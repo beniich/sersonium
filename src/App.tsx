@@ -199,10 +199,12 @@ export default function App() {
     if (typeof window !== "undefined") {
       try {
         const stored = localStorage.getItem("sensorium_language") || localStorage.getItem("cafm_language");
-        if (stored === "en") return "en";
-        // User requested English default - ensure English is saved and returned
-        localStorage.setItem("sensorium_language", "en");
-        localStorage.setItem("cafm_language", "en");
+        if (stored) return stored as Language;
+        const navLang = navigator.language.slice(0, 2);
+        const defaultLang: Language = navLang === "fr" ? "fr" : "en";
+        localStorage.setItem("sensorium_language", defaultLang);
+        localStorage.setItem("cafm_language", defaultLang);
+        return defaultLang;
       } catch {}
     }
     return "en";
@@ -248,6 +250,10 @@ export default function App() {
   }, []);
 
   const [isMockMode, setIsMockMode] = useState<boolean>(() => {
+    // In production, always disable mock mode
+    if (process.env.NODE_ENV === "production") {
+      return false;
+    }
     if (typeof window !== "undefined") {
       try {
         const stored = localStorage.getItem("cafm_mock_mode");
@@ -333,24 +339,24 @@ export default function App() {
     handleEnterMockMode();
   };
 
-  if (!user && !isMockMode) {
-    return (
-      <ThemeContext.Provider value={themeContextValue}>
-        <LanguageContext.Provider value={languageContextValue}>
-          <PublicPortal 
-            onSignIn={handleSignIn}
-            onEnterMockMode={handleEnterMockMode}
-            onNavigateToSection={handleNavigateFromPortal}
-            isDark={isDark}
-            toggleTheme={toggleTheme}
-            mode={mode}
-            authError={authError}
-            state={state}
-          />
-        </LanguageContext.Provider>
-      </ThemeContext.Provider>
-    );
-  }
+  if (!user || !state?.subscriptionTier) {
+  return (
+    <ThemeContext.Provider value={themeContextValue}>
+      <LanguageContext.Provider value={languageContextValue}>
+        <PublicPortal
+          onSignIn={handleSignIn}
+          onEnterMockMode={handleEnterMockMode}
+          onNavigateToSection={handleNavigateFromPortal}
+          isDark={isDark}
+          toggleTheme={toggleTheme}
+          mode={mode}
+          authError={authError}
+          state={state}
+        />
+      </LanguageContext.Provider>
+    </ThemeContext.Provider>
+  );
+}
 
   if (loading || !state) {
     return (
