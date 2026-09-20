@@ -1,0 +1,8 @@
+{
+  "name": "SENSORIUM",
+  "description": "Sovereign platform for sensory intelligence, Edge AI orchestration, and real-time supervision of critical infrastructure.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}

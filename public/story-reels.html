@@ -1,0 +1,1000 @@
+<!DOCTYPE html>
+<html class="dark" lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" name="viewport"/>
+  <title>Story &amp; Reels 9:16 - Sensorium CAFM &amp; Datacenter</title>
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  <link href="https://fonts.googleapis.com" rel="preconnect"/>
+  <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&amp;family=Space+Grotesk:wght@500;700&amp;display=swap" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Plus Jakarta Sans', 'system-ui', 'sans-serif'],
+            mono: ['Space Grotesk', 'monospace']
+          }
+        }
+      }
+    };
+  </script>
+  <style>
+    :root {
+      --app-height: 100dvh;
+    }
+    body, html {
+      height: 100%;
+      height: 100dvh;
+      overflow: hidden;
+      background-color: #030712;
+      user-select: none;
+      -webkit-user-select: none;
+      touch-action: pan-y;
+    }
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 1, 'wght' 600, 'GRAD' 0, 'opsz' 24;
+      display: inline-block;
+      vertical-align: middle;
+      line-height: 1;
+    }
+    @keyframes softPulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.88; transform: scale(1.02); }
+    }
+    .animate-soft-pulse {
+      animation: softPulse 2.8s ease-in-out infinite;
+    }
+    @keyframes spinVinyl {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+    .animate-spin-slow {
+      animation: spinVinyl 6s linear infinite;
+    }
+    @keyframes eqBar1 { 0%, 100% { height: 4px; } 50% { height: 16px; } }
+    @keyframes eqBar2 { 0%, 100% { height: 14px; } 50% { height: 6px; } }
+    @keyframes eqBar3 { 0%, 100% { height: 8px; } 50% { height: 18px; } }
+    .eq-1 { animation: eqBar1 0.75s ease-in-out infinite; }
+    .eq-2 { animation: eqBar2 0.6s ease-in-out infinite; }
+    .eq-3 { animation: eqBar3 0.9s ease-in-out infinite; }
+    @keyframes scanlineMove {
+      0% { transform: translateY(-100%); }
+      100% { transform: translateY(1200%); }
+    }
+    .tech-scanline {
+      animation: scanlineMove 8s linear infinite;
+    }
+    @keyframes ambientZoom {
+      0%, 100% { transform: scale(1.02); }
+      50% { transform: scale(1.07); }
+    }
+    .animate-video-ambient {
+      animation: ambientZoom 16s ease-in-out infinite alternate;
+    }
+    .slide-stage {
+      transition: transform 0.3s cubic-bezier(0.2, 0.9, 0.3, 1), opacity 0.28s ease-out;
+      will-change: transform, opacity;
+    }
+    .slide-exit-left {
+      transform: translateX(-50px) scale(0.96);
+      opacity: 0;
+    }
+    .slide-exit-right {
+      transform: translateX(50px) scale(0.96);
+      opacity: 0;
+    }
+    .slide-enter-from-right {
+      transform: translateX(50px) scale(0.96);
+      opacity: 0;
+    }
+    .slide-enter-from-left {
+      transform: translateX(-50px) scale(0.96);
+      opacity: 0;
+    }
+    @keyframes swipeCuePulse {
+      0%, 100% { opacity: 0.4; transform: translateX(0); }
+      50% { opacity: 0.95; transform: translateX(3px); }
+    }
+    .animate-swipe-cue {
+      animation: swipeCuePulse 2.2s ease-in-out infinite;
+    }
+    .hide-scrollbar::-webkit-scrollbar {
+      display: none;
+    }
+    .hide-scrollbar {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+  </style>
+</head>
+<body class="flex items-center justify-center min-h-screen w-full bg-slate-950 text-slate-100 font-sans p-0 sm:p-4">
+
+  <!-- Desktop App Frame / Mobile Fullscreen Wrapper -->
+  <div class="relative w-full sm:w-[410px] md:w-[430px] h-full sm:h-[860px] max-h-[100dvh] sm:max-h-[94vh] bg-black sm:rounded-[44px] sm:border-[10px] sm:border-slate-800 shadow-[0_25px_80px_-15px_rgba(0,0,0,0.95)] overflow-hidden flex flex-col justify-between select-none">
+    
+    <!-- Top Notch on Desktop Preview -->
+    <div class="hidden sm:flex absolute top-0 inset-x-0 h-6 z-50 items-center justify-center pointer-events-none">
+      <div class="w-28 h-4 bg-slate-800 rounded-b-xl flex items-center justify-center gap-2">
+        <span class="w-2 h-2 rounded-full bg-slate-900"></span>
+        <span class="w-3 h-1.5 rounded-full bg-slate-700"></span>
+      </div>
+    </div>
+
+    <!-- MAIN CAROUSEL STAGE -->
+    <main class="relative w-full h-full flex flex-col justify-between overflow-hidden select-none" id="carousel-container">
+      
+      <!-- DYNAMIC BACKGROUND -->
+      <div class="absolute inset-0 z-0 overflow-hidden bg-slate-950">
+        <img 
+          id="carousel-bg-img" 
+          alt="Data Center Visualization" 
+          class="w-full h-full object-cover animate-video-ambient transition-all duration-700 brightness-[0.82]" 
+          src="https://images.unsplash.com/photo-1558494949-ef010cbdcc31?auto=format&fit=crop&w=1200&q=80"
+          onerror="this.src='https://images.unsplash.com/photo-1544197150-b99a580bb7a8?auto=format&fit=crop&w=1200&q=80';"
+        />
+        
+        <!-- Tech Scanline Overlay -->
+        <div class="absolute inset-x-0 h-28 bg-gradient-to-b from-transparent via-cyan-400/10 to-transparent tech-scanline pointer-events-none"></div>
+        
+        <!-- Quantum Ambient Gradients for Maximum Contrast -->
+        <div class="absolute inset-0 bg-gradient-to-b from-slate-950/90 via-slate-950/40 via-45% to-slate-950/95 pointer-events-none"></div>
+        <div class="absolute inset-0 bg-blue-950/20 mix-blend-color-dodge pointer-events-none"></div>
+      </div>
+
+      <!-- INVISIBLE TAP NAVIGATION ZONES (Left 25% = Prev, Right 25% = Next) -->
+      <div class="absolute inset-y-16 left-0 w-1/4 z-20 cursor-pointer" onclick="handleTapPrev(event)" title="Previous slide (Tap or ←)"></div>
+      <div class="absolute inset-y-16 right-0 w-1/4 z-20 cursor-pointer" onclick="handleTapNext(event)" title="Next slide (Tap or →)"></div>
+
+      <!-- 1. TOP HEADER : 10 Progress Bars & Slide Meta -->
+      <header class="relative z-30 w-full pt-3 sm:pt-4 px-3.5 flex flex-col gap-2 pointer-events-auto">
+        <!-- 10-Segment Story Progress Bars -->
+        <div class="flex items-center gap-1 w-full" id="story-bar-segments">
+          <div class="flex-1 h-1 rounded-full bg-white/25 overflow-hidden"><div class="h-full bg-cyan-400 transition-all duration-300 w-full" id="bar-seg-0"></div></div>
+          <div class="flex-1 h-1 rounded-full bg-white/25 overflow-hidden"><div class="h-full bg-white transition-all duration-300 w-0" id="bar-seg-1"></div></div>
+          <div class="flex-1 h-1 rounded-full bg-white/25 overflow-hidden"><div class="h-full bg-white transition-all duration-300 w-0" id="bar-seg-2"></div></div>
+          <div class="flex-1 h-1 rounded-full bg-white/25 overflow-hidden"><div class="h-full bg-white transition-all duration-300 w-0" id="bar-seg-3"></div></div>
+          <div class="flex-1 h-1 rounded-full bg-white/25 overflow-hidden"><div class="h-full bg-white transition-all duration-300 w-0" id="bar-seg-4"></div></div>
+          <div class="flex-1 h-1 rounded-full bg-white/25 overflow-hidden"><div class="h-full bg-white transition-all duration-300 w-0" id="bar-seg-5"></div></div>
+          <div class="flex-1 h-1 rounded-full bg-white/25 overflow-hidden"><div class="h-full bg-white transition-all duration-300 w-0" id="bar-seg-6"></div></div>
+          <div class="flex-1 h-1 rounded-full bg-white/25 overflow-hidden"><div class="h-full bg-white transition-all duration-300 w-0" id="bar-seg-7"></div></div>
+          <div class="flex-1 h-1 rounded-full bg-white/25 overflow-hidden"><div class="h-full bg-white transition-all duration-300 w-0" id="bar-seg-8"></div></div>
+          <div class="flex-1 h-1 rounded-full bg-white/25 overflow-hidden"><div class="h-full bg-white transition-all duration-300 w-0" id="bar-seg-9"></div></div>
+        </div>
+
+        <!-- Controls Row -->
+        <div class="flex items-center justify-between text-white pt-0.5">
+          <div class="flex items-center gap-2">
+            <span class="text-xs font-bold tracking-wider font-mono text-cyan-300" id="slide-counter-badge">Slide 01 / 10 • Tech Hook</span>
+            <span class="text-slate-400 text-xs">•</span>
+            <span class="text-[10px] font-semibold text-white bg-cyan-950/80 border border-cyan-500/40 px-2.5 py-0.5 rounded-full" id="slide-category-tag">Tech Breakthrough</span>
+          </div>
+
+          <div class="flex items-center gap-1.5">
+            <button class="w-7 h-7 rounded-full bg-black/40 backdrop-blur-md border border-white/20 flex items-center justify-center hover:bg-black/70 active:scale-95 transition cursor-pointer text-white" onclick="prevSlide()" title="Previous (←)">
+              <svg class="w-3.5 h-3.5 fill-none stroke-current" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7"/></svg>
+            </button>
+            <button class="w-7 h-7 rounded-full bg-black/40 backdrop-blur-md border border-white/20 flex items-center justify-center hover:bg-black/70 active:scale-95 transition cursor-pointer text-white" onclick="nextSlide()" title="Next (→)">
+              <svg class="w-3.5 h-3.5 fill-none stroke-current" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"/></svg>
+            </button>
+            <button class="w-7 h-7 rounded-full bg-black/40 backdrop-blur-md border border-white/20 flex items-center justify-center hover:bg-black/70 active:scale-95 transition cursor-pointer text-cyan-300" onclick="toggleAudioIcon(this)" title="Mute/Unmute audio" id="btn-audio-toggle">
+              <svg class="w-3.5 h-3.5 fill-none stroke-current" viewBox="0 0 24 24" id="audio-icon-svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z"/></svg>
+            </button>
+          </div>
+        </div>
+      </header>
+
+      <!-- 2. CENTER SECTION : Dynamic Slide Card (Pre-rendered default ensures NO BLANK SCREEN) -->
+      <section class="relative z-30 flex flex-col items-center justify-center text-center px-4 my-auto pointer-events-auto w-full slide-stage cursor-grab active:cursor-grabbing" id="slide-dynamic-content">
+        <!-- Slide 0 Content Pre-Baked for Instant Rendering -->
+        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-gradient-to-r from-blue-600/70 via-cyan-500/70 to-amber-500/70 border border-cyan-400/50 backdrop-blur-md text-white text-[11px] font-extrabold tracking-wide uppercase shadow-lg shadow-cyan-500/20 mb-2.5 animate-soft-pulse">
+          <span class="w-2 h-2 rounded-full bg-cyan-300 animate-ping"></span>
+          <span>⚡ DATA CENTER TECH BREAKTHROUGH 2025</span>
+        </div>
+        <h2 class="text-2xl sm:text-3xl font-black text-white leading-tight tracking-tight drop-shadow-lg max-w-[320px] mb-2.5">
+          Silicon-DNA Hybrid Cluster: <span class="text-transparent bg-clip-text bg-gradient-to-r from-cyan-300 to-amber-300">PUE 1.18 Achieved</span>
+        </h2>
+        <p class="text-xs sm:text-sm text-slate-200 max-w-[300px] mb-3.5 drop-shadow leading-relaxed">
+          100x density per rack with direct two-phase immersion cooling.
+        </p>
+        <div class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-blue-950/80 border border-cyan-400/40 text-cyan-300 text-xs font-bold backdrop-blur-sm shadow-md">
+          <span>🔥 Thermal saturation eliminated</span>
+        </div>
+      </section>
+
+      <!-- Swipe / Tap Hint Pill -->
+      <div class="relative z-30 flex items-center justify-center pointer-events-none mb-1.5" id="swipe-hint-container">
+        <div class="inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full bg-black/50 backdrop-blur-sm border border-white/15 text-[10px] text-slate-300 font-mono transition-opacity duration-500 animate-swipe-cue" id="swipe-hint-badge">
+          <span class="text-cyan-400 font-bold">⟵</span>
+          <span>Swipe or tap to navigate</span>
+          <span class="text-cyan-400 font-bold">⟶</span>
+        </div>
+      </div>
+
+      <!-- 3. RIGHT ASIDE : Social Interaction Bar (Repositioned to prevent bottom collisions) -->
+      <aside class="absolute right-2.5 sm:right-3 bottom-32 z-40 flex flex-col items-center gap-3 pointer-events-auto">
+        <!-- Heart / Like -->
+        <button class="flex flex-col items-center group active:scale-125 transition-transform cursor-pointer" onclick="handleLike()" title="Like">
+          <div class="w-10 h-10 rounded-full bg-black/50 backdrop-blur-md border border-white/20 flex items-center justify-center text-white group-hover:text-rose-500 transition shadow-lg" id="reels-heart-bg">
+            <svg class="w-5 h-5 fill-none stroke-current" id="reels-heart-icon" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/></svg>
+          </div>
+          <span class="text-[10px] font-semibold text-white mt-0.5 drop-shadow" id="reels-like-count">4.2k</span>
+        </button>
+
+        <!-- Comments -->
+        <button class="flex flex-col items-center group active:scale-110 transition-transform cursor-pointer" onclick="showCommentToast()" title="Comments">
+          <div class="w-10 h-10 rounded-full bg-black/50 backdrop-blur-md border border-white/20 flex items-center justify-center text-white group-hover:text-cyan-400 transition shadow-lg">
+            <svg class="w-5 h-5 fill-none stroke-current" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/></svg>
+          </div>
+          <span class="text-[10px] font-semibold text-white mt-0.5 drop-shadow">240</span>
+        </button>
+
+        <!-- Share -->
+        <button class="flex flex-col items-center group active:scale-110 transition-transform cursor-pointer" onclick="handleShare()" title="Share">
+          <div class="w-10 h-10 rounded-full bg-black/50 backdrop-blur-md border border-white/20 flex items-center justify-center text-white group-hover:text-emerald-400 transition shadow-lg">
+            <svg class="w-5 h-5 fill-none stroke-current" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/></svg>
+          </div>
+          <span class="text-[10px] font-semibold text-white mt-0.5 drop-shadow" id="reels-share-count">912</span>
+        </button>
+
+        <!-- Bookmark -->
+        <button class="flex flex-col items-center group active:scale-110 transition-transform cursor-pointer" onclick="toggleBookmark(this)" title="Save">
+          <div class="w-10 h-10 rounded-full bg-black/50 backdrop-blur-md border border-white/20 flex items-center justify-center text-white group-hover:text-amber-400 transition shadow-lg" id="reels-save-bg">
+            <svg class="w-5 h-5 fill-none stroke-current" id="reels-save-icon" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z"/></svg>
+          </div>
+          <span class="text-[10px] font-semibold text-white mt-0.5 drop-shadow">Save</span>
+        </button>
+
+        <!-- Spinning Vinyl Disc -->
+        <div class="w-8 h-8 rounded-full border-2 border-slate-700 bg-slate-900 p-1 flex items-center justify-center relative overflow-hidden animate-spin-slow shadow-lg" title="High Fidelity Stereo Audio">
+          <div class="w-3 h-3 rounded-full bg-cyan-400"></div>
+          <div class="absolute inset-0 border border-white/20 rounded-full"></div>
+        </div>
+      </aside>
+
+      <!-- 4. BOTTOM SECTION : Account, Caption, CTA & Equalizer -->
+      <footer class="relative z-30 w-full pr-16 pl-3.5 pb-2 pointer-events-auto">
+        <!-- Account Row -->
+        <div class="flex items-center gap-2 mb-1.5">
+          <div class="w-7 h-7 rounded-full bg-slate-900 border border-cyan-400 p-0.5 overflow-hidden flex items-center justify-center shrink-0">
+            <div class="w-full h-full rounded-full bg-gradient-to-tr from-cyan-500 to-blue-600 flex items-center justify-center text-white font-black text-[10px]">JC</div>
+          </div>
+          <span class="text-xs font-bold text-white tracking-wide">jeton_cafm</span>
+          <span class="w-3.5 h-3.5 rounded-full bg-cyan-400 text-slate-950 flex items-center justify-center text-[9px] font-bold shrink-0">✓</span>
+          <button class="text-[10px] font-semibold text-white bg-white/20 hover:bg-white/30 active:scale-95 px-2.5 py-0.5 rounded-full border border-white/30 transition cursor-pointer" onclick="toggleFollow(this)">
+            Follow
+          </button>
+        </div>
+
+        <!-- Caption -->
+        <p class="text-[11px] sm:text-xs text-slate-200 line-clamp-2 leading-relaxed mb-2.5 drop-shadow" id="slide-caption-text">
+          No more overheating AI server racks. Predictive HVAC monitoring and continuous thermodynamic steering. <span class="text-cyan-300 font-medium">#Datacenter #BioCompute #PUE118 #CMMS</span>
+        </p>
+
+        <!-- Primary CTA Button -->
+        <button class="w-full mb-2 py-2 px-3.5 rounded-xl bg-gradient-to-r from-blue-600 via-indigo-600 to-cyan-500 hover:from-blue-500 hover:to-cyan-400 text-white text-xs font-bold flex items-center justify-between shadow-lg shadow-blue-500/25 active:scale-[0.98] transition cursor-pointer" id="slide-cta-button" onclick="handlePrimaryAction()">
+          <span id="slide-cta-text">Book Deployment Slot</span>
+          <svg class="w-4 h-4 fill-none stroke-current" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+        </button>
+
+        <!-- Audio Equalizer Badge -->
+        <div class="flex items-center gap-2 text-[10px] text-slate-300 bg-black/50 backdrop-blur-md px-2.5 py-1 rounded-full border border-white/15 w-fit max-w-full">
+          <div class="flex items-end gap-0.5 h-3">
+            <span class="w-0.5 bg-cyan-400 eq-1"></span>
+            <span class="w-0.5 bg-cyan-400 eq-2"></span>
+            <span class="w-0.5 bg-cyan-400 eq-3"></span>
+          </div>
+          <span class="truncate">Original Audio • Sensorium CAFM x Nano Tech Beats</span>
+        </div>
+
+        <!-- Secondary Bottom Toolbar : Restart, Prev, Next -->
+        <div class="w-full pt-2 flex items-center justify-between text-[10px] font-mono text-slate-400">
+          <button class="hover:text-white transition flex items-center gap-1 text-[10px] bg-slate-850/80 hover:bg-slate-800 px-2.5 py-1 rounded-lg border border-slate-700 active:scale-95 cursor-pointer" onclick="goToSlide(0)">
+            <svg class="w-3 h-3 fill-none stroke-current" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+            <span>Restart</span>
+          </button>
+          <div class="flex items-center gap-2">
+            <button class="px-2.5 py-1 rounded-lg bg-slate-800 border border-slate-700 text-white hover:bg-slate-700 active:scale-95 transition cursor-pointer" onclick="prevSlide()">◀ Prev</button>
+            <button class="px-3 py-1 rounded-lg bg-blue-600 border border-blue-400 text-white font-bold hover:bg-blue-500 active:scale-95 transition cursor-pointer shadow-sm" onclick="nextSlide()">Next ▶</button>
+          </div>
+        </div>
+      </footer>
+
+    </main>
+  </div>
+
+  <!-- Interactive Notification Toast -->
+  <div class="fixed bottom-6 px-4 py-2.5 rounded-full bg-slate-900/95 border border-cyan-400/50 text-cyan-300 text-xs font-semibold shadow-2xl backdrop-blur-md transform translate-y-20 opacity-0 transition-all duration-300 pointer-events-none z-50 flex items-center gap-2" id="toast-message">
+    <span class="w-2 h-2 rounded-full bg-cyan-400 animate-ping"></span>
+    <span id="toast-text">Action executed successfully</span>
+  </div>
+
+  <script>
+    // 10 Complete Slides Data
+    const slidesData = [
+      {
+        id: 0,
+        category: 'Tech Breakthrough',
+        badge: 'Slide 01 / 10 • Tech Hook',
+        caption: 'No more overheating AI server racks. Predictive HVAC monitoring and continuous thermodynamic steering. #Datacenter #BioCompute #PUE118',
+        cta: 'Book Deployment Slot',
+        bg: 'https://images.unsplash.com/photo-1558494949-ef010cbdcc31?auto=format&fit=crop&w=1200&q=80',
+        content: `
+          <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-gradient-to-r from-blue-600/70 via-cyan-500/70 to-amber-500/70 border border-cyan-400/50 backdrop-blur-md text-white text-[11px] font-extrabold tracking-wide uppercase shadow-lg shadow-cyan-500/20 mb-2.5 animate-soft-pulse">
+            <span class="w-2 h-2 rounded-full bg-cyan-300 animate-ping"></span>
+            <span>⚡ DATA CENTER TECH BREAKTHROUGH 2025</span>
+          </div>
+          <h2 class="text-2xl sm:text-3xl font-black text-white leading-tight tracking-tight drop-shadow-lg max-w-[320px] mb-2.5">
+            Silicon-DNA Hybrid Cluster: <span class="text-transparent bg-clip-text bg-gradient-to-r from-cyan-300 to-amber-300">PUE 1.18 Achieved</span>
+          </h2>
+          <p class="text-xs sm:text-sm text-slate-200 max-w-[300px] mb-3.5 drop-shadow leading-relaxed">
+            100x density per rack with direct two-phase immersion cooling.
+          </p>
+          <div class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-blue-950/80 border border-cyan-400/40 text-cyan-300 text-xs font-bold backdrop-blur-sm shadow-md">
+            <span>🔥 Thermal saturation eliminated</span>
+          </div>
+        `
+      },
+      {
+        id: 1,
+        category: 'Energy Alert',
+        badge: 'Slide 02 / 10 • The Problem',
+        caption: 'Global average PUE at 1.58: 40% of electricity bills wasted in unoptimized cooling. #GreenIT #PUE',
+        cta: 'Analyze Current PUE',
+        bg: 'https://images.unsplash.com/photo-1544197150-b99a580bb7a8?auto=format&fit=crop&w=1200&q=80',
+        content: `
+          <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-rose-500/20 border border-rose-400/40 text-rose-300 text-xs font-bold mb-3 backdrop-blur-md animate-pulse">
+            <span>🚨</span><span>ENERGY COST CRISIS</span>
+          </div>
+          <h2 class="text-2xl sm:text-3xl font-black text-white leading-tight tracking-tight mb-2.5">
+            Your GPUs overheat,<br/>
+            <span class="text-transparent bg-clip-text bg-gradient-to-r from-rose-400 to-amber-300">your power bills skyrocket.</span>
+          </h2>
+          <div class="w-full max-w-[320px] bg-slate-900/95 backdrop-blur-xl border border-rose-500/40 rounded-2xl p-3.5 my-2 shadow-2xl text-left">
+            <div class="flex justify-between items-center mb-1">
+              <span class="text-xs text-slate-300 font-semibold">Legacy PUE</span>
+              <span class="text-xs font-mono font-bold text-rose-400">1.58 (38% Waste)</span>
+            </div>
+            <div class="w-full h-2 bg-slate-800 rounded-full overflow-hidden mb-2.5">
+              <div class="h-full bg-rose-500 w-[78%]"></div>
+            </div>
+            <div class="flex justify-between items-center mb-1">
+              <span class="text-xs text-slate-300 font-semibold">Sensorium CAFM Target</span>
+              <span class="text-xs font-mono font-bold text-emerald-400">1.18 (96% Efficiency)</span>
+            </div>
+            <div class="w-full h-2 bg-slate-800 rounded-full overflow-hidden">
+              <div class="h-full bg-emerald-400 w-[22%]"></div>
+            </div>
+          </div>
+        `
+      },
+      {
+        id: 2,
+        category: 'Architecture',
+        badge: 'Slide 03 / 10 • Silicon-DNA',
+        caption: 'Bridging neuromorphic silicon with DNA macromolecules to compress 1 PB per gram. #BioCompute #Hardware',
+        cta: 'Discover the Architecture',
+        bg: 'https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=1200&q=80',
+        content: `
+          <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-cyan-500/20 border border-cyan-400/40 text-cyan-300 text-xs font-bold mb-2.5 backdrop-blur-md">
+            <span>🧬</span><span>GLOBAL PATENT 2025</span>
+          </div>
+          <h2 class="text-xl sm:text-2xl font-black text-white leading-tight mb-2">Hybrid Silicon-DNA Technology</h2>
+          <div class="grid grid-cols-2 gap-2 w-full max-w-[320px] my-2 text-left">
+            <div class="p-2.5 rounded-xl bg-slate-900/90 border border-cyan-500/30">
+              <div class="text-cyan-400 font-bold text-base font-mono">100x</div>
+              <div class="text-[10px] text-slate-300 leading-tight mt-0.5">Compute density per sq meter</div>
+            </div>
+            <div class="p-2.5 rounded-xl bg-slate-900/90 border border-amber-500/30">
+              <div class="text-amber-400 font-bold text-base font-mono">-65%</div>
+              <div class="text-[10px] text-slate-300 leading-tight mt-0.5">Coolant fluid requirement</div>
+            </div>
+          </div>
+          <p class="text-[11px] text-slate-300 max-w-[300px]">Native BACnet, Modbus IP and SNMP v3 integration.</p>
+        `
+      },
+      {
+        id: 3,
+        category: 'Telemetry',
+        badge: 'Slide 04 / 10 • Live Data',
+        caption: 'Second-by-second telemetry: intake/exhaust temperature delta and micro-channel monitoring. #IoT #Supervision',
+        cta: 'View Live Console',
+        bg: 'https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?auto=format&fit=crop&w=1200&q=80',
+        content: `
+          <div class="w-full max-w-[320px] bg-slate-900/95 backdrop-blur-xl border border-cyan-400/50 rounded-2xl p-3.5 shadow-2xl text-left">
+            <div class="flex items-center justify-between mb-2 pb-1.5 border-b border-slate-800">
+              <div class="flex items-center gap-1.5">
+                <span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
+                <span class="text-[10px] font-mono text-cyan-300 font-bold">REAL-TIME RACK TELEMETRY</span>
+              </div>
+              <span class="text-[9px] font-mono text-slate-400">12ms LATENCY</span>
+            </div>
+            <div class="space-y-2 text-xs font-mono">
+              <div class="flex justify-between items-center">
+                <span class="text-slate-300">Rack #04 Temperature</span>
+                <span class="text-emerald-400 font-bold">23.4 °C (Nominal)</span>
+              </div>
+              <div class="flex justify-between items-center">
+                <span class="text-slate-300">Immersion Fluid Flow</span>
+                <span class="text-cyan-300 font-bold">48.2 L/min</span>
+              </div>
+              <div class="flex justify-between items-center">
+                <span class="text-slate-300">Instantaneous PUE</span>
+                <span class="text-amber-300 font-bold text-sm">1.178</span>
+              </div>
+            </div>
+            <div class="mt-2.5 pt-2 border-t border-slate-800 flex items-center justify-between text-[10px] text-slate-400">
+              <span>84 thermal probes</span>
+              <span class="text-emerald-400 font-semibold">100% Operational</span>
+            </div>
+          </div>
+        `
+      },
+      {
+        id: 4,
+        category: 'Predictive AI',
+        badge: 'Slide 05 / 10 • CMMS & CAFM',
+        caption: 'Our neural models predict bearing wear and HVAC compressor fatigue 48h before failure. #Maintenance #Predictive',
+        cta: 'Schedule CMMS Audit',
+        bg: 'https://images.unsplash.com/photo-1558494949-ef010cbdcc31?auto=format&fit=crop&w=1200&q=80',
+        content: `
+          <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-blue-500/20 border border-blue-400/40 text-blue-300 text-xs font-bold mb-2.5 backdrop-blur-md">
+            <span>🤖</span><span>PREDICTIVE CMMS 4.0</span>
+          </div>
+          <h2 class="text-xl sm:text-2xl font-black text-white leading-tight mb-2">Zero Unplanned Downtime</h2>
+          <div class="w-full max-w-[320px] bg-slate-900/90 border border-slate-700/80 rounded-2xl p-3 mb-2 text-left space-y-2">
+            <div class="flex items-start gap-2">
+              <span class="text-amber-400 text-lg leading-none mt-0.5">⚠️</span>
+              <div>
+                <p class="text-xs font-bold text-white leading-none">Early Thermal Drift Alert</p>
+                <p class="text-[10px] text-slate-300 mt-1">HVAC Pump B2: abnormal vibration detected at +48h.</p>
+              </div>
+            </div>
+            <div class="p-2 rounded-lg bg-emerald-500/15 border border-emerald-500/40 text-emerald-300 text-[10px] font-semibold flex items-center justify-between">
+              <span>On-call technician work order created</span>
+              <span class="font-bold">Auto-assigned</span>
+            </div>
+          </div>
+        `
+      },
+      {
+        id: 5,
+        category: 'Poll',
+        badge: 'Slide 06 / 10 • Direct Poll',
+        caption: 'Vote to see benchmark results across 1,800+ CTOs and infrastructure directors surveyed this week. #Poll #CIO',
+        cta: 'Share My Feedback',
+        bg: 'https://images.unsplash.com/photo-1544197150-b99a580bb7a8?auto=format&fit=crop&w=1200&q=80',
+        content: `
+          <div class="w-full max-w-[320px] bg-slate-900/95 backdrop-blur-xl border border-slate-700/80 rounded-2xl p-3.5 shadow-2xl text-left">
+            <div class="flex items-center justify-between mb-2">
+              <span class="text-[11px] font-bold uppercase tracking-wider text-blue-400 font-mono">📊 Direct Industry Poll 2025</span>
+              <span class="text-[10px] text-slate-400">2,140 votes</span>
+            </div>
+            <p class="text-xs font-semibold text-white mb-2.5">What is your biggest thermal challenge today?</p>
+            <div class="space-y-2" id="poll-options-carousel">
+              <button class="w-full text-left p-2.5 rounded-xl border border-slate-700 hover:border-blue-400 bg-slate-800/80 hover:bg-blue-900/40 transition flex items-center justify-between cursor-pointer" onclick="voteSlide('optA')">
+                <span class="text-xs font-medium text-slate-200">❄️ Legacy chillers &amp; HVAC systems</span>
+                <span class="text-xs font-bold text-blue-400 font-mono hidden" id="pctA">64%</span>
+              </button>
+              <button class="w-full text-left p-2.5 rounded-xl border border-slate-700 hover:border-blue-400 bg-slate-800/80 hover:bg-blue-900/40 transition flex items-center justify-between cursor-pointer" onclick="voteSlide('optB')">
+                <span class="text-xs font-medium text-slate-200">🔥 Hotspots on AI GPU racks</span>
+                <span class="text-xs font-bold text-blue-400 font-mono hidden" id="pctB">36%</span>
+              </button>
+            </div>
+            <p class="text-[10px] text-emerald-400 text-center font-medium mt-2 hidden" id="poll-slide-feedback">✓ Live vote recorded! Thank you.</p>
+          </div>
+        `
+      },
+      {
+        id: 6,
+        category: 'Case Study',
+        badge: 'Slide 07 / 10 • Key Numbers',
+        caption: 'Field results verified after 6 months with a Tier III operator in Paris region. #Metrics #ROI #CAFM',
+        cta: 'Calculate Annual Savings',
+        bg: 'https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=1200&q=80',
+        content: `
+          <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/20 border border-emerald-400/40 text-emerald-300 text-xs font-bold mb-2.5 backdrop-blur-md">
+            <span>📈</span><span>MEASURED PRODUCTION IMPACT</span>
+          </div>
+          <h2 class="text-xl sm:text-2xl font-black text-white leading-tight mb-2.5">Certified Operational Metrics</h2>
+          <div class="grid grid-cols-2 gap-2 w-full max-w-[320px] text-left">
+            <div class="p-3 rounded-xl bg-slate-900/90 border border-cyan-400/30">
+              <div class="text-2xl font-mono font-black text-cyan-300">-42%</div>
+              <div class="text-[10px] text-slate-300 mt-0.5">Total HVAC power bill</div>
+            </div>
+            <div class="p-3 rounded-xl bg-slate-900/90 border border-amber-400/30">
+              <div class="text-2xl font-mono font-black text-amber-300">5 mos</div>
+              <div class="text-[10px] text-slate-300 mt-0.5">Net payback period</div>
+            </div>
+          </div>
+          <div class="w-full max-w-[320px] mt-2 p-2 rounded-xl bg-slate-900/80 border border-slate-800 text-[11px] text-slate-300 text-center">
+            <span>🏢 <strong>2.4M</strong> monitored assets around the clock</span>
+          </div>
+        `
+      },
+      {
+        id: 7,
+        category: 'Launch',
+        badge: 'Slide 08 / 10 • Countdown',
+        caption: 'Next-generation bio-computing cluster opens its first private deployment slots in 3 days. #Event #ClusterLaunch',
+        cta: 'Reserve Early-Access Slot',
+        bg: 'https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?auto=format&fit=crop&w=1200&q=80',
+        content: `
+          <div class="w-full max-w-[320px] bg-slate-900/95 backdrop-blur-xl border border-cyan-500/40 rounded-2xl p-3.5 shadow-2xl text-left">
+            <div class="flex items-center justify-between mb-2">
+              <div class="flex items-center gap-1.5">
+                <span class="text-amber-400 animate-pulse">⏳</span>
+                <span class="text-[10px] font-bold tracking-wider text-cyan-300 uppercase font-mono">Official Cluster Launch</span>
+              </div>
+              <span class="text-[9px] px-1.5 py-0.5 rounded bg-amber-500/20 border border-amber-400/40 text-amber-300 font-bold">T-03</span>
+            </div>
+            <div class="grid grid-cols-4 gap-1.5 text-center mb-2.5">
+              <div class="bg-black/60 border border-white/10 rounded-lg py-1 px-0.5">
+                <span class="block text-sm font-bold text-white font-mono leading-none">03</span>
+                <span class="text-[8px] text-slate-400 uppercase">Days</span>
+              </div>
+              <div class="bg-black/60 border border-white/10 rounded-lg py-1 px-0.5">
+                <span class="block text-sm font-bold text-white font-mono leading-none">14</span>
+                <span class="text-[8px] text-slate-400 uppercase">Hours</span>
+              </div>
+              <div class="bg-black/60 border border-white/10 rounded-lg py-1 px-0.5">
+                <span class="block text-sm font-bold text-cyan-300 font-mono leading-none">28</span>
+                <span class="text-[8px] text-slate-400 uppercase">Mins</span>
+              </div>
+              <div class="bg-black/60 border border-white/10 rounded-lg py-1 px-0.5">
+                <span class="block text-sm font-bold text-amber-400 font-mono leading-none">45</span>
+                <span class="text-[8px] text-slate-400 uppercase">Secs</span>
+              </div>
+            </div>
+            <button class="w-full py-2 px-3 rounded-xl bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-500 hover:to-cyan-500 text-white font-bold text-xs flex items-center justify-center gap-1.5 transition active:scale-95 shadow-md cursor-pointer" onclick="toggleReminderSlide(this)">
+              <span>🔔</span>
+              <span>Notify me at launch</span>
+            </button>
+          </div>
+        `
+      },
+      {
+        id: 8,
+        category: 'Testimonial',
+        badge: 'Slide 09 / 10 • CIO Review',
+        caption: 'Field testimonial: certified thermal stability and elimination of unexpected GPU throttling. #Testimonial #Enterprise',
+        cta: 'View Full Case Study',
+        bg: 'https://images.unsplash.com/photo-1558494949-ef010cbdcc31?auto=format&fit=crop&w=1200&q=80',
+        content: `
+          <div class="w-full max-w-[320px] bg-slate-900/95 backdrop-blur-xl border border-amber-400/40 rounded-2xl p-3.5 shadow-2xl text-left">
+            <div class="flex items-center gap-1 text-amber-400 mb-2">
+              <span>★</span><span>★</span><span>★</span><span>★</span><span>★</span>
+              <span class="text-[10px] font-bold text-white ml-1.5">5.0 / 5</span>
+            </div>
+            <p class="text-xs text-slate-100 italic leading-relaxed mb-3">
+              "With Sensorium CAFM, our 64 server racks of H100s run at 100% load with zero thermal throttling. An engineering feat."
+            </p>
+            <div class="flex items-center gap-2.5 pt-2 border-t border-slate-800">
+              <div class="w-7 h-7 rounded-full bg-blue-600 text-white flex items-center justify-center font-bold text-xs shrink-0">MC</div>
+              <div>
+                <p class="text-xs font-bold text-white leading-none">Marc C.</p>
+                <p class="text-[10px] text-slate-400 mt-0.5">Director of Cloud &amp; AI Infrastructure</p>
+              </div>
+            </div>
+          </div>
+        `
+      },
+      {
+        id: 9,
+        category: 'Sandbox CTA',
+        badge: 'Slide 10 / 10 • 14-Day Trial',
+        caption: 'Test the platform on your own IoT sensor telemetry with no commitment for 14 days. #FreeTrial #CloudCAFM',
+        cta: 'Start Free 14-Day Trial',
+        bg: 'https://images.unsplash.com/photo-1544197150-b99a580bb7a8?auto=format&fit=crop&w=1200&q=80',
+        content: `
+          <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-cyan-500/20 border border-cyan-400/40 text-cyan-300 text-xs font-bold mb-2.5 backdrop-blur-md animate-soft-pulse">
+            <span>🚀</span><span>INSTANT SANDBOX ACCESS</span>
+          </div>
+          <h2 class="text-2xl sm:text-3xl font-black text-white leading-tight mb-2">Take Action Now</h2>
+          <p class="text-xs text-slate-300 max-w-[300px] mb-3 leading-relaxed">
+            Connect your first cluster or test drive our simulated telemetry in 3 clicks.
+          </p>
+          <div class="w-full max-w-[320px] space-y-2 mb-2">
+            <button class="w-full py-2.5 px-3 rounded-xl bg-gradient-to-r from-blue-600 to-cyan-500 hover:from-blue-500 hover:to-cyan-400 text-white font-bold text-xs flex items-center justify-center gap-2 shadow-lg cursor-pointer transition active:scale-95" onclick="showToast('Opening 14-day Sandbox portal...')">
+              <span>🚀</span>
+              <span>Launch Demo Sandbox (14 days)</span>
+            </button>
+            <button class="w-full py-2 px-3 rounded-xl bg-slate-900/90 border border-slate-700 text-slate-200 hover:text-white font-semibold text-xs flex items-center justify-center gap-1.5 cursor-pointer transition active:scale-95" onclick="showToast('Thermal audit request transmitted')">
+              <span>📅</span>
+              <span>Request Free Thermal Audit</span>
+            </button>
+          </div>
+        `
+      }
+    ];
+
+    let currentSlideIndex = 0;
+    let isTransitioning = false;
+
+    // Web Audio Feedback (Gentle synth bleep)
+    const AudioContext = window.AudioContext || window.webkitAudioContext;
+    let audioCtx = null;
+    let isMuted = false;
+
+    function playBeep(freq = 520, type = 'sine', duration = 0.08) {
+      if (isMuted) return;
+      try {
+        if (!audioCtx) audioCtx = new AudioContext();
+        if (audioCtx.state === 'suspended') audioCtx.resume();
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = type;
+        osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+        gain.gain.setValueAtTime(0.05, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + duration);
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start();
+        osc.stop(audioCtx.currentTime + duration);
+      } catch (err) {
+        // AudioContext restricted or not supported
+      }
+    }
+
+    function renderSlide(index, direction = 'none') {
+      if (isTransitioning && direction !== 'none') return;
+      const targetIndex = (index + slidesData.length) % slidesData.length;
+      const contentEl = document.getElementById('slide-dynamic-content');
+
+      const performDOMUpdate = () => {
+        currentSlideIndex = targetIndex;
+        const s = slidesData[currentSlideIndex];
+        
+        // Background Image
+        const bgEl = document.getElementById('carousel-bg-img');
+        if (bgEl && bgEl.src !== s.bg) {
+          bgEl.src = s.bg;
+        }
+
+        // Badges & Texts
+        const badgeEl = document.getElementById('slide-counter-badge');
+        const catEl = document.getElementById('slide-category-tag');
+        const captionEl = document.getElementById('slide-caption-text');
+        const ctaEl = document.getElementById('slide-cta-text');
+
+        if (badgeEl) badgeEl.textContent = s.badge;
+        if (catEl) catEl.textContent = s.category;
+        if (captionEl) captionEl.innerHTML = s.caption;
+        if (ctaEl) ctaEl.textContent = s.cta;
+
+        // Content
+        if (contentEl) {
+          contentEl.innerHTML = s.content;
+        }
+
+        // Story progress segments
+        for (let i = 0; i < 10; i++) {
+          const seg = document.getElementById('bar-seg-' + i);
+          if (seg) {
+            if (i < currentSlideIndex) {
+              seg.className = 'h-full bg-white transition-all duration-300 w-full';
+            } else if (i === currentSlideIndex) {
+              seg.className = 'h-full bg-cyan-400 transition-all duration-300 w-full';
+            } else {
+              seg.className = 'h-full bg-white transition-all duration-300 w-0';
+            }
+          }
+        }
+      };
+
+      if (direction === 'none' || !contentEl) {
+        performDOMUpdate();
+        return;
+      }
+
+      playBeep(640, 'sine', 0.05);
+      isTransitioning = true;
+      const exitClass = direction === 'next' ? 'slide-exit-left' : 'slide-exit-right';
+      const enterClass = direction === 'next' ? 'slide-enter-from-right' : 'slide-enter-from-left';
+
+      contentEl.classList.add(exitClass);
+
+      setTimeout(() => {
+        performDOMUpdate();
+        contentEl.classList.remove(exitClass);
+        contentEl.classList.add(enterClass);
+        void contentEl.offsetWidth; // Force reflow
+        contentEl.classList.remove(enterClass);
+        setTimeout(() => {
+          isTransitioning = false;
+        }, 300);
+      }, 150);
+    }
+
+    function nextSlide() {
+      renderSlide(currentSlideIndex + 1, 'next');
+    }
+
+    function prevSlide() {
+      renderSlide(currentSlideIndex - 1, 'prev');
+    }
+
+    function goToSlide(idx) {
+      const dir = idx > currentSlideIndex ? 'next' : 'prev';
+      renderSlide(idx, dir);
+      showToast('Slide ' + (idx + 1) + ' / 10');
+    }
+
+    function handleTapPrev(e) {
+      if (hasMovedSignificantly) return;
+      prevSlide();
+    }
+
+    function handleTapNext(e) {
+      if (hasMovedSignificantly) return;
+      nextSlide();
+    }
+
+    function handlePrimaryAction() {
+      playBeep(880, 'triangle', 0.1);
+      showToast('Action: ' + slidesData[currentSlideIndex].cta);
+    }
+
+    // Likes
+    let isLiked = false;
+    let likeCount = 4210;
+    function handleLike() {
+      isLiked = !isLiked;
+      const heartIcon = document.getElementById('reels-heart-icon');
+      const heartBg = document.getElementById('reels-heart-bg');
+      const counter = document.getElementById('reels-like-count');
+      if (isLiked) {
+        likeCount++;
+        playBeep(980, 'sine', 0.12);
+        if (heartIcon) {
+          heartIcon.classList.remove('fill-none');
+          heartIcon.classList.add('fill-rose-500', 'text-rose-500');
+        }
+        if (heartBg) heartBg.classList.add('border-rose-500/60', 'bg-rose-500/20');
+        if (counter) counter.textContent = (likeCount / 1000).toFixed(1) + 'k';
+        showToast("You liked this sponsored video ❤️");
+      } else {
+        likeCount--;
+        if (heartIcon) {
+          heartIcon.classList.remove('fill-rose-500', 'text-rose-500');
+          heartIcon.classList.add('fill-none');
+        }
+        if (heartBg) heartBg.classList.remove('border-rose-500/60', 'bg-rose-500/20');
+        if (counter) counter.textContent = (likeCount / 1000).toFixed(1) + 'k';
+      }
+    }
+
+    // Share
+    let shareCount = 912;
+    function handleShare() {
+      shareCount++;
+      playBeep(720, 'sine', 0.08);
+      const shareEl = document.getElementById('reels-share-count');
+      if (shareEl) shareEl.textContent = shareCount;
+      if (navigator.clipboard) {
+        navigator.clipboard.writeText(window.location.href);
+      }
+      showToast("Link copied to clipboard! 🚀");
+    }
+
+    function showCommentToast() {
+      showToast("Comments open: 240 expert reviews 💬");
+    }
+
+    // Bookmark
+    let isSaved = false;
+    function toggleBookmark(btn) {
+      isSaved = !isSaved;
+      playBeep(800, 'sine', 0.08);
+      const saveIcon = document.getElementById('reels-save-icon');
+      const saveBg = document.getElementById('reels-save-bg');
+      if (isSaved) {
+        if (saveIcon) {
+          saveIcon.classList.remove('fill-none');
+          saveIcon.classList.add('fill-amber-400', 'text-amber-400');
+        }
+        if (saveBg) saveBg.classList.add('border-amber-400/60', 'bg-amber-400/20');
+        showToast("Saved to your bookmarks 📌");
+      } else {
+        if (saveIcon) {
+          saveIcon.classList.remove('fill-amber-400', 'text-amber-400');
+          saveIcon.classList.add('fill-none');
+        }
+        if (saveBg) saveBg.classList.remove('border-amber-400/60', 'bg-amber-400/20');
+        showToast("Removed from bookmarks");
+      }
+    }
+
+    // Audio Toggle
+    function toggleAudioIcon(btn) {
+      isMuted = !isMuted;
+      if (isMuted) {
+        btn.innerHTML = `<svg class="w-3.5 h-3.5 fill-none stroke-current" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2"/></svg>`;
+        btn.classList.remove('text-cyan-300');
+        btn.classList.add('text-slate-400');
+        showToast("Sound muted 🔇");
+      } else {
+        btn.innerHTML = `<svg class="w-3.5 h-3.5 fill-none stroke-current" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z"/></svg>`;
+        btn.classList.add('text-cyan-300');
+        btn.classList.remove('text-slate-400');
+        playBeep(880, 'sine', 0.1);
+        showToast("Sound enabled: Tech Beats (Stereo) 🔊");
+      }
+    }
+
+    // Follow toggle
+    function toggleFollow(btn) {
+      playBeep(750, 'sine', 0.08);
+      if (btn.textContent.includes('Following')) {
+        btn.textContent = "Follow";
+        btn.classList.remove('bg-emerald-500/25', 'border-emerald-400', 'text-emerald-300');
+        showToast("Unfollowed");
+      } else {
+        btn.textContent = 'Following ✓';
+        btn.classList.add('bg-emerald-500/25', 'border-emerald-400', 'text-emerald-300');
+        showToast("You are now following @jeton_cafm ✓");
+      }
+    }
+
+    // Poll Vote
+    function voteSlide(opt) {
+      playBeep(680, 'sine', 0.08);
+      const pctA = document.getElementById('pctA');
+      const pctB = document.getElementById('pctB');
+      const feedback = document.getElementById('poll-slide-feedback');
+      if (pctA) pctA.classList.remove('hidden');
+      if (pctB) pctB.classList.remove('hidden');
+      if (feedback) feedback.classList.remove('hidden');
+      showToast("Your vote has been recorded! Thank you 📊");
+    }
+
+    // Reminder toggle
+    function toggleReminderSlide(btn) {
+      playBeep(840, 'triangle', 0.1);
+      btn.innerHTML = '<span>✓</span><span>Reminder Confirmed at T-0</span>';
+      btn.className = 'w-full py-2 px-3 rounded-xl bg-emerald-600 text-white font-bold text-xs flex items-center justify-center gap-1.5 transition';
+      showToast("Reminder enabled: see you at launch 🔔");
+    }
+
+    // Toast
+    let toastTimeout;
+    function showToast(message) {
+      const toast = document.getElementById('toast-message');
+      const text = document.getElementById('toast-text');
+      if (!toast || !text) return;
+      text.textContent = message;
+      toast.classList.remove('translate-y-20', 'opacity-0');
+      toast.classList.add('translate-y-0', 'opacity-100');
+      clearTimeout(toastTimeout);
+      toastTimeout = setTimeout(() => {
+        toast.classList.add('translate-y-20', 'opacity-0');
+        toast.classList.remove('translate-y-0', 'opacity-100');
+      }, 2400);
+    }
+
+    // Keyboard Arrow navigation
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'ArrowRight' || e.key === ' ') {
+        nextSlide();
+      } else if (e.key === 'ArrowLeft') {
+        prevSlide();
+      }
+    });
+
+    // Touch & Pointer Gesture Engine
+    let touchStartX = 0;
+    let touchStartY = 0;
+    let touchEndX = 0;
+    let touchEndY = 0;
+    let isPointerDown = false;
+    let hasMovedSignificantly = false;
+    const minSwipeThreshold = 35;
+    const maxVerticalRatio = 1.35;
+    const gestureZone = document.getElementById('carousel-container') || document.body;
+
+    function onGestureStart(x, y, target) {
+      const interactiveTag = target.closest('button, a, input, textarea, select');
+      if (interactiveTag) return;
+      isPointerDown = true;
+      hasMovedSignificantly = false;
+      touchStartX = x;
+      touchStartY = y;
+      touchEndX = x;
+      touchEndY = y;
+    }
+
+    function onGestureMove(x, y) {
+      if (!isPointerDown) return;
+      touchEndX = x;
+      touchEndY = y;
+      const diffX = touchEndX - touchStartX;
+      const diffY = touchEndY - touchStartY;
+      if (Math.abs(diffX) > 10 || Math.abs(diffY) > 10) {
+        hasMovedSignificantly = true;
+      }
+      const contentEl = document.getElementById('slide-dynamic-content');
+      if (contentEl && Math.abs(diffX) > 15 && Math.abs(diffX) > Math.abs(diffY)) {
+        const dragFactor = Math.max(-45, Math.min(45, diffX * 0.25));
+        contentEl.style.transform = `translateX(${dragFactor}px)`;
+      }
+    }
+
+    function onGestureEnd() {
+      if (!isPointerDown) return;
+      isPointerDown = false;
+      const contentEl = document.getElementById('slide-dynamic-content');
+      if (contentEl) contentEl.style.transform = '';
+
+      const deltaX = touchEndX - touchStartX;
+      const deltaY = touchEndY - touchStartY;
+      const absX = Math.abs(deltaX);
+      const absY = Math.abs(deltaY);
+
+      if (absX >= minSwipeThreshold && absX > (absY * maxVerticalRatio)) {
+        if (deltaX < 0) {
+          nextSlide();
+          hideSwipeHint();
+        } else {
+          prevSlide();
+          hideSwipeHint();
+        }
+      }
+      touchStartX = 0; touchStartY = 0; touchEndX = 0; touchEndY = 0;
+    }
+
+    function hideSwipeHint() {
+      const hint = document.getElementById('swipe-hint-badge');
+      if (hint) {
+        hint.style.opacity = '0';
+        setTimeout(() => {
+          const container = document.getElementById('swipe-hint-container');
+          if (container && container.parentNode) container.parentNode.removeChild(container);
+        }, 500);
+      }
+    }
+
+    // Touch Event Listeners
+    gestureZone.addEventListener('touchstart', function(e) {
+      if (e.touches.length === 1) onGestureStart(e.touches[0].clientX, e.touches[0].clientY, e.target);
+    }, { passive: true });
+
+    gestureZone.addEventListener('touchmove', function(e) {
+      if (e.touches.length === 1) onGestureMove(e.touches[0].clientX, e.touches[0].clientY);
+    }, { passive: true });
+
+    gestureZone.addEventListener('touchend', function(e) {
+      onGestureEnd();
+    }, { passive: true });
+
+    // Pointer Event Listeners for Desktop Drag
+    gestureZone.addEventListener('pointerdown', function(e) {
+      if (e.pointerType === 'mouse') onGestureStart(e.clientX, e.clientY, e.target);
+    });
+
+    gestureZone.addEventListener('pointermove', function(e) {
+      if (e.pointerType === 'mouse' && isPointerDown) onGestureMove(e.clientX, e.clientY);
+    });
+
+    gestureZone.addEventListener('pointerup', function(e) {
+      if (e.pointerType === 'mouse' && isPointerDown) onGestureEnd();
+    });
+
+    gestureZone.addEventListener('pointercancel', function(e) {
+      if (e.pointerType === 'mouse' && isPointerDown) {
+        isPointerDown = false;
+        const contentEl = document.getElementById('slide-dynamic-content');
+        if (contentEl) contentEl.style.transform = '';
+      }
+    });
+
+    // Auto dismiss swipe cue after 5s
+    setTimeout(hideSwipeHint, 5500);
+
+    // Initial sync
+    renderSlide(0, 'none');
+  </script>
+</body>
+</html>

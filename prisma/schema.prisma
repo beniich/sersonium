@@ -1,0 +1,280 @@
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model Organization {
+  id          String   @id @default(cuid())
+  name        String
+  slug                   String    @unique
+  plan                   String    @default("enterprise")
+  subscriptionCycle      String?   @default("monthly")
+  subscriptionExpiresAt  DateTime?
+  paypalSubscriptionId   String?
+  createdAt              DateTime  @default(now())
+  updatedAt              DateTime  @updatedAt
+
+  users       User[]
+  emissions   CarbonEmission[]
+  assets      InfrastructureAsset[]
+  auditLogs   AuditLog[]
+  accessPolicies AccessPolicy[]
+  invoices    Invoice[]
+  telemetries AssetTelemetry[]
+  files       FileMetadata[]
+  trafficLogs TrafficLog[]
+  wafEvents   WafSecurityEvent[]
+  strategicObjectives StrategicObjective[]
+  kpis        Kpi[]
+
+  @@map("organizations")
+}
+
+model User {
+  id          String   @id @default(cuid())
+  email       String   @unique
+  name        String?
+  role        String   @default("operator") // admin, operator, auditor, viewer
+  tokens      Int      @default(1000)      // Jeton / Credit system for AI & API usage
+  tenantId    String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  organization Organization   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  auditLogs    AuditLog[]
+  accessPolicies AccessPolicy[]
+
+  @@index([tenantId])
+  @@map("users")
+}
+
+model CarbonEmission {
+  id             String   @id @default(cuid())
+  tenantId       String
+  title          String
+  scope          Int      // 1: Direct, 2: Indirect Energy, 3: Value Chain
+  category       String   // e.g. "Data Centers", "Cloud Compute", "Cooling Systems", "Fleet"
+  co2EquivalentKg Float   // in kg CO2e
+  activityDate   DateTime @default(now())
+  source         String   @default("automated_telemetry")
+  status         String   @default("verified") // draft, verified, audited
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  organization   Organization @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId])
+  @@index([tenantId, scope])
+  @@map("carbon_emissions")
+}
+
+model InfrastructureAsset {
+  id             String   @id @default(cuid())
+  tenantId       String
+  name           String
+  location       String
+  type           String   // "edge_node", "datacenter", "cooling_unit", "switch"
+  status         String   @default("healthy") // "healthy", "warning", "critical", "offline"
+  powerUsageKw   Float    @default(0.0)
+  pueScore       Float    @default(1.15) // Power Usage Effectiveness
+  renewablePct   Float    @default(100.0)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  organization   Organization @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId])
+  @@map("infrastructure_assets")
+}
+
+model AuditLog {
+  id          String   @id @default(cuid())
+  tenantId    String
+  userId      String?
+  action      String   // e.g. "CREATE_EMISSION", "UPDATE_ASSET", "SECURITY_ALERT"
+  resource    String   // e.g. "CarbonEmission", "InfrastructureAsset"
+  resourceId  String?
+  details     String?  // JSON string
+  ipAddress   String?
+  createdAt   DateTime @default(now())
+
+  organization Organization @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  user         User?        @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([tenantId])
+  @@index([tenantId, createdAt])
+  @@map("audit_logs")
+}
+
+// --- Sprint 1: Zero Trust ---
+model AccessPolicy {
+  id          String   @id @default(cuid())
+  tenantId    String
+  userId      String?
+  resourceId  String   // Target resource (e.g. "api/v1/carbon", "datacenter/par-01", "*")
+  action      String   // "read", "write", "admin", "*"
+  allowed     Boolean  @default(true)
+  description String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  organization Organization @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  user         User?        @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId])
+  @@index([tenantId, userId, resourceId])
+  @@map("access_policies")
+}
+
+// --- Sprint 1: Manage & Billing (Tokens / Jetons) ---
+model Invoice {
+  id           String   @id @default(cuid())
+  tenantId     String
+  amount       Float
+  currency     String   @default("EUR")
+  status       String   @default("paid") // paid, pending, failed
+  description   String
+  tokenCredits  Int      @default(0)      // Tokens added with this purchase
+  paypalOrderId String?
+  payerEmail    String?
+  paymentMethod String?  @default("paypal") // paypal_account, card_via_paypal
+  createdAt     DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  organization Organization @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId])
+  @@map("invoices")
+}
+
+// --- Sprint 2: Infrastructure (CAFM) Telemetry ---
+model AssetTelemetry {
+  id             String   @id @default(cuid())
+  tenantId       String
+  assetId        String
+  temperatureC   Float    @default(22.0)
+  vibrationMmS   Float    @default(0.5)
+  powerKw        Float    @default(50.0)
+  pueScore       Float    @default(1.15)
+  status         String   @default("nominal") // nominal, warning, critical
+  timestamp      DateTime @default(now())
+
+  organization   Organization @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId])
+  @@index([tenantId, assetId])
+  @@index([tenantId, timestamp])
+  @@map("asset_telemetries")
+}
+
+// --- Sprint 2: Storage & DB (R2/S3 Buckets) ---
+model FileMetadata {
+  id          String   @id @default(cuid())
+  tenantId    String
+  fileName    String
+  fileSize    Int
+  mimeType    String
+  storageKey  String   @unique
+  bucket      String   @default("beecarbonat-assets")
+  uploadedBy  String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  organization Organization @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId])
+  @@map("file_metadata")
+}
+
+// --- Sprint 3: Global Traffic & Edge Network ---
+model TrafficLog {
+  id               String   @id @default(cuid())
+  tenantId         String
+  nodeId           String   // e.g. "edge-fra-01", "edge-par-02"
+  region           String   // e.g. "eu-west-3", "eu-central-1"
+  bytesTransferred Float    // in bytes
+  latencyMs        Float    // in ms
+  statusCode       Int      @default(200)
+  timestamp        DateTime @default(now())
+
+  organization     Organization @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId])
+  @@index([tenantId, timestamp])
+  @@index([tenantId, nodeId])
+  @@map("traffic_logs")
+}
+
+// --- Sprint 3: Security & WAF ---
+model WafSecurityEvent {
+  id          String   @id @default(cuid())
+  tenantId    String
+  clientIp    String
+  threatType  String   // "rate_limit", "sql_injection", "geo_block", "bot"
+  ruleId      String
+  action      String   // "block", "challenge", "log"
+  blocked     Boolean  @default(true)
+  timestamp   DateTime @default(now())
+
+  organization Organization @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId])
+  @@index([tenantId, timestamp])
+  @@map("waf_security_events")
+}
+
+// --- Sprint 4: Strategy & OKR (Draxlr-like Strategic Performance Management) ---
+model StrategicObjective {
+  id          String   @id @default(uuid())
+  tenantId    String
+  title       String
+  description String?
+  period      String
+  status      String   @default("Active")
+  priority    Int      @default(3)
+  createdAt   DateTime @default(now())
+
+  organization Organization @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  kpis        Kpi[]
+
+  @@index([tenantId])
+  @@map("strategic_objectives")
+}
+
+model Kpi {
+  id           String   @id @default(uuid())
+  tenantId     String
+  objectiveId  String
+  name         String
+  unit         String
+  targetValue  Float
+  currentValue Float    @default(0)
+  frequency    String   @default("Monthly")
+  source       String   @default("MANUAL") // MANUAL or AUTOMATED
+  sourceKey    String?
+
+  organization       Organization       @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  objective          StrategicObjective @relation(fields: [objectiveId], references: [id], onDelete: Cascade)
+  history            KpiHistory[]
+
+  @@index([tenantId])
+  @@index([objectiveId])
+  @@map("kpis")
+}
+
+model KpiHistory {
+  id        String   @id @default(uuid())
+  kpiId     String
+  value     Float
+  timestamp DateTime @default(now())
+
+  kpi       Kpi      @relation(fields: [kpiId], references: [id], onDelete: Cascade)
+
+  @@index([kpiId])
+  @@map("kpi_history")
+}
+

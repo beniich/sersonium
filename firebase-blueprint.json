@@ -1,0 +1,86 @@
+{
+  "collections": {
+    "nodes": {
+      "description": "Datacenter edge nodes",
+      "access": "Public read/write for prototype",
+      "schema": {
+        "id": "string",
+        "location": "string",
+        "status": "string",
+        "cpu": "number",
+        "ram": "number",
+        "bandwidth": "number"
+      }
+    },
+    "dnsRecords": {
+      "description": "DNS records",
+      "access": "Public read/write for prototype",
+      "schema": {
+        "id": "string",
+        "type": "string",
+        "name": "string",
+        "content": "string",
+        "proxied": "boolean",
+        "ttl": "string"
+      }
+    },
+    "securityEvents": {
+      "description": "WAF security events",
+      "access": "Public read/write for prototype",
+      "schema": {
+        "id": "string",
+        "timestamp": "string",
+        "sourceIp": "string",
+        "country": "string",
+        "action": "string",
+        "ruleId": "string"
+      }
+    },
+    "workers": {
+      "description": "Edge computing worker scripts",
+      "access": "Public read/write for prototype",
+      "schema": {
+        "id": "string",
+        "name": "string",
+        "route": "string",
+        "requests": "number",
+        "cpuTimeMs": "number",
+        "status": "string"
+      }
+    },
+    "workOrders": {
+      "description": "CAFM infrastructure work orders",
+      "access": "Public read/write for prototype",
+      "schema": {
+        "id": "string",
+        "nodeId": "string",
+        "issue": "string",
+        "priority": "string",
+        "status": "string",
+        "aiDiagnostic": "string"
+      }
+    },
+    "ztPolicies": {
+      "description": "Zero Trust Access Policies",
+      "access": "Public read/write for prototype",
+      "schema": {
+        "id": "string",
+        "name": "string",
+        "action": "string",
+        "users": "string",
+        "status": "string"
+      }
+    },
+    "buckets": {
+      "description": "R2 Object Storage Buckets",
+      "access": "Public read/write for prototype",
+      "schema": {
+        "id": "string",
+        "name": "string",
+        "location": "string",
+        "sizeGB": "number",
+        "objects": "number"
+      }
+    }
+  }
+}
