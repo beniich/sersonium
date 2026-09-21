@@ -325,7 +325,7 @@ export interface GoogleAuthConfig {
   dnsVerificationTxtRecord: string;
 }
 
-export type SubscriptionTier = "free" | "silver" | "pro";
+export type SubscriptionTier = "free" | "silver" | "pro" | "enterprise";
 
 export interface SubscriptionPlan {
   id: SubscriptionTier;
