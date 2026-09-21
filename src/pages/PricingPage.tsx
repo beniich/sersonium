@@ -63,41 +63,45 @@ export default function PricingPage({
   const [activeFaq, setActiveFaq] = useState<number | null>(null);
   const [customOrderNote, setCustomOrderNote] = useState("");
 
-  const currentTier: SubscriptionTier = state?.subscriptionTier || "lite";
+  const currentTier: SubscriptionTier = state?.subscriptionTier || "free";
+  const isSilver = currentTier === "silver";
   const isPro = currentTier === "pro";
 
-  const handlePayPalSuccess = async (details: { orderId: string; amount: number; cycle: string }) => {
-    setPayPalTxId(details.orderId);
+  const handlePayPalSuccess = async (details: { subscriptionId: string; planId: string }) => {
+    setPayPalTxId(details.subscriptionId);
     setPayPalPaymentSuccess(true);
     
+    // Determine which plan was bought based on planId
+    const newTier = details.planId === "P-2PN232575Y225210YNKY3QZQ" ? "pro" : "silver";
+
     // Update local storage and app state
     if (typeof window !== "undefined") {
-      localStorage.setItem("sensorium_subscription_tier", "pro");
+      localStorage.setItem("sensorium_subscription_tier", newTier);
     }
     if (state) {
-      state.subscriptionTier = "pro";
+      state.subscriptionTier = newTier;
     }
     if (onUpgradeTier) {
-      onUpgradeTier("pro");
+      onUpgradeTier(newTier);
     }
 
     await logAuditEvent(
       "PAYPAL_SUBSCRIPTION_SUCCESS",
-      `Subscription upgraded to PRO Plan via PayPal Live Gateway (Capture ID: ${details.orderId}, ${details.cycle === "yearly" ? "499€/year" : "49€/month"})`
+      `Subscription upgraded to ${newTier.toUpperCase()} Plan via PayPal Subscription (ID: ${details.subscriptionId})`
     );
   };
 
   const handleDowngrade = async () => {
     if (typeof window !== "undefined") {
-      localStorage.setItem("sensorium_subscription_tier", "lite");
+      localStorage.setItem("sensorium_subscription_tier", "free");
     }
     if (state) {
-      state.subscriptionTier = "lite";
+      state.subscriptionTier = "free";
     }
     if (onUpgradeTier) {
-      onUpgradeTier("lite");
+      onUpgradeTier("free");
     }
-    await logAuditEvent("SUBSCRIPTION_DOWNGRADED_LITE", "Subscription reverted to LITE Tier.");
+    await logAuditEvent("SUBSCRIPTION_DOWNGRADED_FREE", "Subscription reverted to FREE Tier.");
   };
 
   const comparisonFeatures: FeatureComparisonRow[] = [
@@ -269,11 +273,11 @@ export default function PricingPage({
       </div>
 
       {/* Pricing Cards Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-stretch">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-8 items-stretch">
         
-        {/* LITE CARD (Free) */}
+        {/* FREE CARD */}
         <div className={`rounded-3xl p-7 sm:p-8 flex flex-col justify-between border transition-all duration-200 ${
-          currentTier === "lite"
+          currentTier === "free"
             ? "bg-white dark:bg-[#111114] border-slate-300 dark:border-white/20 shadow-md ring-1 ring-slate-300 dark:ring-white/20"
             : "bg-white dark:bg-[#0c0c0e] border-slate-200 dark:border-white/[0.07] shadow-xs"
         }`}>
@@ -283,12 +287,12 @@ export default function PricingPage({
                 <span className="text-xs font-mono font-bold text-slate-400 uppercase tracking-wider">
                   {language === "fr" ? "DÉCOUVERTE & PROTOTYPAGE" : "DEVELOPER & PILOT"}
                 </span>
-                <h3 className="text-2xl font-bold text-slate-900 dark:text-white mt-1">Plan Lite</h3>
+                <h3 className="text-2xl font-bold text-slate-900 dark:text-white mt-1">Plan Free</h3>
                 <p className="text-xs text-slate-500 dark:text-neutral-400 mt-1">
                   {language === "fr" ? "Idéal pour évaluer la plateforme et superviser un site pilote." : "Ideal for discovering SENSORIUM and monitoring a pilot edge node."}
                 </p>
               </div>
-              {currentTier === "lite" && (
+              {currentTier === "free" && (
                 <span className="text-[11px] font-mono font-bold px-2.5 py-1 rounded-full bg-slate-100 dark:bg-white/[0.08] text-slate-700 dark:text-neutral-200 border border-slate-200 dark:border-white/[0.1]">
                   {language === "fr" ? "ACTUEL" : "ACTIVE"}
                 </span>
@@ -333,7 +337,7 @@ export default function PricingPage({
           </div>
 
           <div className="pt-8">
-            {currentTier === "lite" ? (
+            {currentTier === "free" ? (
               <div className="w-full py-3 px-4 rounded-xl bg-slate-100 dark:bg-white/[0.04] text-slate-500 dark:text-neutral-400 text-xs font-bold text-center border border-slate-200 dark:border-white/[0.06]">
                 {language === "fr" ? "Formule actuellement active" : "Currently Active Tier"}
               </div>
@@ -342,8 +346,85 @@ export default function PricingPage({
                 onClick={handleDowngrade}
                 className="w-full py-3 px-4 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-white/[0.06] dark:hover:bg-white/[0.1] text-slate-700 dark:text-neutral-200 text-xs font-bold text-center transition-colors cursor-pointer border border-slate-200 dark:border-white/[0.08]"
               >
-                {language === "fr" ? "Repasser au plan Lite" : "Downgrade to Lite"}
+                {language === "fr" ? "Repasser au plan Free" : "Downgrade to Free"}
               </button>
+            )}
+          </div>
+        </div>
+
+        {/* SILVER CARD */}
+        <div className={`rounded-3xl p-7 sm:p-8 flex flex-col justify-between border relative transition-all duration-200 ${
+          currentTier === "silver"
+            ? "bg-slate-50 dark:bg-slate-900 border-slate-400 dark:border-slate-500 shadow-lg ring-1 ring-slate-400 dark:ring-slate-500"
+            : "bg-white dark:bg-[#0c0c0e] border-slate-200 dark:border-white/[0.07] hover:border-slate-300 dark:hover:border-white/[0.2] shadow-sm"
+        }`}>
+          <div className="space-y-6">
+            <div className="flex justify-between items-start">
+              <div>
+                <span className="text-xs font-mono font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+                  {language === "fr" ? "PROFESSIONNELS" : "PROFESSIONALS"}
+                </span>
+                <h3 className="text-2xl font-bold text-slate-900 dark:text-white mt-1">Plan Silver</h3>
+                <p className="text-xs text-slate-500 dark:text-neutral-400 mt-1">
+                  {language === "fr" ? "Parfait pour les PME nécessitant plus de capacités d'analyse." : "Perfect for SMEs needing more analytics capacity."}
+                </p>
+              </div>
+            </div>
+
+            {/* Price tag */}
+            <div className="flex items-baseline gap-1">
+              <span className="text-4xl sm:text-5xl font-extrabold text-slate-900 dark:text-white">
+                {billingCycle === "yearly" ? "199€" : "19€"}
+              </span>
+              <span className="text-xs text-slate-500 dark:text-neutral-400 font-medium">
+                /{billingCycle === "yearly" ? (language === "fr" ? "an" : "year") : (language === "fr" ? "mois" : "month")}
+              </span>
+            </div>
+
+            {/* Feature Highlights */}
+            <div className="space-y-3 pt-4 border-t border-slate-100 dark:border-white/[0.06] text-xs">
+              <div className="flex items-center gap-2.5 text-slate-700 dark:text-neutral-300">
+                <Check className="w-4 h-4 text-emerald-500 shrink-0" />
+                <span>{language === "fr" ? "Supervision Edge jusqu'à 20 nœuds" : "Edge supervision up to 20 nodes"}</span>
+              </div>
+              <div className="flex items-center gap-2.5 text-slate-700 dark:text-neutral-300">
+                <Check className="w-4 h-4 text-emerald-500 shrink-0" />
+                <span>{language === "fr" ? "GMAO intermédiaire (jusqu'à 50 ordres)" : "Intermediate CMMS (up to 50 active work orders)"}</span>
+              </div>
+              <div className="flex items-center gap-2.5 text-slate-700 dark:text-neutral-300 font-semibold">
+                <Check className="w-4 h-4 text-blue-500 shrink-0" />
+                <span>{language === "fr" ? "Générateur de Rapports PDF A4 & CSV" : "Strategic Executive PDF A4 & CSV Generator"}</span>
+              </div>
+              <div className="flex items-center gap-2.5 text-slate-400 dark:text-neutral-500 line-through">
+                <X className="w-4 h-4 text-slate-300 dark:text-neutral-600 shrink-0" />
+                <span>{language === "fr" ? "Maintenance Prédictive IA" : "Predictive Maintenance AI"}</span>
+              </div>
+            </div>
+          </div>
+
+          <div className="pt-8 space-y-3">
+            {currentTier === "silver" ? (
+              <div className="p-3.5 rounded-2xl bg-blue-500/10 border border-blue-500/30 text-blue-600 dark:text-blue-400 font-bold text-xs flex items-center justify-center gap-2 shadow-xs">
+                <CheckCircle2 className="w-4 h-4" />
+                <span>{language === "fr" ? "Abonnement Silver Actif" : "Silver Plan Active"}</span>
+              </div>
+            ) : payPalPaymentSuccess ? (
+              <div className="p-4 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-600 dark:text-emerald-400 text-xs text-center space-y-1">
+                <div className="font-bold flex items-center justify-center gap-1.5">
+                  <CheckCircle2 className="w-4 h-4" />
+                  <span>{language === "fr" ? "Paiement Validé !" : "Payment Confirmed!"}</span>
+                </div>
+              </div>
+            ) : (
+              <div className="space-y-2">
+                <div className="p-3.5 rounded-2xl bg-slate-50 dark:bg-white/[0.02] border border-slate-200 dark:border-white/[0.06]">
+                  <PayPalSmartButton
+                    planId="P-44Y462991D576054FNKY3PKI"
+                    onSuccess={handlePayPalSuccess}
+                    isDark={isDark}
+                  />
+                </div>
+              </div>
             )}
           </div>
         </div>
@@ -435,7 +516,7 @@ export default function PricingPage({
                 {/* PayPal Smart Payment Buttons Placeholder / Interactive Flow */}
                 <div className="p-3.5 rounded-2xl bg-slate-50 dark:bg-white/[0.02] border border-slate-200 dark:border-white/[0.06]">
                   <PayPalSmartButton
-                    billingCycle={billingCycle}
+                    planId="P-2PN232575Y225210YNKY3QZQ"
                     onSuccess={handlePayPalSuccess}
                     isDark={isDark}
                   />

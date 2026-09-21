@@ -3,14 +3,16 @@ import { Lock, RefreshCw, AlertCircle, CheckCircle2 } from "lucide-react";
 import { useLanguage } from "../App";
 
 interface PayPalSmartButtonProps {
-  billingCycle: "monthly" | "yearly";
-  onSuccess: (details: { orderId: string; amount: number; cycle: string }) => void;
+  planId: string;
+  tenantId?: string;
+  onSuccess: (details: { subscriptionId: string; planId: string }) => void;
   onError?: (err: any) => void;
   isDark?: boolean;
 }
 
 export default function PayPalSmartButton({
-  billingCycle,
+  planId,
+  tenantId,
   onSuccess,
   onError,
   isDark = true,
@@ -68,45 +70,29 @@ export default function PayPalSmartButton({
           .Buttons({
             style: {
               layout: "vertical",
-              color: "gold",
-              shape: "rect",
-              label: "paypal",
+              color: "black",
+              shape: "pill",
+              label: "subscribe",
               height: 42,
             },
-            createOrder: async () => {
-              const res = await fetch("/api/v1/paypal/create-order", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ cycle: billingCycle }),
+            createSubscription: (data: any, actions: any) => {
+              return actions.subscription.create({
+                plan_id: planId,
+                custom_id: tenantId || "tenant_beecarbonat_global"
               });
-              const data = await res.json();
-              if (!data.success || !data.data?.orderId) {
-                throw new Error(data.error || "Impossible d'initier la commande PayPal.");
-              }
-              return data.data.orderId;
             },
-            onApprove: async (data: any) => {
+            onApprove: async (data: any, actions: any) => {
               setLoading(true);
               try {
-                const res = await fetch("/api/v1/paypal/capture-order", {
-                  method: "POST",
-                  headers: { "Content-Type": "application/json" },
-                  body: JSON.stringify({ orderId: data.orderID }),
+                // Subscription is created by PayPal directly
+                onSuccess({
+                  subscriptionId: data.subscriptionID,
+                  planId: planId,
                 });
-                const result = await res.json();
-                if (result.success) {
-                  onSuccess({
-                    orderId: data.orderID,
-                    amount: result.data?.amount || (billingCycle === "yearly" ? 499 : 49),
-                    cycle: billingCycle,
-                  });
-                } else {
-                  throw new Error(result.error || "Échec de la validation de paiement.");
-                }
               } catch (captureErr: any) {
                 console.error("[PayPal Capture Error]", captureErr);
                 if (onError) onError(captureErr);
-                setSdkError(captureErr.message || "Erreur de capture du paiement.");
+                setSdkError(captureErr.message || "Erreur lors de la finalisation de l'abonnement.");
               } finally {
                 setLoading(false);
               }
@@ -135,7 +121,7 @@ export default function PayPalSmartButton({
     if (!script) {
       script = document.createElement("script");
       script.id = scriptId;
-      script.src = `https://www.paypal.com/sdk/js?client-id=${clientId}&currency=EUR&intent=capture&components=buttons`;
+      script.src = `https://www.paypal.com/sdk/js?client-id=${clientId}&vault=true&intent=subscription&components=buttons`;
       script.async = true;
       script.onload = () => renderButtons();
       script.onerror = () => {
@@ -150,7 +136,7 @@ export default function PayPalSmartButton({
         script.onload = () => renderButtons();
       }
     }
-  }, [clientId, billingCycle]);
+  }, [clientId, planId]);
 
   return (
     <div className="space-y-3 w-full">

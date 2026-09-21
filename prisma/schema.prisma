@@ -8,13 +8,14 @@ generator client {
 }
 
 model Organization {
-  id          String   @id @default(cuid())
-  name        String
+  id                     String    @id @default(cuid())
+  name                   String
   slug                   String    @unique
-  plan                   String    @default("enterprise")
+  plan                   String    @default("FREE") // FREE, SILVER, PRO
   subscriptionCycle      String?   @default("monthly")
   subscriptionExpiresAt  DateTime?
   paypalSubscriptionId   String?
+  subscriptionStatus     String?   @default("inactive") // active, past_due, canceled
   createdAt              DateTime  @default(now())
   updatedAt              DateTime  @updatedAt
 

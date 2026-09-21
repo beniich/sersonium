@@ -179,44 +179,60 @@ export async function handlePayPalWebhook(req: Request, res: Response) {
     const eventType = event.event_type;
     console.log(`[PayPal Webhook] Événement reçu : ${eventType} (${event.id})`);
 
-    // Traitement des renouvellements automatiques ou annulations
-    if (eventType === "PAYMENT.CAPTURE.COMPLETED" || eventType === "PAYMENT.SALE.COMPLETED") {
+    // Traitement des abonnements (Subscriptions)
+    if (eventType === "BILLING.SUBSCRIPTION.ACTIVATED" || eventType === "BILLING.SUBSCRIPTION.UPDATED") {
       const resource = event.resource;
       const customId = resource.custom_id;
-      if (customId) {
-        try {
-          const parsed = JSON.parse(customId);
-          if (parsed.tenantId) {
-            const nextExpires = new Date();
-            nextExpires.setDate(nextExpires.getDate() + (parsed.cycle === "yearly" ? 365 : 30));
+      const planId = resource.plan_id;
+      const status = resource.status; // ACTIVE, SUSPENDED, CANCELLED, EXPIRED
+      const subscriptionId = resource.id;
 
-            await rawPrisma.organization.update({
-              where: { id: parsed.tenantId },
-              data: {
-                plan: "pro",
-                subscriptionExpiresAt: nextExpires,
-              },
-            });
-          }
-        } catch (e) {
-          // Format custom id non-json
-        }
+      if (customId) {
+        // Déterminer le niveau de plan en fonction du plan_id PayPal officiel
+        const planLevel = planId === "P-2PN232575Y225210YNKY3QZQ" ? "pro"
+                        : planId === "P-44Y462991D576054FNKY3PKI" ? "silver"
+                        : "free";
+        
+        await rawPrisma.organization.update({
+          where: { id: customId },
+          data: {
+            plan: planLevel,
+            subscriptionStatus: status.toLowerCase(),
+            paypalSubscriptionId: subscriptionId,
+            // (optionnel) On pourrait extraire next_billing_time de resource.billing_info
+          },
+        });
+        
+        // Log the audit event
+        await rawPrisma.auditLog.create({
+          data: {
+            tenantId: customId,
+            action: "SUBSCRIPTION_WEBHOOK_ACTIVATED",
+            resource: "Organization",
+            details: JSON.stringify({ planId, status, subscriptionId }),
+          },
+        });
       }
-    } else if (eventType === "BILLING.SUBSCRIPTION.CANCELLED" || eventType === "BILLING.SUBSCRIPTION.SUSPENDED") {
+    } else if (eventType === "BILLING.SUBSCRIPTION.CANCELLED" || eventType === "BILLING.SUBSCRIPTION.SUSPENDED" || eventType === "BILLING.SUBSCRIPTION.EXPIRED") {
       const resource = event.resource;
       const customId = resource.custom_id;
       if (customId) {
-        try {
-          const parsed = JSON.parse(customId);
-          if (parsed.tenantId) {
-            await rawPrisma.organization.update({
-              where: { id: parsed.tenantId },
-              data: { plan: "lite" },
-            });
-          }
-        } catch (e) {
-          // ignore
-        }
+        await rawPrisma.organization.update({
+          where: { id: customId },
+          data: { 
+            plan: "free",
+            subscriptionStatus: resource.status.toLowerCase(),
+          },
+        });
+        
+        await rawPrisma.auditLog.create({
+          data: {
+            tenantId: customId,
+            action: "SUBSCRIPTION_WEBHOOK_CANCELLED",
+            resource: "Organization",
+            details: JSON.stringify({ status: resource.status, subscriptionId: resource.id }),
+          },
+        });
       }
     }
 

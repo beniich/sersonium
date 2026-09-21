@@ -42,32 +42,33 @@ export default function SubscriptionPricingModal({
   const [paymentSuccess, setPaymentSuccess] = useState(false);
   const [transactionId, setTransactionId] = useState<string>("");
 
-  const currentTier: SubscriptionTier = state.subscriptionTier || "lite";
+  const currentTier: SubscriptionTier = state.subscriptionTier || "free";
 
   if (!isOpen) return null;
 
-  const handlePayPalSuccess = async (details: { orderId: string; amount: number; cycle: string }) => {
-    setTransactionId(details.orderId);
+  const handlePayPalSuccess = async (details: { subscriptionId: string; planId: string }) => {
+    setTransactionId(details.subscriptionId);
     setPaymentSuccess(true);
     
-    // Update local storage and trigger parent update
-    localStorage.setItem("sensorium_subscription_tier", "pro");
+    // Determine tier from planId
+    const newTier = details.planId === "P-2PN232575Y225210YNKY3QZQ" ? "pro" : "silver";
+    localStorage.setItem("sensorium_subscription_tier", newTier);
     if (onUpgradeSuccess) {
-      onUpgradeSuccess("pro");
+      onUpgradeSuccess(newTier);
     }
 
     await logAuditEvent(
       "SUBSCRIPTION_UPGRADED_PAYPAL",
-      `Subscription upgraded to PRO Plan via PayPal Live capture (OrderID: ${details.orderId}, ${details.cycle === "yearly" ? "499€/an" : "49€/mois"})`
+      `Subscription upgraded to ${newTier.toUpperCase()} via PayPal Subscription (ID: ${details.subscriptionId})`
     );
   };
 
   const handleDowngrade = async () => {
-    localStorage.setItem("sensorium_subscription_tier", "lite");
+    localStorage.setItem("sensorium_subscription_tier", "free");
     if (onUpgradeSuccess) {
-      onUpgradeSuccess("lite");
+      onUpgradeSuccess("free");
     }
-    await logAuditEvent("SUBSCRIPTION_DOWNGRADED", "Subscription switched to LITE plan");
+    await logAuditEvent("SUBSCRIPTION_DOWNGRADED", "Subscription switched to FREE plan");
     onClose();
   };
 
@@ -177,7 +178,7 @@ export default function SubscriptionPricingModal({
               
               {/* Carte LITE (Gratuit) */}
               <div className={`p-6 rounded-2xl border flex flex-col justify-between transition-all ${
-                currentTier === "lite"
+                currentTier === "free"
                   ? "bg-slate-50/80 dark:bg-white/[0.02] border-slate-300 dark:border-white/20 ring-1 ring-slate-300 dark:ring-white/20"
                   : "bg-white dark:bg-neutral-900 border-slate-200 dark:border-white/[0.07]"
               }`}>
@@ -189,7 +190,7 @@ export default function SubscriptionPricingModal({
                         {language === "fr" ? "Pour découverte et monitoring basique" : "For discovery and basic surveillance"}
                       </p>
                     </div>
-                    {currentTier === "lite" && (
+                    {currentTier === "free" && (
                       <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-slate-200 dark:bg-white/10 text-slate-700 dark:text-neutral-300 font-bold">
                         {language === "fr" ? "PLAN ACTUEL" : "CURRENT PLAN"}
                       </span>
@@ -232,7 +233,7 @@ export default function SubscriptionPricingModal({
                 </div>
 
                 <div className="pt-6">
-                  {currentTier === "lite" ? (
+                  {currentTier === "free" ? (
                     <button
                       disabled
                       className="w-full py-2.5 px-4 bg-slate-100 dark:bg-white/[0.04] text-slate-400 dark:text-neutral-500 font-semibold rounded-xl text-xs text-center cursor-default"
@@ -328,7 +329,7 @@ export default function SubscriptionPricingModal({
                   ) : (
                     <div className="p-3 rounded-2xl bg-slate-50 dark:bg-white/[0.02] border border-slate-200 dark:border-white/[0.06]">
                       <PayPalSmartButton
-                        billingCycle={billingCycle}
+                        planId="P-2PN232575Y225210YNKY3QZQ"
                         onSuccess={handlePayPalSuccess}
                         isDark={isDark}
                       />
