@@ -250,8 +250,9 @@ export default function App() {
   }, []);
 
   const [isMockMode, setIsMockMode] = useState<boolean>(() => {
-    // In production, always disable mock mode
-    if (process.env.NODE_ENV === "production") {
+    // In production build, always force mock mode OFF and clear stale cache
+    if (import.meta.env.PROD) {
+      try { localStorage.removeItem("cafm_mock_mode"); } catch {}
       return false;
     }
     if (typeof window !== "undefined") {
@@ -339,24 +340,30 @@ export default function App() {
     handleEnterMockMode();
   };
 
-  if (!user || !state?.subscriptionTier) {
-  return (
-    <ThemeContext.Provider value={themeContextValue}>
-      <LanguageContext.Provider value={languageContextValue}>
-        <PublicPortal
-          onSignIn={handleSignIn}
-          onEnterMockMode={handleEnterMockMode}
-          onNavigateToSection={handleNavigateFromPortal}
-          isDark={isDark}
-          toggleTheme={toggleTheme}
-          mode={mode}
-          authError={authError}
-          state={state}
-        />
-      </LanguageContext.Provider>
-    </ThemeContext.Provider>
-  );
-}
+  // Show portal if: no user (not logged in), OR in mock mode without user, OR user exists but subscription not yet active (show portal with auth info)
+  // Authenticated PRO users + isMockMode explicitly enabled → go to dashboard
+  const isSubscribedPro = state?.subscriptionTier === "pro";
+  const shouldShowPortal = !user || (!isMockMode && !isSubscribedPro);
+
+  if (shouldShowPortal && !loading) {
+    return (
+      <ThemeContext.Provider value={themeContextValue}>
+        <LanguageContext.Provider value={languageContextValue}>
+          <PublicPortal
+            onSignIn={handleSignIn}
+            onEnterMockMode={handleEnterMockMode}
+            onNavigateToSection={handleNavigateFromPortal}
+            isDark={isDark}
+            toggleTheme={toggleTheme}
+            mode={mode}
+            authError={authError}
+            state={state}
+            user={user}
+          />
+        </LanguageContext.Provider>
+      </ThemeContext.Provider>
+    );
+  }
 
   if (loading || !state) {
     return (
@@ -426,7 +433,7 @@ export default function App() {
           mode={mode}
           state={state}
           user={user}
-          isMockMode={isMockMode || !user}
+          isMockMode={isMockMode}
           onToggleMockMode={toggleMockMode}
           onReturnToPortal={handleReturnToPortal}
           onSignIn={handleSignIn}

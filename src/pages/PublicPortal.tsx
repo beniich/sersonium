@@ -1,6 +1,7 @@
 import React from "react";
 import { SensoriumShowcase } from "../components/SensoriumShowcase";
 import { GlobalState } from "../types";
+import type { User } from "firebase/auth";
 
 interface PublicPortalProps {
   onSignIn: () => void;
@@ -11,9 +12,10 @@ interface PublicPortalProps {
   mode?: "system" | "light" | "dark";
   authError?: string | null;
   state?: GlobalState;
+  user?: User | null;
 }
 
-export default function PublicPortal({ onSignIn, onEnterMockMode, state, isDark, toggleTheme, mode, authError }: PublicPortalProps) {
+export default function PublicPortal({ onSignIn, onEnterMockMode, state, isDark, toggleTheme, mode, authError, user }: PublicPortalProps) {
   return (
     <SensoriumShowcase 
       onSignIn={onSignIn} 
@@ -23,6 +25,7 @@ export default function PublicPortal({ onSignIn, onEnterMockMode, state, isDark,
       toggleTheme={toggleTheme}
       mode={mode}
       authError={authError}
+      user={user}
     />
   );
 }

@@ -40,10 +40,12 @@ import {
   Scan,
   Languages
 } from "lucide-react";
-import { useLanguage } from "../App";
+import { useLanguage, useTheme } from "../App";
+import { translations } from "../i18n/translations";
 import SensoriumLogo from "./SensoriumLogo";
 import SensoryBiometricModal from "./SensoryBiometricModal";
 import { GlobalState } from "../types";
+import type { User } from "firebase/auth";
 
 // Modular Vitrine Pages
 import ArchitectureSection from "./vitrine/ArchitectureSection";
@@ -67,6 +69,7 @@ interface SensoriumShowcaseProps {
   toggleTheme?: () => void;
   mode?: "system" | "light" | "dark";
   authError?: string | null;
+  user?: User | null;
 }
 
 interface TierDefinition {
@@ -292,12 +295,12 @@ export function SensoriumShowcase({
   onSignIn,
   onEnterDashboard,
   state,
-  isDark = true,
-  toggleTheme,
-  mode = "system",
-  authError = null
+  authError = null,
+  user = null
 }: SensoriumShowcaseProps) {
   const { language, toggleLanguage } = useLanguage();
+  const { isDark, toggleTheme, mode } = useTheme();
+  const t = translations[language] || translations.en;
   const [selectedTier, setSelectedTier] = useState<string>("tier-5");
   const [activeTab, setActiveTab] = useState<"architecture" | "sandbox" | "hardware" | "roi" | "devices">("architecture");
   const [isBiometricModalOpen, setIsBiometricModalOpen] = useState(false);
@@ -570,7 +573,7 @@ Return on Investment (ROI): 3.2 months
                   activeTab === "architecture" ? "text-white font-medium" : "hover:text-neutral-200"
                 }`}
               >
-                Architecture
+                {t.showcase.architecture}
               </button>
               
               <button 
@@ -579,7 +582,7 @@ Return on Investment (ROI): 3.2 months
                   activeTab === "sandbox" ? "text-white font-medium" : "hover:text-neutral-200"
                 }`}
               >
-                Inference & Sandbox
+                {t.showcase.inferenceSandbox}
               </button>
 
               <button 
@@ -588,7 +591,7 @@ Return on Investment (ROI): 3.2 months
                   activeTab === "hardware" ? "text-white font-medium" : "hover:text-neutral-200"
                 }`}
               >
-                Silicon X1
+                {t.showcase.siliconX1}
               </button>
 
               <button 
@@ -597,7 +600,7 @@ Return on Investment (ROI): 3.2 months
                   activeTab === "roi" ? "text-white font-medium" : "hover:text-neutral-200"
                 }`}
               >
-                Calculator
+                {t.showcase.calculator}
               </button>
 
               <button 
@@ -606,7 +609,7 @@ Return on Investment (ROI): 3.2 months
                   activeTab === "devices" ? "text-white font-medium" : "hover:text-neutral-200"
                 }`}
               >
-                Ecosystem
+                {t.showcase.ecosystem}
               </button>
             </nav>
           </div>
@@ -640,23 +643,25 @@ Return on Investment (ROI): 3.2 months
               title="Secure Biometric Unlock"
             >
               <Fingerprint className="w-3.5 h-3.5 text-emerald-400 animate-pulse" />
-              <span className="hidden sm:inline">Sensory Unlock</span>
+              <span className="hidden sm:inline">{t.header.sensoryUnlock}</span>
             </button>
 
-            {onSignIn && (
+            {/* Show Sign In button only if NOT already authenticated */}
+            {!user && onSignIn && (
               <button 
                 onClick={() => setIsBiometricModalOpen(true)}
                 className="hidden sm:inline-flex text-xs font-medium text-neutral-300 hover:text-white px-3 py-1.5 transition-colors cursor-pointer"
               >
-                Sign In
+                {t.header.signIn}
               </button>
             )}
 
+            {/* Main CTA: if authenticated → access dashboard, else → cockpit */}
             <button 
               onClick={onEnterDashboard}
               className="px-4 py-1.5 rounded-full text-xs font-medium text-black bg-white hover:bg-neutral-200 transition-all cursor-pointer shadow-xs flex items-center gap-1.5"
             >
-              <span>Cockpit</span>
+              <span>{user ? (language === "fr" ? "Accéder au Cockpit" : "Access Cockpit") : t.header.cockpit}</span>
               <ArrowRight className="w-3.5 h-3.5" />
             </button>
           </div>
@@ -670,7 +675,7 @@ Return on Investment (ROI): 3.2 months
               activeTab === "architecture" ? "bg-white text-black font-semibold" : "text-neutral-400 hover:text-white bg-white/[0.04]"
             }`}
           >
-            Architecture
+            {t.showcase.architecture}
           </button>
           <button
             onClick={() => setActiveTab("sandbox")}
@@ -678,7 +683,7 @@ Return on Investment (ROI): 3.2 months
               activeTab === "sandbox" ? "bg-white text-black font-semibold" : "text-neutral-400 hover:text-white bg-white/[0.04]"
             }`}
           >
-            Inference
+            {t.showcase.inferenceSandbox}
           </button>
           <button
             onClick={() => setActiveTab("hardware")}
@@ -686,7 +691,7 @@ Return on Investment (ROI): 3.2 months
               activeTab === "hardware" ? "bg-white text-black font-semibold" : "text-neutral-400 hover:text-white bg-white/[0.04]"
             }`}
           >
-            Silicon X1
+            {t.showcase.siliconX1}
           </button>
           <button
             onClick={() => setActiveTab("roi")}
@@ -694,7 +699,7 @@ Return on Investment (ROI): 3.2 months
               activeTab === "roi" ? "bg-white text-black font-semibold" : "text-neutral-400 hover:text-white bg-white/[0.04]"
             }`}
           >
-            Calculator
+            {t.showcase.calculator}
           </button>
           <button
             onClick={() => setActiveTab("devices")}
@@ -702,7 +707,7 @@ Return on Investment (ROI): 3.2 months
               activeTab === "devices" ? "bg-white text-black font-semibold" : "text-neutral-400 hover:text-white bg-white/[0.04]"
             }`}
           >
-            Ecosystem
+            {t.showcase.ecosystem}
           </button>
         </div>
       </header>
@@ -718,7 +723,7 @@ Return on Investment (ROI): 3.2 months
           className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-white/[0.06] border border-white/[0.1] text-xs text-neutral-300 font-medium mb-6"
         >
           <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-          <span>SENSORIUM SENSORY EDGE 4.0 • LIVE ARCHITECTURE & TELEMETRY</span>
+          <span>{t.showcase.heroTag}</span>
         </motion.div>
 
         {/* Master Typographic Headline */}
@@ -728,8 +733,8 @@ Return on Investment (ROI): 3.2 months
           transition={{ duration: 0.7, delay: 0.1 }}
           className="text-4xl sm:text-6xl lg:text-7xl font-bold tracking-tight text-white leading-[1.08]"
         >
-          Sensory intelligence.<br />
-          <span className="text-neutral-400 font-normal">Absolute speed.</span>
+          {t.showcase.heroTitle1}<br />
+          <span className="text-neutral-400 font-normal">{t.showcase.heroTitle2}</span>
         </motion.h1>
 
         {/* Crisp Subtitle */}
@@ -739,7 +744,7 @@ Return on Investment (ROI): 3.2 months
           transition={{ duration: 0.7, delay: 0.2 }}
           className="text-base sm:text-xl text-neutral-400 max-w-2xl mx-auto mt-6 leading-relaxed font-normal"
         >
-          Supervise, analyze, and orchestrate critical infrastructure across 340+ Anycast points of presence. 3 ms inference, sub-8 ms latency, and full sovereignty.
+          {t.showcase.heroSubtitle}
         </motion.p>
 
         {/* Apple-grade Action Pills */}
@@ -754,14 +759,14 @@ Return on Investment (ROI): 3.2 months
             className="px-6 py-3 rounded-full text-sm font-semibold text-black bg-white hover:bg-neutral-200 transition-all cursor-pointer shadow-md flex items-center gap-2"
           >
             <Fingerprint className="w-4 h-4 text-emerald-600" />
-            <span>Sensory Unlock</span>
+            <span>{t.showcase.unlockCta}</span>
           </button>
 
           <button 
             onClick={onEnterDashboard}
             className="px-6 py-3 rounded-full text-sm font-medium text-white bg-white/[0.08] hover:bg-white/[0.12] border border-white/[0.12] transition-all cursor-pointer"
           >
-            Explore Cockpit
+            {t.showcase.cockpitCta}
           </button>
 
           <button 
@@ -772,7 +777,7 @@ Return on Investment (ROI): 3.2 months
             }}
             className="px-6 py-3 rounded-full text-sm font-medium text-neutral-300 hover:text-white bg-white/[0.04] hover:bg-white/[0.08] border border-white/[0.08] transition-all cursor-pointer"
           >
-            Sandbox & AI Inference
+            {t.showcase.sandboxCta}
           </button>
         </motion.div>
 
@@ -1012,11 +1017,11 @@ Return on Investment (ROI): 3.2 months
           <SensoriumLogo size="lg" className="justify-center mb-2" />
 
           <h2 className="text-3xl sm:text-4xl font-bold text-white tracking-tight">
-            Ready to empower your infrastructure?
+            {t.showcase.readyTitle}
           </h2>
 
           <p className="text-neutral-400 text-sm sm:text-base max-w-xl mx-auto">
-            Access the live management console, test the multi-node architecture, and simulate real-world scenarios.
+            {t.showcase.readySubtitle}
           </p>
 
           <div className="flex flex-wrap items-center justify-center gap-3 pt-2">
@@ -1025,14 +1030,14 @@ Return on Investment (ROI): 3.2 months
               className="px-6 py-3 rounded-full text-sm font-semibold text-black bg-white hover:bg-neutral-200 transition-all cursor-pointer shadow-md flex items-center gap-2"
             >
               <Fingerprint className="w-4 h-4 text-emerald-600" />
-              <span>Biometric Unlock</span>
+              <span>{t.showcase.unlockCta}</span>
             </button>
 
             <button 
               onClick={onEnterDashboard}
               className="px-6 py-3 rounded-full text-sm font-medium text-white bg-white/[0.08] hover:bg-white/[0.12] border border-white/[0.1] transition-all cursor-pointer flex items-center gap-2"
             >
-              <span>Access Demo Cockpit</span>
+              <span>{t.showcase.demoAccess}</span>
               <ArrowRight className="w-4 h-4" />
             </button>
           </div>

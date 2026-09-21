@@ -38,6 +38,7 @@ import {
 } from "lucide-react";
 
 import { useLanguage } from "../App";
+import { translations } from "../i18n/translations";
 import { generateInfrastructureReport, exportStrategicDashboardPDF, exportDashboardDataCSV } from "../utils/pdfGenerator";
 import { logout } from "../firebase";
 import SensoriumLogo from "./SensoriumLogo";
@@ -246,6 +247,24 @@ export default function DashboardLayout(props: any) {
   const [collapsedGroups, setCollapsedGroups] = useState<Record<string, boolean>>({});
   const [isNavExportOpen, setIsNavExportOpen] = useState(false);
   const { language, toggleLanguage, setLanguage } = useLanguage();
+  const t = translations[language] || translations.en;
+
+  const getGroupName = (groupId: string, fallback: string): string => {
+    switch (groupId) {
+      case "grp-overview": return t.sidebar.overview;
+      case "grp-compute": return t.sidebar.siliconCompute;
+      case "grp-infrastructure": return t.sidebar.infrastructure;
+      case "grp-network": return t.sidebar.network;
+      case "grp-security": return t.sidebar.security;
+      case "grp-zerotrust": return t.sidebar.zeroTrust;
+      case "grp-storage": return t.sidebar.storage;
+      case "grp-telemetry": return t.sidebar.telemetry;
+      case "grp-workspace": return t.sidebar.workspace;
+      case "grp-strategy": return t.sidebar.strategy;
+      case "grp-settings": return t.sidebar.settings;
+      default: return fallback;
+    }
+  };
 
   const toggleGroupCollapse = (groupId: string) => {
     setCollapsedGroups(prev => ({
@@ -355,7 +374,7 @@ export default function DashboardLayout(props: any) {
               type="text" 
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder={`Search across ${totalServicesCount} services...`}
+              placeholder={t.header.searchPlaceholder}
               className="bg-transparent border-none outline-none w-full text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-neutral-600 text-xs" 
             />
             {searchQuery && (
@@ -377,7 +396,7 @@ export default function DashboardLayout(props: any) {
               title="Display showcase portal"
             >
               <Eye className="w-3.5 h-3.5 text-slate-500 dark:text-neutral-400" />
-              <span className="hidden md:inline">Showcase</span>
+              <span className="hidden md:inline">{t.header.showcase}</span>
             </button>
           )}
 
@@ -410,7 +429,7 @@ export default function DashboardLayout(props: any) {
                 <Sun className="w-3.5 h-3.5 text-amber-500" />
               )}
               <span className="hidden xl:inline text-xs font-medium">
-                {mode === "system" ? "Auto" : isDark ? "Dark" : "Light"}
+                {mode === "system" ? t.header.auto : isDark ? t.header.dark : t.header.light}
               </span>
             </button>
           )}
@@ -420,13 +439,13 @@ export default function DashboardLayout(props: any) {
             onClick={onToggleMockMode}
             className={`flex items-center gap-1.5 text-xs font-mono px-2.5 py-1 sm:py-1.5 rounded-full border transition-all cursor-pointer min-h-[36px] ${
               isMockMode
-                ? "bg-emerald-500/10 border-emerald-500/30 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500/20"
-                : "bg-blue-500/10 border-blue-500/30 text-blue-600 dark:text-blue-400 hover:bg-blue-500/20"
+                ? "bg-amber-500/10 border-amber-500/30 text-amber-600 dark:text-amber-400 hover:bg-amber-500/20"
+                : "bg-emerald-500/10 border-emerald-500/30 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500/20"
             }`}
             title="Toggle data mode"
           >
-            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-            <span className="text-[10px] sm:text-[11px] font-semibold">{isMockMode ? "Live" : "Cloud"}</span>
+            <span className={`w-1.5 h-1.5 rounded-full animate-pulse ${isMockMode ? "bg-amber-500" : "bg-emerald-500"}`} />
+            <span className="text-[10px] sm:text-[11px] font-semibold">{isMockMode ? t.mockMode.mockMode : t.mockMode.liveMode}</span>
           </button>
 
           {/* Quick Mobile Mode Button */}
@@ -436,7 +455,7 @@ export default function DashboardLayout(props: any) {
             title="Switch to Mobile Field Technician Interface"
           >
             <Smartphone className="w-3.5 h-3.5 text-orange-500" />
-            <span className="hidden sm:inline">Mode Mobile</span>
+            <span className="hidden sm:inline">{t.header.mobileMode}</span>
           </button>
 
           {/* Quick Setup Floating Drawer Trigger */}
@@ -446,7 +465,7 @@ export default function DashboardLayout(props: any) {
             title="Open quick telemetry setup"
           >
             <SlidersHorizontal className="w-3.5 h-3.5 text-orange-500 animate-pulse" />
-            <span className="hidden sm:inline">Quick Setup</span>
+            <span className="hidden sm:inline">{t.header.quickSetup}</span>
           </button>
 
           {/* Strategic Export (PDF & CSV) */}
@@ -613,7 +632,7 @@ export default function DashboardLayout(props: any) {
           <div className="flex items-center gap-2 flex-shrink-0">
             <span className="w-2 h-2 rounded-full bg-orange-500 animate-pulse" />
             <span className="font-medium text-slate-700 dark:text-neutral-300 text-xs">
-              Sensorium Simulators
+              {t.mockMode.simulators}
             </span>
           </div>
 
@@ -700,22 +719,22 @@ export default function DashboardLayout(props: any) {
             </div>
 
             <div className="flex items-center justify-between text-[10px] text-slate-500 dark:text-neutral-400 font-mono px-1">
-              <span>{filteredStructure.reduce((a, b) => a + b.items.length, 0)} available services</span>
+              <span>{filteredStructure.reduce((a, b) => a + b.items.length, 0)} {t.header.availableServices}</span>
               <div className="flex items-center gap-2">
                 <button 
                   onClick={expandAllGroups}
                   className="hover:text-slate-800 dark:hover:text-neutral-200 cursor-pointer"
-                  title="Expand all sections"
+                  title={t.header.expandAll}
                 >
-                  Expand all
+                  {t.header.expandAll}
                 </button>
                 <span>•</span>
                 <button 
                   onClick={collapseAllGroups}
                   className="hover:text-slate-800 dark:hover:text-neutral-200 cursor-pointer"
-                  title="Collapse sections"
+                  title={t.header.collapseAll}
                 >
-                  Collapse
+                  {t.header.collapseAll}
                 </button>
               </div>
             </div>
@@ -737,7 +756,7 @@ export default function DashboardLayout(props: any) {
                   >
                     <div className="flex items-center gap-2 min-w-0">
                       <group.icon className={`w-3.5 h-3.5 flex-shrink-0 ${hasActiveItem ? "text-orange-500 dark:text-orange-400" : "text-slate-400 dark:text-neutral-500"}`} />
-                      <span className="truncate uppercase tracking-wider text-[10px] font-mono">{group.name}</span>
+                      <span className="truncate uppercase tracking-wider text-[10px] font-mono">{getGroupName(group.id, group.name)}</span>
                     </div>
 
                     <div className="flex items-center gap-1.5 flex-shrink-0">
@@ -868,7 +887,7 @@ export default function DashboardLayout(props: any) {
                       <div className="flex items-center justify-between text-[11px] font-mono uppercase tracking-wider text-slate-500 dark:text-neutral-400 px-2">
                         <div className="flex items-center gap-2">
                           <group.icon className="w-3.5 h-3.5 text-slate-400 dark:text-neutral-500" />
-                          <span>{group.name}</span>
+                          <span>{getGroupName(group.id, group.name)}</span>
                         </div>
                         <span className="text-[10px] text-slate-400 dark:text-neutral-500 font-mono">({group.items.length})</span>
                       </div>
