@@ -51,7 +51,7 @@ export default function SubscriptionPricingModal({
     setPaymentSuccess(true);
     
     // Determine tier from planId
-    const newTier = details.planId === "P-2PN232575Y225210YNKY3QZQ" ? "pro" : "silver";
+    const newTier = details.planId === "P-44Y462991D576054FNKY3PKI" ? "pro" : "silver";
     localStorage.setItem("sensorium_subscription_tier", newTier);
     if (onUpgradeSuccess) {
       onUpgradeSuccess(newTier);
@@ -329,7 +329,7 @@ export default function SubscriptionPricingModal({
                   ) : (
                     <div className="p-3 rounded-2xl bg-slate-50 dark:bg-white/[0.02] border border-slate-200 dark:border-white/[0.06]">
                       <PayPalSmartButton
-                        planId="P-2PN232575Y225210YNKY3QZQ"
+                        planId="P-44Y462991D576054FNKY3PKI"
                         onSuccess={handlePayPalSuccess}
                         isDark={isDark}
                       />

@@ -189,8 +189,10 @@ export async function handlePayPalWebhook(req: Request, res: Response) {
 
       if (customId) {
         // Déterminer le niveau de plan en fonction du plan_id PayPal officiel
-        const planLevel = planId === "P-2PN232575Y225210YNKY3QZQ" ? "pro"
-                        : planId === "P-44Y462991D576054FNKY3PKI" ? "silver"
+        // P-44Y462991D576054FNKY3PKI = PRO | P-0RJ6785234422590FNKY3NXI = SILVER | P-2PN232575Y225210YNKY3QZQ = ENTERPRISE
+        const planLevel = planId === "P-44Y462991D576054FNKY3PKI" ? "pro"
+                        : planId === "P-2PN232575Y225210YNKY3QZQ" ? "pro"
+                        : planId === "P-0RJ6785234422590FNKY3NXI" ? "silver"
                         : "free";
         
         await rawPrisma.organization.update({

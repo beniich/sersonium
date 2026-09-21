@@ -72,7 +72,7 @@ export default function PricingPage({
     setPayPalPaymentSuccess(true);
     
     // Determine which plan was bought based on planId
-    const newTier = details.planId === "P-2PN232575Y225210YNKY3QZQ" ? "pro" : "silver";
+    const newTier = details.planId === "P-44Y462991D576054FNKY3PKI" ? "pro" : "silver";
 
     // Update local storage and app state
     if (typeof window !== "undefined") {
@@ -419,7 +419,7 @@ export default function PricingPage({
               <div className="space-y-2">
                 <div className="p-3.5 rounded-2xl bg-slate-50 dark:bg-white/[0.02] border border-slate-200 dark:border-white/[0.06]">
                   <PayPalSmartButton
-                    planId="P-44Y462991D576054FNKY3PKI"
+                    planId="P-0RJ6785234422590FNKY3NXI"
                     onSuccess={handlePayPalSuccess}
                     isDark={isDark}
                   />
@@ -516,7 +516,7 @@ export default function PricingPage({
                 {/* PayPal Smart Payment Buttons Placeholder / Interactive Flow */}
                 <div className="p-3.5 rounded-2xl bg-slate-50 dark:bg-white/[0.02] border border-slate-200 dark:border-white/[0.06]">
                   <PayPalSmartButton
-                    planId="P-2PN232575Y225210YNKY3QZQ"
+                    planId="P-44Y462991D576054FNKY3PKI"
                     onSuccess={handlePayPalSuccess}
                     isDark={isDark}
                   />
