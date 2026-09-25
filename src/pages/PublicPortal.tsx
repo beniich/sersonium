@@ -15,11 +15,12 @@ interface PublicPortalProps {
   user?: User | null;
 }
 
-export default function PublicPortal({ onSignIn, onEnterMockMode, state, isDark, toggleTheme, mode, authError, user }: PublicPortalProps) {
+export default function PublicPortal({ onSignIn, onEnterMockMode, onNavigateToSection, state, isDark, toggleTheme, mode, authError, user }: PublicPortalProps) {
   return (
     <SensoriumShowcase 
       onSignIn={onSignIn} 
       onEnterDashboard={onEnterMockMode || onSignIn}
+      onNavigateToSection={onNavigateToSection}
       state={state}
       isDark={isDark}
       toggleTheme={toggleTheme}

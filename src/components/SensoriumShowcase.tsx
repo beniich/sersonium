@@ -64,6 +64,7 @@ import mobileMockupImg from "../assets/images/lacaza_mobile_mockup_1789685199548
 interface SensoriumShowcaseProps {
   onSignIn?: () => void;
   onEnterDashboard: () => void;
+  onNavigateToSection?: (page: string, itemId: string) => void;
   state?: GlobalState;
   isDark?: boolean;
   toggleTheme?: () => void;
@@ -610,6 +611,13 @@ Return on Investment (ROI): 3.2 months
                 }`}
               >
                 {t.showcase.ecosystem}
+              </button>
+
+              <button 
+                onClick={() => onNavigateToSection?.("pricing", "pricing-plans")}
+                className="transition-colors cursor-pointer hover:text-white flex items-center gap-1 font-medium bg-clip-text text-transparent bg-gradient-to-r from-orange-400 to-amber-300 ml-2"
+              >
+                Pricing
               </button>
             </nav>
           </div>
