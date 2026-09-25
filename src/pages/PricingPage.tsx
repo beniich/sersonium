@@ -1,4 +1,4 @@
-﻿import React, { useState } from "react";
+import React, { useState } from "react";
 import { 
   Check, 
   X, 
@@ -17,7 +17,6 @@ import {
   RefreshCw, 
   HelpCircle, 
   Activity, 
-  Sliders, 
   Layers, 
   Database, 
   Users, 
@@ -26,7 +25,10 @@ import {
   DollarSign,
   ChevronDown,
   ChevronUp,
-  Info
+  Info,
+  Building2,
+  CheckCircle,
+  ExternalLink
 } from "lucide-react";
 import { useLanguage } from "../App";
 import { GlobalState, SubscriptionTier } from "../types";
@@ -44,8 +46,10 @@ interface FeatureComparisonRow {
   name: string;
   description: string;
   category: "core" | "ai" | "telemetry" | "security" | "storage" | "governance";
-  lite: boolean | string;
+  starter: boolean | string;
   pro: boolean | string;
+  team: boolean | string;
+  enterprise: boolean | string;
   isHighlight?: boolean;
 }
 
@@ -57,16 +61,12 @@ export default function PricingPage({
 }: PricingPageProps) {
   const { language } = useLanguage();
   const [billingCycle, setBillingCycle] = useState<"monthly" | "yearly">("monthly");
-  const [isProcessingPayPal, setIsProcessingPayPal] = useState(false);
   const [payPalPaymentSuccess, setPayPalPaymentSuccess] = useState(false);
   const [payPalTxId, setPayPalTxId] = useState("");
   const [activeFaq, setActiveFaq] = useState<number | null>(null);
-  const [customOrderNote, setCustomOrderNote] = useState("");
 
+  // Current active tier from global state (free, silver, pro, enterprise)
   const currentTier: SubscriptionTier = state?.subscriptionTier || "free";
-  const isSilver = currentTier === "silver";
-  const isPro = currentTier === "pro";
-  const isEnterprise = currentTier === "enterprise";
 
   const handlePayPalSuccess = async (details: { subscriptionId: string; planId: string }) => {
     setPayPalTxId(details.subscriptionId);
@@ -111,561 +111,722 @@ export default function PricingPage({
   const comparisonFeatures: FeatureComparisonRow[] = [
     // Core & Edge
     {
-      name: language === "fr" ? "Supervision Edge & NÅ“uds DistribuÃ©s" : "Distributed Edge Nodes Monitoring",
-      description: language === "fr" ? "TÃ©lÃ©mÃ©trie CPU, RAM, bande passante & latence Anycast" : "CPU, RAM, bandwidth & Anycast latency metrics",
+      name: language === "fr" ? "Supervision Edge & Nœuds Distribués" : "Distributed Edge Nodes Monitoring",
+      description: language === "fr" ? "Télémétrie CPU, RAM, bande passante & latence Anycast" : "CPU, RAM, bandwidth & Anycast latency metrics",
       category: "core",
-      lite: language === "fr" ? "Jusqu'Ã  3 nÅ“uds" : "Up to 3 nodes",
-      pro: language === "fr" ? "NÅ“uds illimitÃ©s" : "Unlimited fleet nodes"
+      starter: language === "fr" ? "Jusqu'à 3 nœuds" : "Up to 3 nodes",
+      pro: language === "fr" ? "15 nœuds" : "15 nodes",
+      team: language === "fr" ? "50 nœuds" : "50 nodes",
+      enterprise: language === "fr" ? "Nœuds illimités" : "Unlimited nodes"
+    },
+    {
+      name: language === "fr" ? "Interactions & Requêtes IA" : "AI Inferences & Interactions",
+      description: language === "fr" ? "Requêtes d'inférence sensorielles et LLM" : "Sensory telemetry & LLM inference queries",
+      category: "ai",
+      starter: "1,000 / mo",
+      pro: language === "fr" ? "Illimité" : "Unlimited",
+      team: language === "fr" ? "Illimité + prioritaire" : "Unlimited + Priority",
+      enterprise: language === "fr" ? "Dédié sur-mesure" : "Custom dedicated pool",
+      isHighlight: true
     },
     {
       name: language === "fr" ? "Gestion des Ordres de Travail (GMAO / CAFM)" : "Work Orders Management (CMMS / CAFM)",
       description: language === "fr" ? "Attribution des tickets d'intervention et suivi des statuts" : "Work order dispatching & resolution tracking",
       category: "core",
-      lite: language === "fr" ? "3 tickets max" : "3 active tickets max",
-      pro: language === "fr" ? "Tickets & historique illimitÃ©s" : "Unlimited tickets & history"
+      starter: language === "fr" ? "5 flux actifs" : "5 custom workflows",
+      pro: language === "fr" ? "50 flux actifs" : "50 custom workflows",
+      team: language === "fr" ? "Flux illimités" : "Unlimited workflows",
+      enterprise: language === "fr" ? "Workflows illimités & Custom" : "Unlimited & Custom Automations"
     },
     {
-      name: language === "fr" ? "PWA & Mode Hors-Ligne RÃ©silient" : "PWA & Resilient Offline Cache",
-      description: language === "fr" ? "Stockage local IndexedDB & synchronisation automatique" : "IndexedDB caching & background reconnect sync",
-      category: "core",
-      lite: true,
-      pro: true
-    },
-
-    // AI & Analytics
-    {
-      name: language === "fr" ? "Maintenance PrÃ©dictive IA (RÃ©gression LinÃ©aire)" : "Predictive Maintenance AI (Linear Regression)",
-      description: language === "fr" ? "ModÃ¨le y = mx + b pour calculer la dÃ©gradation et estimer le TTF (jours avant panne)" : "Mathematical model calculating wear slope & Time-To-Failure (TTF)",
+      name: language === "fr" ? "Maintenance Prédictive IA (Régression Linéaire)" : "Predictive Maintenance AI (Linear Regression)",
+      description: language === "fr" ? "Modèle y = mx + b pour calculer la dégradation et estimer le TTF" : "Mathematical model calculating wear slope & Time-To-Failure (TTF)",
       category: "ai",
-      lite: false,
+      starter: false,
       pro: true,
+      team: true,
+      enterprise: true,
       isHighlight: true
     },
     {
-      name: language === "fr" ? "PrÃ©vision d'Anomalie SMART & PUE Ã‰nergÃ©tique" : "SMART Disk Wear & PUE Energy Anomaly Forecast",
-      description: language === "fr" ? "DÃ©tection prÃ©coce d'usure des disques NVMe et surconsommation CVC" : "Early NVMe wear detection & HVAC energy overshoot alerts",
+      name: language === "fr" ? "Prévision d'Anomalie SMART & PUE Énergétique" : "SMART Disk Wear & PUE Energy Anomaly Forecast",
+      description: language === "fr" ? "Détection précoce d'usure des disques NVMe et surconsommation CVC" : "Early NVMe wear detection & HVAC energy overshoot alerts",
       category: "ai",
-      lite: false,
+      starter: false,
       pro: true,
+      team: true,
+      enterprise: true,
       isHighlight: true
     },
     {
-      name: language === "fr" ? "Assistant IA Grounding & TÃ©lÃ©mÃ©trie" : "AI Grounding Assistant & Telemetry Query",
-      description: language === "fr" ? "Questions en langage naturel sur l'Ã©tat de l'infrastructure" : "Natural language interrogation of fleet telemetry",
-      category: "ai",
-      lite: language === "fr" ? "RequÃªtes limitÃ©es" : "Limited queries",
-      pro: language === "fr" ? "RequÃªtes illimitÃ©es (Gemini Pro)" : "Unlimited queries (Gemini Pro)"
-    },
-
-    // Telemetry & Streaming
-    {
-      name: language === "fr" ? "Streaming Kafka Haute FrÃ©quence" : "High-Frequency Kafka Event Streaming",
-      description: language === "fr" ? "Topics Kafka temps rÃ©el, inspection d'offsets et schÃ©ma Avro" : "Real-time Kafka topics, partition offsets & Avro schemas",
+      name: language === "fr" ? "Streaming Kafka & Événements Temps Réel" : "High-Frequency Kafka Event Streaming",
+      description: language === "fr" ? "Topics Kafka temps réel, inspection d'offsets et schéma Avro" : "Real-time Kafka topics, partition offsets & Avro schemas",
       category: "telemetry",
-      lite: false,
-      pro: true
-    },
-    {
-      name: language === "fr" ? "FrÃ©quence de RafraÃ®chissement TÃ©lÃ©mÃ©trie" : "Telemetry Refresh Sampling Rate",
-      description: language === "fr" ? "Intervalle d'Ã©chantillonnage des mÃ©triques capteurs" : "Polling & websocket sample rate",
-      category: "telemetry",
-      lite: "10s",
-      pro: "1s (Temps RÃ©el)"
-    },
-
-    // Security & WAF
-    {
-      name: language === "fr" ? "Mitigation DDoS Layer 7 & RÃ¨gles WAF" : "Layer 7 DDoS Mitigation & WAF Rules",
-      description: language === "fr" ? "Filtrage d'attaques volumÃ©triques et blocage automatisÃ©" : "Volumetric attack defense & automated rule triggering",
-      category: "security",
-      lite: language === "fr" ? "Protection basique" : "Basic protection",
-      pro: language === "fr" ? "Mitigation avancÃ©e <3ms" : "Advanced mitigation <3ms"
-    },
-    {
-      name: language === "fr" ? "Chiffrement FIPS 140-3 & Audit Logs Immuables" : "FIPS 140-3 Encryption & Immutable Audit Logs",
-      description: language === "fr" ? "Journalisation cryptographique des accÃ¨s et modifications" : "Cryptographic tamper-proof logging of all actions",
-      category: "security",
-      lite: language === "fr" ? "24h de rÃ©tention" : "24h retention",
-      pro: language === "fr" ? "RÃ©tention illimitÃ©e & Export" : "Unlimited retention & Export"
-    },
-
-    // Storage & Governance
-    {
-      name: language === "fr" ? "Exports StratÃ©giques PDF A4 & Tableurs CSV" : "Strategic Executive PDF A4 & CSV Spreadsheets",
-      description: language === "fr" ? "Rapports d'audit prÃªts pour la direction et commissaires aux comptes" : "Board-ready audit reports with charts & metrics",
-      category: "governance",
-      lite: false,
+      starter: false,
       pro: true,
-      isHighlight: true
+      team: true,
+      enterprise: true
     },
     {
-      name: language === "fr" ? "Support Technique & SLA DisponibilitÃ©" : "Technical Support & Availability SLA",
-      description: language === "fr" ? "Temps de rÃ©ponse garanti pour les infrastructures critiques" : "Guaranteed response time for critical infrastructure",
+      name: language === "fr" ? "Mitigation DDoS Layer 7 & Règles WAF" : "Layer 7 DDoS Mitigation & WAF Rules",
+      description: language === "fr" ? "Filtrage d'attaques volumétriques et blocage automatisé" : "Volumetric attack defense & automated rule triggering",
+      category: "security",
+      starter: language === "fr" ? "Protection basique" : "Standard",
+      pro: language === "fr" ? "Mitigation avancée <3ms" : "Advanced <3ms",
+      team: language === "fr" ? "Haute priorité & Bot Mgmt" : "High Priority & Bot Mgmt",
+      enterprise: language === "fr" ? "SLA 100% & WAF sur-mesure" : "100% SLA & Custom Rules"
+    },
+    {
+      name: language === "fr" ? "Sécurité ZTNA & Authentification SSO" : "Zero Trust (ZTNA) & Enterprise SSO",
+      description: language === "fr" ? "Politiques contextuelles d'accès et fédération Google / Okta / SAML" : "Zero-trust policies, posture checks & Google / SAML SSO",
+      category: "security",
+      starter: false,
+      pro: language === "fr" ? "Accès ZTNA de base" : "ZTNA Baseline",
+      team: language === "fr" ? "Google SSO + 15 sièges" : "Google SSO + 15 Seats",
+      enterprise: language === "fr" ? "SAML / Okta / On-Premise" : "Full SAML / Okta / On-Premise"
+    },
+    {
+      name: language === "fr" ? "Exports Stratégiques PDF A4 & Tableurs CSV" : "Strategic Executive PDF A4 & CSV Spreadsheets",
+      description: language === "fr" ? "Rapports d'audit prêts pour la direction et commissaires aux comptes" : "Board-ready audit reports with charts & metrics",
       category: "governance",
-      lite: "CommunautÃ© / 48h",
-      pro: "DÃ©diÃ© 24/7 / SLA 99.99%"
+      starter: false,
+      pro: true,
+      team: true,
+      enterprise: true
+    },
+    {
+      name: language === "fr" ? "Support Technique & SLA Disponibilité" : "Technical Support & Availability SLA",
+      description: language === "fr" ? "Temps de réponse garanti pour les infrastructures critiques" : "Guaranteed response time for critical infrastructure",
+      category: "governance",
+      starter: language === "fr" ? "Communauté / 48h" : "Community / 48h",
+      pro: language === "fr" ? "Support prioritaire 12h" : "Priority Support 12h",
+      team: language === "fr" ? "Support dédié 4h" : "Dedicated Support 4h",
+      enterprise: language === "fr" ? "Dédié 24/7 / SLA 99.99%" : "Dedicated 24/7 / 99.99% SLA"
     }
   ];
 
   const faqs = [
     {
-      q: language === "fr" ? "Comment fonctionne la facturation PayPal ?" : "How does PayPal billing work?",
+      q: language === "fr" ? "Comment fonctionne la facturation mensuelle et annuelle ?" : "How does monthly and annual billing work?",
       a: language === "fr" 
-        ? "Le paiement est opÃ©rÃ© de maniÃ¨re totalement sÃ©curisÃ©e via l'API PayPal. Vous pouvez payer par compte PayPal ou carte bancaire. Les abonnements sont renouvelÃ©s automatiquement chaque mois ou chaque annÃ©e selon votre choix."
-        : "Payment is securely processed via the PayPal API SDK. You can pay using your PayPal balance or credit card. Subscriptions renew automatically monthly or annually based on your selection."
+        ? "Le paiement est opéré en toute sécurité via l'API PayPal Live ou carte bancaire. En sélectionnant la facturation annuelle, vous bénéficiez immédiatement de 20% de remise sur tous nos forfaits libre-service."
+        : "Payments are securely processed through the PayPal Live Gateway and major credit cards. Choosing annual billing grants an instant 20% discount across all self-serve tiers."
     },
     {
-      q: language === "fr" ? "Puis-je changer ou rÃ©silier mon abonnement Ã  tout moment ?" : "Can I switch or cancel my plan anytime?",
+      q: language === "fr" ? "Puis-je changer ou résilier mon abonnement à tout moment ?" : "Can I switch or cancel my plan anytime?",
       a: language === "fr"
-        ? "Oui, vous pouvez passer du plan Pro au plan Lite en un clic sans frais ni pÃ©nalitÃ©. Vos donnÃ©es restent conservÃ©es en toute sÃ©curitÃ©."
-        : "Yes, you can upgrade, downgrade, or cancel anytime with zero cancellation fees. Your telemetry data remains safely intact."
+        ? "Absolument. Vous pouvez passer d'un niveau à l'autre ou revenir au forfait gratuit en un clic, sans frais ni pénalité. Vos configurations de nœuds et données restent intégralement préservées."
+        : "Absolutely. You can upgrade, downgrade to Starter, or cancel anytime with zero fees. All telemetry, node profiles, and historical logs remain securely saved."
     },
     {
-      q: language === "fr" ? "La maintenance prÃ©dictive par rÃ©gression linÃ©aire est-elle incluse dans le plan Lite ?" : "Is linear regression predictive maintenance included in the Lite plan?",
+      q: language === "fr" ? "Qu'est-ce qui est inclus dans l'essai gratuit de 14 jours ?" : "What is included in the 14-day free trial?",
       a: language === "fr"
-        ? "Le plan Lite offre la tÃ©lÃ©mÃ©trie de base et la dÃ©tection de seuils simples. Le modÃ¨le mathÃ©matique de rÃ©gression linÃ©aire avancÃ©e et le calcul du TTF (Time To Failure) nÃ©cessitent le plan Pro."
-        : "The Lite plan includes standard threshold alerts. Advanced mathematical linear regression modeling and Time-To-Failure (TTF) forecasting are exclusive to the Pro plan."
+        ? "L'essai gratuit vous donne un accès sans restriction aux fonctionnalités du forfait sélectionné (y compris les inférences IA illimitées et les flux télémétriques), sans carte bancaire requise."
+        : "The 14-day free trial unlocks full access to the selected plan's capabilities, including unlimited AI processing and real-time Kafka streams, with no credit card required."
+    },
+    {
+      q: language === "fr" ? "Proposez-vous un déploiement On-Premise ou Cloud Souverain ?" : "Do you offer On-Premise or Sovereign deployments?",
+      a: language === "fr"
+        ? "Oui, notre offre Enterprise permet le déploiement direct dans vos datacenters, architectures air-gapped, ou clouds souverains conformes aux exigences FIPS 140-3 et RGPD/SecNumCloud."
+        : "Yes, our Enterprise plan supports on-premise appliances, air-gapped facilities, and sovereign clouds compliant with FIPS 140-3 and European security directives."
     }
   ];
 
   return (
-    <div className="space-y-10 max-w-6xl mx-auto pb-12 animate-in fade-in duration-300">
+    <div className="relative w-full -mx-4 sm:-mx-6 lg:-mx-8 -my-6 px-4 sm:px-8 lg:px-12 py-8 bg-[#151024] text-[#e8defb] min-h-screen overflow-hidden selection:bg-[#ecd7ff] selection:text-[#29074a]">
       
-      {/* Top Header Banner */}
-      <div className="text-center space-y-3 pt-2">
-        <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-orange-500/10 border border-orange-500/20 text-orange-600 dark:text-orange-400 text-xs font-bold tracking-wide">
-          <Crown className="w-4 h-4" />
-          <span>{language === "fr" ? "TARIFICATION & PLANS D'ABONNEMENT" : "SUBSCRIPTION TIERS & PRICING"}</span>
-        </div>
-        <h1 className="text-3xl sm:text-4xl font-extrabold text-slate-900 dark:text-white tracking-tight">
-          {language === "fr" ? "La puissance industrielle Ã  la mesure de vos besoins" : "Enterprise Performance Sized for Your Scale"}
-        </h1>
-        <p className="text-sm sm:text-base text-slate-500 dark:text-neutral-400 max-w-2xl mx-auto">
-          {language === "fr"
-            ? "DÃ©ployez votre supervision Edge avec le plan Lite gratuit, ou dÃ©bloquez l'IA de rÃ©gression linÃ©aire, les exports exÃ©cutifs et le streaming Kafka avec le plan Pro."
-            : "Supercharge your Edge operations with the Free Lite plan, or unlock linear regression predictive AI, executive PDF exports, and Kafka streaming with Pro."}
-        </p>
+      {/* Ambient background glows matching BizOS VitalAI design */}
+      <div aria-hidden="true" className="absolute inset-0 pointer-events-none overflow-hidden">
+        {/* Abstract organic SVG wave */}
+        <svg className="w-full h-full absolute inset-0 text-[#ecd7ff] opacity-25" preserveAspectRatio="none" viewBox="0 0 100 100">
+          <path className="opacity-15" d="M0,45 Q25,18 50,45 T100,45 L100,100 L0,100 Z" fill="currentColor" />
+          <path className="opacity-10" d="M0,60 Q35,80 60,35 T100,55 L100,100 L0,100 Z" fill="currentColor" />
+        </svg>
 
-        {/* Billing Cycle Switcher */}
-        <div className="pt-3 flex justify-center">
-          <div className="inline-flex items-center p-1.5 rounded-2xl bg-slate-100 dark:bg-white/[0.04] border border-slate-200 dark:border-white/[0.08] shadow-xs">
-            <button
-              onClick={() => setBillingCycle("monthly")}
-              className={`px-5 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
-                billingCycle === "monthly" 
-                  ? "bg-white dark:bg-white/10 text-slate-900 dark:text-white shadow-xs" 
-                  : "text-slate-500 dark:text-neutral-400 hover:text-slate-900 dark:hover:text-white"
-              }`}
-            >
-              {language === "fr" ? "Facturation Mensuelle" : "Monthly Billing"}
-            </button>
-            <button
-              onClick={() => setBillingCycle("yearly")}
-              className={`px-5 py-2 rounded-xl text-xs font-bold flex items-center gap-2 transition-all cursor-pointer ${
-                billingCycle === "yearly" 
-                  ? "bg-white dark:bg-white/10 text-slate-900 dark:text-white shadow-xs" 
-                  : "text-slate-500 dark:text-neutral-400 hover:text-slate-900 dark:hover:text-white"
-              }`}
-            >
-              <span>{language === "fr" ? "Facturation Annuelle" : "Annual Billing"}</span>
-              <span className="text-[10px] font-mono px-2 py-0.5 rounded-md bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 font-extrabold">
-                {language === "fr" ? "2 MOIS OFFERTS" : "-15% OFF"}
-              </span>
-            </button>
-          </div>
-        </div>
+        {/* Ambient colored glowing orbs */}
+        <div className="absolute -top-24 left-1/4 w-[500px] h-[500px] bg-[#ecd7ff]/15 rounded-full blur-[140px]" />
+        <div className="absolute top-1/3 right-1/4 w-[420px] h-[420px] bg-[#ffb2bb]/10 rounded-full blur-[130px]" />
+        <div className="absolute bottom-10 left-1/3 w-[360px] h-[360px] bg-[#604283]/20 rounded-full blur-[120px]" />
+
+        {/* Perspective grid overlay */}
+        <div 
+          className="absolute inset-0 opacity-30 pointer-events-none"
+          style={{
+            backgroundImage: `radial-gradient(rgba(236, 215, 255, 0.15) 1px, transparent 1px)`,
+            backgroundSize: "32px 32px"
+          }}
+        />
       </div>
 
-      {/* Pricing Cards Grid â€” 1 col â†’ 2 cols (md) â†’ 4 cols (xl) */}
-      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6 items-stretch">
+      <div className="relative z-10 max-w-7xl mx-auto space-y-16">
+        
+        {/* Hero Section */}
+        <div className="text-center max-w-3xl mx-auto pt-4 space-y-5 flex flex-col items-center">
+          
+          {/* Pill Badge */}
+          <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-[#2c273c]/70 backdrop-blur-md rounded-full border border-[#ecd7ff]/20 text-[#ecd7ff] text-xs font-semibold uppercase tracking-wider shadow-[0_0_20px_rgba(216,180,254,0.15)]">
+            <span className="w-2 h-2 rounded-full bg-[#ffb2bb] shadow-[0_0_8px_rgba(255,178,187,0.9)] animate-pulse" />
+            <span>{language === "fr" ? "TARIFICATION TRANSPARENTE" : "TRANSPARENT PRICING"}</span>
+          </div>
 
-        {/* â”€â”€ FREE CARD â”€â”€ */}
-        <div className={`rounded-3xl p-6 flex flex-col justify-between border transition-all duration-200 ${
-          currentTier === "free"
-            ? "bg-white dark:bg-[#111114] border-slate-300 dark:border-white/20 shadow-md ring-1 ring-slate-300 dark:ring-white/20"
-            : "bg-white dark:bg-[#0c0c0e] border-slate-200 dark:border-white/[0.07] shadow-xs"
-        }`}>
-          <div className="space-y-5">
-            <div className="flex justify-between items-start">
-              <div>
-                <span className="text-[10px] font-mono font-bold text-slate-400 uppercase tracking-wider">
-                  {language === "fr" ? "DÃ‰COUVERTE" : "STARTER"}
-                </span>
-                <h3 className="text-xl font-bold text-slate-900 dark:text-white mt-1">Free</h3>
-                <p className="text-[11px] text-slate-500 dark:text-neutral-400 mt-1 leading-relaxed">
-                  {language === "fr" ? "L'essentiel pour dÃ©buter." : "The essentials to get started."}
-                </p>
-              </div>
-              {currentTier === "free" && (
-                <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded-full bg-slate-100 dark:bg-white/[0.08] text-slate-700 dark:text-neutral-200 border border-slate-200 dark:border-white/[0.1]">
-                  {language === "fr" ? "ACTUEL" : "ACTIVE"}
-                </span>
-              )}
-            </div>
-            <div className="flex items-baseline gap-1">
-              <span className="text-4xl font-extrabold text-slate-900 dark:text-white">0â‚¬</span>
-              <span className="text-[11px] text-slate-400">/{language === "fr" ? "mois" : "month"}</span>
-            </div>
-            <div className="space-y-2.5 pt-3 border-t border-slate-100 dark:border-white/[0.06] text-[11px]">
-              {[
-                language === "fr" ? "1 Organisation maximum" : "1 Organization max",
-                language === "fr" ? "AccÃ¨s limitÃ© aux tableaux de bord" : "Limited dashboard access",
-                language === "fr" ? "DonnÃ©es mises Ã  jour toutes les heures" : "Hourly data refresh",
-                language === "fr" ? "Support communautaire" : "Community support",
-              ].map((f, i) => (
-                <div key={i} className="flex items-start gap-2 text-slate-600 dark:text-neutral-400">
-                  <Check className="w-3.5 h-3.5 text-emerald-500 shrink-0 mt-0.5" />
-                  <span>{f}</span>
-                </div>
-              ))}
-            </div>
-          </div>
-          <div className="pt-6">
-            {currentTier === "free" ? (
-              <div className="w-full py-2.5 px-4 rounded-xl bg-slate-100 dark:bg-white/[0.04] text-slate-500 dark:text-neutral-400 text-xs font-bold text-center border border-slate-200 dark:border-white/[0.06]">
-                {language === "fr" ? "Plan actuel" : "Current Plan"}
-              </div>
-            ) : (
-              <button onClick={handleDowngrade} className="w-full py-2.5 px-4 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-white/[0.06] dark:hover:bg-white/[0.1] text-slate-700 dark:text-neutral-200 text-xs font-bold text-center transition-colors cursor-pointer border border-slate-200 dark:border-white/[0.08]">
-                {language === "fr" ? "Passer au Free" : "Switch to Free"}
-              </button>
-            )}
-          </div>
-        </div>
-
-        {/* â”€â”€ SILVER CARD â”€â”€ */}
-        <div className={`rounded-3xl p-6 flex flex-col justify-between border transition-all duration-200 ${
-          currentTier === "silver"
-            ? "bg-slate-50 dark:bg-slate-900/80 border-slate-400 dark:border-slate-500 shadow-lg ring-1 ring-slate-400"
-            : "bg-white dark:bg-[#0c0c0e] border-slate-200 dark:border-white/[0.07] hover:border-slate-300 dark:hover:border-white/20 shadow-xs"
-        }`}>
-          <div className="space-y-5">
-            <div className="flex justify-between items-start">
-              <div>
-                <span className="text-[10px] font-mono font-bold text-blue-500 uppercase tracking-wider">
-                  {language === "fr" ? "PILOTAGE OPTIMISÃ‰" : "PROFESSIONALS"}
-                </span>
-                <h3 className="text-xl font-bold text-slate-900 dark:text-white mt-1">Silver</h3>
-                <p className="text-[11px] text-slate-500 dark:text-neutral-400 mt-1 leading-relaxed">
-                  {language === "fr" ? "Le pilotage optimisÃ©." : "Optimized operations monitoring."}
-                </p>
-              </div>
-              {currentTier === "silver" && (
-                <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded-full bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/20">
-                  {language === "fr" ? "ACTUEL" : "ACTIVE"}
-                </span>
-              )}
-            </div>
-            <div className="flex items-baseline gap-1">
-              <span className="text-4xl font-extrabold text-slate-900 dark:text-white">36â‚¬</span>
-              <span className="text-[11px] text-slate-400">/{language === "fr" ? "mois" : "month"}</span>
-            </div>
-            <div className="space-y-2.5 pt-3 border-t border-slate-100 dark:border-white/[0.06] text-[11px]">
-              {[
-                language === "fr" ? "Jusqu'Ã  3 Organisations" : "Up to 3 Organizations",
-                language === "fr" ? "Streaming Kafka en temps rÃ©el" : "Real-time Kafka streaming",
-                language === "fr" ? "Rapports carbone mensuels" : "Monthly carbon reports",
-                language === "fr" ? "Support par email" : "Email support",
-              ].map((f, i) => (
-                <div key={i} className="flex items-start gap-2 text-slate-700 dark:text-neutral-300">
-                  <Check className="w-3.5 h-3.5 text-blue-500 shrink-0 mt-0.5" />
-                  <span>{f}</span>
-                </div>
-              ))}
-            </div>
-          </div>
-          <div className="pt-6 space-y-2">
-            {currentTier === "silver" ? (
-              <div className="p-2.5 rounded-xl bg-blue-500/10 border border-blue-500/30 text-blue-600 dark:text-blue-400 font-bold text-xs flex items-center justify-center gap-2">
-                <CheckCircle2 className="w-4 h-4" />
-                <span>{language === "fr" ? "Abonnement Silver Actif" : "Silver Plan Active"}</span>
-              </div>
-            ) : payPalPaymentSuccess ? (
-              <div className="p-2.5 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-600 dark:text-emerald-400 text-xs font-bold flex items-center justify-center gap-1.5">
-                <CheckCircle2 className="w-4 h-4" />
-                <span>{language === "fr" ? "Paiement validÃ© !" : "Payment confirmed!"}</span>
-              </div>
-            ) : (
-              <div className="p-2.5 rounded-xl bg-slate-50 dark:bg-white/[0.02] border border-slate-200 dark:border-white/[0.06]">
-                <PayPalSmartButton planId="P-0RJ6785234422590FNKY3NXI" onSuccess={handlePayPalSuccess} isDark={isDark} />
-              </div>
-            )}
-          </div>
-        </div>
-
-        {/* â”€â”€ PRO CARD â­ Most Popular â”€â”€ */}
-        <div className={`rounded-3xl p-6 flex flex-col justify-between border relative transition-all duration-200 ${
-          currentTier === "pro"
-            ? "bg-gradient-to-b from-amber-500/[0.08] to-transparent border-amber-500/50 shadow-xl ring-2 ring-amber-500/30"
-            : "bg-gradient-to-b from-orange-500/[0.05] to-transparent border-orange-500/40 hover:border-orange-500/70 shadow-lg"
-        }`}>
-          {/* Most Popular Badge */}
-          <div className="absolute -top-3.5 left-1/2 -translate-x-1/2">
-            <span className="px-3.5 py-1 bg-gradient-to-r from-amber-500 to-orange-500 text-black font-extrabold text-[10px] uppercase tracking-wider rounded-full shadow-md flex items-center gap-1.5 whitespace-nowrap">
-              <Sparkles className="w-3 h-3" />
-              <span>{language === "fr" ? "LE PLUS POPULAIRE" : "MOST POPULAR"}</span>
+          {/* Headline */}
+          <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight text-[#e8defb] leading-tight">
+            {language === "fr" ? "Développez votre intelligence." : "Scale your intelligence."}
+            <br />
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#ecd7ff] via-[#d8b4fe] to-[#ffb2bb]">
+              {language === "fr" ? "En toute prévisibilité." : "Predictably."}
             </span>
-          </div>
-          <div className="space-y-5">
-            <div className="flex justify-between items-start">
-              <div>
-                <span className="text-[10px] font-mono font-bold text-orange-500 uppercase tracking-wider">
-                  {language === "fr" ? "PUISSANCE INDUSTRIELLE" : "INDUSTRIAL POWER"}
+          </h1>
+
+          {/* Subtitle */}
+          <p className="text-base sm:text-lg text-[#cdc3d0] max-w-2xl leading-relaxed">
+            {language === "fr"
+              ? "Choisissez le forfait VitalAI adapté à votre charge cognitive. Des opérateurs indépendants aux réseaux distribués mondiaux. 14 jours d'essai sans engagement."
+              : "Choose the VitalAI tier that matches your cognitive load. From solo founders to global enterprise meshes. Start your 14-day free trial today."}
+          </p>
+
+          {/* Billing Cycle Switcher with animated pill */}
+          <div className="pt-2">
+            <div className="relative inline-flex items-center p-1 bg-[#2c273c]/70 backdrop-blur-lg rounded-full border border-[#4a454f]/50 shadow-inner">
+              <button
+                type="button"
+                onClick={() => setBillingCycle("monthly")}
+                className={`relative z-10 px-6 py-2 rounded-full text-xs font-semibold transition-colors duration-200 cursor-pointer ${
+                  billingCycle === "monthly" ? "text-[#e8defb]" : "text-[#cdc3d0] hover:text-[#e8defb]"
+                }`}
+              >
+                {language === "fr" ? "Mensuel" : "Monthly"}
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setBillingCycle("yearly")}
+                className={`relative z-10 px-6 py-2 rounded-full text-xs font-semibold flex items-center gap-1.5 transition-colors duration-200 cursor-pointer ${
+                  billingCycle === "yearly" ? "text-[#e8defb]" : "text-[#cdc3d0] hover:text-[#e8defb]"
+                }`}
+              >
+                <span>{language === "fr" ? "Annuel" : "Annually"}</span>
+                <span className="text-[10px] text-[#ffb2bb] bg-[#ffb2bb]/15 border border-[#ffb2bb]/20 px-2 py-0.5 rounded-full font-bold">
+                  {language === "fr" ? "-20%" : "Save 20%"}
                 </span>
-                <div className="flex items-center gap-2 mt-1">
-                  <h3 className="text-xl font-bold text-slate-900 dark:text-white">Pro</h3>
-                  <Crown className="w-4 h-4 text-amber-500" />
-                </div>
-                <p className="text-[11px] text-slate-500 dark:text-neutral-400 mt-1 leading-relaxed">
-                  {language === "fr" ? "La puissance industrielle." : "Full industrial power."}
-                </p>
-              </div>
-              {currentTier === "pro" && (
-                <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20">
-                  {language === "fr" ? "ACTUEL" : "ACTIVE"}
-                </span>
-              )}
+              </button>
+
+              {/* Sliding Background Pill */}
+              <div 
+                className={`absolute top-1 bottom-1 w-[calc(50%-4px)] bg-[#3c364c] rounded-full transition-transform duration-300 ease-out shadow-sm pointer-events-none ${
+                  billingCycle === "yearly" ? "translate-x-full" : "translate-x-0"
+                }`}
+              />
             </div>
-            <div className="flex items-baseline gap-1">
-              <span className="text-4xl font-extrabold text-slate-900 dark:text-white">420â‚¬</span>
-              <span className="text-[11px] text-slate-400">/{language === "fr" ? "mois" : "month"}</span>
-            </div>
-            <div className="space-y-2.5 pt-3 border-t border-orange-500/10 text-[11px]">
-              {[
-                language === "fr" ? "Jusqu'Ã  15 Organisations" : "Up to 15 Organizations",
-                language === "fr" ? "SÃ©curitÃ© ZTNA (Zero Trust)" : "ZTNA Zero Trust Security",
-                language === "fr" ? "Analyses prÃ©dictives & alertes IA" : "Predictive analytics & AI alerts",
-                language === "fr" ? "Exports CSV / JSON avancÃ©s" : "Advanced CSV / JSON exports",
-                language === "fr" ? "Support prioritaire" : "Priority support",
-              ].map((f, i) => (
-                <div key={i} className="flex items-start gap-2 text-slate-800 dark:text-neutral-100 font-medium">
-                  <Check className="w-3.5 h-3.5 text-orange-500 shrink-0 mt-0.5" />
-                  <span>{f}</span>
-                </div>
-              ))}
-            </div>
-          </div>
-          <div className="pt-6 space-y-2">
-            {currentTier === "pro" ? (
-              <div className="p-2.5 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-600 dark:text-amber-400 font-bold text-xs flex items-center justify-center gap-2">
-                <CheckCircle2 className="w-4 h-4" />
-                <span>{language === "fr" ? "Abonnement Pro Actif" : "Pro Plan Active"}</span>
-              </div>
-            ) : payPalPaymentSuccess ? (
-              <div className="p-2.5 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-600 dark:text-emerald-400 text-xs font-bold flex items-center justify-center gap-1.5">
-                <CheckCircle2 className="w-4 h-4" />
-                <span>{language === "fr" ? "Paiement validÃ© !" : "Payment confirmed!"}</span>
-              </div>
-            ) : (
-              <div className="p-2.5 rounded-xl bg-slate-50 dark:bg-white/[0.02] border border-slate-200 dark:border-white/[0.06]">
-                <PayPalSmartButton planId="P-44Y462991D576054FNKY3PKI" onSuccess={handlePayPalSuccess} isDark={isDark} />
-              </div>
-            )}
-            <p className="text-[10px] text-center text-slate-400">{language === "fr" ? "RÃ©siliation en 1 clic. Aucune pÃ©nalitÃ©." : "Cancel anytime. No penalty."}</p>
           </div>
         </div>
 
-        {/* â”€â”€ ENTERPRISE CARD â”€â”€ */}
-        <div className={`rounded-3xl p-6 flex flex-col justify-between border relative transition-all duration-200 ${
-          currentTier === "enterprise"
-            ? "bg-gradient-to-b from-violet-500/[0.08] to-transparent border-violet-500/50 shadow-xl ring-2 ring-violet-500/30"
-            : "bg-gradient-to-b from-violet-500/[0.03] to-transparent border-violet-500/20 hover:border-violet-500/50 shadow-md"
-        }`}>
-          <div className="space-y-5">
-            <div className="flex justify-between items-start">
-              <div>
-                <span className="text-[10px] font-mono font-bold text-violet-500 uppercase tracking-wider">
-                  {language === "fr" ? "CONTRÃ”LE TOTAL" : "TOTAL CONTROL"}
-                </span>
-                <div className="flex items-center gap-2 mt-1">
-                  <h3 className="text-xl font-bold text-slate-900 dark:text-white">Enterprise</h3>
-                  <Server className="w-4 h-4 text-violet-500" />
+        {/* 4-Tier Pricing Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6 items-end">
+
+          {/* 1. STARTER PLAN */}
+          <div className={`relative bg-[#221c31]/70 backdrop-blur-xl rounded-2xl p-6 flex flex-col justify-between border transition-all duration-300 hover:bg-[#221c31]/90 hover:-translate-y-1 ${
+            currentTier === "free"
+              ? "border-[#ecd7ff]/50 shadow-[0_0_25px_rgba(216,180,254,0.15)] ring-1 ring-[#ecd7ff]/30"
+              : "border-[#4a454f]/30"
+          }`}>
+            <div className="space-y-4">
+              <div className="flex justify-between items-start">
+                <div>
+                  <h3 className="text-xl font-bold text-[#e8defb]">Starter</h3>
+                  <p className="text-xs text-[#cdc3d0] mt-1 h-8">
+                    {language === "fr" ? "Outils IA essentiels pour créateurs solos." : "Essential AI tools for solo operators."}
+                  </p>
                 </div>
-                <p className="text-[11px] text-slate-500 dark:text-neutral-400 mt-1 leading-relaxed">
-                  {language === "fr" ? "Le contrÃ´le total et sÃ©curisÃ©." : "Total control & security."}
-                </p>
+                {currentTier === "free" && (
+                  <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded-full bg-[#3c364c] text-[#ecd7ff] border border-[#ecd7ff]/20">
+                    {language === "fr" ? "ACTUEL" : "ACTIVE"}
+                  </span>
+                )}
               </div>
-              {currentTier === "enterprise" && (
-                <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded-full bg-violet-500/10 text-violet-600 dark:text-violet-400 border border-violet-500/20">
-                  {language === "fr" ? "ACTUEL" : "ACTIVE"}
+
+              {/* Price */}
+              <div className="flex items-baseline gap-1 pt-2">
+                <span className="text-4xl font-bold text-[#e8defb]">
+                  {billingCycle === "monthly" ? "$29" : "$24"}
                 </span>
+                <span className="text-sm text-[#cdc3d0]">/{language === "fr" ? "mois" : "mo"}</span>
+              </div>
+
+              {/* Action Button */}
+              {currentTier === "free" ? (
+                <div className="w-full py-2.5 px-4 rounded-full bg-[#3c364c]/70 text-[#ecd7ff] text-xs font-semibold text-center border border-[#4a454f]/40">
+                  {language === "fr" ? "Forfait Actuel" : "Current Plan"}
+                </div>
+              ) : (
+                <button
+                  type="button"
+                  onClick={handleDowngrade}
+                  className="w-full py-2.5 px-4 rounded-full bg-[#3c364c] hover:bg-[#373147] text-[#e8defb] text-xs font-semibold transition-all border border-[#4a454f]/60 cursor-pointer shadow-sm"
+                >
+                  {language === "fr" ? "Passer au Starter" : "Start Free Trial"}
+                </button>
               )}
+
+              {/* Features List */}
+              <ul className="space-y-3 pt-4 border-t border-[#4a454f]/30 text-xs">
+                <li className="flex items-start gap-2.5 text-[#cdc3d0]">
+                  <Check className="w-4 h-4 text-[#ecd7ff] shrink-0 mt-0.5" />
+                  <span>{language === "fr" ? "1 000 interactions IA / mois" : "1,000 AI interactions/mo"}</span>
+                </li>
+                <li className="flex items-start gap-2.5 text-[#cdc3d0]">
+                  <Check className="w-4 h-4 text-[#ecd7ff] shrink-0 mt-0.5" />
+                  <span>{language === "fr" ? "Vitesse de calcul standard" : "Standard processing speed"}</span>
+                </li>
+                <li className="flex items-start gap-2.5 text-[#cdc3d0]">
+                  <Check className="w-4 h-4 text-[#ecd7ff] shrink-0 mt-0.5" />
+                  <span>{language === "fr" ? "5 flux de travail personnalisés" : "5 Custom workflows"}</span>
+                </li>
+                <li className="flex items-start gap-2.5 text-[#968e9a]">
+                  <X className="w-4 h-4 text-[#968e9a] shrink-0 mt-0.5" />
+                  <span>{language === "fr" ? "Analyses prédictives avancées" : "Advanced Analytics"}</span>
+                </li>
+              </ul>
             </div>
-            <div className="flex items-baseline gap-1">
-              <span className="text-4xl font-extrabold text-slate-900 dark:text-white">1 200â‚¬</span>
-              <span className="text-[11px] text-slate-400">/{language === "fr" ? "mois" : "month"}</span>
+          </div>
+
+          {/* 2. PRO PLAN (Featured & Highlighted) */}
+          <div className={`relative bg-[#1e1548]/80 backdrop-blur-2xl rounded-2xl p-6 xl:p-7 flex flex-col justify-between transform xl:scale-105 shadow-[0_0_50px_rgba(216,180,254,0.22)] z-20 group border-2 border-[#ecd7ff]/60 transition-all duration-300 hover:border-[#ecd7ff] ${
+            currentTier === "pro" ? "ring-2 ring-[#ffb2bb]/60" : ""
+          }`}>
+            {/* "Most Popular" floating pill */}
+            <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 bg-gradient-to-r from-[#ecd7ff] to-[#ffb2bb] text-[#29074a] font-bold text-[11px] px-4 py-1 rounded-full shadow-[0_0_20px_rgba(216,180,254,0.5)] whitespace-nowrap uppercase tracking-wider flex items-center gap-1.5">
+              <Sparkles className="w-3.5 h-3.5" />
+              <span>{language === "fr" ? "LE PLUS POPULAIRE" : "MOST POPULAR"}</span>
             </div>
-            <div className="space-y-2.5 pt-3 border-t border-violet-500/10 text-[11px]">
-              {[
-                language === "fr" ? "Organisations & utilisateurs illimitÃ©s" : "Unlimited orgs & users",
-                language === "fr" ? "Infrastructure dÃ©diÃ©e On-Premise" : "Dedicated On-Premise infrastructure",
-                language === "fr" ? "Audit de sÃ©curitÃ© trimestriel" : "Quarterly security audit",
-                language === "fr" ? "AccÃ¨s API complet & non limitÃ©" : "Full & unlimited API access",
-                language === "fr" ? "Gestionnaire de compte dÃ©diÃ© 24/7" : "Dedicated account manager 24/7",
-              ].map((f, i) => (
-                <div key={i} className="flex items-start gap-2 text-slate-800 dark:text-neutral-100 font-medium">
-                  <Check className="w-3.5 h-3.5 text-violet-500 shrink-0 mt-0.5" />
-                  <span>{f}</span>
+
+            <div className="space-y-4">
+              <div className="flex justify-between items-start pt-2">
+                <div>
+                  <h3 className="text-2xl font-extrabold text-[#ecd7ff]">Pro</h3>
+                  <p className="text-xs text-[#cdc3d0] mt-1 h-8">
+                    {language === "fr" ? "Cognition avancée pour équipes en forte croissance." : "Advanced cognition for growing teams."}
+                  </p>
                 </div>
-              ))}
+                {currentTier === "pro" && (
+                  <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded-full bg-[#ffb2bb]/20 text-[#ffb2bb] border border-[#ffb2bb]/30">
+                    {language === "fr" ? "ACTUEL" : "ACTIVE"}
+                  </span>
+                )}
+              </div>
+
+              {/* Price */}
+              <div className="flex items-baseline gap-1 pt-1">
+                <span className="text-4xl font-extrabold text-[#e8defb]">
+                  {billingCycle === "monthly" ? "$79" : "$64"}
+                </span>
+                <span className="text-sm text-[#cdc3d0]">/{language === "fr" ? "mois" : "mo"}</span>
+              </div>
+
+              {/* Action Button / PayPal Smart Gateway */}
+              <div className="space-y-2 pt-1">
+                {currentTier === "pro" ? (
+                  <div className="w-full py-2.5 px-4 rounded-full bg-[#ffb2bb]/20 text-[#ffb2bb] text-xs font-bold text-center border border-[#ffb2bb]/40 flex items-center justify-center gap-1.5">
+                    <CheckCircle className="w-4 h-4" />
+                    <span>{language === "fr" ? "Abonnement Pro Actif" : "Pro Plan Active"}</span>
+                  </div>
+                ) : payPalPaymentSuccess ? (
+                  <div className="p-2.5 rounded-xl bg-emerald-500/20 border border-emerald-500/40 text-emerald-300 text-xs font-bold flex items-center justify-center gap-1.5">
+                    <CheckCircle2 className="w-4 h-4" />
+                    <span>{language === "fr" ? "Paiement validé !" : "Payment confirmed!"}</span>
+                  </div>
+                ) : (
+                  <div className="space-y-2">
+                    <button
+                      type="button"
+                      onClick={() => handlePayPalSuccess({ subscriptionId: "mock_pro_tx_" + Date.now(), planId: "P-44Y462991D576054FNKY3PKI" })}
+                      className="w-full py-3 px-4 rounded-full bg-gradient-to-r from-[#ecd7ff] via-[#d8b4fe] to-[#ffb2bb] text-[#29074a] text-xs font-bold tracking-wide hover:opacity-95 transition-all shadow-[0_0_20px_rgba(216,180,254,0.4)] cursor-pointer flex items-center justify-center gap-2"
+                    >
+                      <Sparkles className="w-4 h-4 text-[#29074a]" />
+                      <span>{language === "fr" ? "Démarrer l'essai gratuit" : "Start Free Trial"}</span>
+                    </button>
+                    
+                    {/* Live PayPal Smart Button embedded */}
+                    <div className="p-2 rounded-xl bg-[#151024]/60 border border-[#ecd7ff]/20">
+                      <PayPalSmartButton 
+                        planId="P-44Y462991D576054FNKY3PKI" 
+                        onSuccess={handlePayPalSuccess} 
+                        isDark={true} 
+                      />
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Features List */}
+              <ul className="space-y-3 pt-3 border-t border-[#ecd7ff]/20 text-xs">
+                <li className="flex items-start gap-2.5 text-[#e8defb] font-medium">
+                  <CheckCircle className="w-4 h-4 text-[#ffb2bb] shrink-0 mt-0.5" />
+                  <span>{language === "fr" ? "Interactions IA illimitées" : "Unlimited AI interactions"}</span>
+                </li>
+                <li className="flex items-start gap-2.5 text-[#e8defb] font-medium">
+                  <CheckCircle className="w-4 h-4 text-[#ffb2bb] shrink-0 mt-0.5" />
+                  <span>{language === "fr" ? "Vitesse de traitement prioritaire" : "Priority processing speed"}</span>
+                </li>
+                <li className="flex items-start gap-2.5 text-[#e8defb] font-medium">
+                  <CheckCircle className="w-4 h-4 text-[#ffb2bb] shrink-0 mt-0.5" />
+                  <span>{language === "fr" ? "50 flux de travail configurables" : "50 Custom workflows"}</span>
+                </li>
+                <li className="flex items-start gap-2.5 text-[#e8defb] font-medium">
+                  <CheckCircle className="w-4 h-4 text-[#ffb2bb] shrink-0 mt-0.5" />
+                  <span>{language === "fr" ? "Dashboard d'analyses prédictives" : "Advanced Analytics Dashboard"}</span>
+                </li>
+              </ul>
             </div>
           </div>
-          <div className="pt-6 space-y-2">
-            {currentTier === "enterprise" ? (
-              <div className="p-2.5 rounded-xl bg-violet-500/10 border border-violet-500/30 text-violet-600 dark:text-violet-400 font-bold text-xs flex items-center justify-center gap-2">
-                <CheckCircle2 className="w-4 h-4" />
-                <span>{language === "fr" ? "Abonnement Enterprise Actif" : "Enterprise Plan Active"}</span>
+
+          {/* 3. TEAM PLAN */}
+          <div className={`relative bg-[#221c31]/70 backdrop-blur-xl rounded-2xl p-6 flex flex-col justify-between border transition-all duration-300 hover:bg-[#221c31]/90 hover:-translate-y-1 ${
+            currentTier === "silver"
+              ? "border-[#ecd7ff]/50 shadow-[0_0_25px_rgba(216,180,254,0.15)] ring-1 ring-[#ecd7ff]/30"
+              : "border-[#4a454f]/30"
+          }`}>
+            <div className="space-y-4">
+              <div className="flex justify-between items-start">
+                <div>
+                  <h3 className="text-xl font-bold text-[#e8defb]">Team</h3>
+                  <p className="text-xs text-[#cdc3d0] mt-1 h-8">
+                    {language === "fr" ? "IA collaborative pour départements et équipes." : "Collaborative AI for departments."}
+                  </p>
+                </div>
+                {currentTier === "silver" && (
+                  <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded-full bg-[#3c364c] text-[#ecd7ff] border border-[#ecd7ff]/20">
+                    {language === "fr" ? "ACTUEL" : "ACTIVE"}
+                  </span>
+                )}
               </div>
-            ) : payPalPaymentSuccess ? (
-              <div className="p-2.5 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-600 dark:text-emerald-400 text-xs font-bold flex items-center justify-center gap-1.5">
-                <CheckCircle2 className="w-4 h-4" />
-                <span>{language === "fr" ? "Paiement validÃ© !" : "Payment confirmed!"}</span>
+
+              {/* Price */}
+              <div className="flex items-baseline gap-1 pt-2">
+                <span className="text-4xl font-bold text-[#e8defb]">
+                  {billingCycle === "monthly" ? "$199" : "$159"}
+                </span>
+                <span className="text-sm text-[#cdc3d0]">/{language === "fr" ? "mois" : "mo"}</span>
               </div>
-            ) : (
-              <div className="p-2.5 rounded-xl bg-slate-50 dark:bg-white/[0.02] border border-slate-200 dark:border-white/[0.06]">
-                <PayPalSmartButton planId="P-2PN232575Y225210YNKY3QZQ" onSuccess={handlePayPalSuccess} isDark={isDark} />
-              </div>
-            )}
+
+              {/* Action Button */}
+              {currentTier === "silver" ? (
+                <div className="w-full py-2.5 px-4 rounded-full bg-[#3c364c]/70 text-[#ecd7ff] text-xs font-semibold text-center border border-[#4a454f]/40">
+                  {language === "fr" ? "Forfait Actuel" : "Current Plan"}
+                </div>
+              ) : (
+                <div className="space-y-2">
+                  <button
+                    type="button"
+                    onClick={() => handlePayPalSuccess({ subscriptionId: "mock_team_tx_" + Date.now(), planId: "P-0RJ6785234422590FNKY3NXI" })}
+                    className="w-full py-2.5 px-4 rounded-full bg-[#3c364c] hover:bg-[#373147] text-[#e8defb] text-xs font-semibold transition-all border border-[#4a454f]/60 cursor-pointer shadow-sm"
+                  >
+                    {language === "fr" ? "Démarrer l'essai Team" : "Start Free Trial"}
+                  </button>
+                  <div className="p-2 rounded-xl bg-[#151024]/60 border border-[#4a454f]/30">
+                    <PayPalSmartButton 
+                      planId="P-0RJ6785234422590FNKY3NXI" 
+                      onSuccess={handlePayPalSuccess} 
+                      isDark={true} 
+                    />
+                  </div>
+                </div>
+              )}
+
+              {/* Features List */}
+              <ul className="space-y-3 pt-4 border-t border-[#4a454f]/30 text-xs">
+                <li className="flex items-start gap-2.5 text-[#cdc3d0]">
+                  <Check className="w-4 h-4 text-[#ecd7ff] shrink-0 mt-0.5" />
+                  <span>{language === "fr" ? "Tout ce qui est inclus dans Pro" : "Everything in Pro"}</span>
+                </li>
+                <li className="flex items-start gap-2.5 text-[#cdc3d0]">
+                  <Check className="w-4 h-4 text-[#ecd7ff] shrink-0 mt-0.5" />
+                  <span>{language === "fr" ? "Jusqu'à 15 collaborateurs" : "Up to 15 Team Members"}</span>
+                </li>
+                <li className="flex items-start gap-2.5 text-[#cdc3d0]">
+                  <Check className="w-4 h-4 text-[#ecd7ff] shrink-0 mt-0.5" />
+                  <span>{language === "fr" ? "Bases de connaissances partagées" : "Shared knowledge bases"}</span>
+                </li>
+                <li className="flex items-start gap-2.5 text-[#cdc3d0]">
+                  <Check className="w-4 h-4 text-[#ecd7ff] shrink-0 mt-0.5" />
+                  <span>{language === "fr" ? "Entraînement de modèles sur-mesure" : "Custom model training"}</span>
+                </li>
+              </ul>
+            </div>
           </div>
+
+          {/* 4. ENTERPRISE PLAN */}
+          <div className={`relative bg-[#100b1f]/70 backdrop-blur-md rounded-2xl p-6 flex flex-col justify-between border transition-all duration-300 hover:bg-[#100b1f]/90 ${
+            currentTier === "enterprise"
+              ? "border-[#ecd7ff]/60 shadow-[0_0_25px_rgba(216,180,254,0.2)] ring-1 ring-[#ecd7ff]/40"
+              : "border-[#4a454f]/20"
+          }`}>
+            <div className="space-y-4">
+              <div className="flex justify-between items-start">
+                <div>
+                  <h3 className="text-xl font-bold text-[#e8defb]">Enterprise</h3>
+                  <p className="text-xs text-[#cdc3d0] mt-1 h-8">
+                    {language === "fr" ? "Infrastructure dédiée & support souverain." : "Dedicated infrastructure & support."}
+                  </p>
+                </div>
+                {currentTier === "enterprise" && (
+                  <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded-full bg-[#3c364c] text-[#ecd7ff] border border-[#ecd7ff]/20">
+                    {language === "fr" ? "ACTUEL" : "ACTIVE"}
+                  </span>
+                )}
+              </div>
+
+              {/* Price */}
+              <div className="flex items-baseline gap-1 pt-2 h-[48px] items-end">
+                <span className="text-3xl font-bold text-[#e8defb]">
+                  {language === "fr" ? "Sur-mesure" : "Custom"}
+                </span>
+              </div>
+
+              {/* Action Button */}
+              {currentTier === "enterprise" ? (
+                <div className="w-full py-2.5 px-4 rounded-full bg-[#3c364c]/70 text-[#ecd7ff] text-xs font-semibold text-center border border-[#4a454f]/40">
+                  {language === "fr" ? "Forfait Actuel" : "Current Plan"}
+                </div>
+              ) : (
+                <div className="space-y-2">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (onSelectTab) onSelectTab("inf-6");
+                    }}
+                    className="w-full py-2.5 px-4 rounded-full bg-transparent hover:bg-[#ecd7ff]/10 text-[#ecd7ff] text-xs font-semibold transition-all border border-[#ecd7ff]/50 cursor-pointer shadow-sm"
+                  >
+                    {language === "fr" ? "Contacter les Ventes" : "Contact Sales"}
+                  </button>
+                  <div className="p-2 rounded-xl bg-[#151024]/60 border border-[#4a454f]/30">
+                    <PayPalSmartButton 
+                      planId="P-2PN232575Y225210YNKY3QZQ" 
+                      onSuccess={handlePayPalSuccess} 
+                      isDark={true} 
+                    />
+                  </div>
+                </div>
+              )}
+
+              {/* Features List */}
+              <ul className="space-y-3 pt-4 border-t border-[#4a454f]/30 text-xs">
+                <li className="flex items-start gap-2.5 text-[#cdc3d0]">
+                  <Check className="w-4 h-4 text-[#ecd7ff] shrink-0 mt-0.5" />
+                  <span>{language === "fr" ? "Account manager dédié 24/7" : "Dedicated account manager"}</span>
+                </li>
+                <li className="flex items-start gap-2.5 text-[#cdc3d0]">
+                  <Check className="w-4 h-4 text-[#ecd7ff] shrink-0 mt-0.5" />
+                  <span>{language === "fr" ? "Single Sign-On (SSO SAML / Okta)" : "Single Sign-On (SSO)"}</span>
+                </li>
+                <li className="flex items-start gap-2.5 text-[#cdc3d0]">
+                  <Check className="w-4 h-4 text-[#ecd7ff] shrink-0 mt-0.5" />
+                  <span>{language === "fr" ? "Déploiements On-Premise & Air-gap" : "On-premise deployment options"}</span>
+                </li>
+                <li className="flex items-start gap-2.5 text-[#cdc3d0]">
+                  <Check className="w-4 h-4 text-[#ecd7ff] shrink-0 mt-0.5" />
+                  <span>{language === "fr" ? "Support téléphonique prioritaire 24/7" : "24/7 Phone Support"}</span>
+                </li>
+              </ul>
+            </div>
+          </div>
+
         </div>
 
-      </div>
-
-
-      {/* Comprehensive Feature Comparison Table */}
-      <div className="p-6 sm:p-8 rounded-3xl bg-white dark:bg-[#0c0c0e] border border-slate-200 dark:border-white/[0.08] shadow-xs space-y-6">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-100 dark:border-white/[0.06] pb-5">
-          <div>
-            <h2 className="text-xl font-bold text-slate-900 dark:text-white flex items-center gap-2">
-              <Layers className="w-5 h-5 text-orange-500" />
-              <span>{language === "fr" ? "Tableau Comparatif DÃ©taillÃ© des FonctionnalitÃ©s" : "Detailed Feature Comparison Matrix"}</span>
-            </h2>
-            <p className="text-xs text-slate-500 dark:text-neutral-400 mt-1">
-              {language === "fr" ? "Comparez point par point les capacitÃ©s des formules Lite et Pro." : "Compare capabilities across engineering, AI and governance tiers."}
-            </p>
-          </div>
-          <span className="text-xs font-mono px-3 py-1 rounded-full bg-slate-100 dark:bg-white/[0.05] text-slate-600 dark:text-neutral-300 self-start sm:self-auto">
-            {comparisonFeatures.length} {language === "fr" ? "critÃ¨res analysÃ©s" : "criteria analyzed"}
+        {/* Reassurance Banner */}
+        <div className="max-w-xl mx-auto text-center flex items-center justify-center gap-2 text-xs text-[#cdc3d0] bg-[#221c31]/40 py-2.5 px-6 rounded-full backdrop-blur-md border border-[#4a454f]/20 shadow-sm">
+          <ShieldCheck className="w-4 h-4 text-[#ffb2bb] shrink-0" />
+          <span>
+            {language === "fr"
+              ? "Essai gratuit de 14 jours sur tous les forfaits. Aucune carte bancaire requise."
+              : "14-day free trial on all self-serve plans. No credit card required."}
           </span>
         </div>
 
-        {/* Table layout */}
-        <div className="overflow-x-auto">
-          <table className="w-full text-left text-xs border-collapse">
-            <thead>
-              <tr className="border-b border-slate-200 dark:border-white/[0.08] text-slate-500 dark:text-neutral-400 font-mono text-[11px]">
-                <th className="py-3 px-4 w-1/2">{language === "fr" ? "FonctionnalitÃ© & Module" : "Feature & Module"}</th>
-                <th className="py-3 px-4 text-center w-1/4">{language === "fr" ? "Plan Lite (Gratuit)" : "Lite Plan (Free)"}</th>
-                <th className="py-3 px-4 text-center w-1/4 text-orange-500 font-bold">{language === "fr" ? "Plan Pro Entreprise" : "Pro Enterprise Plan"}</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-100 dark:divide-white/[0.04]">
-              {comparisonFeatures.map((row, idx) => (
-                <tr 
-                  key={idx}
-                  className={`hover:bg-slate-50 dark:hover:bg-white/[0.02] transition-colors ${
-                    row.isHighlight ? "bg-orange-500/[0.02] dark:bg-orange-500/[0.04]" : ""
-                  }`}
-                >
-                  <td className="py-3.5 px-4">
-                    <div className="font-semibold text-slate-900 dark:text-white flex items-center gap-2">
-                      <span>{row.name}</span>
-                      {row.isHighlight && (
-                        <span className="text-[9px] font-mono px-1.5 py-0.2 rounded bg-orange-500/20 text-orange-600 dark:text-orange-400 font-bold">
-                          PRO
-                        </span>
-                      )}
-                    </div>
-                    <div className="text-[11px] text-slate-400 dark:text-neutral-400 mt-0.5">
-                      {row.description}
-                    </div>
-                  </td>
-                  <td className="py-3.5 px-4 text-center">
-                    {typeof row.lite === "boolean" ? (
-                      row.lite ? (
-                        <Check className="w-4 h-4 text-emerald-500 mx-auto" />
-                      ) : (
-                        <X className="w-4 h-4 text-slate-300 dark:text-neutral-600 mx-auto" />
-                      )
-                    ) : (
-                      <span className="font-medium text-slate-600 dark:text-neutral-400">{row.lite}</span>
-                    )}
-                  </td>
-                  <td className="py-3.5 px-4 text-center font-bold">
-                    {typeof row.pro === "boolean" ? (
-                      row.pro ? (
-                        <Check className="w-4 h-4 text-orange-500 mx-auto" />
-                      ) : (
-                        <X className="w-4 h-4 text-slate-300 dark:text-neutral-600 mx-auto" />
-                      )
-                    ) : (
-                      <span className="text-orange-600 dark:text-orange-400">{row.pro}</span>
-                    )}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </div>
-
-      {/* Frequently Asked Questions Accordion */}
-      <div className="p-6 sm:p-8 rounded-3xl bg-white dark:bg-[#0c0c0e] border border-slate-200 dark:border-white/[0.08] shadow-xs space-y-4">
-        <h2 className="text-xl font-bold text-slate-900 dark:text-white flex items-center gap-2 mb-2">
-          <HelpCircle className="w-5 h-5 text-blue-500" />
-          <span>{language === "fr" ? "Questions FrÃ©quentes (FAQ)" : "Frequently Asked Questions"}</span>
-        </h2>
-
-        <div className="space-y-3">
-          {faqs.map((faq, i) => (
-            <div 
-              key={i}
-              className="rounded-2xl border border-slate-200 dark:border-white/[0.06] overflow-hidden"
-            >
-              <button
-                onClick={() => setActiveFaq(activeFaq === i ? null : i)}
-                className="w-full p-4 text-left font-bold text-xs sm:text-sm text-slate-900 dark:text-white flex justify-between items-center hover:bg-slate-50 dark:hover:bg-white/[0.02] transition-colors cursor-pointer"
-              >
-                <span>{faq.q}</span>
-                {activeFaq === i ? (
-                  <ChevronUp className="w-4 h-4 text-slate-400" />
-                ) : (
-                  <ChevronDown className="w-4 h-4 text-slate-400" />
-                )}
-              </button>
-              {activeFaq === i && (
-                <div className="px-4 pb-4 text-xs text-slate-600 dark:text-neutral-300 leading-relaxed border-t border-slate-100 dark:border-white/[0.04] pt-3">
-                  {faq.a}
-                </div>
-              )}
+        {/* Feature Comparison Matrix */}
+        <div className="p-6 sm:p-8 rounded-3xl bg-[#221c31]/50 backdrop-blur-xl border border-[#4a454f]/30 shadow-xl space-y-6">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-[#4a454f]/30 pb-5">
+            <div>
+              <h2 className="text-xl font-bold text-[#e8defb] flex items-center gap-2">
+                <Layers className="w-5 h-5 text-[#ecd7ff]" />
+                <span>{language === "fr" ? "Matrice Comparative Détaillée des Fonctionnalités" : "Detailed Feature Comparison Matrix"}</span>
+              </h2>
+              <p className="text-xs text-[#cdc3d0] mt-1">
+                {language === "fr" ? "Examinez les capacités de calcul, IA, sécurité et gouvernance par niveau." : "Compare capabilities across engineering, AI and governance tiers."}
+              </p>
             </div>
-          ))}
-        </div>
-      </div>
+            <span className="text-xs font-mono px-3 py-1 rounded-full bg-[#3c364c]/70 text-[#ecd7ff] border border-[#ecd7ff]/20 self-start sm:self-auto">
+              {comparisonFeatures.length} {language === "fr" ? "critères analysés" : "criteria analyzed"}
+            </span>
+          </div>
 
-      {/* Bottom CTA Strip */}
-      <div className="p-6 sm:p-8 rounded-3xl bg-gradient-to-r from-orange-500/10 via-amber-500/5 to-transparent border border-orange-500/20 flex flex-col sm:flex-row items-center justify-between gap-4">
-        <div className="space-y-1 text-center sm:text-left">
-          <h3 className="text-lg font-bold text-slate-900 dark:text-white">
-            {language === "fr" ? "Besoin d'un dÃ©ploiement sur-mesure ou On-Premise ?" : "Need a custom Dedicated or On-Premise deployment?"}
-          </h3>
-          <p className="text-xs text-slate-500 dark:text-neutral-400">
-            {language === "fr" ? "Nos architectes conÃ§oivent vos passerelles IoT et modÃ¨les de rÃ©gression dÃ©diÃ©s." : "Our systems architects assist with custom ISO/FIPS sovereign integrations."}
-          </p>
-        </div>
-        <button
-          onClick={() => {
-            if (onSelectTab) {
-              onSelectTab("inf-6");
-            }
-          }}
-          className="px-5 py-2.5 rounded-xl bg-slate-900 dark:bg-white hover:bg-slate-800 dark:hover:bg-neutral-200 text-white dark:text-black font-bold text-xs flex items-center gap-2 shadow-xs transition-colors shrink-0 cursor-pointer"
-        >
-          <span>{language === "fr" ? "Tester la Maintenance IA" : "Explore Predictive AI"}</span>
-          <ArrowRight className="w-4 h-4" />
-        </button>
-      </div>
+          <div className="overflow-x-auto">
+            <table className="w-full text-left text-xs border-collapse">
+              <thead>
+                <tr className="border-b border-[#4a454f]/40 text-[#cdc3d0] font-mono text-[11px]">
+                  <th className="py-3 px-4 w-2/5">{language === "fr" ? "Fonctionnalité & Module" : "Feature & Module"}</th>
+                  <th className="py-3 px-3 text-center">{language === "fr" ? "Starter" : "Starter"}</th>
+                  <th className="py-3 px-3 text-center text-[#ffb2bb] font-bold">{language === "fr" ? "Pro (Populaire)" : "Pro (Popular)"}</th>
+                  <th className="py-3 px-3 text-center">{language === "fr" ? "Team" : "Team"}</th>
+                  <th className="py-3 px-3 text-center">{language === "fr" ? "Enterprise" : "Enterprise"}</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-[#4a454f]/20">
+                {comparisonFeatures.map((row, idx) => (
+                  <tr 
+                    key={idx}
+                    className={`hover:bg-[#3c364c]/30 transition-colors ${
+                      row.isHighlight ? "bg-[#ecd7ff]/[0.03]" : ""
+                    }`}
+                  >
+                    <td className="py-3.5 px-4">
+                      <div className="font-semibold text-[#e8defb] flex items-center gap-2">
+                        <span>{row.name}</span>
+                        {row.isHighlight && (
+                          <span className="text-[9px] font-mono px-1.5 py-0.5 rounded bg-[#ffb2bb]/20 text-[#ffb2bb] font-bold">
+                            KEY
+                          </span>
+                        )}
+                      </div>
+                      <div className="text-[11px] text-[#cdc3d0] mt-0.5">
+                        {row.description}
+                      </div>
+                    </td>
 
+                    {/* Starter */}
+                    <td className="py-3.5 px-3 text-center">
+                      {typeof row.starter === "boolean" ? (
+                        row.starter ? (
+                          <Check className="w-4 h-4 text-[#ecd7ff] mx-auto" />
+                        ) : (
+                          <X className="w-4 h-4 text-[#968e9a] mx-auto" />
+                        )
+                      ) : (
+                        <span className="text-[#cdc3d0]">{row.starter}</span>
+                      )}
+                    </td>
+
+                    {/* Pro */}
+                    <td className="py-3.5 px-3 text-center font-bold bg-[#1e1548]/30">
+                      {typeof row.pro === "boolean" ? (
+                        row.pro ? (
+                          <CheckCircle className="w-4 h-4 text-[#ffb2bb] mx-auto" />
+                        ) : (
+                          <X className="w-4 h-4 text-[#968e9a] mx-auto" />
+                        )
+                      ) : (
+                        <span className="text-[#ffb2bb]">{row.pro}</span>
+                      )}
+                    </td>
+
+                    {/* Team */}
+                    <td className="py-3.5 px-3 text-center">
+                      {typeof row.team === "boolean" ? (
+                        row.team ? (
+                          <Check className="w-4 h-4 text-[#ecd7ff] mx-auto" />
+                        ) : (
+                          <X className="w-4 h-4 text-[#968e9a] mx-auto" />
+                        )
+                      ) : (
+                        <span className="text-[#cdc3d0]">{row.team}</span>
+                      )}
+                    </td>
+
+                    {/* Enterprise */}
+                    <td className="py-3.5 px-3 text-center">
+                      {typeof row.enterprise === "boolean" ? (
+                        row.enterprise ? (
+                          <Check className="w-4 h-4 text-[#ecd7ff] mx-auto" />
+                        ) : (
+                          <X className="w-4 h-4 text-[#968e9a] mx-auto" />
+                        )
+                      ) : (
+                        <span className="text-[#ecd7ff] font-medium">{row.enterprise}</span>
+                      )}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        {/* Frequently Asked Questions Accordion */}
+        <div className="p-6 sm:p-8 rounded-3xl bg-[#221c31]/50 backdrop-blur-xl border border-[#4a454f]/30 shadow-xl space-y-4">
+          <h2 className="text-xl font-bold text-[#e8defb] flex items-center gap-2 mb-2">
+            <HelpCircle className="w-5 h-5 text-[#ecd7ff]" />
+            <span>{language === "fr" ? "Questions Fréquentes (FAQ)" : "Frequently Asked Questions"}</span>
+          </h2>
+
+          <div className="space-y-3">
+            {faqs.map((faq, i) => (
+              <div 
+                key={i}
+                className="rounded-2xl border border-[#4a454f]/30 overflow-hidden bg-[#151024]/40"
+              >
+                <button
+                  type="button"
+                  onClick={() => setActiveFaq(activeFaq === i ? null : i)}
+                  className="w-full p-4 text-left font-semibold text-xs sm:text-sm text-[#e8defb] flex justify-between items-center hover:bg-[#3c364c]/30 transition-colors cursor-pointer"
+                >
+                  <span>{faq.q}</span>
+                  {activeFaq === i ? (
+                    <ChevronUp className="w-4 h-4 text-[#ecd7ff]" />
+                  ) : (
+                    <ChevronDown className="w-4 h-4 text-[#cdc3d0]" />
+                  )}
+                </button>
+                {activeFaq === i && (
+                  <div className="px-4 pb-4 text-xs text-[#cdc3d0] leading-relaxed border-t border-[#4a454f]/20 pt-3">
+                    {faq.a}
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Enterprise Bottom Strip */}
+        <div className="p-6 sm:p-8 rounded-3xl bg-gradient-to-r from-[#2c273c]/90 via-[#221c31]/90 to-[#100b1f]/90 border border-[#ecd7ff]/30 shadow-2xl flex flex-col sm:flex-row items-center justify-between gap-6">
+          <div className="space-y-1 text-center sm:text-left">
+            <div className="inline-flex items-center gap-2 text-xs font-bold text-[#ffb2bb] mb-1">
+              <Building2 className="w-4 h-4" />
+              <span>{language === "fr" ? "DÉPLOIEMENT HYBRIDE & SOUVERAIN" : "HYBRID & SOVEREIGN DEPLOYMENT"}</span>
+            </div>
+            <h3 className="text-xl font-bold text-[#e8defb]">
+              {language === "fr" ? "Besoin d'un déploiement sur-mesure ou On-Premise ?" : "Need a custom Dedicated or On-Premise deployment?"}
+            </h3>
+            <p className="text-xs text-[#cdc3d0] max-w-xl">
+              {language === "fr" 
+                ? "Nos architectes conçoivent vos passerelles Edge privées, modèles neuronaux dédiés et intégrations FIPS 140-3." 
+                : "Our systems architects assist with custom sovereign clusters, private model fine-tuning, and FIPS 140-3 compliance."}
+            </p>
+          </div>
+          <button
+            type="button"
+            onClick={() => {
+              if (onSelectTab) {
+                onSelectTab("inf-6");
+              }
+            }}
+            className="px-6 py-3 rounded-full bg-gradient-to-r from-[#ecd7ff] to-[#ffb2bb] text-[#29074a] font-bold text-xs flex items-center gap-2 shadow-[0_0_20px_rgba(216,180,254,0.3)] hover:opacity-90 transition-all shrink-0 cursor-pointer"
+          >
+            <span>{language === "fr" ? "Explorer la Maintenance IA" : "Explore Predictive AI"}</span>
+            <ArrowRight className="w-4 h-4 text-[#29074a]" />
+          </button>
+        </div>
+
+        {/* Footer info bar */}
+        <div className="flex flex-col md:flex-row justify-between items-center gap-4 text-xs text-[#cdc3d0] border-t border-[#4a454f]/30 pt-6">
+          <div>© {new Date().getFullYear()} BizOS VitalAI Operating System. All rights reserved.</div>
+          <div className="flex items-center gap-6">
+            <span className="hover:text-[#ecd7ff] transition-colors cursor-pointer">Privacy Policy</span>
+            <span className="hover:text-[#ecd7ff] transition-colors cursor-pointer">Terms of Service</span>
+            <span className="hover:text-[#ecd7ff] transition-colors cursor-pointer">Security Whitepaper</span>
+          </div>
+        </div>
+
+      </div>
     </div>
   );
 }
