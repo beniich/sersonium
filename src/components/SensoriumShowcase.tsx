@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "motion/react";
 import {
   Sparkles,
@@ -295,10 +296,12 @@ const AI_PROMPT_PRESETS = [
 export function SensoriumShowcase({
   onSignIn,
   onEnterDashboard,
+  onNavigateToSection,
   state,
   authError = null,
   user = null
 }: SensoriumShowcaseProps) {
+  const navigate = useNavigate();
   const { language, toggleLanguage } = useLanguage();
   const { isDark, toggleTheme, mode } = useTheme();
   const t = translations[language] || translations.en;
@@ -614,7 +617,13 @@ Return on Investment (ROI): 3.2 months
               </button>
 
               <button 
-                onClick={() => onNavigateToSection?.("pricing", "pricing-plans")}
+                onClick={() => {
+                  if (onNavigateToSection) {
+                    onNavigateToSection("pricing", "pricing-plans");
+                  } else {
+                    navigate("/pricing");
+                  }
+                }}
                 className="transition-colors cursor-pointer hover:text-white flex items-center gap-1 font-medium bg-clip-text text-transparent bg-gradient-to-r from-orange-400 to-amber-300 ml-2"
               >
                 Pricing

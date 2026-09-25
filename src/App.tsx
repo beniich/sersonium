@@ -1,4 +1,5 @@
 import React, { useState, useEffect, createContext, useContext, useMemo } from "react";
+import { useNavigate, useLocation, Routes, Route, Navigate } from "react-router-dom";
 import { AnimatePresence, motion } from "motion/react";
 import DashboardLayout from "./components/DashboardLayout";
 import OverviewPage from "./pages/OverviewPage";
@@ -67,8 +68,17 @@ const getSystemPreference = (): boolean => {
 };
 
 export default function App() {
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  // Map URL path → page key
+  const pageFromPath = (pathname: string): string => {
+    const seg = pathname.replace(/^\//, "") || "overview";
+    return seg;
+  };
+
   const [activeItemId, setActiveItemId] = useState<string>("ov-1");
-  const [activePage, setActivePage] = useState<string>("overview");
+  const [activePage, setActivePage] = useState<string>(() => pageFromPath(location.pathname));
   
   // Track operating system/browser preference in real-time
   const [systemIsDark, setSystemIsDark] = useState<boolean>(getSystemPreference);
@@ -334,9 +344,26 @@ export default function App() {
     );
   }
 
+  // Keep URL in sync whenever activePage changes
+  useEffect(() => {
+    const target = activePage === "overview" ? "/" : `/${activePage}`;
+    if (location.pathname !== target) {
+      navigate(target, { replace: true });
+    }
+  }, [activePage]);
+
+  // React to browser back/forward navigation
+  useEffect(() => {
+    const newPage = pageFromPath(location.pathname);
+    if (newPage !== activePage) {
+      setActivePage(newPage);
+    }
+  }, [location.pathname]);
+
   const handleNavigateFromPortal = (page: string, itemId: string) => {
     setActivePage(page);
     setActiveItemId(itemId);
+    navigate(`/${page}`);
     handleEnterMockMode();
   };
 
