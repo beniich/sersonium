@@ -22,9 +22,13 @@ import {
   Sliders
 } from "lucide-react";
 
+import { SubscriptionTier } from "../../types";
+
 interface ArchitectureSectionProps {
   onEnterDashboard: () => void;
   onNavigateToSandbox?: () => void;
+  onSelectPlan?: (tier: SubscriptionTier) => void;
+  userTier?: SubscriptionTier;
 }
 
 interface TierDefinition {
@@ -119,7 +123,9 @@ const TIERS_DATA: TierDefinition[] = [
 
 export default function ArchitectureSection({
   onEnterDashboard,
-  onNavigateToSandbox
+  onNavigateToSandbox,
+  onSelectPlan,
+  userTier = "free"
 }: ArchitectureSectionProps) {
   const [selectedTierId, setSelectedTierId] = useState<string>("tier-5");
   const [isScanningChain, setIsScanningChain] = useState<boolean>(false);
@@ -321,6 +327,18 @@ export default function ArchitectureSection({
                 <ArrowRight className="w-3.5 h-3.5" />
               </button>
               
+              {onSelectPlan && (
+                <button
+                  onClick={() => onSelectPlan(selectedTier.id === "tier-5" ? "enterprise" : selectedTier.id === "tier-3" || selectedTier.id === "tier-4" ? "pro" : "silver")}
+                  className="w-full py-2.5 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-semibold text-xs shadow-md transition-all cursor-pointer flex items-center justify-center gap-1.5"
+                >
+                  <Lock className="w-3.5 h-3.5" />
+                  <span>
+                    {selectedTier.id === "tier-5" ? "Souscrire Plan Titan (Tier 05)" : "Activer ce Tier d'Architecture"}
+                  </span>
+                </button>
+              )}
+
               {onNavigateToSandbox && (
                 <button
                   onClick={onNavigateToSandbox}

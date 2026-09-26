@@ -15,13 +15,16 @@ import {
   Download,
   FileSpreadsheet
 } from "lucide-react";
+import { SubscriptionTier } from "../../types";
 
 interface RoiCalculatorSectionProps {
   onEnterDashboard: () => void;
+  onSelectPlan?: (tier: SubscriptionTier) => void;
 }
 
 export default function RoiCalculatorSection({
-  onEnterDashboard
+  onEnterDashboard,
+  onSelectPlan
 }: RoiCalculatorSectionProps) {
   // Input parameters
   const [numSites, setNumSites] = useState<number>(12);
@@ -261,6 +264,156 @@ export default function RoiCalculatorSection({
             >
               <span>Open Console</span>
               <ArrowRight className="w-3.5 h-3.5" />
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* STRATEGIC B2B TIERING CALL TO ACTION (L'après-calculateur de conversion) */}
+      <div className="mt-12 pt-10 border-t border-white/[0.1] space-y-8">
+        <div className="text-left space-y-2">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-400 text-xs font-mono">
+            <span>Déploiement Industriel & Souscription</span>
+          </div>
+          <h3 className="text-xl sm:text-2xl font-bold text-white tracking-tight">
+            Passez à l'action : Choisissez votre plan pour réaliser ces ${annualSavingsEur.toLocaleString("en-US", { maximumFractionDigits: 0 })} d'économies annuelles
+          </h3>
+          <p className="text-xs sm:text-sm text-neutral-400 max-w-3xl">
+            Abonnements souverains dimensionnés pour CTOs, directeurs industriels et équipes de fiabilité de site (SRE).
+          </p>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-left">
+          {/* Plan 1: Edge Explorer */}
+          <div className="p-6 rounded-2xl bg-[#0d0d12] border border-white/[0.1] hover:border-blue-500/40 transition-all flex flex-col justify-between space-y-6">
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-mono px-2.5 py-0.5 rounded-full bg-blue-500/10 text-blue-400 font-semibold">
+                  Plan Sandbox
+                </span>
+                <span className="text-[11px] text-neutral-400 font-mono">Devs / PoC</span>
+              </div>
+              <div>
+                <h4 className="text-xl font-bold text-white">Edge Explorer</h4>
+                <div className="text-2xl font-black text-white mt-1">
+                  49€ <span className="text-xs font-normal text-neutral-400">/ mois</span>
+                </div>
+                <p className="text-xs text-neutral-400 mt-2">
+                  Idéal pour valider les scripts V8 et l'inférence locale en environnement d'essai.
+                </p>
+              </div>
+
+              <ul className="space-y-2 text-xs text-neutral-300 font-mono border-t border-white/[0.08] pt-4">
+                <li className="flex items-center gap-2 text-emerald-400">
+                  <CheckCircle2 className="w-3.5 h-3.5 shrink-0" />
+                  <span>Accès Tier 02 (V8 Isolates)</span>
+                </li>
+                <li className="flex items-center gap-2">
+                  <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
+                  <span>Inférence Sandbox & Démo</span>
+                </li>
+                <li className="flex items-center gap-2 text-neutral-500">
+                  <span>✕ Matériel Silicium X1 non inclus</span>
+                </li>
+              </ul>
+            </div>
+
+            <button
+              onClick={() => onSelectPlan ? onSelectPlan("silver") : onEnterDashboard()}
+              className="w-full py-2.5 px-4 rounded-xl bg-white/[0.08] hover:bg-white/[0.15] text-white font-semibold text-xs transition-colors cursor-pointer"
+            >
+              Souscrire Edge Explorer
+            </button>
+          </div>
+
+          {/* Plan 2: Sovereign Ops (Recommended) */}
+          <div className="p-6 rounded-2xl bg-gradient-to-b from-blue-950/40 via-[#0d0d12] to-black border-2 border-blue-500 shadow-2xl flex flex-col justify-between space-y-6 relative">
+            <div className="absolute -top-3 right-6 px-3 py-0.5 rounded-full bg-blue-500 text-white font-mono text-[10px] font-bold uppercase tracking-wider">
+              Recommandé ROI
+            </div>
+
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-mono px-2.5 py-0.5 rounded-full bg-blue-500/20 text-blue-300 font-semibold">
+                  Plan Pro
+                </span>
+                <span className="text-[11px] text-neutral-400 font-mono">PME & Scale-ups</span>
+              </div>
+              <div>
+                <h4 className="text-xl font-bold text-white">Sovereign Ops</h4>
+                <div className="text-2xl font-black text-white mt-1">
+                  499€ <span className="text-xs font-normal text-neutral-400">/ mois</span>
+                </div>
+                <p className="text-xs text-neutral-400 mt-2">
+                  Accès complet aux Tiers 01 à 04 avec accélération Silicium X1 virtuelle et SLA 99.9%.
+                </p>
+              </div>
+
+              <ul className="space-y-2 text-xs text-neutral-200 font-mono border-t border-white/[0.08] pt-4">
+                <li className="flex items-center gap-2 text-emerald-400">
+                  <CheckCircle2 className="w-3.5 h-3.5 shrink-0" />
+                  <span>Accès Tiers 01 à 04 Inclus</span>
+                </li>
+                <li className="flex items-center gap-2 text-emerald-400">
+                  <CheckCircle2 className="w-3.5 h-3.5 shrink-0" />
+                  <span>Silicium X1 NPU Virtuel (240 TOPS)</span>
+                </li>
+                <li className="flex items-center gap-2 text-emerald-400">
+                  <CheckCircle2 className="w-3.5 h-3.5 shrink-0" />
+                  <span>Support Prioritaire & SLA 99.9%</span>
+                </li>
+              </ul>
+            </div>
+
+            <button
+              onClick={() => onSelectPlan ? onSelectPlan("pro") : onEnterDashboard()}
+              className="w-full py-2.5 px-4 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-semibold text-xs shadow-lg shadow-blue-500/25 transition-all cursor-pointer flex items-center justify-center gap-1.5"
+            >
+              <span>Activer Sovereign Ops</span>
+              <ArrowRight className="w-3.5 h-3.5" />
+            </button>
+          </div>
+
+          {/* Plan 3: Titan Sovereign */}
+          <div className="p-6 rounded-2xl bg-[#0d0d12] border border-white/[0.1] hover:border-amber-500/40 transition-all flex flex-col justify-between space-y-6">
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-mono px-2.5 py-0.5 rounded-full bg-amber-500/10 text-amber-400 font-semibold">
+                  Plan Enterprise
+                </span>
+                <span className="text-[11px] text-neutral-400 font-mono">Grands Comptes</span>
+              </div>
+              <div>
+                <h4 className="text-xl font-bold text-white">Titan Sovereign</h4>
+                <div className="text-2xl font-black text-white mt-1">
+                  Sur Devis <span className="text-xs font-normal text-neutral-400">(CapEx + OpEx)</span>
+                </div>
+                <p className="text-xs text-neutral-400 mt-2">
+                  Full Stack Tiers 01-05, gouvernance HSM, clés privées scellées et matériel EdgeBlade X1 physique.
+                </p>
+              </div>
+
+              <ul className="space-y-2 text-xs text-neutral-300 font-mono border-t border-white/[0.08] pt-4">
+                <li className="flex items-center gap-2 text-emerald-400">
+                  <CheckCircle2 className="w-3.5 h-3.5 shrink-0" />
+                  <span>Tous les Tiers 01 à 05 (Gouvernance)</span>
+                </li>
+                <li className="flex items-center gap-2 text-emerald-400">
+                  <CheckCircle2 className="w-3.5 h-3.5 shrink-0" />
+                  <span>Matériel Physique X1 & HSM TPM 2.0</span>
+                </li>
+                <li className="flex items-center gap-2 text-emerald-400">
+                  <CheckCircle2 className="w-3.5 h-3.5 shrink-0" />
+                  <span>Déploiement On-Premise / Air-Gapped</span>
+                </li>
+              </ul>
+            </div>
+
+            <button
+              onClick={() => onSelectPlan ? onSelectPlan("enterprise") : onEnterDashboard()}
+              className="w-full py-2.5 px-4 rounded-xl bg-amber-500/15 hover:bg-amber-500/25 border border-amber-500/30 text-amber-300 font-semibold text-xs transition-colors cursor-pointer"
+            >
+              Demander un Devis Entreprise
             </button>
           </div>
         </div>

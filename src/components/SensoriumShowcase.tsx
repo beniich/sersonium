@@ -45,7 +45,7 @@ import { useLanguage, useTheme } from "../App";
 import { translations } from "../i18n/translations";
 import SensoriumLogo from "./SensoriumLogo";
 import SensoryBiometricModal from "./SensoryBiometricModal";
-import { GlobalState } from "../types";
+import { GlobalState, SubscriptionTier } from "../types";
 import type { User } from "firebase/auth";
 
 // Modular Vitrine Pages
@@ -54,6 +54,7 @@ import InferenceSandboxSection from "./vitrine/InferenceSandboxSection";
 import SiliciumHardwareSection from "./vitrine/SiliciumHardwareSection";
 import RoiCalculatorSection from "./vitrine/RoiCalculatorSection";
 import EcosystemSection from "./vitrine/EcosystemSection";
+import AccessControl from "./vitrine/AccessControl";
 
 // High-tech generated hardware photography assets
 import nanoCoreImg from "../assets/images/nanobanana_hero_core_1789723476137.jpg";
@@ -996,6 +997,14 @@ Return on Investment (ROI): 3.2 months
           <ArchitectureSection 
             onEnterDashboard={onEnterDashboard} 
             onNavigateToSandbox={() => setActiveTab("sandbox")} 
+            onSelectPlan={(tier) => {
+              if (onNavigateToSection) {
+                onNavigateToSection("pricing", "pricing-plans");
+              } else {
+                navigate("/pricing");
+              }
+            }}
+            userTier={state?.subscriptionTier || "free"}
           />
         )}
 
@@ -1006,17 +1015,37 @@ Return on Investment (ROI): 3.2 months
           />
         )}
 
-        {/* 3. SILICIUM X1 TAB */}
+        {/* 3. SILICIUM X1 TAB (Protected B2B Tier Paywall) */}
         {activeTab === "hardware" && (
-          <SiliciumHardwareSection 
-            onEnterDashboard={onEnterDashboard} 
-          />
+          <AccessControl
+            requiredTier="pro"
+            userTier={state?.subscriptionTier || "free"}
+            moduleName="Silicium EdgeBlade X1-Pro & Tuning NPU 240 TOPS"
+            onUpgrade={(tier) => {
+              if (onNavigateToSection) {
+                onNavigateToSection("pricing", "pricing-plans");
+              } else {
+                navigate("/pricing");
+              }
+            }}
+          >
+            <SiliciumHardwareSection 
+              onEnterDashboard={onEnterDashboard} 
+            />
+          </AccessControl>
         )}
 
-        {/* 4. CALCULATEUR ROI & ESG TAB */}
+        {/* 4. CALCULATEUR ROI & ESG TAB (Direct Strategic Conversion) */}
         {activeTab === "roi" && (
           <RoiCalculatorSection 
             onEnterDashboard={onEnterDashboard} 
+            onSelectPlan={(tier) => {
+              if (onNavigateToSection) {
+                onNavigateToSection("pricing", "pricing-plans");
+              } else {
+                navigate("/pricing");
+              }
+            }}
           />
         )}
 
