@@ -24,6 +24,7 @@ const USERS_DB = [
     userId: "usr_admin_001",
     email: "beniich.contact@gmail.com",
     role: "admin" as RoleType,
+    subscriptionTier: "enterprise" as const,
     tenantId: "tenant_enterprise_lacaza",
     organizationName: "LACAZA ClouIndustrie Group"
   },
@@ -31,6 +32,7 @@ const USERS_DB = [
     userId: "usr_operator_002",
     email: "ops@lacaza.clouindustrie.com",
     role: "operator" as RoleType,
+    subscriptionTier: "pro" as const,
     tenantId: "tenant_enterprise_lacaza",
     organizationName: "LACAZA ClouIndustrie Group"
   },
@@ -38,6 +40,7 @@ const USERS_DB = [
     userId: "usr_tech_003",
     email: "tech.field@lacaza.clouindustrie.com",
     role: "technician" as RoleType,
+    subscriptionTier: "silver" as const,
     tenantId: "tenant_enterprise_lacaza",
     organizationName: "LACAZA ClouIndustrie Group"
   },
@@ -45,6 +48,7 @@ const USERS_DB = [
     userId: "usr_auditor_004",
     email: "auditor@lacaza.clouindustrie.com",
     role: "auditor" as RoleType,
+    subscriptionTier: "free" as const,
     tenantId: "tenant_enterprise_lacaza",
     organizationName: "LACAZA ClouIndustrie Group"
   }
@@ -81,7 +85,8 @@ export const login = async (req: Request, res: Response): Promise<void> => {
     email: targetUser.email,
     role: targetUser.role,
     tenantId: targetUser.tenantId,
-    organizationName: targetUser.organizationName
+    organizationName: targetUser.organizationName,
+    subscriptionTier: targetUser.subscriptionTier
   };
 
   const accessToken = signAccessToken(userPayload);
@@ -150,7 +155,8 @@ export const refreshSession = async (req: AuthenticatedRequest, res: Response): 
       email: payload.email,
       role: payload.role,
       tenantId: payload.tenantId,
-      organizationName: payload.organizationName
+      organizationName: payload.organizationName,
+      subscriptionTier: payload.subscriptionTier || "free"
     };
 
     // Rotate: generate new access token & new rotating refresh token in same family

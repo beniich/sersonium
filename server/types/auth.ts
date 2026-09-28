@@ -3,6 +3,8 @@ import type { TenantPrismaClient } from "../db/tenantPrisma.js";
 
 export type RoleType = "admin" | "operator" | "technician" | "auditor" | "viewer";
 
+export type SubscriptionTierType = "free" | "silver" | "pro" | "enterprise";
+
 export type PermissionType = 
   | "infra:read"
   | "infra:write"
@@ -24,6 +26,7 @@ export interface UserPayload {
   role: RoleType;
   tenantId: string;
   organizationName?: string;
+  subscriptionTier?: SubscriptionTierType;
   permissions?: PermissionType[];
 }
 

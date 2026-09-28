@@ -153,7 +153,11 @@ class PayPalService {
    */
   public async verifyWebhookSignature(headers: Record<string, string>, body: any): Promise<boolean> {
     if (!this.webhookId) {
-      console.warn("[PayPal Webhook] Aucun PAYPAL_WEBHOOK_ID configuré, signature non vérifiée.");
+      if (process.env.NODE_ENV === "production") {
+        console.error("[PayPal Webhook CRITICAL] PAYPAL_WEBHOOK_ID absent en production. Rejet sécurisé.");
+        return false;
+      }
+      console.warn("[PayPal Webhook DEV] Aucun PAYPAL_WEBHOOK_ID configuré, bypass actif uniquement en dev.");
       return true;
     }
 

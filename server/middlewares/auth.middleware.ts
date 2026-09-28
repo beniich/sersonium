@@ -1,6 +1,6 @@
 import { Response, NextFunction } from "express";
 import { verifyAccessToken } from "../config/jwt.js";
-import { AuthenticatedRequest, RoleType, PermissionType } from "../types/auth.js";
+import { AuthenticatedRequest, RoleType, PermissionType, SubscriptionTierType } from "../types/auth.js";
 
 /**
  * Role to Permissions mapping matrix
@@ -157,6 +157,55 @@ export const requirePermission = (...requiredPermissions: PermissionType[]) => {
         error: {
           code: "INSUFFICIENT_PERMISSIONS",
           message: `Permissions insuffisantes. Requis : [${requiredPermissions.join(", ")}]. Rôle actuel : ${req.user.role}`
+        }
+      });
+      return;
+    }
+
+    next();
+  };
+};
+
+/**
+ * Subscription Tier Hierarchy
+ */
+export const TIER_LEVELS: Record<SubscriptionTierType, number> = {
+  free: 0,
+  silver: 1,
+  pro: 2,
+  enterprise: 3
+};
+
+/**
+ * Middleware to enforce subscription tier requirement
+ */
+export const requireSubscriptionTier = (minimumTier: SubscriptionTierType) => {
+  return (req: AuthenticatedRequest, res: Response, next: NextFunction): void => {
+    if (!req.user) {
+      res.status(401).json({
+        success: false,
+        error: { code: "UNAUTHORIZED", message: "Authentification requise." }
+      });
+      return;
+    }
+
+    // Admins bypass subscription tier restrictions
+    if (req.user.role === "admin") {
+      return next();
+    }
+
+    const currentTier: SubscriptionTierType = req.user.subscriptionTier || "free";
+    const userLevel = TIER_LEVELS[currentTier] ?? 0;
+    const requiredLevel = TIER_LEVELS[minimumTier] ?? 0;
+
+    if (userLevel < requiredLevel) {
+      res.status(403).json({
+        success: false,
+        error: {
+          code: "UPGRADE_REQUIRED",
+          message: `Niveau d'abonnement insuffisant. Ce service nécessite le plan ${minimumTier.toUpperCase()} (Votre plan actuel : ${currentTier.toUpperCase()}).`,
+          requiredTier: minimumTier,
+          currentTier: currentTier
         }
       });
       return;

@@ -1,14 +1,56 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    // Top level global documents (fallback for unmigrated logic)
-    match /{document=**} {
-      allow read, write: if request.auth != null;
+    
+    // Security Helper functions
+    function isAuthenticated() {
+      return request.auth != null;
     }
     
-    // Strict Database-per-tenant (user) isolation
-    match /users/{userId}/{document=**} {
-      allow read, write: if request.auth != null && request.auth.uid == userId;
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+    
+    // Check if the update is trying to alter subscription or security roles
+    function isNotModifyingRestrictedUserFields() {
+      let restrictedFields = ['subscriptionTier', 'role', 'subscriptionExpiresAt', 'paypalSubscriptionId', 'isAdmin', 'plan'];
+      return !request.resource.data.diff(resource.data).affectedKeys().hasAny(restrictedFields);
+    }
+
+    // User profile document (Protected: subscription & roles cannot be self-elevated by user)
+    match /users/{userId} {
+      allow read: if isOwner(userId);
+      // On creation, new users can only start with free/default tier
+      allow create: if isOwner(userId) 
+        && (!request.resource.data.keys().hasAny(['subscriptionTier', 'role', 'isAdmin']) 
+            || request.resource.data.subscriptionTier == 'free');
+      // On update, users can update profile info, but NOT subscriptionTier or roles
+      allow update: if isOwner(userId) && isNotModifyingRestrictedUserFields();
+      allow delete: if false; // Users cannot delete their core profile directly
+      
+      // Subcollections belonging to the tenant/user (nodes, securityEvents, dnsRecords, etc.)
+      match /{allSubcollections=**} {
+        allow read, write: if isOwner(userId);
+      }
+    }
+    
+    // Public / Shared configurations (read-only for authenticated users)
+    match /publicConfig/{configId} {
+      allow read: if isAuthenticated();
+      allow write: if false;
+    }
+
+    // Top-level audit logs: append-only, immutable
+    match /auditLogs/{logId} {
+      allow read: if isAuthenticated();
+      allow create: if isAuthenticated();
+      allow update, delete: if false;
+    }
+
+    // Default deny all other paths
+    match /{document=**} {
+      allow read, write: if false;
     }
   }
 }
+

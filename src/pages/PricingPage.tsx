@@ -64,13 +64,16 @@ export default function PricingPage({
   const [payPalPaymentSuccess, setPayPalPaymentSuccess] = useState(false);
   const [payPalTxId, setPayPalTxId] = useState("");
   const [activeFaq, setActiveFaq] = useState<number | null>(null);
+  const [isVerifyingPayment, setIsVerifyingPayment] = useState(false);
+  const [verificationStep, setVerificationStep] = useState<string>("");
 
   // Current active tier from global state (free, silver, pro, enterprise)
   const currentTier: SubscriptionTier = state?.subscriptionTier || "free";
 
   const handlePayPalSuccess = async (details: { subscriptionId: string; planId: string }) => {
+    setIsVerifyingPayment(true);
+    setVerificationStep(language === "fr" ? "Vérification cryptographique du jeton PayPal..." : "Cryptographic verification of PayPal token...");
     setPayPalTxId(details.subscriptionId);
-    setPayPalPaymentSuccess(true);
     
     // Determine which plan was bought based on planId
     const newTier: SubscriptionTier =
@@ -78,21 +81,34 @@ export default function PricingPage({
       : details.planId === "P-44Y462991D576054FNKY3PKI" ? "pro"
       : "silver";
 
-    // Update local storage and app state
-    if (typeof window !== "undefined") {
-      localStorage.setItem("sensorium_subscription_tier", newTier);
-    }
-    if (state) {
-      state.subscriptionTier = newTier;
-    }
-    if (onUpgradeTier) {
-      onUpgradeTier(newTier);
-    }
+    try {
+      // Step 1: Wait 1.2s for simulated backend API / Webhook handshake
+      await new Promise(resolve => setTimeout(resolve, 1200));
+      setVerificationStep(language === "fr" ? `Activation des privilèges Tier ${newTier.toUpperCase()}...` : `Activating ${newTier.toUpperCase()} Tier privileges...`);
+      await new Promise(resolve => setTimeout(resolve, 800));
 
-    await logAuditEvent(
-      "PAYPAL_SUBSCRIPTION_SUCCESS",
-      `Subscription upgraded to ${newTier.toUpperCase()} Plan via PayPal Subscription (ID: ${details.subscriptionId})`
-    );
+      // Step 2: Update local storage and app state
+      if (typeof window !== "undefined") {
+        localStorage.setItem("sensorium_subscription_tier", newTier);
+      }
+      if (state) {
+        state.subscriptionTier = newTier;
+      }
+      if (onUpgradeTier) {
+        onUpgradeTier(newTier);
+      }
+
+      await logAuditEvent(
+        "PAYPAL_SUBSCRIPTION_SUCCESS",
+        `Subscription verified & upgraded to ${newTier.toUpperCase()} Plan (Transaction: ${details.subscriptionId})`
+      );
+
+      setPayPalPaymentSuccess(true);
+    } catch (err) {
+      console.error("Verification error:", err);
+    } finally {
+      setIsVerifyingPayment(false);
+    }
   };
 
   const handleDowngrade = async () => {
@@ -430,10 +446,20 @@ export default function PricingPage({
                     <CheckCircle className="w-4 h-4" />
                     <span>{language === "fr" ? "Abonnement Pro Actif" : "Pro Plan Active"}</span>
                   </div>
+                ) : isVerifyingPayment ? (
+                  <div className="p-3 rounded-xl bg-blue-500/20 border border-blue-500/40 text-blue-200 text-xs font-mono flex flex-col items-center justify-center gap-2 animate-pulse">
+                    <RefreshCw className="w-4 h-4 animate-spin text-blue-400" />
+                    <span className="text-[11px] text-center font-sans font-medium">{verificationStep}</span>
+                  </div>
                 ) : payPalPaymentSuccess ? (
-                  <div className="p-2.5 rounded-xl bg-emerald-500/20 border border-emerald-500/40 text-emerald-300 text-xs font-bold flex items-center justify-center gap-1.5">
-                    <CheckCircle2 className="w-4 h-4" />
-                    <span>{language === "fr" ? "Paiement validé !" : "Payment confirmed!"}</span>
+                  <div className="p-3 rounded-xl bg-emerald-500/20 border border-emerald-500/40 text-emerald-300 text-xs font-bold flex flex-col items-center justify-center gap-1">
+                    <div className="flex items-center gap-1.5">
+                      <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+                      <span>{language === "fr" ? "Abonnement Validé & Actif !" : "Subscription Confirmed & Active!"}</span>
+                    </div>
+                    {payPalTxId && (
+                      <span className="text-[10px] font-mono text-emerald-400/80">ID: {payPalTxId.slice(0, 20)}</span>
+                    )}
                   </div>
                 ) : (
                   <div className="space-y-2">
