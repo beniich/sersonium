@@ -1,6 +1,10 @@
 import { Request, Response } from "express";
 import { paypalService } from "../services/paypal.service.js";
 import { rawPrisma } from "../db/prisma.js";
+import {
+  sendEnterpriseActivationEmail,
+  generateActivationKey,
+} from "../services/email.service.js";
 
 /**
  * Exposer la configuration publique du client PayPal (Client ID, mode, devise)
@@ -206,14 +210,48 @@ export async function handlePayPalWebhook(req: Request, res: Response) {
         });
         
         // Log the audit event
+        const activationKey = planLevel === "enterprise" ? generateActivationKey() : null;
         await rawPrisma.auditLog.create({
           data: {
             tenantId: customId,
             action: "SUBSCRIPTION_WEBHOOK_ACTIVATED",
             resource: "Organization",
-            details: JSON.stringify({ planId, status, subscriptionId }),
+            details: JSON.stringify({ planId, planLevel, status, subscriptionId, activationKey }),
           },
         });
+
+        // 📧 Send Enterprise Sovereign Activation Email
+        if (planLevel === "enterprise" && activationKey) {
+          try {
+            // Find the org admin user to get their email and name
+            const adminUser = await rawPrisma.user.findFirst({
+              where: { tenantId: customId, role: "admin" },
+              select: { email: true, name: true },
+            });
+
+            if (adminUser?.email) {
+              const orgRecord = await rawPrisma.organization.findUnique({
+                where: { id: customId },
+                select: { name: true },
+              });
+              const clientName = adminUser.name || orgRecord?.name || "Enterprise Client";
+              // Detect locale from name heuristic (fallback fr)
+              const locale: 'fr' | 'en' = 'fr';
+              await sendEnterpriseActivationEmail(
+                adminUser.email,
+                clientName,
+                activationKey,
+                locale
+              );
+              console.info(`[PayPal Webhook] 📧 Enterprise activation email sent to ${adminUser.email}`);
+            } else {
+              console.warn(`[PayPal Webhook] ⚠️ No admin user found for org ${customId} — email skipped.`);
+            }
+          } catch (emailErr: any) {
+            // Non-blocking: log error but don't fail the webhook response
+            console.error(`[PayPal Webhook] ❌ Email send failed: ${emailErr.message}`);
+          }
+        }
       }
     } else if (eventType === "BILLING.SUBSCRIPTION.CANCELLED" || eventType === "BILLING.SUBSCRIPTION.SUSPENDED" || eventType === "BILLING.SUBSCRIPTION.EXPIRED") {
       const resource = event.resource;

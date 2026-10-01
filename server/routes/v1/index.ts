@@ -14,6 +14,8 @@ import strategyRoutes from "./strategy.routes.js";
 import groundingRoutes from "./grounding.routes.js";
 import showcaseRoutes from "./showcase.routes.js";
 import paypalRoutes from "./paypal.routes.js";
+import terminalRoutes from "./terminal.routes.js";
+import complianceRoutes from "./compliance.routes.js";
 import { apiRateLimiter } from "../../middlewares/rateLimit.middleware.js";
 import { csrfProtection } from "../../middlewares/csrf.middleware.js";
 import { executeSecurityAction } from "../../controllers/security.controller.js";
@@ -36,6 +38,9 @@ router.use("/showcase", showcaseRoutes);
 
 // Passerelle de Paiement et Abonnements PayPal (Ordres, Captures, Webhooks)
 router.use("/paypal", paypalRoutes);
+
+// Hardware Terminal Edge Callbacks & Observability (Installation Success & Heartbeat)
+router.use("/terminal", terminalRoutes);
 
 // Application du bouclier anti-CSRF sur toutes les routes à modification d'état (POST, PUT, PATCH, DELETE)
 router.use(csrfProtection);
@@ -72,6 +77,9 @@ router.use("/ai", aiRoutes);
 
 // Sprint 4: Strategy & OKRs
 router.use("/strategy", strategyRoutes);
+
+// Niveau 3: Sovereign Compliance Registry (Certifications, Permits, Insurances)
+router.use("/compliance", complianceRoutes);
 
 // Grounding (Google Search & Maps)
 router.use("/grounding", groundingRoutes);

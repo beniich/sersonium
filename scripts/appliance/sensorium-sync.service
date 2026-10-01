@@ -1,0 +1,16 @@
+[Unit]
+Description=Sensorium Compliance Registry Mirror Sync (Niveau 3)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+User=sensorium
+WorkingDirectory=/opt/sensorium/appliance
+ExecStart=/usr/bin/python3 /opt/sensorium/appliance/sync_compliance.py
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=sensorium-sync
+
+[Install]
+WantedBy=multi-user.target

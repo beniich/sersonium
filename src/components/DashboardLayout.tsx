@@ -44,6 +44,7 @@ import { logout } from "../firebase";
 import SensoriumLogo from "./SensoriumLogo";
 import QuickSetupDrawer from "./QuickSetupDrawer";
 import SubscriptionPricingModal from "./SubscriptionPricingModal";
+import TerminalStatusBadge from "./TerminalStatusBadge";
 
 export interface SidebarServiceItem {
   id: string;
@@ -194,6 +195,7 @@ export const SENSORIUM_SERVICE_SUITE: SidebarServiceGroup[] = [
     name: "Governance & Strategy",
     icon: Target,
     items: [
+      { id: "strat-compliance", label: "Registre de Conformité Souverain", page: "compliance", badge: "Sync", badgeType: "live", keywords: "registre conformite iso permis assurances sovereign sync certifs fleet" },
       { id: "strat-1", label: "Strategic Objectives (OKRs)", page: "strategy", keywords: "okr kpi tracking strategic vision performance" },
       { id: "strat-2", label: "SENSORIUM Brand Identity", page: "brand-vision", keywords: "brand vision guidelines identity logo presskit" },
       { id: "ad-campaigns", label: "Campaigns & Visibility", page: "ad-campaigns", keywords: "campaigns billboard communication ads" }
@@ -387,6 +389,9 @@ export default function DashboardLayout(props: any) {
               </button>
             )}
           </div>
+
+          {/* Zero-Config Edge Terminal Hardware Badge */}
+          <TerminalStatusBadge />
 
           {/* Quick Switch to Vitrine */}
           {onReturnToPortal && (

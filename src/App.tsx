@@ -17,6 +17,7 @@ import AdCampaignsPage from "./pages/AdCampaignsPage";
 import PricingPage from "./pages/PricingPage";
 import PublicPortal from "./pages/PublicPortal";
 import KafkaMonitor from "./components/KafkaMonitor";
+import ComplianceManager from "./pages/admin/ComplianceManager";
 import { Loader2 } from "lucide-react";
 import { useGlobalState } from "./hooks/useGlobalState";
 import { initAuth, googleSignIn, logout } from "./firebase";
@@ -419,6 +420,7 @@ export default function App() {
     switch (activePage) {
       case "overview": return <OverviewPage {...commonProps} />;
       case "strategy": return <StrategyPage {...commonProps} />;
+      case "compliance": return <ComplianceManager isDark={isDark} />;
       case "brand-vision": return <BrandVisionPage isDark={isDark} />;
       case "ad-campaigns": return <AdCampaignsPage isDark={isDark} />;
       case "security": return <SecurityPage {...commonProps} />;

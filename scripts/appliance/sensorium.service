@@ -1,0 +1,26 @@
+[Unit]
+Description=Sensorium Sovereign Edge AI Appliance
+After=network.target avahi-daemon.service dnsmasq.service
+Wants=avahi-daemon.service
+
+[Service]
+Type=simple
+User=sensorium
+WorkingDirectory=/opt/sensorium/appliance
+ExecStart=/usr/bin/npm start
+Restart=always
+RestartSec=3
+Environment=NODE_ENV=production
+Environment=PORT=3000
+Environment=APPLIANCE_MODE=SOVEREIGN_EDGE
+Environment=AI_MODEL=llama3.1-8b-quantized
+Environment=DATABASE_URL=file:/opt/sensorium/data/edge.db
+
+# Sandboxing & Security hardening
+ProtectSystem=full
+ProtectHome=read-only
+NoNewPrivileges=true
+LimitNOFILE=65536
+
+[Install]
+WantedBy=multi-user.target

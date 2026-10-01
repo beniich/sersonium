@@ -1,0 +1,11 @@
+[Unit]
+Description=Run Sensorium Sovereign Compliance Sync every 6 hours
+
+[Timer]
+OnBootSec=2min
+OnUnitActiveSec=6h
+Unit=sensorium-sync.service
+Persistent=true
+
+[Install]
+WantedBy=timers.target

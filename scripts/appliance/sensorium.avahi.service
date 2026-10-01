@@ -1,0 +1,20 @@
+<?xml version="1.0" standalone="no"?>
+<!DOCTYPE service-group SYSTEM "avahi-service.dtd">
+<!--
+  Avahi mDNS Service Announcement
+  Install at: /etc/avahi/services/sensorium.service
+  Allows automatic discovery via: http://sensorium.local:3000
+-->
+<service-group>
+  <name replace-wildcards="yes">Sensorium Sovereign Edge AI (%h)</name>
+  <service>
+    <type>_http._tcp</type>
+    <port>3000</port>
+    <txt-record>vendor=Sensorium AI</txt-record>
+    <txt-record>hardware=Silicium-X1-NPU</txt-record>
+    <txt-record>firmware=2.4.0-sentry</txt-record>
+    <txt-record>tops=240</txt-record>
+    <txt-record>security=ZeroTrust-HSM</txt-record>
+    <txt-record>network=RNDIS-USB</txt-record>
+  </service>
+</service-group>

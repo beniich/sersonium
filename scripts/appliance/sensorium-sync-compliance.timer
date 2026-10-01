@@ -1,0 +1,22 @@
+# SENSORIUM — Sovereign Compliance Sync Timer
+# Déclenche le sync toutes les 6 heures (au démarrage + récurrent)
+# ════════════════════════════════════════════════════════════════════════════════
+# sudo systemctl enable --now sensorium-sync-compliance.timer
+
+[Unit]
+Description=SENSORIUM — Sync Compliance Registry every 6 hours
+Requires=sensorium-sync-compliance.service
+
+[Timer]
+# Run immediately on timer activation (startup sync)
+OnBootSec=2min
+# Then every 6 hours
+OnUnitActiveSec=6h
+# Ensure accuracy within 5 minutes (power-saver friendly)
+AccuracySec=5min
+# Persist timer across reboots
+Persistent=true
+Unit=sensorium-sync-compliance.service
+
+[Install]
+WantedBy=timers.target

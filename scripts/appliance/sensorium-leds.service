@@ -1,0 +1,25 @@
+﻿[Unit]
+Description=Sensorium Physical LED Controller (Hardware UX)
+After=network.target sensorium.service
+Wants=sensorium.service
+BindsTo=sensorium.service
+
+[Service]
+Type=simple
+User=sensorium
+WorkingDirectory=/opt/sensorium/appliance
+ExecStartPre=/bin/sleep 2
+ExecStart=/usr/bin/python3 /opt/sensorium/appliance/led_controller.py
+Restart=always
+RestartSec=2
+
+# GPIO permissions
+SupplementaryGroups=gpio dialout
+
+# Logging
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=sensorium-leds
+
+[Install]
+WantedBy=multi-user.target

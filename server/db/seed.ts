@@ -160,6 +160,119 @@ export async function seedDatabase() {
       });
     }
 
+    // 4. Initialiser le Registre de Conformité Souverain (Niveau 3)
+    const countCerts = await rawPrisma.certification.count();
+    if (countCerts === 0) {
+      console.log("[DB Seed] Seeding sovereign compliance registry (Certifications, Permits, Insurances)...");
+      const defaultTenant = "tenant_enterprise_lacaza";
+
+      // Ensure tenant organization exists
+      await rawPrisma.organization.upsert({
+        where: { id: defaultTenant },
+        update: {},
+        create: {
+          id: defaultTenant,
+          name: "LACAZA ClouIndustrie Group",
+          slug: "lacaza-group",
+          plan: "enterprise",
+          subscriptionStatus: "active",
+        },
+      });
+
+      // Seed Certifications
+      await rawPrisma.certification.createMany({
+        data: [
+          {
+            tenantId: defaultTenant,
+            name: "ISO 39001 (Sécurité Routière)",
+            issuer: "AFNOR Certification",
+            expiry: new Date("2026-12-31"),
+            status: "Valid",
+            fileUrl: "/docs/cert-iso39001-lacaza.pdf",
+          },
+          {
+            tenantId: defaultTenant,
+            name: "ISO 14001 (Environnement & Carbone)",
+            issuer: "Bureau Veritas",
+            expiry: new Date("2025-11-15"),
+            status: "Valid",
+            fileUrl: "/docs/cert-iso14001.pdf",
+          },
+          {
+            tenantId: defaultTenant,
+            name: "FIPS 140-3 Cryptographic HSM",
+            issuer: "NIST / ANSSI",
+            expiry: new Date("2025-06-30"),
+            status: "Warning",
+            fileUrl: "/docs/fips-140-3-hsm.pdf",
+          },
+        ],
+      });
+
+      // Seed Permis
+      await rawPrisma.permit.createMany({
+        data: [
+          {
+            tenantId: defaultTenant,
+            driver: "Jean Dupont",
+            category: "CE (Poids Lourds & Super-Lourds)",
+            expiry: new Date("2024-06-15"),
+            status: "Warning",
+          },
+          {
+            tenantId: defaultTenant,
+            driver: "Marc Vasseur",
+            category: "ADR (Matières Dangereuses Cl. 3)",
+            expiry: new Date("2027-04-10"),
+            status: "Valid",
+          },
+          {
+            tenantId: defaultTenant,
+            driver: "Sophie Lambert",
+            category: "C (Poids Lourds Urbain)",
+            expiry: new Date("2026-09-01"),
+            status: "Valid",
+          },
+        ],
+      });
+
+      // Seed Assurances
+      await rawPrisma.insurance.createMany({
+        data: [
+          {
+            tenantId: defaultTenant,
+            company: "AXA Entreprise Flotte",
+            policy: "POL-AXA-998244-FR",
+            coverageType: "Tous Risques Flotte + Marchandises",
+            vehicle: "Camion Silicium X1 (Lyon)",
+            premium: 2450.0,
+            expiry: new Date("2024-12-31"),
+            status: "Valid",
+          },
+          {
+            tenantId: defaultTenant,
+            company: "Allianz Global Corporate",
+            policy: "ALL-7781-EDGE",
+            coverageType: "Responsabilité Civile Exploitation & Cyber",
+            vehicle: "Flotte Logistique Paris-Nord",
+            premium: 3800.0,
+            expiry: new Date("2025-08-30"),
+            status: "Valid",
+          },
+          {
+            tenantId: defaultTenant,
+            company: "Groupama Transport",
+            policy: "GP-CAM-4201",
+            coverageType: "Tiers Collision & Rapatriement",
+            vehicle: "Camion 42 (Immobilisation Test)",
+            premium: 1100.0,
+            expiry: new Date("2024-05-01"),
+            status: "Expired",
+          },
+        ],
+      });
+    }
+
     console.log("[DB Seed] Multi-tenant initial data ready.");
   } catch (err) {
     console.error("[DB Seed] Seeding error:", err);

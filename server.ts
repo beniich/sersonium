@@ -55,6 +55,22 @@ async function startServer() {
     res.sendFile(path.join(process.cwd(), "public", "privacy.html"));
   });
 
+  // Zero-Config Physical Edge Appliance Discovery & Healthcheck (sensorium.local)
+  app.get(["/healthcheck", "/api/v1/healthcheck"], (req, res) => {
+    res.json({
+      status: "ok",
+      appliance: "Sensorium Silicium X1 Edge Node",
+      mode: process.env.APPLIANCE_MODE || "SOVEREIGN_EDGE",
+      hostname: "sensorium.local",
+      firmwareVersion: "2.4.0-sentry",
+      npuActive: true,
+      tops: 240,
+      usbEthernetIp: "192.168.7.1",
+      uptimeSeconds: Math.floor(process.uptime()),
+      timestamp: new Date().toISOString()
+    });
+  });
+
   // Vite middleware for development or fallback if dist not built
   const distPath = path.join(process.cwd(), "dist");
   const distIndexHtml = path.join(distPath, "index.html");

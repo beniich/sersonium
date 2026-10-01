@@ -1,0 +1,62 @@
+# SENSORIUM — Sovereign Compliance Sync Engine v3
+# Systemd Service Unit
+# ════════════════════════════════════════════════════════════════════════════════
+# Installation:
+#   sudo cp sensorium-sync-compliance.service /etc/systemd/system/
+#   sudo cp sensorium-sync-compliance.timer /etc/systemd/system/
+#   sudo systemctl daemon-reload
+#   sudo systemctl enable --now sensorium-sync-compliance.timer
+#
+# Vérification:
+#   sudo systemctl status sensorium-sync-compliance.timer
+#   journalctl -u sensorium-sync-compliance.service -f
+
+[Unit]
+Description=SENSORIUM — Sovereign Compliance Sync Engine
+Documentation=https://sensorium.app/docs/terminal/sync-compliance
+After=network-online.target ollama.service
+Wants=network-online.target
+Requires=network-online.target
+
+[Service]
+Type=oneshot
+User=sensorium
+Group=sensorium
+
+# Working directory
+WorkingDirectory=/opt/sensorium
+
+# Environment variables (override in /etc/sensorium/env)
+EnvironmentFile=-/etc/sensorium/env
+Environment="SENSORIUM_API_URL=https://sensorium.app/api/v1"
+Environment="SENSORIUM_HARDWARE_ID=SNSR-SILICIUM-X1"
+
+# Run sync once and exit (timer handles recurrence)
+ExecStart=/opt/sensorium/venv/bin/python3 /opt/sensorium/scripts/sync_compliance.py --once --verbose
+
+# Output to journal
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=sensorium-sync
+
+# Graceful timeout
+TimeoutStartSec=120
+TimeoutStopSec=30
+
+# Restart on failure (not needed with timer, but good practice)
+Restart=no
+
+# Security hardening
+NoNewPrivileges=yes
+PrivateTmp=yes
+ProtectSystem=strict
+ReadWritePaths=/opt/sensorium/data /opt/sensorium/logs
+ProtectHome=yes
+RestrictNamespaces=yes
+RestrictRealtime=yes
+RestrictSUIDSGID=yes
+LockPersonality=yes
+MemoryDenyWriteExecute=no
+
+[Install]
+WantedBy=multi-user.target

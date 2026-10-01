@@ -31,6 +31,10 @@ model Organization {
   wafEvents   WafSecurityEvent[]
   strategicObjectives StrategicObjective[]
   kpis        Kpi[]
+  certifications Certification[]
+  permits     Permit[]
+  insurances  Insurance[]
+  needsSync   Boolean   @default(false)
 
   @@map("organizations")
 }
@@ -277,5 +281,58 @@ model KpiHistory {
 
   @@index([kpiId])
   @@map("kpi_history")
+}
+
+model Certification {
+  id          String   @id @default(uuid())
+  tenantId    String
+  name        String
+  issuer      String
+  issuedAt    DateTime @default(now())
+  expiry      DateTime
+  fileUrl     String?
+  status      String   @default("Valid") // Valid, Warning, Expired
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  organization Organization @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId])
+  @@map("certifications")
+}
+
+model Permit {
+  id          String   @id @default(uuid())
+  tenantId    String
+  driver      String
+  category    String   // C, CE, D, B, ADR, etc.
+  expiry      DateTime
+  status      String   @default("Valid") // Valid, Warning, Expired
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  organization Organization @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId])
+  @@map("permits")
+}
+
+model Insurance {
+  id          String   @id @default(uuid())
+  tenantId    String
+  company     String   // AXA, Allianz, etc.
+  policy      String   // Police number
+  coverageType String  @default("Tous Risques Flotte")
+  vehicle     String?  // Camion X1, Flotte 42, etc.
+  premium     Float?
+  expiry      DateTime
+  status      String   @default("Valid") // Valid, Warning, Expired
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  organization Organization @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId])
+  @@map("insurances")
 }
 

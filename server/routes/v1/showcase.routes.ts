@@ -1,7 +1,19 @@
 import { Router } from "express";
 import { GoogleGenAI } from "@google/genai";
+import {
+  getLiveFxRates,
+  calculateFxConversion,
+  simulateCardAction,
+} from "../../controllers/showcase.fx.controller.js";
 
 const router = Router();
+
+/**
+ * Public Showcase FX & Multi-Currency Simulation Routes
+ */
+router.get("/fx/rates", getLiveFxRates);
+router.post("/fx/convert", calculateFxConversion);
+router.post("/card/action", simulateCardAction);
 
 /**
  * Public Showcase AI Inference Engine
