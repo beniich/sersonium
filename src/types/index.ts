@@ -82,3 +82,10 @@ export interface UserProfile {
   role: 'SUPER_ADMIN' | 'FACILITY_LEAD' | 'FIELD_TECHNICIAN' | 'CSRD_AUDITOR';
   organization: string;
 }
+
+export interface GlobalState {
+  currentPage: string;
+  sidebarOpen: boolean;
+  notifications: number;
+  userProfile?: UserProfile;
+}

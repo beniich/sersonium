@@ -14,8 +14,8 @@ interface TactileHeaderProps {
   activePath: ActiveNavPath;
   onNavigate: (path: ActiveNavPath) => void;
   onLaunchCockpit: () => void;
-  onLaunchDashboard?: () => void;
   onOpenVault: () => void;
+  onLaunchDashboard?: () => void;
   tokenCountdown?: string;
 }
 
@@ -23,8 +23,8 @@ export const TactileHeader: React.FC<TactileHeaderProps> = ({
   activePath,
   onNavigate,
   onLaunchCockpit,
-  onLaunchDashboard,
   onOpenVault,
+  onLaunchDashboard,
   tokenCountdown = '23:59:59',
 }) => {
   return (
@@ -167,22 +167,21 @@ export const TactileHeader: React.FC<TactileHeaderProps> = ({
             </div>
           </div>
 
-          {/* Return/Enter Workspace Dashboard button */}
-          <button
-            onClick={onLaunchDashboard}
-            className="tactile-btn px-3.5 py-2 rounded-xl hidden sm:flex items-center gap-2 text-[#1b1b20] hover:text-[#630ed4] font-['Space_Grotesk'] text-[13px] font-bold cursor-pointer transition-all shadow-sm border border-slate-200/80"
-            title="Accéder au Console CAFM & Multi-Tenant Dashboard"
-          >
-            <span className="material-symbols-outlined text-[18px] text-[#630ed4]">dashboard</span>
-            <span>Dashboard</span>
-          </button>
-
+          {onLaunchDashboard && (
+            <button
+              onClick={onLaunchDashboard}
+              className="tactile-btn px-4 py-2.5 rounded-xl flex items-center gap-2 text-[#1b1b20] font-['Space_Grotesk'] text-[13px] font-bold hover:text-[#630ed4] active:scale-95 transition-all cursor-pointer"
+            >
+              <span className="material-symbols-outlined text-[18px]">dashboard</span>
+              <span className="whitespace-nowrap hidden sm:inline">Dashboard</span>
+            </button>
+          )}
           <button
             onClick={onLaunchCockpit}
             className="tactile-btn-primary px-4 py-2.5 rounded-xl flex items-center gap-2 text-white font-['Space_Grotesk'] text-[15px] font-bold hover:brightness-105 active:scale-95 transition-all cursor-pointer shadow-md"
           >
             <span className="material-symbols-outlined text-[18px]">sensors</span>
-            <span className="whitespace-nowrap">Cockpit 3D</span>
+            <span className="whitespace-nowrap">Launch Cockpit</span>
           </button>
         </div>
       </div>
