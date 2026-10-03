@@ -239,3 +239,40 @@ body:not(.dark),
 .animate-video-ambient {
   animation: ambientZoom 12s ease-in-out infinite alternate;
 }
+
+/* BeeCarbonat Tactile Neo-Industrial Theme */
+.tactile-plate {
+  background: #f5f2fa;
+  box-shadow: 6px 6px 14px rgba(112, 104, 133, 0.18), -6px -6px 14px rgba(255, 255, 255, 0.95);
+}
+
+.tactile-debossed {
+  background: #efedf4;
+  box-shadow: inset 3px 3px 6px rgba(112, 104, 133, 0.22), inset -3px -3px 6px rgba(255, 255, 255, 0.9);
+}
+
+.tactile-btn {
+  background: #f5f2fa;
+  box-shadow: 4px 4px 10px rgba(112, 104, 133, 0.2), -4px -4px 10px #ffffff, inset 0 1px 0 rgba(255, 255, 255, 0.8);
+}
+
+.tactile-btn-primary {
+  background: linear-gradient(135deg, #7c3aed 0%, #630ed4 100%);
+  box-shadow: 4px 4px 12px rgba(99, 14, 212, 0.35), -2px -2px 6px rgba(255, 255, 255, 0.7), inset 0 1px 1px rgba(255, 255, 255, 0.4);
+}
+
+.dark .tactile-plate {
+  background: #14141c;
+  box-shadow: 6px 6px 14px rgba(0, 0, 0, 0.5), -6px -6px 14px rgba(255, 255, 255, 0.03);
+}
+
+.dark .tactile-debossed {
+  background: #0d0d12;
+  box-shadow: inset 3px 3px 6px rgba(0, 0, 0, 0.6), inset -3px -3px 6px rgba(255, 255, 255, 0.04);
+}
+
+.dark .tactile-btn {
+  background: #181824;
+  box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.5), -4px -4px 10px rgba(255, 255, 255, 0.03);
+}
+
