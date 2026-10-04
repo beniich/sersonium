@@ -135,6 +135,8 @@ export const TactileHeader: React.FC<TactileHeaderProps> = ({
 
         {/* Right action block */}
         <div className="flex items-center gap-3 shrink-0">
+
+          {/* Rotation Token (vault) */}
           <div
             onClick={onOpenVault}
             className="tactile-debossed px-3 py-1.5 rounded-xl hidden lg:flex items-center gap-2 cursor-pointer hover:bg-[#e9e7ee] transition-colors"
@@ -151,15 +153,16 @@ export const TactileHeader: React.FC<TactileHeaderProps> = ({
             </div>
           </div>
 
+          {/* User badge */}
           <div
             onClick={onOpenVault}
-            className="tactile-btn px-3 py-1.5 rounded-xl flex items-center gap-2 cursor-pointer active:scale-95 transition-all"
+            className="tactile-btn px-3 py-1.5 rounded-xl hidden md:flex items-center gap-2 cursor-pointer active:scale-95 transition-all"
             title="Credential Verification"
           >
             <div className="w-8 h-8 rounded-full bg-[#630ed4] flex items-center justify-center text-white">
               <span className="material-symbols-outlined text-[18px]">person</span>
             </div>
-            <div className="hidden sm:flex flex-col text-left">
+            <div className="hidden lg:flex flex-col text-left">
               <span className="font-['Space_Grotesk'] text-[11px] text-[#1b1b20] font-bold">
                 Dr. A. Mercer
               </span>
@@ -167,22 +170,37 @@ export const TactileHeader: React.FC<TactileHeaderProps> = ({
             </div>
           </div>
 
-          {onLaunchDashboard && (
-            <button
-              onClick={onLaunchDashboard}
-              className="tactile-btn px-4 py-2.5 rounded-xl flex items-center gap-2 text-[#1b1b20] font-['Space_Grotesk'] text-[13px] font-bold hover:text-[#630ed4] active:scale-95 transition-all cursor-pointer"
-            >
-              <span className="material-symbols-outlined text-[18px]">dashboard</span>
-              <span className="whitespace-nowrap hidden sm:inline">Dashboard</span>
-            </button>
-          )}
+          {/* Cockpit demo button */}
           <button
             onClick={onLaunchCockpit}
-            className="tactile-btn-primary px-4 py-2.5 rounded-xl flex items-center gap-2 text-white font-['Space_Grotesk'] text-[15px] font-bold hover:brightness-105 active:scale-95 transition-all cursor-pointer shadow-md"
+            className="tactile-btn px-3 py-2 rounded-xl flex items-center gap-1.5 text-[#4a4455] font-['Space_Grotesk'] text-[13px] font-semibold hover:text-[#1b1b20] active:scale-95 transition-all cursor-pointer"
           >
-            <span className="material-symbols-outlined text-[18px]">sensors</span>
-            <span className="whitespace-nowrap">Launch Cockpit</span>
+            <span className="material-symbols-outlined text-[16px]">sensors</span>
+            <span className="whitespace-nowrap hidden sm:inline">Cockpit</span>
           </button>
+
+          {/* ✦ MODE PRO — SENSORIUM — primary bypass CTA */}
+          {onLaunchDashboard && (
+            <button
+              id="btn-mode-pro-sensorium"
+              onClick={onLaunchDashboard}
+              className="group relative flex items-center gap-2 px-4 py-2.5 rounded-xl font-['Space_Grotesk'] text-[13px] font-bold text-white cursor-pointer active:scale-95 transition-all overflow-hidden shadow-lg hover:shadow-[0_0_24px_rgba(99,14,212,0.45)]"
+              style={{
+                background: 'linear-gradient(135deg, #7c3aed 0%, #4f46e5 60%, #2563eb 100%)',
+              }}
+              title="Accéder au dashboard SENSORIUM Pro"
+            >
+              {/* shimmer */}
+              <span className="pointer-events-none absolute inset-0 bg-white/10 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-500 skew-x-12" />
+              {/* crown icon */}
+              <span className="material-symbols-outlined text-[16px] text-yellow-300">workspace_premium</span>
+              <span className="whitespace-nowrap hidden sm:inline">Mode Pro</span>
+              {/* pill badge */}
+              <span className="hidden md:inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-full bg-white/20 text-[9px] tracking-widest font-bold uppercase">
+                SENSORIUM
+              </span>
+            </button>
+          )}
         </div>
       </div>
     </header>

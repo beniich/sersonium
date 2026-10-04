@@ -403,15 +403,18 @@ export default function DashboardLayout(props: any) {
           {/* Zero-Config Edge Terminal Hardware Badge */}
           <TerminalStatusBadge />
 
-          {/* Quick Switch to Vitrine */}
+          {/* ← Retour au Site Principal (BeeCarbonat SPIDER) */}
           {onReturnToPortal && (
             <button
+              id="btn-retour-site-principal"
               onClick={onReturnToPortal}
-              className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 bg-slate-100 hover:bg-slate-200 dark:bg-white/[0.04] dark:hover:bg-white/[0.08] border border-slate-200 dark:border-white/[0.07] text-slate-700 dark:text-neutral-300 hover:text-slate-900 dark:hover:text-white rounded-full text-xs font-medium transition-colors cursor-pointer min-h-[36px]"
-              title="Display showcase portal"
+              className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold transition-all cursor-pointer min-h-[36px] bg-violet-500/10 hover:bg-violet-500/20 border border-violet-500/30 text-violet-600 dark:text-violet-400 hover:text-violet-700 dark:hover:text-violet-300 group"
+              title="Retourner au site principal SENSORIUM"
             >
-              <Eye className="w-3.5 h-3.5 text-slate-500 dark:text-neutral-400" />
-              <span className="hidden md:inline">{t.header.showcase}</span>
+              <svg xmlns="http://www.w3.org/2000/svg" className="w-3.5 h-3.5 group-hover:-translate-x-0.5 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
+              </svg>
+              <span className="hidden md:inline">Site principal</span>
             </button>
           )}
 
