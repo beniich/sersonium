@@ -264,12 +264,9 @@ export default function App() {
   }, []);
 
   const [isMockMode, setIsMockMode] = useState<boolean>(() => {
-    // In production build, always force mock mode OFF and clear stale cache
-    if (import.meta.env.PROD) {
-      try { localStorage.removeItem("cafm_mock_mode"); } catch {}
-      return false;
-    }
     if (typeof window !== "undefined") {
+      // /dashboard URL → auto-enable mock mode for direct access
+      if (window.location.pathname === "/dashboard") return true;
       try {
         const stored = localStorage.getItem("cafm_mock_mode");
         if (stored !== null) return stored === "true";
@@ -280,6 +277,14 @@ export default function App() {
     // Default to false so landing page is shown to visitors
     return false;
   });
+
+  // Auto-redirect /dashboard → mock mode dashboard
+  useEffect(() => {
+    if (location.pathname === "/dashboard" && !isMockMode) {
+      setIsMockMode(true);
+      try { localStorage.setItem("cafm_mock_mode", "true"); } catch {}
+    }
+  }, [location.pathname]);
 
   const { 
     state, 
@@ -374,10 +379,12 @@ export default function App() {
     handleEnterMockMode();
   };
 
-  // Show portal if: no user (not logged in), OR in mock mode without user, OR user exists but subscription not yet active (show portal with auth info)
-  // Authenticated PRO users + isMockMode explicitly enabled → go to dashboard
+  // Portal logic:
+  // - isMockMode=true  → always show dashboard (demo/dev bypass)
+  // - user authenticated → always show dashboard
+  // - otherwise         → show public portal
   const isSubscribedPro = state?.subscriptionTier === "pro";
-  const shouldShowPortal = !user || (!isMockMode && !isSubscribedPro);
+  const shouldShowPortal = !isMockMode && !user && !isSubscribedPro;
 
   if (shouldShowPortal && !loading) {
     return (
