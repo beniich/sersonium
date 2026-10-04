@@ -12,6 +12,7 @@ import { createServer as createViteServer } from "vite";
 import apiRouterV1 from "./server/routes/v1/index.js";
 import { seedDatabase } from "./server/db/seed.js";
 import { kafkaService } from "./server/services/kafka.service.js";
+import { WafService } from "./server/services/waf.service.js";
 import { 
   securityHeaders, 
   payloadSanitizer,
@@ -38,10 +39,9 @@ async function startServer() {
   app.use(express.json({ limit: "10mb" }));
   app.use(express.urlencoded({ extended: true, limit: "10mb" }));
 
-  // Intercepteur WAF temps réel & Liste noire
+  // Intercepteur WAF temps réel & Liste noire (ESM static import - no require)
   app.use((req, res, next) => {
     const clientIp = (req.headers["x-forwarded-for"] as string)?.split(",")[0] || req.socket.remoteAddress || "127.0.0.1";
-    const { WafService } = require("./server/services/waf.service.js");
     const check = WafService.inspectRequest(clientIp, req.path, req.body);
     if (check.isMalicious) {
       console.warn(`🚨 [WAF SHIELD] Requête bloquée depuis ${clientIp} (${check.type}) sur ${req.path}`);
