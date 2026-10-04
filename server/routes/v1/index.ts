@@ -16,6 +16,7 @@ import showcaseRoutes from "./showcase.routes.js";
 import paypalRoutes from "./paypal.routes.js";
 import terminalRoutes from "./terminal.routes.js";
 import complianceRoutes from "./compliance.routes.js";
+import iotRoutes from "./iot.routes.js";
 import { apiRateLimiter } from "../../middlewares/rateLimit.middleware.js";
 import { csrfProtection } from "../../middlewares/csrf.middleware.js";
 import { executeSecurityAction } from "../../controllers/security.controller.js";
@@ -83,6 +84,9 @@ router.use("/compliance", complianceRoutes);
 
 // Grounding (Google Search & Maps)
 router.use("/grounding", groundingRoutes);
+
+// IoT Telemetry Stream (Kafka)
+router.use("/iot", iotRoutes);
 
 // Security Actions
 router.post("/security/action", executeSecurityAction);

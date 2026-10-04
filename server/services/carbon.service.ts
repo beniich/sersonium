@@ -71,4 +71,46 @@ export class CarbonService {
   static async deleteEmission(tenantPrisma: TenantPrismaClient, id: string) {
     return this.crud.delete(tenantPrisma, id);
   }
+
+  /**
+   * Calcul de l'empreinte carbone multi-énergie temps réel (Facteurs ADEME / GHG Protocol)
+   */
+  static calculateFootprint(consumption: { electricityKwh: number; gasKwh: number; fuelLitres: number }) {
+    const EMISSION_FACTORS = {
+      electricity_fr: 0.056, // France (0.056 kg CO2e / kWh)
+      gas_natural: 0.202,    // Gaz naturel (0.202 kg CO2e / kWh)
+      diesel: 2.670,         // Diesel (2.670 kg CO2e / L)
+    };
+
+    const scope1Kg = (consumption.gasKwh * EMISSION_FACTORS.gas_natural) + (consumption.fuelLitres * EMISSION_FACTORS.diesel);
+    const scope2Kg = consumption.electricityKwh * EMISSION_FACTORS.electricity_fr;
+    const totalCarbonKg = scope1Kg + scope2Kg;
+
+    return {
+      totalTons: +(totalCarbonKg / 1000).toFixed(3),
+      totalKg: Math.round(totalCarbonKg),
+      breakdown: {
+        scope1: Math.round(scope1Kg),
+        scope2: Math.round(scope2Kg)
+      },
+      unit: "tCO2e",
+      timestamp: new Date().toISOString()
+    };
+  }
+
+  /**
+   * Analyse de la qualité de l'air intérieur (Norme environnementale WELL v2)
+   */
+  static checkAirQuality(co2Ppm: number, vocPpb: number) {
+    const isCompliant = co2Ppm < 800 && vocPpb < 500;
+    return {
+      isCompliant,
+      co2Ppm,
+      vocPpb,
+      status: isCompliant ? "EXCELLENT" : "VENTILATION_REQUIRED",
+      recommendation: co2Ppm > 800 
+        ? "Augmenter le débit de renouvellement d'air frais (VMC CVC) de +20%" 
+        : "Qualité d'air optimale conforme WELL v2"
+    };
+  }
 }

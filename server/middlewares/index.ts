@@ -3,7 +3,8 @@ import { Request, Response, NextFunction } from "express";
 export { 
   securityHeaders, 
   payloadSanitizer, 
-  antiReplayGuard 
+  antiReplayGuard,
+  secureRoute
 } from "./security.middleware.js";
 export { 
   authenticateToken, 

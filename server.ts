@@ -6,6 +6,8 @@ import express from "express";
 import cookieParser from "cookie-parser";
 import path from "path";
 import fs from "fs";
+import http from "http";
+import { Server as SocketIOServer } from "socket.io";
 import { createServer as createViteServer } from "vite";
 import apiRouterV1 from "./server/routes/v1/index.js";
 import { seedDatabase } from "./server/db/seed.js";
@@ -35,13 +37,66 @@ async function startServer() {
   app.use(cookieParser());
   app.use(express.json({ limit: "10mb" }));
   app.use(express.urlencoded({ extended: true, limit: "10mb" }));
+
+  // Intercepteur WAF temps réel & Liste noire
+  app.use((req, res, next) => {
+    const clientIp = (req.headers["x-forwarded-for"] as string)?.split(",")[0] || req.socket.remoteAddress || "127.0.0.1";
+    const { WafService } = require("./server/services/waf.service.js");
+    const check = WafService.inspectRequest(clientIp, req.path, req.body);
+    if (check.isMalicious) {
+      console.warn(`🚨 [WAF SHIELD] Requête bloquée depuis ${clientIp} (${check.type}) sur ${req.path}`);
+      return res.status(403).json({
+        success: false,
+        error: "Security Violation: Bloqué par le pare-feu applicatif SENSORIUM WAF",
+        threatType: check.type
+      });
+    }
+    next();
+  });
+
   app.use(payloadSanitizer);
   app.use(antiReplayGuard);
   app.use(requestLogger);
   app.use(auditMiddleware);
 
+  // Endpoint d'Observabilité Prometheus (/metrics)
+  app.get("/metrics", async (req, res) => {
+    const { metricsCollector } = await import("./server/services/metrics.service.js");
+    const snapshot = metricsCollector.getSnapshot();
+    const prometheusFormat = `# HELP sensorium_http_requests_total Nombre total de requêtes HTTP
+# TYPE sensorium_http_requests_total counter
+sensorium_http_requests_total ${snapshot.http.totalRequests}
+
+# HELP sensorium_http_active_connections Connexions HTTP actives
+# TYPE sensorium_http_active_connections gauge
+sensorium_http_active_connections ${snapshot.http.activeConnections}
+
+# HELP sensorium_security_threats_blocked Menaces bloquées par le WAF
+# TYPE sensorium_security_threats_blocked counter
+sensorium_security_threats_blocked ${snapshot.security.rateLimitHits}
+
+# HELP sensorium_system_uptime_seconds Uptime du serveur
+# TYPE sensorium_system_uptime_seconds gauge
+sensorium_system_uptime_seconds ${snapshot.uptimeSeconds}
+`;
+    res.setHeader("Content-Type", "text/plain; version=0.0.4");
+    res.send(prometheusFormat);
+  });
+
   // 2. Montage des APIs V1
   app.use("/api/v1", apiRouterV1);
+
+  // Route Webhook PayPal directe (sans protection CSRF de session)
+  app.post("/webhooks/paypal", express.json(), async (req, res) => {
+    try {
+      const { payPalSubscriptionService } = await import("./server/services/paypal.subscription.service.js");
+      await payPalSubscriptionService.handleWebhook(req.body);
+      res.status(200).send("Event Received");
+    } catch (error: any) {
+      console.error("[PayPal Direct Webhook Error]:", error);
+      res.status(500).send("Internal Error");
+    }
+  });
 
   // In-memory simulation states for Spider CAFM Digital Twin
   const valveState = {
@@ -218,8 +273,65 @@ async function startServer() {
   // Global Error Handler
   app.use(errorHandler);
 
-  app.listen(PORT, "0.0.0.0", () => {
-    console.log(`[Server] Jeton Edge API Platform running on port ${PORT}`);
+  const httpServer = http.createServer(app);
+
+  // Initialisation Socket.IO pour le Jumeau Numérique 3D
+  const io = new SocketIOServer(httpServer, {
+    cors: { origin: "*", methods: ["GET", "POST"] },
+  });
+
+  io.on("connection", (socket) => {
+    console.log(`🔌 [Socket.IO] Client connecté au Jumeau Numérique 3D: ${socket.id}`);
+
+    // Envoi immédiat de l'état initial
+    socket.emit("telemetry_update", {
+      assetId: "pump_01",
+      value: 68.4,
+      unit: "°C",
+      status: "NOMINAL",
+      timestamp: Date.now()
+    });
+
+    // Événements Espace Collaboratif Workspace
+    socket.on("join_workspace", ({ workspaceId, userId }) => {
+      socket.join(workspaceId || "default_workspace");
+      console.log(`👥 [Workspace] Utilisateur ${userId} a rejoint le salon ${workspaceId}`);
+      io.to(workspaceId || "default_workspace").emit("presence_update", [
+        { userId: "usr-admin", name: "Directeur des Opérations", role: "Manager", viewing: "Supervision Globale" },
+        { userId: "usr-tech", name: "Marc Vasseur", role: "Superviseur CVC", viewing: "Jumeau Numérique 3D - Pompe 01" },
+        { userId: "usr-net", name: "Samira Khelifi", role: "Ingénieur Réseau", viewing: "Cartographie Anycast" },
+      ]);
+    });
+
+    socket.on("new_annotation", (note) => {
+      io.emit("new_annotation", note);
+      console.log(`📝 [Workspace] Nouvelle note déposée sur ${note.assetId}: ${note.text}`);
+    });
+
+    socket.on("team_broadcast", (alert) => {
+      io.emit("team_broadcast", alert);
+      console.log(`📢 [Workspace] Alerte Flash diffusée: ${alert.message}`);
+    });
+
+    socket.on("disconnect", () => {
+      console.log(`🔌 [Socket.IO] Client déconnecté: ${socket.id}`);
+    });
+  });
+
+  // Diffusion périodique de télémétrie IoT pour les maquettes 3D
+  setInterval(() => {
+    const isAnomaly = Math.random() > 0.85;
+    io.emit("telemetry_update", {
+      assetId: "pump_01",
+      value: +(65 + Math.random() * (isAnomaly ? 25 : 8)).toFixed(1),
+      unit: "°C",
+      status: isAnomaly ? "CRITICAL" : "NOMINAL",
+      timestamp: Date.now()
+    });
+  }, 4000);
+
+  httpServer.listen(PORT, "0.0.0.0", () => {
+    console.log(`[Server] Jeton Edge API Platform & WebSocket running on port ${PORT}`);
     console.log(`[Server] Environment: ${process.env.NODE_ENV || "development"}`);
   });
 }

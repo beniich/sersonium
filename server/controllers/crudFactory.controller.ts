@@ -89,8 +89,10 @@ export function createCrudController(
     async create(req: AuthenticatedRequest, res: Response): Promise<void> {
       try {
         const tenantPrisma = req.tenantPrisma!;
+        const userId = req.user?.userId;
+        const reqInfo = { ipAddress: req.ip, userAgent: req.headers["user-agent"] };
         // req.body a déjà été validé et assaini par le middleware Zod
-        const created = await service.create(tenantPrisma, req.body);
+        const created = await service.create(tenantPrisma, userId, req.body, reqInfo);
 
         res.status(201).json({
           success: true,
@@ -117,9 +119,11 @@ export function createCrudController(
     async update(req: AuthenticatedRequest, res: Response): Promise<void> {
       try {
         const tenantPrisma = req.tenantPrisma!;
+        const userId = req.user?.userId;
+        const reqInfo = { ipAddress: req.ip, userAgent: req.headers["user-agent"] };
         const { id } = req.params;
 
-        const updated = await service.update(tenantPrisma, id, req.body);
+        const updated = await service.update(tenantPrisma, userId, id, req.body, reqInfo);
         if (!updated) {
           res.status(404).json({
             success: false,
@@ -153,9 +157,11 @@ export function createCrudController(
     async delete(req: AuthenticatedRequest, res: Response): Promise<void> {
       try {
         const tenantPrisma = req.tenantPrisma!;
+        const userId = req.user?.userId;
+        const reqInfo = { ipAddress: req.ip, userAgent: req.headers["user-agent"] };
         const { id } = req.params;
 
-        const deleted = await service.delete(tenantPrisma, id);
+        const deleted = await service.delete(tenantPrisma, userId, id, reqInfo);
         if (!deleted) {
           res.status(404).json({
             success: false,

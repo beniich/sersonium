@@ -276,3 +276,52 @@ body:not(.dark),
   box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.5), -4px -4px 10px rgba(255, 255, 255, 0.03);
 }
 
+
+/* -- Spider CAFM Palette tokens (from nat---spider-cafm) ------------------- */
+
+.bg-surface { background-color: #fbf8ff; }
+.bg-surface-container { background-color: #efedf4; }
+.bg-surface-container-low { background-color: #f5f2fa; }
+.bg-surface-container-high { background-color: #e9e7ee; }
+.bg-surface-container-highest { background-color: #e3e1e8; }
+.bg-surface-container-lowest { background-color: #ffffff; }
+.bg-primary-cafm { background-color: #630ed4; }
+.bg-primary-container-cafm { background-color: #7c3aed; }
+.bg-primary-fixed { background-color: #eaddff; }
+.bg-secondary-cafm { background-color: #712edd; }
+.bg-secondary-container { background-color: #8b4ef7; }
+.bg-secondary-fixed { background-color: #ebddff; }
+.bg-tertiary { background-color: #005952; }
+.bg-error-cafm { background-color: #ba1a1a; }
+
+.text-on-surface-cafm { color: #1b1b20; }
+.text-on-surface-variant { color: #4a4455; }
+.text-outline-cafm { color: #7b7487; }
+.text-outline-variant { color: #ccc3d8; }
+.text-primary-cafm { color: #630ed4; }
+
+.border-primary-cafm { border-color: #630ed4; }
+.border-outline-cafm { border-color: #7b7487; }
+.border-outline-variant { border-color: #ccc3d8; }
+.border-surface-variant { border-color: #e3e1e8; }
+
+.bg-grid-subtle {
+  background-size: 32px 32px;
+  background-image:
+    linear-gradient(to right, rgba(99, 102, 241, 0.05) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(99, 102, 241, 0.05) 1px, transparent 1px);
+}
+
+.bg-dot-matrix {
+  background-size: 24px 24px;
+  background-image: radial-gradient(circle, rgba(99, 102, 241, 0.12) 1px, transparent 1px);
+}
+
+@keyframes pulseGlow {
+  0%, 100% { opacity: 0.4; transform: scale(1); }
+  50% { opacity: 0.8; transform: scale(1.05); }
+}
+
+.animate-pulse-glow {
+  animation: pulseGlow 4s ease-in-out infinite;
+}

@@ -6,7 +6,10 @@ export interface AuditEventInput {
   resource: string;
   resourceId?: string;
   details?: Record<string, any>;
+  oldValue?: Record<string, any>;
+  newValue?: Record<string, any>;
   ipAddress?: string;
+  userAgent?: string;
 }
 
 export class AuditService {
@@ -26,7 +29,10 @@ export class AuditService {
           resource: data.resource,
           resourceId: data.resourceId || null,
           details: data.details ? JSON.stringify(data.details) : null,
-          ipAddress: data.ipAddress || null
+          oldValue: data.oldValue ? JSON.stringify(data.oldValue) : null,
+          newValue: data.newValue ? JSON.stringify(data.newValue) : null,
+          ipAddress: data.ipAddress || null,
+          userAgent: data.userAgent || null
         } as any
       });
     } catch (err) {

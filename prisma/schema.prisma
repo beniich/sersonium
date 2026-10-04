@@ -41,6 +41,7 @@ model Organization {
 
 model User {
   id          String   @id @default(cuid())
+  firebaseUid String?  @unique // L'ID unique venant de Google/Firebase
   email       String   @unique
   name        String?
   role        String   @default("operator") // admin, operator, auditor, viewer
@@ -104,7 +105,10 @@ model AuditLog {
   resource    String   // e.g. "CarbonEmission", "InfrastructureAsset"
   resourceId  String?
   details     String?  // JSON string
+  oldValue    String?  // JSON string
+  newValue    String?  // JSON string
   ipAddress   String?
+  userAgent   String?
   createdAt   DateTime @default(now())
 
   organization Organization @relation(fields: [tenantId], references: [id], onDelete: Cascade)

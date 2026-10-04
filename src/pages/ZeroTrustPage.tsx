@@ -4,6 +4,7 @@ import { Users, Lock, ShieldCheck, Plus, X, Globe, Laptop, Radio, Trash2, CheckC
 import { db } from "../firebase";
 import { collection, addDoc, doc, updateDoc, deleteDoc } from "firebase/firestore";
 import { logAuditEvent } from "../hooks/useGlobalState";
+import { VaultView } from "../components/VaultView";
 
 interface ZeroTrustPageProps {
   state: GlobalState;
@@ -13,6 +14,7 @@ interface ZeroTrustPageProps {
 }
 
 const TABS = [
+  { id: "zt-vault", label: "Spider CAFM Ephemeral Vault" },
   { id: "zt-1", label: "Access Policies" },
   { id: "zt-2", label: "Identity Providers" },
   { id: "zt-3", label: "Gateway" },
@@ -122,6 +124,16 @@ export default function ZeroTrustPage({ state, isDark, activeItemId = "zt-1", on
           <div className="text-[11px] text-slate-500 dark:text-neutral-400 mt-1">SAML 2.0 / OIDC Connected</div>
         </div>
       </div>
+
+      {/* Sub-View: Spider CAFM Ephemeral Vault (zt-vault) */}
+      {currentTab === "zt-vault" && (
+        <div className="rounded-2xl overflow-hidden border border-slate-200 dark:border-white/[0.08] shadow-2xl">
+          <VaultView
+            onUnlockTwin={() => onSelectTab && onSelectTab("zt-1")}
+            onNavigate={() => {}}
+          />
+        </div>
+      )}
 
       {/* Sub-View: Access Policies (zt-1) */}
       {currentTab === "zt-1" && (

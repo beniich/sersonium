@@ -79,6 +79,50 @@ class KafkaService {
       return false;
     }
   }
+
+  /**
+   * Envoie une donnée de télémétrie dans le bus
+   * @param tenantId ID du client propriétaire du capteur
+   * @param payload Données du capteur { sensorId, value, unit, type }
+   */
+  async emitTelemetry(tenantId: string, payload: any) {
+    return this.publishEvent('iot-telemetry', {
+      ...payload,
+      tenantId,
+      timestamp: new Date().toISOString(),
+    }, tenantId); // On utilise le tenantId comme clé pour garantir l'ordre
+  }
+
+  /**
+   * Crée un consommateur pour traiter les données en arrière-plan
+   * @param groupId Identifiant du groupe de consommateurs (ex: 'ai-engine', 'carbon-calc')
+   * @param processCallback Fonction à exécuter pour chaque message reçu
+   */
+  async createConsumer(groupId: string, processCallback: (data: any) => Promise<void>) {
+    if (!this.kafka) {
+      console.warn(`[Mock Kafka] Consommateur '${groupId}' démarré (Aucun événement ne sera reçu).`);
+      return;
+    }
+
+    const consumer = this.kafka.consumer({ groupId });
+
+    try {
+      await consumer.connect();
+      await consumer.subscribe({ topic: 'iot-telemetry', fromBeginning: false });
+
+      await consumer.run({
+        eachMessage: async ({ message }) => {
+          if (!message.value) return;
+          const data = JSON.parse(message.value.toString());
+          await processCallback(data);
+        },
+      });
+
+      console.log(`🚀 Consumer Group [${groupId}] is listening to iot-telemetry...`);
+    } catch (error) {
+      console.error(`❌ Erreur de création du consumer ${groupId}:`, error);
+    }
+  }
 }
 
 export const kafkaService = new KafkaService();

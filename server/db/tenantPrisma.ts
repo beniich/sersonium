@@ -3,18 +3,42 @@ import { rawPrisma } from "./prisma.js";
 /**
  * Modèles soumis à l'isolation stricte multi-tenant.
  * Toute requête sur ces modèles est automatiquement injectée avec `where: { tenantId }` ou `data: { tenantId }`.
+ *
+ * ⚠️  RÈGLE ABSOLUE : Tout nouveau modèle Prisma possédant un champ `tenantId`
+ *      DOIT être ajouté ici. Sans cela, l'extension n'interceptera pas ses requêtes
+ *      et les données pourraient fuiter entre tenants (faille de sécurité critique).
  */
 export const TENANT_ISOLATED_MODELS = [
+  // ── Identité & Accès ──────────────────────────────────────────────
   "User",
-  "CarbonEmission",
-  "InfrastructureAsset",
-  "AuditLog",
   "AccessPolicy",
+  "AuditLog",
+
+  // ── Facturation & Tokens ──────────────────────────────────────────
   "Invoice",
+
+  // ── Infrastructure & Équipements ─────────────────────────────────
+  "InfrastructureAsset",
   "AssetTelemetry",
+
+  // ── Carbone & ESG ────────────────────────────────────────────────
+  "CarbonEmission",
+
+  // ── Stockage & Fichiers ───────────────────────────────────────────
   "FileMetadata",
+
+  // ── Réseau & Sécurité ─────────────────────────────────────────────
   "TrafficLog",
-  "WafSecurityEvent"
+  "WafSecurityEvent",
+
+  // ── Stratégie & OKR ───────────────────────────────────────────────
+  "StrategicObjective",
+  "Kpi",
+
+  // ── Conformité & Documents ────────────────────────────────────────
+  "Certification",
+  "Permit",
+  "Insurance",
 ] as const;
 
 export type TenantIsolatedModel = typeof TENANT_ISOLATED_MODELS[number];

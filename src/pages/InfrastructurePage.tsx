@@ -20,6 +20,7 @@ import CmmsReliabilityKpiDashboard from "../components/CmmsReliabilityKpiDashboa
 import WorkOrderExecutionModal from "../components/WorkOrderExecutionModal";
 import MobileFieldTechnician from "../components/MobileFieldTechnician";
 import PreventiveMaintenanceScheduler from "../components/PreventiveMaintenanceScheduler";
+import { CockpitConsoleView } from "../components/CockpitConsoleView";
 
 interface InfrastructurePageProps {
   state: GlobalState;
@@ -29,6 +30,7 @@ interface InfrastructurePageProps {
 }
 
 const TABS = [
+  { id: "inf-cockpit", label: "Spider CAFM 3D Cockpit" },
   { id: "cmms-preventive", label: "Preventive Tour Scheduler" },
   { id: "cmms-mobile", label: "Mobile Field Tech (App)" },
   { id: "inf-floorplan", label: "2D Floor Plan (CAFM)" },
@@ -322,6 +324,20 @@ export default function InfrastructurePage({ state, isDark, activeItemId = "inf-
           <div className="text-[11px] text-neutral-500 mt-1">Eco-optimized cooling</div>
         </div>
       </div>
+
+      {/* Sub-View: Spider CAFM 3D Digital Twin Cockpit */}
+      {currentTab === "inf-cockpit" && (
+        <div className="rounded-2xl overflow-hidden border border-slate-200 dark:border-white/[0.08] shadow-2xl">
+          <CockpitConsoleView
+            onNavigate={(path) => {
+              if (onSelectTab) {
+                if (path === "esg-carbon") onSelectTab("inf-5");
+                else if (path === "vault") onSelectTab("inf-1");
+              }
+            }}
+          />
+        </div>
+      )}
 
       {/* Sub-View: 2D Floor Plan (CAFM) (inf-floorplan) */}
       {currentTab === "inf-floorplan" && (

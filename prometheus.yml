@@ -1,0 +1,12 @@
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+
+scrape_configs:
+  - job_name: "sensorium-core"
+    metrics_path: "/metrics"
+    static_configs:
+      - targets: ["sensorium-app:3000"]
+        labels:
+          environment: "production"
+          cluster: "sovereign-node-01"

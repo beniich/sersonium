@@ -1,0 +1,102 @@
+name: SENSORIUM Sovereign CI/CD Pipeline
+
+on:
+  push:
+    branches: [ main, master, develop ]
+  pull_request:
+    branches: [ main, master ]
+
+env:
+  NODE_VERSION: '22'
+  DATABASE_URL: 'file:./dev.db'
+
+jobs:
+  # -------------------------------------------------------------
+  # Job 1: Lint, Static Typing & Code Hygiene
+  # -------------------------------------------------------------
+  validate:
+    name: 🛡️ Code Quality & Zero-Trust Static Analysis
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js Environment
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Install Dependencies
+        run: npm ci
+
+      - name: Generate Prisma Schema
+        run: npx prisma generate
+
+      - name: TypeScript Type Checking (noEmit)
+        run: npm run lint
+
+  # -------------------------------------------------------------
+  # Job 2: Production Bundle Compilation
+  # -------------------------------------------------------------
+  build:
+    name: 📦 Build Frontend & Backend Bundle
+    needs: validate
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js Environment
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Install Dependencies
+        run: npm ci
+
+      - name: Generate Prisma Client
+        run: npx prisma generate
+
+      - name: Compile Full Stack Bundle (Vite + esbuild)
+        run: npm run build
+
+      - name: Upload Build Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: sensorium-dist
+          path: dist/
+          retention-days: 7
+
+  # -------------------------------------------------------------
+  # Job 3: Docker Security Scan & Image Packaging
+  # -------------------------------------------------------------
+  package-docker:
+    name: 🐳 Docker Multi-Arch Build & Vulnerability Audit
+    needs: build
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build Docker Image (Local Check)
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          push: false
+          tags: sensorium/app:latest
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Trivy Vulnerability Scanner
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: 'sensorium/app:latest'
+          format: 'table'
+          exit-code: '0'
+          severity: 'CRITICAL,HIGH'

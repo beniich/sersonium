@@ -1,3 +1,5 @@
+import { googleSignIn } from "../firebase.js";
+
 /**
  * Frontend Authentication & Secure API Client
  * - Manages JWT Access Token & Automatic Refresh Token Rotation
@@ -133,6 +135,55 @@ class AuthService {
       return {
         success: false,
         error: err.message || "Erreur de connexion au serveur"
+      };
+    }
+  }
+
+  /**
+   * Login with Google (Firebase Hybrid Auth)
+   * Exchanges Firebase ID Token for a Sensorium JWT
+   */
+  public async loginWithGoogle(): Promise<{ success: boolean; user?: AuthUser; error?: string }> {
+    try {
+      const { user: firebaseUser } = await googleSignIn();
+      const idToken = await firebaseUser.getIdToken();
+
+      const res = await fetch("/api/v1/auth/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Accept": "application/json"
+        },
+        body: JSON.stringify({ token: idToken })
+      });
+
+      const result = await res.json();
+
+      if (!res.ok || !result.success) {
+        return {
+          success: false,
+          error: result.error?.message || "Échec de l'authentification Firebase vers Sensorium"
+        };
+      }
+
+      this.accessToken = result.data.accessToken;
+      this.csrfToken = result.data.csrfToken || this.getCookie("XSRF-TOKEN");
+      this.user = result.data.user;
+
+      if (typeof localStorage !== "undefined") {
+        localStorage.setItem("sensorium_access_token", this.accessToken!);
+        localStorage.setItem("sensorium_auth_user", JSON.stringify(this.user));
+        if (this.csrfToken) localStorage.setItem("sensorium_csrf_token", this.csrfToken);
+      }
+
+      return {
+        success: true,
+        user: this.user!
+      };
+    } catch (err: any) {
+      return {
+        success: false,
+        error: err.message || "Erreur de connexion Google"
       };
     }
   }

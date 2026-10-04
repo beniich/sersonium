@@ -18,6 +18,9 @@ import PricingPage from "./pages/PricingPage";
 import PublicPortal from "./pages/PublicPortal";
 import KafkaMonitor from "./components/KafkaMonitor";
 import ComplianceManager from "./pages/admin/ComplianceManager";
+import { CockpitConsoleView } from "./components/CockpitConsoleView";
+import { VaultView } from "./components/VaultView";
+import { EsgGrafanaView } from "./components/EsgGrafanaView";
 import { Loader2 } from "lucide-react";
 import { useGlobalState } from "./hooks/useGlobalState";
 import { initAuth, googleSignIn, logout } from "./firebase";
@@ -330,6 +333,23 @@ export default function App() {
     }
   };
 
+  // Keep URL in sync whenever activePage changes
+  // (must be before any conditional return to respect Rules of Hooks)
+  useEffect(() => {
+    const target = activePage === "overview" ? "/" : `/${activePage}`;
+    if (location.pathname !== target) {
+      navigate(target, { replace: true });
+    }
+  }, [activePage]);
+
+  // React to browser back/forward navigation
+  useEffect(() => {
+    const newPage = pageFromPath(location.pathname);
+    if (newPage !== activePage) {
+      setActivePage(newPage);
+    }
+  }, [location.pathname]);
+
   if (authLoading) {
     return (
       <ThemeContext.Provider value={themeContextValue}>
@@ -345,21 +365,7 @@ export default function App() {
     );
   }
 
-  // Keep URL in sync whenever activePage changes
-  useEffect(() => {
-    const target = activePage === "overview" ? "/" : `/${activePage}`;
-    if (location.pathname !== target) {
-      navigate(target, { replace: true });
-    }
-  }, [activePage]);
 
-  // React to browser back/forward navigation
-  useEffect(() => {
-    const newPage = pageFromPath(location.pathname);
-    if (newPage !== activePage) {
-      setActivePage(newPage);
-    }
-  }, [location.pathname]);
 
   const handleNavigateFromPortal = (page: string, itemId: string) => {
     setActivePage(page);
@@ -445,6 +451,73 @@ export default function App() {
           }}
         />
       );
+      case "cockpit":
+      case "digital-twin":
+        return (
+          <div className="p-2 sm:p-4 lg:p-6 max-w-[1700px] mx-auto min-h-[calc(100vh-100px)]">
+            <CockpitConsoleView
+              onNavigate={(path) => {
+                if (path === "vault") {
+                  setActivePage("vault");
+                  setActiveItemId("spider-vault");
+                } else if (path === "esg-carbon" || path === "grafana-observability") {
+                  setActivePage("esg-carbon");
+                  setActiveItemId("spider-esg");
+                } else {
+                  setActivePage("overview");
+                  setActiveItemId("ov-general");
+                }
+              }}
+              onClose={() => {
+                setActivePage("overview");
+                setActiveItemId("ov-general");
+              }}
+            />
+          </div>
+        );
+      case "vault":
+        return (
+          <div className="p-2 sm:p-4 lg:p-6 max-w-[1700px] mx-auto min-h-[calc(100vh-100px)]">
+            <VaultView
+              onUnlockTwin={() => {
+                setActivePage("cockpit");
+                setActiveItemId("spider-cockpit");
+              }}
+              onNavigate={(path) => {
+                if (path === "cockpit" || path === "3d-digital-twin") {
+                  setActivePage("cockpit");
+                  setActiveItemId("spider-cockpit");
+                } else if (path === "esg-carbon" || path === "grafana-observability") {
+                  setActivePage("esg-carbon");
+                  setActiveItemId("spider-esg");
+                } else {
+                  setActivePage("overview");
+                  setActiveItemId("ov-general");
+                }
+              }}
+            />
+          </div>
+        );
+      case "esg-carbon":
+      case "grafana":
+        return (
+          <div className="p-2 sm:p-4 lg:p-6 max-w-[1700px] mx-auto min-h-[calc(100vh-100px)]">
+            <EsgGrafanaView
+              onNavigate={(path) => {
+                if (path === "cockpit" || path === "3d-digital-twin") {
+                  setActivePage("cockpit");
+                  setActiveItemId("spider-cockpit");
+                } else if (path === "vault") {
+                  setActivePage("vault");
+                  setActiveItemId("spider-vault");
+                } else {
+                  setActivePage("overview");
+                  setActiveItemId("ov-general");
+                }
+              }}
+            />
+          </div>
+        );
       default: return <OverviewPage {...commonProps} />;
     }
   };

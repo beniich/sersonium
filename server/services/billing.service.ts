@@ -1,6 +1,56 @@
 import { TenantPrismaClient } from "../db/tenantPrisma.js";
 
 export class BillingService {
+  // Quotas de jetons par forfait mensuel
+  public static PLAN_QUOTAS: Record<string, number> = {
+    FREE: 10_000,
+    SILVER: 100_000,
+    PRO: 1_000_000,
+    ENTERPRISE: 100_000_000,
+  };
+
+  /**
+   * Initialise le portefeuille de jetons d'une organisation
+   */
+  static async initializeBilling(tenantPrisma: TenantPrismaClient, userId: string, plan: string = "PRO") {
+    const quota = this.PLAN_QUOTAS[plan.toUpperCase()] || this.PLAN_QUOTAS.PRO;
+    return tenantPrisma.user.update({
+      where: { id: userId },
+      data: { tokens: quota } as any
+    });
+  }
+
+  /**
+   * Récupère le pourcentage d'utilisation des quotas IA
+   */
+  static async getUsageMetrics(tenantPrisma: TenantPrismaClient, userId: string, plan: string = "PRO") {
+    const user = await tenantPrisma.user.findFirst({ where: { id: userId } });
+    if (!user) return null;
+
+    const monthlyLimit = this.PLAN_QUOTAS[plan.toUpperCase()] || this.PLAN_QUOTAS.PRO;
+    const currentTokens = user.tokens;
+    const consumed = Math.max(0, monthlyLimit - currentTokens);
+    const percentage = Math.min(100, Math.round((consumed / monthlyLimit) * 100));
+
+    return {
+      consumed,
+      limit: monthlyLimit,
+      remaining: currentTokens,
+      percentage
+    };
+  }
+
+  /**
+   * Réinitialise le quota mensuel au 1er du mois
+   */
+  static async resetMonthlyQuota(tenantPrisma: TenantPrismaClient, userId: string, plan: string = "PRO") {
+    const quota = this.PLAN_QUOTAS[plan.toUpperCase()] || this.PLAN_QUOTAS.PRO;
+    return tenantPrisma.user.update({
+      where: { id: userId },
+      data: { tokens: quota } as any
+    });
+  }
+
   /**
    * Déduit des jetons à chaque appel d'API ou inférence AI (Pattern Blueprint)
    * Protège contre les soldes négatifs avec transaction atomique.

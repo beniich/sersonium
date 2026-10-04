@@ -1,19 +1,25 @@
 /**
  * @license
  * SPDX-License-Identifier: Apache-2.0
+ *
+ * PublicPortal — Spider CAFM Landing Page (Design from nat---spider-cafm)
+ * Fused into sersonium: keeps Firebase auth logic, gains new UI.
  */
 
 import React, { useState, useEffect } from 'react';
 import { TactileHeader, ActiveNavPath } from '../components/TactileHeader';
-import { ArchitectureView } from '../components/ArchitectureView';
-import { SixPillarsView } from '../components/SixPillarsView';
+import { Hero } from '../components/Hero';
+import { SixPillars } from '../components/SixPillars';
+import { PipelineArchitecture } from '../components/PipelineArchitecture';
+import { MetricsAndCompliance } from '../components/MetricsAndCompliance';
+import { CtaSection } from '../components/CtaSection';
 import { Footer } from '../components/Footer';
 import { VaultView } from '../components/VaultView';
 import { PricingView } from '../components/PricingView';
 import { CockpitConsoleView } from '../components/CockpitConsoleView';
 import { EsgGrafanaView } from '../components/EsgGrafanaView';
 import { ScheduleModal } from '../components/ScheduleModal';
-import { GlobalState } from '../types';
+import { TelemetryMetrics, SpatialNode, GlobalState } from '../types';
 import type { User } from 'firebase/auth';
 
 interface PublicPortalProps {
@@ -37,6 +43,19 @@ export default function PublicPortal({
   const [currentView, setCurrentView] = useState<ActiveNavPath>('architecture');
   const [isScheduleOpen, setIsScheduleOpen] = useState(false);
 
+  // Live telemetry metrics
+  const [metrics, setMetrics] = useState<TelemetryMetrics>({
+    energyDeltaPercent: -34.8,
+    ashraeBaselineKwh: 14820,
+    currentLoadKwh: 9660,
+    copFactor: 6.22,
+    healthScore: 98.4,
+    carbonAbatedTco2e: 4120,
+    activeEdgeNodes: 14890,
+    ingestionRps: 1420500,
+    edgeLatencyMs: 0.4,
+  });
+
   // Token countdown simulation
   const [tokenCountdown, setTokenCountdown] = useState('23:59:59');
 
@@ -50,6 +69,31 @@ export default function PublicPortal({
       setTokenCountdown(`${h}:${m}:${s}`);
     }, 1000);
     return () => clearInterval(timer);
+  }, []);
+
+  // Poll live telemetry or apply subtle realistic jitter
+  useEffect(() => {
+    const fetchTelemetry = async () => {
+      try {
+        const res = await fetch('/api/telemetry/snapshot');
+        if (res.ok) {
+          const data = await res.json();
+          if (data.metrics) {
+            setMetrics((prev) => ({ ...prev, ...data.metrics }));
+          }
+        }
+      } catch {
+        setMetrics((prev) => ({
+          ...prev,
+          ingestionRps: Math.floor(1420000 + Math.random() * 2500),
+          edgeLatencyMs: Number((0.38 + Math.random() * 0.05).toFixed(2)),
+        }));
+      }
+    };
+
+    fetchTelemetry();
+    const interval = setInterval(fetchTelemetry, 6000);
+    return () => clearInterval(interval);
   }, []);
 
   const handleNavigate = (path: ActiveNavPath) => {
@@ -70,6 +114,11 @@ export default function PublicPortal({
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
+  const handleSelectNode = (_node: SpatialNode) => {
+    setCurrentView('3d-digital-twin');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
   const handleEnterDashboard = () => {
     if (onEnterMockMode) {
       onEnterMockMode();
@@ -80,7 +129,8 @@ export default function PublicPortal({
 
   return (
     <div className="min-h-screen bg-[#fbf8ff] text-[#1b1b20] flex flex-col font-['Inter'] selection:bg-[#630ed4] selection:text-white">
-      {/* Top Tactile Header */}
+
+      {/* Top Tactile Header (shared across all views) */}
       {currentView !== 'cockpit' && (
         <TactileHeader
           activePath={currentView}
@@ -92,7 +142,7 @@ export default function PublicPortal({
         />
       )}
 
-      {/* VIEW 1: COCKPIT CONSOLE & 3D DIGITAL TWIN */}
+      {/* VIEW 1 — COCKPIT CONSOLE & 3D DIGITAL TWIN */}
       {(currentView === 'cockpit' || currentView === '3d-digital-twin') && (
         <CockpitConsoleView
           onNavigate={handleNavigate}
@@ -100,7 +150,7 @@ export default function PublicPortal({
         />
       )}
 
-      {/* VIEW 2: ZERO-TRUST EPHEMERAL ACCESS VAULT */}
+      {/* VIEW 2 — ZERO-TRUST EPHEMERAL ACCESS VAULT */}
       {currentView === 'vault' && (
         <>
           <VaultView
@@ -111,17 +161,15 @@ export default function PublicPortal({
         </>
       )}
 
-      {/* VIEW 3: PLANS TARIFAIRES & SOUSCRIPTION */}
+      {/* VIEW 3 — PLANS TARIFAIRES & SOUSCRIPTION */}
       {currentView === 'pricing' && (
         <>
-          <PricingView
-            onUnlockCockpit={() => handleNavigate('cockpit')}
-          />
+          <PricingView onUnlockCockpit={() => handleNavigate('cockpit')} />
           <Footer onNavigate={handleNavigate} />
         </>
       )}
 
-      {/* VIEW 4: ESG CSRD & INDUSTRIAL GRAFANA OBSERVABILITY */}
+      {/* VIEW 4 — ESG CSRD & INDUSTRIAL GRAFANA OBSERVABILITY */}
       {(currentView === 'esg-carbon' || currentView === 'grafana-observability') && (
         <>
           <EsgGrafanaView onNavigate={handleNavigate} />
@@ -129,28 +177,34 @@ export default function PublicPortal({
         </>
       )}
 
-      {/* VIEW 5: ARCHITECTURE PIPELINE HAUTE FIDÉLITÉ (Exact design requested) */}
-      {currentView === 'architecture' && (
-        <div className="pt-20 flex-1 flex flex-col justify-between">
+      {/* VIEW 5 — ARCHITECTURE & SYSTEM TOPOLOGY / 6 PILLARS (nat---spider-cafm design) */}
+      {(currentView === 'architecture' || currentView === '6-core-pillars') && (
+        <div className="pt-20">
           <main className="flex-1">
-            <ArchitectureView
-              onNavigate={handleNavigate}
-              onLaunchCockpit={() => handleNavigate('cockpit')}
+            {/* Hero with 3D Canvas & Live Metrics */}
+            <Hero
+              onExploreDigitalTwin={() => handleNavigate('3d-digital-twin')}
+              onExploreArchitecture={() => {
+                const el = document.getElementById('architecture');
+                if (el) el.scrollIntoView({ behavior: 'smooth' });
+              }}
+              onSelectNode={handleSelectNode}
+              metrics={metrics}
             />
-          </main>
-          <Footer onNavigate={handleNavigate} />
-        </div>
-      )}
 
-      {/* VIEW 6: LES 6 PILIERS INDUSTRIELS & BANC DE DÉPLOIEMENT (Exact design requested) */}
-      {currentView === '6-core-pillars' && (
-        <div className="pt-20 flex-1 flex flex-col justify-between">
-          <main className="flex-1">
-            <SixPillarsView
-              onNavigate={handleNavigate}
-              onOpenPillar={handleOpenPillar}
-            />
+            {/* The 6 Pillars of Spider CAFM */}
+            <SixPillars onOpenPillar={handleOpenPillar} />
+
+            {/* Pipeline Architecture & TypeScript Schema */}
+            <PipelineArchitecture />
+
+            {/* Metrics & Compliance Seals */}
+            <MetricsAndCompliance />
+
+            {/* Deploy in 48 Hours CTA */}
+            <CtaSection onOpenSchedule={() => setIsScheduleOpen(true)} />
           </main>
+
           <Footer onNavigate={handleNavigate} />
         </div>
       )}
@@ -163,3 +217,4 @@ export default function PublicPortal({
     </div>
   );
 }
+

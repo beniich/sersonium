@@ -453,3 +453,30 @@ export interface UserProfile {
   organization: string;
 }
 
+
+// -- Spider CAFM Landing / Vitrine types --------------------------------------
+
+export interface TelemetryMetrics {
+  energyDeltaPercent: number;
+  ashraeBaselineKwh: number;
+  currentLoadKwh: number;
+  copFactor: number;
+  healthScore: number;
+  carbonAbatedTco2e: number;
+  activeEdgeNodes: number;
+  ingestionRps: number;
+  edgeLatencyMs: number;
+}
+
+export interface SpatialNode {
+  id: string;
+  name: string;
+  category: 'CVC' | 'WATER' | 'IAQ' | 'LIGHTING';
+  floor: number;
+  floorName: string;
+  coords: [number, number, number];
+  metricLabel: string;
+  metricValue: string;
+  status: 'OPTIMAL' | 'ADVISORY' | 'ALERT';
+  description: string;
+}

@@ -78,6 +78,16 @@ export const SENSORIUM_SERVICE_SUITE: SidebarServiceGroup[] = [
     ]
   },
   {
+    id: "grp-spider-cafm",
+    name: "Spider CAFM Digital Twin",
+    icon: Compass,
+    items: [
+      { id: "spider-cockpit", label: "3D Cockpit Console & Actuators", page: "cockpit", badge: "3D Live", badgeType: "live", keywords: "spider cafm cockpit 3d twin threejs valves lighting hvac actuators" },
+      { id: "spider-vault", label: "Zero-Trust Ephemeral Vault", page: "vault", badge: "Vault", badgeType: "ia", keywords: "spider cafm vault zero trust ephemeral passcodes biometric access" },
+      { id: "spider-esg", label: "CSRD ESG & Industrial Grafana", page: "esg-carbon", badge: "CSRD", badgeType: "default", keywords: "spider cafm esg csrd carbon scope 1 2 3 grafana observability" }
+    ]
+  },
+  {
     id: "grp-compute",
     name: "Silicon & Edge Compute",
     icon: Cpu,
@@ -404,6 +414,23 @@ export default function DashboardLayout(props: any) {
               <span className="hidden md:inline">{t.header.showcase}</span>
             </button>
           )}
+
+          {/* Quick Launch to Spider CAFM 3D Cockpit */}
+          <button
+            onClick={() => {
+              setActivePage("cockpit");
+              setActiveItemId("spider-cockpit");
+            }}
+            className={`hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold transition-all cursor-pointer min-h-[36px] ${
+              activePage === "cockpit"
+                ? "bg-purple-600 text-white shadow-lg shadow-purple-500/25 border border-purple-500"
+                : "bg-purple-500/10 hover:bg-purple-500/20 text-purple-600 dark:text-purple-400 border border-purple-500/30"
+            }`}
+            title="Launch Spider CAFM 3D Cockpit Console"
+          >
+            <Compass className="w-3.5 h-3.5 text-purple-500 animate-spin-slow" />
+            <span className="hidden md:inline">Spider CAFM 3D</span>
+          </button>
 
           {/* Language Toggle Button */}
           <button

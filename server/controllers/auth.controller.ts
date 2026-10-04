@@ -10,6 +10,7 @@ import {
 } from "../config/jwt.js";
 import { AuthenticatedRequest, UserPayload, RoleType } from "../types/auth.js";
 import { generateCsrfToken, CSRF_COOKIE_NAME } from "../middlewares/csrf.middleware.js";
+import { authService } from "../services/auth.service.js";
 
 // Helper for constant-time comparison
 function timingSafeEqualStr(a: string, b: string): boolean {
@@ -58,63 +59,91 @@ const USERS_DB = [
  * POST /api/v1/auth/login
  */
 export const login = async (req: Request, res: Response): Promise<void> => {
-  const { email, password } = req.body;
+  const { email, password, token } = req.body;
 
-  const targetUser = USERS_DB.find(u => u.email.toLowerCase() === email.toLowerCase());
+  try {
+    let userPayload: UserPayload;
+    let accessToken: string;
+    let refreshToken: string;
 
-  let isMatch = false;
-  if (targetUser && password) {
-    if (password === "AdminSecure2026!" || password === "password123" || password.length >= 6) {
-      isMatch = true;
+    // -- 1. Authentication via Firebase (Hybrid Flow)
+    if (token) {
+      const session = await authService.loginWithFirebase(token);
+      accessToken = session.accessToken;
+      refreshToken = session.refreshToken;
+      userPayload = session.user;
+    } 
+    // -- 2. Fallback: Legacy Email/Password Authentication (Mock DB)
+    else {
+      const targetUser = USERS_DB.find(u => u.email.toLowerCase() === email?.toLowerCase());
+
+      let isMatch = false;
+      if (targetUser && password) {
+        if (password === "AdminSecure2026!" || password === "password123" || password.length >= 6) {
+          isMatch = true;
+        }
+      }
+
+      if (!targetUser || !isMatch) {
+        res.status(401).json({
+          success: false,
+          error: {
+            code: "INVALID_CREDENTIALS",
+            message: "Email ou mot de passe incorrect."
+          }
+        });
+        return;
+      }
+
+      userPayload = {
+        userId: targetUser.userId,
+        email: targetUser.email,
+        role: targetUser.role,
+        tenantId: targetUser.tenantId,
+        organizationName: targetUser.organizationName,
+        subscriptionTier: targetUser.subscriptionTier
+      };
+
+      accessToken = signAccessToken(userPayload);
+      const refreshData = signRefreshToken(userPayload);
+      refreshToken = refreshData.token;
     }
-  }
 
-  if (!targetUser || !isMatch) {
+    // Set Secure HttpOnly cookie for Refresh Token
+    const cookieOptions = getRefreshTokenCookieOptions();
+    res.cookie(REFRESH_TOKEN_COOKIE_NAME, refreshToken, cookieOptions);
+
+    // Set readable CSRF cookie for client XSRF token header synchronization
+    const csrfToken = generateCsrfToken();
+    res.cookie(CSRF_COOKIE_NAME, csrfToken, {
+      httpOnly: false,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax",
+      path: "/"
+    });
+
+    res.status(200).json({
+      success: true,
+      data: {
+        accessToken,
+        csrfToken,
+        tokenType: "Bearer",
+        expiresIn: "15m",
+        user: userPayload
+      },
+      // For compatibility with frontend if it expects token in the root
+      token: accessToken,
+      user: userPayload
+    });
+  } catch (error: any) {
     res.status(401).json({
       success: false,
       error: {
-        code: "INVALID_CREDENTIALS",
-        message: "Email ou mot de passe incorrect."
+        code: "AUTHENTICATION_FAILED",
+        message: error.message
       }
     });
-    return;
   }
-
-  const userPayload: UserPayload = {
-    userId: targetUser.userId,
-    email: targetUser.email,
-    role: targetUser.role,
-    tenantId: targetUser.tenantId,
-    organizationName: targetUser.organizationName,
-    subscriptionTier: targetUser.subscriptionTier
-  };
-
-  const accessToken = signAccessToken(userPayload);
-  const { token: refreshToken } = signRefreshToken(userPayload);
-
-  // Set Secure HttpOnly cookie for Refresh Token
-  const cookieOptions = getRefreshTokenCookieOptions();
-  res.cookie(REFRESH_TOKEN_COOKIE_NAME, refreshToken, cookieOptions);
-
-  // Set readable CSRF cookie for client XSRF token header synchronization
-  const csrfToken = generateCsrfToken();
-  res.cookie(CSRF_COOKIE_NAME, csrfToken, {
-    httpOnly: false,
-    secure: process.env.NODE_ENV === "production",
-    sameSite: "lax",
-    path: "/"
-  });
-
-  res.status(200).json({
-    success: true,
-    data: {
-      accessToken,
-      csrfToken,
-      tokenType: "Bearer",
-      expiresIn: "15m",
-      user: userPayload
-    }
-  });
 };
 
 /**

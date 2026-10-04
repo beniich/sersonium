@@ -1,4 +1,7 @@
 import { Request, Response, NextFunction } from "express";
+import { verifyAccessToken } from "../config/jwt.js";
+import { ZeroTrustService } from "../services/zeroTrust.service.js";
+import type { AuthenticatedRequest } from "../types/auth.js";
 
 /**
  * Enhanced Security Shield Middlewares:
@@ -145,3 +148,72 @@ export const antiReplayGuard = (req: Request, res: Response, next: NextFunction)
   }
   next();
 };
+
+// ─── Zero-Trust: secureRoute() ───────────────────────────────────────────────────
+
+/**
+ * Middleware Zero-Trust: Authentication + RBAC en une seule passe.
+ *
+ * Combine les deux vérifications du principe "Never Trust, Always Verify" :
+ * 1. IDENTITÉ   — Valide le JWT Bearer avec verifyAccessToken() (HS256, expiry)
+ * 2. AUTORISATION — Vérifie le rôle via ZeroTrustService.authorize() (RBAC stateless)
+ *
+ * Injecte req.user avec le payload JWT complet pour les controllers en aval.
+ *
+ * @param allowedRoles Tableau de rôles autorisés (ex: ["admin", "operator"])
+ *
+ * @example
+ * // Seuls les admins peuvent créer un asset
+ * app.post('/api/v1/assets', secureRoute(["admin"]), createAsset);
+ *
+ * // Tout rôle authentifié peut lire ses assets
+ * app.get('/api/v1/assets',  secureRoute(["admin", "operator", "auditor", "viewer"]), getAssets);
+ */
+export const secureRoute = (allowedRoles: string[]) => {
+  return async (req: AuthenticatedRequest, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      // —— 1. Extraction du token Bearer
+      const authHeader = req.headers.authorization;
+      if (!authHeader || !authHeader.startsWith("Bearer ")) {
+        res.status(401).json({
+          success: false,
+          error: {
+            code: "UNAUTHORIZED",
+            message: "Jeton d'accès manquant ou format invalide (Bearer token attendu)."
+          }
+        });
+        return;
+      }
+
+      const token = authHeader.split(" ")[1];
+
+      // —— 2. Vérification d'identité (JWT Pilier 1)
+      const decoded = verifyAccessToken(token);
+
+      // —— 3. Injection du contexte dans la requête pour les services en aval
+      req.user = decoded;
+
+      // —— 4. Contrôle RBAC (Pilier 2 — stateless, sans DB)
+      ZeroTrustService.authorize(decoded.role, allowedRoles);
+
+      next();
+    } catch (error: any) {
+      const isAuthError = error.name === "TokenExpiredError" || error.name === "JsonWebTokenError";
+      const isRbacError = error.code === "RBAC_INSUFFICIENT_ROLE";
+
+      res.status(isAuthError ? 401 : 403).json({
+        success: false,
+        error: {
+          code: isAuthError
+            ? (error.name === "TokenExpiredError" ? "TOKEN_EXPIRED" : "INVALID_TOKEN")
+            : isRbacError
+              ? "INSUFFICIENT_ROLE"
+              : "SECURITY_BREACH",
+          message: error.message,
+          ...(isRbacError && { hint: `Rôles autorisés : [${allowedRoles.join(", ")}]` })
+        }
+      });
+    }
+  };
+};
+

@@ -48,7 +48,7 @@ export default defineConfig(({ mode }) => {
         },
         workbox: {
           globPatterns: ['**/*.{js,css,html,ico,png,svg,woff,woff2}'],
-          maximumFileSizeToCacheInBytes: 5242880,
+          maximumFileSizeToCacheInBytes: 15728640, // 15 MiB pour supporter le bundle complet Three.js + IFC + Dashboard
         },
         devOptions: {
           enabled: false,

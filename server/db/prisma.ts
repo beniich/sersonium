@@ -3,11 +3,13 @@ import path from "path";
 
 // Normaliser DATABASE_URL en chemin absolu sur Windows pour éviter l'erreur SQLite Error Code 14
 const getDbUrl = () => {
-  const envUrl = process.env.DATABASE_URL || "file:./prisma/dev.db";
+  const envUrl = process.env.DATABASE_URL || "file:./dev.db";
   if (envUrl.startsWith("file:.")) {
-    const relPath = envUrl.replace(/^file:/, "");
-    const absPath = path.resolve(process.cwd(), relPath).replace(/\\/g, "/");
-    return `file:${absPath}`;
+    const cleanRel = envUrl.replace(/^file:\.\/?/, "");
+    const absPath = cleanRel.startsWith("prisma")
+      ? path.resolve(process.cwd(), cleanRel)
+      : path.resolve(process.cwd(), "prisma", cleanRel);
+    return `file:${absPath.replace(/\\/g, "/")}`;
   }
   return envUrl;
 };
