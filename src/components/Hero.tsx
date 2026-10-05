@@ -1,7 +1,8 @@
-import React from 'react';
+import React, { lazy, Suspense } from 'react';
 import { ArrowRight, Sparkles, Zap, Brain, Leaf, Network, ShieldCheck, PlayCircle } from 'lucide-react';
-import { DigitalTwinViewer3D } from './DigitalTwinViewer3D';
 import { SpatialNode, TelemetryMetrics } from '../types';
+
+const DigitalTwinViewer3D = lazy(() => import('./DigitalTwinViewer3D').then(m => ({ default: m.DigitalTwinViewer3D })));
 
 interface HeroProps {
   onExploreDigitalTwin: () => void;
@@ -150,9 +151,16 @@ export const Hero: React.FC<HeroProps> = ({
           </div>
         </div>
 
-        {/* 3D Digital Twin Viewer Canvas */}
+        {/* 3D Digital Twin Viewer Canvas (Lazy Loaded for Instant Paint) */}
         <div id="digital-twin" className="scroll-mt-24">
-          <DigitalTwinViewer3D onSelectNode={onSelectNode} />
+          <Suspense fallback={
+            <div className="w-full h-[480px] rounded-2xl bg-gradient-to-b from-indigo-950/20 to-slate-900/40 border border-indigo-500/20 flex flex-col items-center justify-center gap-3 backdrop-blur-md">
+              <div className="w-8 h-8 rounded-full border-2 border-indigo-500 border-t-transparent animate-spin" />
+              <span className="font-mono text-xs text-indigo-300 uppercase tracking-widest">Loading 3D Spatial Mesh...</span>
+            </div>
+          }>
+            <DigitalTwinViewer3D onSelectNode={onSelectNode} />
+          </Suspense>
 
           {/* Gemini Spatial Engine Live Status Bar */}
           <div className="mt-3 flex items-center justify-center gap-2 px-4 py-2 rounded-lg bg-indigo-50/60 border border-indigo-100 text-xs text-slate-700 font-mono">

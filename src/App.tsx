@@ -1,27 +1,29 @@
-import React, { useState, useEffect, createContext, useContext, useMemo } from "react";
+import React, { useState, useEffect, createContext, useContext, useMemo, lazy, Suspense } from "react";
 import { useNavigate, useLocation, Routes, Route, Navigate } from "react-router-dom";
 import { AnimatePresence, motion } from "motion/react";
 import DashboardLayout from "./components/DashboardLayout";
-import OverviewPage from "./pages/OverviewPage";
-import SecurityPage from "./pages/SecurityPage";
-import InfrastructurePage from "./pages/InfrastructurePage";
-import ComputePage from "./pages/ComputePage";
-import SettingsPage from "./pages/SettingsPage";
-import NetworkPage from "./pages/NetworkPage";
-import ZeroTrustPage from "./pages/ZeroTrustPage";
-import StoragePage from "./pages/StoragePage";
-import WorkspacePage from "./pages/WorkspacePage";
-import StrategyPage from "./pages/StrategyPage";
-import BrandVisionPage from "./pages/BrandVisionPage";
-import AdCampaignsPage from "./pages/AdCampaignsPage";
-import PricingPage from "./pages/PricingPage";
 import PublicPortal from "./pages/PublicPortal";
-import KafkaMonitor from "./components/KafkaMonitor";
-import ComplianceManager from "./pages/admin/ComplianceManager";
-import { CockpitConsoleView } from "./components/CockpitConsoleView";
-import { VaultView } from "./components/VaultView";
-import { EsgGrafanaView } from "./components/EsgGrafanaView";
 import { Loader2 } from "lucide-react";
+
+// Lazy-load dashboard pages to make initial website load ultra-fast and reduce main bundle
+const OverviewPage = lazy(() => import("./pages/OverviewPage"));
+const SecurityPage = lazy(() => import("./pages/SecurityPage"));
+const InfrastructurePage = lazy(() => import("./pages/InfrastructurePage"));
+const ComputePage = lazy(() => import("./pages/ComputePage"));
+const SettingsPage = lazy(() => import("./pages/SettingsPage"));
+const NetworkPage = lazy(() => import("./pages/NetworkPage"));
+const ZeroTrustPage = lazy(() => import("./pages/ZeroTrustPage"));
+const StoragePage = lazy(() => import("./pages/StoragePage"));
+const WorkspacePage = lazy(() => import("./pages/WorkspacePage"));
+const StrategyPage = lazy(() => import("./pages/StrategyPage"));
+const BrandVisionPage = lazy(() => import("./pages/BrandVisionPage"));
+const AdCampaignsPage = lazy(() => import("./pages/AdCampaignsPage"));
+const PricingPage = lazy(() => import("./pages/PricingPage"));
+const KafkaMonitor = lazy(() => import("./components/KafkaMonitor"));
+const ComplianceManager = lazy(() => import("./pages/admin/ComplianceManager"));
+const CockpitConsoleView = lazy(() => import("./components/CockpitConsoleView").then(m => ({ default: m.CockpitConsoleView })));
+const VaultView = lazy(() => import("./components/VaultView").then(m => ({ default: m.VaultView })));
+const EsgGrafanaView = lazy(() => import("./components/EsgGrafanaView").then(m => ({ default: m.EsgGrafanaView })));
 import { useGlobalState } from "./hooks/useGlobalState";
 import { initAuth, googleSignIn, logout } from "./firebase";
 import type { User } from "firebase/auth";
@@ -386,21 +388,6 @@ export default function App() {
     }
   }, [location.pathname]);
 
-  if (authLoading) {
-    return (
-      <ThemeContext.Provider value={themeContextValue}>
-        <LanguageContext.Provider value={languageContextValue}>
-          <div className={`min-h-screen flex items-center justify-center transition-colors duration-200 ${isDark ? 'bg-[#070709] text-neutral-100' : 'bg-slate-50 text-slate-900'}`}>
-            <div className="flex flex-col items-center gap-4">
-              <Loader2 className="w-8 h-8 animate-spin text-[#F38020]" />
-              <p className="text-sm font-mono text-neutral-500 tracking-widest uppercase">Checking Authentication...</p>
-            </div>
-          </div>
-        </LanguageContext.Provider>
-      </ThemeContext.Provider>
-    );
-  }
-
   const handleNavigateFromPortal = (page: string, itemId: string) => {
     setActivePage(page);
     setActiveItemId(itemId);
@@ -411,7 +398,7 @@ export default function App() {
     navigate(page === "overview" ? "/dashboard" : `/${page}`);
   };
 
-  // When activePage is "portal" (root "/" or "/portal"), display the full-screen Website (Spider CAFM BeeCarbonat)
+  // When activePage is "portal" (root "/" or "/portal"), display the full-screen Website immediately without waiting
   if (activePage === "portal") {
     return (
       <ThemeContext.Provider value={themeContextValue}>
@@ -429,6 +416,22 @@ export default function App() {
             user={user}
             isEmbedded={false}
           />
+        </LanguageContext.Provider>
+      </ThemeContext.Provider>
+    );
+  }
+
+  // For protected / internal application dashboard views: show quick spinner only while auth is resolving
+  if (authLoading && !isMockMode) {
+    return (
+      <ThemeContext.Provider value={themeContextValue}>
+        <LanguageContext.Provider value={languageContextValue}>
+          <div className={`min-h-screen flex items-center justify-center transition-colors duration-200 ${isDark ? 'bg-[#070709] text-neutral-100' : 'bg-slate-50 text-slate-900'}`}>
+            <div className="flex flex-col items-center gap-4">
+              <Loader2 className="w-8 h-8 animate-spin text-[#F38020]" />
+              <p className="text-sm font-mono text-neutral-500 tracking-widest uppercase">Checking Authentication...</p>
+            </div>
+          </div>
         </LanguageContext.Provider>
       </ThemeContext.Provider>
     );
@@ -609,7 +612,13 @@ export default function App() {
               transition={{ duration: 0.3, ease: "easeInOut" }}
               className="h-full w-full"
             >
-              {renderPage()}
+              <Suspense fallback={
+                <div className="min-h-[50vh] flex items-center justify-center">
+                  <Loader2 className="w-7 h-7 animate-spin text-[#F38020]" />
+                </div>
+              }>
+                {renderPage()}
+              </Suspense>
             </motion.div>
           </AnimatePresence>
         </DashboardLayout>

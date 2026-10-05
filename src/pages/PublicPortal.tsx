@@ -6,7 +6,7 @@
  * Fused into sersonium: keeps Firebase auth logic, gains new UI.
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, lazy, Suspense } from 'react';
 import { TactileHeader, ActiveNavPath } from '../components/TactileHeader';
 import { Hero } from '../components/Hero';
 import { SixPillars } from '../components/SixPillars';
@@ -14,13 +14,15 @@ import { PipelineArchitecture } from '../components/PipelineArchitecture';
 import { MetricsAndCompliance } from '../components/MetricsAndCompliance';
 import { CtaSection } from '../components/CtaSection';
 import { Footer } from '../components/Footer';
-import { VaultView } from '../components/VaultView';
-import { PricingView } from '../components/PricingView';
-import { CockpitConsoleView } from '../components/CockpitConsoleView';
-import { EsgGrafanaView } from '../components/EsgGrafanaView';
 import { ScheduleModal } from '../components/ScheduleModal';
 import { TelemetryMetrics, SpatialNode, GlobalState } from '../types';
 import type { User } from 'firebase/auth';
+
+// Lazy-load heavier interactive sub-views on demand to make landing page load instant
+const CockpitConsoleView = lazy(() => import('../components/CockpitConsoleView').then(m => ({ default: m.CockpitConsoleView })));
+const VaultView = lazy(() => import('../components/VaultView').then(m => ({ default: m.VaultView })));
+const PricingView = lazy(() => import('../components/PricingView').then(m => ({ default: m.PricingView })));
+const EsgGrafanaView = lazy(() => import('../components/EsgGrafanaView').then(m => ({ default: m.EsgGrafanaView })));
 
 interface PublicPortalProps {
   onSignIn: () => void;
@@ -157,41 +159,47 @@ export default function PublicPortal({
         />
       )}
 
-      {/* VIEW 1 — COCKPIT CONSOLE & 3D DIGITAL TWIN */}
-      {(currentView === 'cockpit' || currentView === '3d-digital-twin') && (
-        <CockpitConsoleView
-          onNavigate={handleNavigate}
-          onClose={() => handleNavigate('architecture')}
-          isEmbedded={isEmbedded}
-        />
-      )}
-
-      {/* VIEW 2 — ZERO-TRUST EPHEMERAL ACCESS VAULT */}
-      {currentView === 'vault' && (
-        <>
-          <VaultView
-            onUnlockTwin={() => handleNavigate('cockpit')}
+      <Suspense fallback={
+        <div className="min-h-[60vh] flex items-center justify-center">
+          <div className="w-8 h-8 rounded-full border-2 border-violet-500 border-t-transparent animate-spin" />
+        </div>
+      }>
+        {/* VIEW 1 — COCKPIT CONSOLE & 3D DIGITAL TWIN */}
+        {(currentView === 'cockpit' || currentView === '3d-digital-twin') && (
+          <CockpitConsoleView
             onNavigate={handleNavigate}
+            onClose={() => handleNavigate('architecture')}
+            isEmbedded={isEmbedded}
           />
-          <Footer onNavigate={handleNavigate} />
-        </>
-      )}
+        )}
 
-      {/* VIEW 3 — PLANS TARIFAIRES & SOUSCRIPTION */}
-      {currentView === 'pricing' && (
-        <>
-          <PricingView onUnlockCockpit={() => handleNavigate('cockpit')} />
-          <Footer onNavigate={handleNavigate} />
-        </>
-      )}
+        {/* VIEW 2 — ZERO-TRUST EPHEMERAL ACCESS VAULT */}
+        {currentView === 'vault' && (
+          <>
+            <VaultView
+              onUnlockTwin={() => handleNavigate('cockpit')}
+              onNavigate={handleNavigate}
+            />
+            <Footer onNavigate={handleNavigate} />
+          </>
+        )}
 
-      {/* VIEW 4 — ESG CSRD & INDUSTRIAL GRAFANA OBSERVABILITY */}
-      {(currentView === 'esg-carbon' || currentView === 'grafana-observability') && (
-        <>
-          <EsgGrafanaView onNavigate={handleNavigate} />
-          <Footer onNavigate={handleNavigate} />
-        </>
-      )}
+        {/* VIEW 3 — PLANS TARIFAIRES & SOUSCRIPTION */}
+        {currentView === 'pricing' && (
+          <>
+            <PricingView onUnlockCockpit={() => handleNavigate('cockpit')} />
+            <Footer onNavigate={handleNavigate} />
+          </>
+        )}
+
+        {/* VIEW 4 — ESG CSRD & INDUSTRIAL GRAFANA OBSERVABILITY */}
+        {(currentView === 'esg-carbon' || currentView === 'grafana-observability') && (
+          <>
+            <EsgGrafanaView onNavigate={handleNavigate} />
+            <Footer onNavigate={handleNavigate} />
+          </>
+        )}
+      </Suspense>
 
       {/* VIEW 5 — ARCHITECTURE & SYSTEM TOPOLOGY / 6 PILLARS (nat---spider-cafm design) */}
       {(currentView === 'architecture' || currentView === '6-core-pillars') && (
