@@ -82,9 +82,11 @@ export const SENSORIUM_SERVICE_SUITE: SidebarServiceGroup[] = [
     name: "Spider CAFM Digital Twin",
     icon: Compass,
     items: [
+      { id: "spider-portal", label: "Site Principal & Vitrine (BeeCarbonat)", page: "portal", badge: "Web", badgeType: "default", keywords: "spider cafm site principal landing vitrine beecarbonat twin accueil" },
       { id: "spider-cockpit", label: "3D Cockpit Console & Actuators", page: "cockpit", badge: "3D Live", badgeType: "live", keywords: "spider cafm cockpit 3d twin threejs valves lighting hvac actuators" },
       { id: "spider-vault", label: "Zero-Trust Ephemeral Vault", page: "vault", badge: "Vault", badgeType: "ia", keywords: "spider cafm vault zero trust ephemeral passcodes biometric access" },
-      { id: "spider-esg", label: "CSRD ESG & Industrial Grafana", page: "esg-carbon", badge: "CSRD", badgeType: "default", keywords: "spider cafm esg csrd carbon scope 1 2 3 grafana observability" }
+      { id: "spider-esg", label: "CSRD ESG & Industrial Grafana", page: "esg-carbon", badge: "CSRD", badgeType: "default", keywords: "spider cafm esg csrd carbon scope 1 2 3 grafana observability" },
+      { id: "spider-arch", label: "6 Core Pillars & Architecture", page: "architecture", badge: "Pillars", badgeType: "ia", keywords: "spider cafm 6 pillars core architecture topology system" }
     ]
   },
   {

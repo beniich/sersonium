@@ -458,6 +458,25 @@ export default function App() {
           }}
         />
       );
+      case "portal":
+      case "architecture":
+        return (
+          <div className="w-full bg-[#fbf8ff] text-[#1b1b20] rounded-2xl overflow-hidden shadow-sm border border-slate-200/80 dark:border-white/[0.08]">
+            <PublicPortal
+              onSignIn={handleSignIn}
+              onEnterMockMode={handleEnterMockMode}
+              onNavigateToSection={handleNavigateFromPortal}
+              isDark={isDark}
+              toggleTheme={toggleTheme}
+              mode={mode}
+              authError={authError}
+              state={state}
+              user={user}
+              initialView={activePage === "architecture" ? "architecture" : "architecture"}
+              isEmbedded={true}
+            />
+          </div>
+        );
       case "cockpit":
       case "digital-twin":
         return (

@@ -17,6 +17,7 @@ interface TactileHeaderProps {
   onOpenVault: () => void;
   onLaunchDashboard?: () => void;
   tokenCountdown?: string;
+  isEmbedded?: boolean;
 }
 
 export const TactileHeader: React.FC<TactileHeaderProps> = ({
@@ -26,9 +27,10 @@ export const TactileHeader: React.FC<TactileHeaderProps> = ({
   onOpenVault,
   onLaunchDashboard,
   tokenCountdown = '23:59:59',
+  isEmbedded = false,
 }) => {
   return (
-    <header className="fixed top-0 w-full z-50 bg-[#fbf8ff]/90 backdrop-blur-md shadow-[0_4px_16px_rgba(112,104,133,0.08)]">
+    <header className={`${isEmbedded ? 'sticky top-0 w-full z-20' : 'fixed top-0 w-full z-50'} bg-[#fbf8ff]/90 backdrop-blur-md shadow-[0_4px_16px_rgba(112,104,133,0.08)]`}>
       <div className="h-20 w-full px-4 sm:px-6 lg:px-8 flex items-center justify-between gap-4">
         {/* Brand identity */}
         <div className="flex items-center gap-4 shrink-0">

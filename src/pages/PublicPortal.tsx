@@ -32,6 +32,8 @@ interface PublicPortalProps {
   authError?: string | null;
   state?: GlobalState;
   user?: User | null;
+  initialView?: ActiveNavPath;
+  isEmbedded?: boolean;
 }
 
 export default function PublicPortal({
@@ -39,9 +41,17 @@ export default function PublicPortal({
   onEnterMockMode,
   onNavigateToSection: _onNavigateToSection,
   state: _globalState,
+  initialView = 'architecture',
+  isEmbedded = false,
 }: PublicPortalProps) {
-  const [currentView, setCurrentView] = useState<ActiveNavPath>('architecture');
+  const [currentView, setCurrentView] = useState<ActiveNavPath>(initialView);
   const [isScheduleOpen, setIsScheduleOpen] = useState(false);
+
+  useEffect(() => {
+    if (initialView && initialView !== currentView) {
+      setCurrentView(initialView);
+    }
+  }, [initialView]);
 
   // Live telemetry metrics
   const [metrics, setMetrics] = useState<TelemetryMetrics>({
@@ -132,7 +142,7 @@ export default function PublicPortal({
   };
 
   return (
-    <div className="min-h-screen bg-[#fbf8ff] text-[#1b1b20] flex flex-col font-['Inter'] selection:bg-[#630ed4] selection:text-white">
+    <div className={`min-h-screen bg-[#fbf8ff] text-[#1b1b20] flex flex-col font-['Inter'] selection:bg-[#630ed4] selection:text-white ${isEmbedded ? 'rounded-2xl overflow-hidden' : ''}`}>
 
       {/* Top Tactile Header (shared across all views) */}
       {currentView !== 'cockpit' && (
@@ -143,6 +153,7 @@ export default function PublicPortal({
           onLaunchDashboard={handleEnterDashboard}
           onOpenVault={() => handleNavigate('vault')}
           tokenCountdown={tokenCountdown}
+          isEmbedded={isEmbedded}
         />
       )}
 
@@ -151,6 +162,7 @@ export default function PublicPortal({
         <CockpitConsoleView
           onNavigate={handleNavigate}
           onClose={() => handleNavigate('architecture')}
+          isEmbedded={isEmbedded}
         />
       )}
 
@@ -183,7 +195,7 @@ export default function PublicPortal({
 
       {/* VIEW 5 — ARCHITECTURE & SYSTEM TOPOLOGY / 6 PILLARS (nat---spider-cafm design) */}
       {(currentView === 'architecture' || currentView === '6-core-pillars') && (
-        <div className="pt-20">
+        <div className={isEmbedded ? "pt-4" : "pt-20"}>
           <main className="flex-1">
             {/* Hero with 3D Canvas & Live Metrics */}
             <Hero
