@@ -82,7 +82,7 @@ export const SENSORIUM_SERVICE_SUITE: SidebarServiceGroup[] = [
     name: "Spider CAFM Digital Twin",
     icon: Compass,
     items: [
-      { id: "spider-portal", label: "Site Principal & Vitrine (BeeCarbonat)", page: "portal", badge: "Web", badgeType: "default", keywords: "spider cafm site principal landing vitrine beecarbonat twin accueil" },
+      { id: "spider-portal", label: "Site Web (Vitrine BeeCarbonat)", page: "portal", badge: "Web", badgeType: "default", keywords: "spider cafm site principal web landing vitrine beecarbonat twin accueil" },
       { id: "spider-cockpit", label: "3D Cockpit Console & Actuators", page: "cockpit", badge: "3D Live", badgeType: "live", keywords: "spider cafm cockpit 3d twin threejs valves lighting hvac actuators" },
       { id: "spider-vault", label: "Zero-Trust Ephemeral Vault", page: "vault", badge: "Vault", badgeType: "ia", keywords: "spider cafm vault zero trust ephemeral passcodes biometric access" },
       { id: "spider-esg", label: "CSRD ESG & Industrial Grafana", page: "esg-carbon", badge: "CSRD", badgeType: "default", keywords: "spider cafm esg csrd carbon scope 1 2 3 grafana observability" },
@@ -341,6 +341,11 @@ export default function DashboardLayout(props: any) {
   };
 
   const handleSelectService = (page: string, itemId: string) => {
+    if ((page === "portal" || itemId === "spider-portal") && onReturnToPortal) {
+      onReturnToPortal();
+      setMobileMenuOpen(false);
+      return;
+    }
     setActiveItemId(itemId);
     setActivePage(page);
     setMobileMenuOpen(false);
@@ -405,18 +410,19 @@ export default function DashboardLayout(props: any) {
           {/* Zero-Config Edge Terminal Hardware Badge */}
           <TerminalStatusBadge />
 
-          {/* ← Retour au Site Principal (BeeCarbonat SPIDER) */}
+          {/* ← Retour au Site Web (BeeCarbonat SPIDER) */}
           {onReturnToPortal && (
             <button
               id="btn-retour-site-principal"
               onClick={onReturnToPortal}
-              className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold transition-all cursor-pointer min-h-[36px] bg-violet-500/10 hover:bg-violet-500/20 border border-violet-500/30 text-violet-600 dark:text-violet-400 hover:text-violet-700 dark:hover:text-violet-300 group"
-              title="Retourner au site principal SENSORIUM"
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold transition-all cursor-pointer min-h-[36px] bg-violet-600 text-white hover:bg-violet-700 shadow-sm shadow-violet-500/25 group"
+              title="Retourner au Site Web (Vitrine BeeCarbonat Spider CAFM)"
             >
-              <svg xmlns="http://www.w3.org/2000/svg" className="w-3.5 h-3.5 group-hover:-translate-x-0.5 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
-              </svg>
-              <span className="hidden md:inline">Site principal</span>
+              <Globe className="w-3.5 h-3.5 group-hover:rotate-12 transition-transform text-violet-200" />
+              <span>Site Web</span>
+              <span className="hidden md:inline-block px-1.5 py-0.5 rounded-full text-[9px] bg-white/20 text-white font-bold uppercase">
+                Vitrine
+              </span>
             </button>
           )}
 
@@ -865,8 +871,8 @@ export default function DashboardLayout(props: any) {
                 onClick={onReturnToPortal}
                 className="w-full py-2 px-3 rounded-lg bg-white dark:bg-white/[0.04] hover:bg-slate-100 dark:hover:bg-white/[0.08] border border-slate-200 dark:border-white/[0.07] text-slate-700 dark:text-neutral-300 hover:text-slate-900 dark:hover:text-white text-xs font-medium flex items-center justify-center gap-2 transition-all cursor-pointer group shadow-2xs"
               >
-                <Eye className="w-3.5 h-3.5 text-orange-500 dark:text-orange-400 group-hover:scale-110 transition-transform" />
-                <span>SENSORIUM Showcase</span>
+                <Globe className="w-3.5 h-3.5 text-violet-500 group-hover:scale-110 transition-transform" />
+                <span>Site Web (Vitrine BeeCarbonat)</span>
               </button>
             </div>
           )}
@@ -973,8 +979,8 @@ export default function DashboardLayout(props: any) {
                     }}
                     className="w-full py-2.5 px-3 bg-slate-100 dark:bg-white/[0.04] hover:bg-slate-200 dark:hover:bg-white/[0.08] text-slate-700 dark:text-neutral-300 rounded-xl text-xs font-medium flex items-center justify-center gap-2 min-h-[44px] cursor-pointer transition-colors"
                   >
-                    <Eye className="w-4 h-4 text-orange-500 dark:text-orange-400" />
-                    <span>SENSORIUM Showcase</span>
+                    <Globe className="w-4 h-4 text-violet-500" />
+                    <span>Site Web (Vitrine BeeCarbonat)</span>
                   </button>
                 )}
               </div>

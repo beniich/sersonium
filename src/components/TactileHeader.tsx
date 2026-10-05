@@ -133,6 +133,22 @@ export const TactileHeader: React.FC<TactileHeaderProps> = ({
           >
             Pricing
           </button>
+          <a
+            href="/spider-solutions.html"
+            className="transition-all px-3 py-2 rounded-xl font-['Space_Grotesk'] text-[15px] text-[#4a4455] hover:text-[#1b1b20] flex items-center gap-1"
+            title="Solutions sectorielles (Bureaux, Logistique, Santé)"
+          >
+            <span>Solutions</span>
+            <span className="text-[9px] px-1 py-0.2 bg-[#eaddff] text-[#25005a] rounded font-bold uppercase">HTML</span>
+          </a>
+          <a
+            href="/spider-roi.html"
+            className="transition-all px-3 py-2 rounded-xl font-['Space_Grotesk'] text-[15px] text-[#4a4455] hover:text-[#1b1b20] flex items-center gap-1"
+            title="Simulateur ROI interactif"
+          >
+            <span>Simulateur ROI</span>
+            <span className="text-[9px] px-1 py-0.2 bg-emerald-100 text-emerald-800 rounded font-bold uppercase">CALC</span>
+          </a>
         </nav>
 
         {/* Right action block */}
@@ -176,12 +192,13 @@ export const TactileHeader: React.FC<TactileHeaderProps> = ({
           <button
             onClick={onLaunchCockpit}
             className="tactile-btn px-3 py-2 rounded-xl flex items-center gap-1.5 text-[#4a4455] font-['Space_Grotesk'] text-[13px] font-semibold hover:text-[#1b1b20] active:scale-95 transition-all cursor-pointer"
+            title="Ouvrir le Cockpit 3D"
           >
             <span className="material-symbols-outlined text-[16px]">sensors</span>
-            <span className="whitespace-nowrap hidden sm:inline">Cockpit</span>
+            <span className="whitespace-nowrap hidden sm:inline">Cockpit 3D</span>
           </button>
 
-          {/* ✦ MODE PRO — SENSORIUM — primary bypass CTA */}
+          {/* ✦ CONSOLE / COCKPIT SENSORIUM — primary bypass CTA */}
           {onLaunchDashboard && (
             <button
               id="btn-mode-pro-sensorium"
@@ -190,16 +207,16 @@ export const TactileHeader: React.FC<TactileHeaderProps> = ({
               style={{
                 background: 'linear-gradient(135deg, #7c3aed 0%, #4f46e5 60%, #2563eb 100%)',
               }}
-              title="Accéder au dashboard SENSORIUM Pro"
+              title="Accéder à la console / Cockpit applicatif SENSORIUM"
             >
               {/* shimmer */}
               <span className="pointer-events-none absolute inset-0 bg-white/10 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-500 skew-x-12" />
               {/* crown icon */}
               <span className="material-symbols-outlined text-[16px] text-yellow-300">workspace_premium</span>
-              <span className="whitespace-nowrap hidden sm:inline">Mode Pro</span>
+              <span className="whitespace-nowrap hidden sm:inline">Console SENSORIUM</span>
               {/* pill badge */}
               <span className="hidden md:inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-full bg-white/20 text-[9px] tracking-widest font-bold uppercase">
-                SENSORIUM
+                COCKPIT
               </span>
             </button>
           )}

@@ -77,11 +77,18 @@ export default function App() {
 
   // Map URL path → page key
   const pageFromPath = (pathname: string): string => {
-    const seg = pathname.replace(/^\//, "") || "overview";
+    const seg = pathname.replace(/^\//, "").split("/")[0].toLowerCase();
+    // Default root "/" or "/portal" or "/website" or "/vitrine" is the Website
+    if (!seg || seg === "portal" || seg === "website" || seg === "site" || seg === "vitrine") {
+      return "portal";
+    }
+    if (seg === "dashboard") {
+      return "overview";
+    }
     return seg;
   };
 
-  const [activeItemId, setActiveItemId] = useState<string>("ov-1");
+  const [activeItemId, setActiveItemId] = useState<string>("ov-general");
   const [activePage, setActivePage] = useState<string>(() => pageFromPath(location.pathname));
   
   // Track operating system/browser preference in real-time
@@ -306,18 +313,28 @@ export default function App() {
     });
   };
 
-  const handleEnterMockMode = () => {
+  const handleEnterDashboard = (targetPage: string = "overview") => {
+    setActivePage(targetPage);
+    setActiveItemId(targetPage === "cockpit" ? "spider-cockpit" : "ov-general");
     setIsMockMode(true);
     try {
       localStorage.setItem("cafm_mock_mode", "true");
     } catch {}
+    navigate(targetPage === "overview" ? "/dashboard" : `/${targetPage}`);
+  };
+
+  const handleEnterMockMode = () => {
+    handleEnterDashboard("overview");
   };
 
   const handleReturnToPortal = () => {
+    setActivePage("portal");
+    setActiveItemId("spider-portal");
     setIsMockMode(false);
     try {
       localStorage.setItem("cafm_mock_mode", "false");
     } catch {}
+    navigate("/");
   };
 
   const handleSignIn = async () => {
@@ -341,7 +358,14 @@ export default function App() {
   // Keep URL in sync whenever activePage changes
   // (must be before any conditional return to respect Rules of Hooks)
   useEffect(() => {
-    const target = activePage === "overview" ? "/" : `/${activePage}`;
+    let target = "/";
+    if (activePage === "portal") {
+      target = "/";
+    } else if (activePage === "overview") {
+      target = "/dashboard";
+    } else {
+      target = `/${activePage}`;
+    }
     if (location.pathname !== target) {
       navigate(target, { replace: true });
     }
@@ -352,6 +376,13 @@ export default function App() {
     const newPage = pageFromPath(location.pathname);
     if (newPage !== activePage) {
       setActivePage(newPage);
+      if (newPage === "overview") {
+        setActiveItemId("ov-general");
+      } else if (newPage === "cockpit") {
+        setActiveItemId("spider-cockpit");
+      } else if (newPage === "portal") {
+        setActiveItemId("spider-portal");
+      }
     }
   }, [location.pathname]);
 
@@ -370,36 +401,33 @@ export default function App() {
     );
   }
 
-
-
   const handleNavigateFromPortal = (page: string, itemId: string) => {
     setActivePage(page);
     setActiveItemId(itemId);
-    navigate(`/${page}`);
-    handleEnterMockMode();
+    setIsMockMode(true);
+    try {
+      localStorage.setItem("cafm_mock_mode", "true");
+    } catch {}
+    navigate(page === "overview" ? "/dashboard" : `/${page}`);
   };
 
-  // Portal logic:
-  // - isMockMode=true  → always show dashboard (demo/dev bypass)
-  // - user authenticated → always show dashboard
-  // - otherwise         → show public portal
-  const isSubscribedPro = state?.subscriptionTier === "pro";
-  const shouldShowPortal = !isMockMode && !user && !isSubscribedPro;
-
-  if (shouldShowPortal && !loading) {
+  // When activePage is "portal" (root "/" or "/portal"), display the full-screen Website (Spider CAFM BeeCarbonat)
+  if (activePage === "portal") {
     return (
       <ThemeContext.Provider value={themeContextValue}>
         <LanguageContext.Provider value={languageContextValue}>
           <PublicPortal
             onSignIn={handleSignIn}
-            onEnterMockMode={handleEnterMockMode}
+            onEnterMockMode={() => handleEnterDashboard("overview")}
+            onLaunchCockpit={() => handleEnterDashboard("cockpit")}
             onNavigateToSection={handleNavigateFromPortal}
             isDark={isDark}
             toggleTheme={toggleTheme}
             mode={mode}
             authError={authError}
-            state={state}
+            state={state || undefined}
             user={user}
+            isEmbedded={false}
           />
         </LanguageContext.Provider>
       </ThemeContext.Provider>
@@ -490,14 +518,15 @@ export default function App() {
                 } else if (path === "esg-carbon" || path === "grafana-observability") {
                   setActivePage("esg-carbon");
                   setActiveItemId("spider-esg");
+                } else if (path === "architecture" || path === "portal" || path === "home") {
+                  handleReturnToPortal();
                 } else {
                   setActivePage("overview");
                   setActiveItemId("ov-general");
                 }
               }}
               onClose={() => {
-                setActivePage("overview");
-                setActiveItemId("ov-general");
+                handleReturnToPortal();
               }}
             />
           </div>
