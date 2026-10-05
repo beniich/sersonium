@@ -158,20 +158,26 @@ export const TactileHeader: React.FC<TactileHeaderProps> = ({
               Tarifs
             </button>
             <a
-              href="/spider-solutions.html"
-              className="transition-all px-3 py-2 rounded-xl font-['Space_Grotesk'] text-[14px] text-[#4a4455] hover:text-[#1b1b20] flex items-center gap-1"
-              title="Solutions sectorielles (Bureaux, Logistique, Santé)"
+              href="/site/index.html"
+              className="transition-all px-3 py-2 rounded-xl font-['Space_Grotesk'] text-[14px] text-[#4a4455] hover:text-[#630ed4] flex items-center gap-1"
+              title="Site Web Vitrine Complet (12 pages)"
             >
-              <span>Solutions</span>
-              <span className="text-[9px] px-1 py-0.2 bg-[#eaddff] text-[#25005a] rounded font-bold uppercase">HTML</span>
+              <span>Site Web</span>
+              <span className="text-[9px] px-1.5 py-0.5 bg-[#eaddff] text-[#25005a] rounded-full font-bold uppercase">12 PAGES</span>
             </a>
             <a
-              href="/spider-roi.html"
+              href="/site/benefices_roi.html"
               className="transition-all px-3 py-2 rounded-xl font-['Space_Grotesk'] text-[14px] text-[#4a4455] hover:text-[#1b1b20] flex items-center gap-1"
-              title="Simulateur ROI interactif"
+              title="Bénéfices & ROI"
             >
-              <span>Simulateur ROI</span>
-              <span className="text-[9px] px-1 py-0.2 bg-emerald-100 text-emerald-800 rounded font-bold uppercase">CALC</span>
+              <span>ROI</span>
+            </a>
+            <a
+              href="/site/demo.html"
+              className="transition-all px-3 py-2 rounded-xl font-['Space_Grotesk'] text-[14px] text-[#4a4455] hover:text-[#1b1b20] flex items-center gap-1"
+              title="Demander une Démo"
+            >
+              <span>Démo</span>
             </a>
           </nav>
 
@@ -470,28 +476,98 @@ export const TactileHeader: React.FC<TactileHeaderProps> = ({
                 </button>
 
                 <div className="pt-2 border-t border-slate-200">
-                  <div className="text-[10px] uppercase font-mono text-slate-400 px-2 tracking-wider font-bold mb-1">Outils Marketing &amp; Solutions</div>
+                  <div className="text-[10px] uppercase font-mono text-slate-400 px-2 tracking-wider font-bold mb-1">Site Web &amp; Vitrine Complète (12 Pages)</div>
                   
                   <a
-                    href="/spider-solutions.html"
+                    href="/site/index.html"
+                    className="w-full flex items-center justify-between px-3 py-2 rounded-xl text-left font-['Space_Grotesk'] text-sm text-[#630ed4] hover:bg-purple-50 font-bold"
+                  >
+                    <span className="flex items-center gap-3">
+                      <span className="material-symbols-outlined text-[18px]">home</span>
+                      <span>Accueil Vitrine</span>
+                    </span>
+                    <span className="text-[9px] px-1.5 py-0.5 bg-[#eaddff] text-[#25005a] rounded-full font-bold uppercase">12 PAGES</span>
+                  </a>
+
+                  <a
+                    href="/site/solutions.html"
                     className="w-full flex items-center justify-between px-3 py-2 rounded-xl text-left font-['Space_Grotesk'] text-sm text-slate-700 hover:bg-slate-100 font-medium"
                   >
                     <span className="flex items-center gap-3">
                       <span className="material-symbols-outlined text-[18px]">domain</span>
-                      <span>Solutions Sectorielles</span>
+                      <span>Solutions Métiers</span>
                     </span>
-                    <span className="text-[9px] px-1 py-0.2 bg-[#eaddff] text-[#25005a] rounded font-bold uppercase">HTML</span>
                   </a>
 
                   <a
-                    href="/spider-roi.html"
+                    href="/site/benefices_roi.html"
                     className="w-full flex items-center justify-between px-3 py-2 rounded-xl text-left font-['Space_Grotesk'] text-sm text-slate-700 hover:bg-slate-100 font-medium"
                   >
                     <span className="flex items-center gap-3">
-                      <span className="material-symbols-outlined text-[18px]">calculate</span>
-                      <span>Simulateur ROI Immédiat</span>
+                      <span className="material-symbols-outlined text-[18px]">trending_up</span>
+                      <span>Bénéfices &amp; ROI</span>
                     </span>
-                    <span className="text-[9px] px-1 py-0.2 bg-emerald-100 text-emerald-800 rounded font-bold uppercase">CALC</span>
+                    <span className="text-[9px] px-1 py-0.2 bg-emerald-100 text-emerald-800 rounded font-bold uppercase">ROI</span>
+                  </a>
+
+                  <a
+                    href="/site/piliers_industriels.html"
+                    className="w-full flex items-center justify-between px-3 py-2 rounded-xl text-left font-['Space_Grotesk'] text-sm text-slate-700 hover:bg-slate-100 font-medium"
+                  >
+                    <span className="flex items-center gap-3">
+                      <span className="material-symbols-outlined text-[18px]">factory</span>
+                      <span>Piliers Industriels</span>
+                    </span>
+                  </a>
+
+                  <a
+                    href="/site/jumeau_numerique_3d.html"
+                    className="w-full flex items-center justify-between px-3 py-2 rounded-xl text-left font-['Space_Grotesk'] text-sm text-slate-700 hover:bg-slate-100 font-medium"
+                  >
+                    <span className="flex items-center gap-3">
+                      <span className="material-symbols-outlined text-[18px]">view_in_ar</span>
+                      <span>Jumeau Numérique 3D</span>
+                    </span>
+                  </a>
+
+                  <a
+                    href="/site/esg_carbon.html"
+                    className="w-full flex items-center justify-between px-3 py-2 rounded-xl text-left font-['Space_Grotesk'] text-sm text-slate-700 hover:bg-slate-100 font-medium"
+                  >
+                    <span className="flex items-center gap-3">
+                      <span className="material-symbols-outlined text-[18px]">eco</span>
+                      <span>ESG &amp; Carbone</span>
+                    </span>
+                  </a>
+
+                  <a
+                    href="/site/temoignages.html"
+                    className="w-full flex items-center justify-between px-3 py-2 rounded-xl text-left font-['Space_Grotesk'] text-sm text-slate-700 hover:bg-slate-100 font-medium"
+                  >
+                    <span className="flex items-center gap-3">
+                      <span className="material-symbols-outlined text-[18px]">reviews</span>
+                      <span>Témoignages Clients</span>
+                    </span>
+                  </a>
+
+                  <a
+                    href="/site/tarifs.html"
+                    className="w-full flex items-center justify-between px-3 py-2 rounded-xl text-left font-['Space_Grotesk'] text-sm text-slate-700 hover:bg-slate-100 font-medium"
+                  >
+                    <span className="flex items-center gap-3">
+                      <span className="material-symbols-outlined text-[18px]">sell</span>
+                      <span>Grille Tarifaire Vitrine</span>
+                    </span>
+                  </a>
+
+                  <a
+                    href="/site/demo.html"
+                    className="w-full flex items-center justify-between px-3 py-2 rounded-xl text-left font-['Space_Grotesk'] text-sm text-slate-700 hover:bg-slate-100 font-medium"
+                  >
+                    <span className="flex items-center gap-3">
+                      <span className="material-symbols-outlined text-[18px]">play_circle</span>
+                      <span>Démo Interactives</span>
+                    </span>
                   </a>
                 </div>
               </div>

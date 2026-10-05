@@ -413,20 +413,27 @@ export default function DashboardLayout(props: any) {
           </div>
 
           {/* ← Retour au Site Web (BeeCarbonat SPIDER) */}
-          {onReturnToPortal && (
-            <button
-              id="btn-retour-site-principal"
-              onClick={onReturnToPortal}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold transition-all cursor-pointer min-h-[36px] bg-violet-600 text-white hover:bg-violet-700 shadow-sm shadow-violet-500/25 group"
-              title="Retourner au Site Web (Vitrine BeeCarbonat Spider CAFM)"
+          <div className="flex items-center gap-1">
+            {onReturnToPortal && (
+              <button
+                id="btn-retour-site-principal"
+                onClick={onReturnToPortal}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold transition-all cursor-pointer min-h-[36px] bg-violet-600 text-white hover:bg-violet-700 shadow-sm shadow-violet-500/25 group"
+                title="Retourner au Site Web Principal (BeeCarbonat Spider CAFM)"
+              >
+                <Globe className="w-3.5 h-3.5 group-hover:rotate-12 transition-transform text-violet-200" />
+                <span>Site Web</span>
+              </button>
+            )}
+            <a
+              href="/site/index.html"
+              className="hidden lg:flex items-center gap-1 px-2.5 py-1.5 rounded-full text-xs font-semibold text-violet-600 dark:text-violet-300 bg-violet-50 dark:bg-violet-950/40 hover:bg-violet-100 dark:hover:bg-violet-900/60 border border-violet-200 dark:border-violet-800 transition-all min-h-[36px]"
+              title="Ouvrir le Site Web 12 Pages Vitrine Complète"
             >
-              <Globe className="w-3.5 h-3.5 group-hover:rotate-12 transition-transform text-violet-200" />
-              <span>Site Web</span>
-              <span className="hidden md:inline-block px-1.5 py-0.5 rounded-full text-[9px] bg-white/20 text-white font-bold uppercase">
-                Vitrine
-              </span>
-            </button>
-          )}
+              <ExternalLink className="w-3 h-3" />
+              <span>12 Pages</span>
+            </a>
+          </div>
 
           {/* Quick Launch to Spider CAFM 3D Cockpit */}
           <button

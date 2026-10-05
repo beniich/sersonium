@@ -1,0 +1,605 @@
+<!DOCTYPE html><html lang="fr"><head><meta charset="utf-8"><meta content="width=device-width, initial-scale=1.0" name="viewport"><meta content="web_standard" name="shell-type"><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"><link href="https://fonts.googleapis.com" rel="preconnect"><link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"><link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&amp;family=Manrope:wght@400;500;600;700&amp;family=Space+Grotesk:wght@500;600;700&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"><style>@layer base{html,body{margin:0;padding:0;}body{overscroll-behavior:none;}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}</style><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config = { darkMode: "class", theme: { extend: { "colors": { "error": "#ba1a1a", "on-secondary-fixed-variant": "#004e5c", "secondary-fixed": "#acedff", "on-secondary": "#ffffff", "surface-variant": "#dae2fd", "background": "#faf8ff", "inverse-primary": "#d2bbff", "on-primary": "#ffffff", "inverse-surface": "#283044", "outline-variant": "#ccc3d8", "surface": "#faf8ff", "on-primary-fixed": "#25005a", "on-background": "#131b2e", "on-primary-container": "#ede0ff", "surface-dim": "#d2d9f4", "inverse-on-surface": "#eef0ff", "primary-fixed-dim": "#d2bbff", "on-surface-variant": "#4a4455", "error-container": "#ffdad6", "primary-container": "#7c3aed", "surface-container-low": "#f2f3ff", "surface-bright": "#faf8ff", "on-primary-fixed-variant": "#5a00c6", "on-surface": "#131b2e", "on-error": "#ffffff", "primary": "#630ed4", "surface-tint": "#732ee4", "primary-fixed": "#eaddff", "secondary-container": "#57dffe", "surface-container-high": "#e2e7ff", "surface-container-lowest": "#ffffff", "on-secondary-container": "#006172", "secondary": "#00687a", "on-tertiary-fixed-variant": "#5516be", "on-error-container": "#93000a", "surface-container": "#eaedff", "on-secondary-fixed": "#001f26", "outline": "#7b7487", "tertiary-fixed-dim": "#d0bcff", "secondary-fixed-dim": "#4cd7f6", "on-tertiary": "#ffffff", "on-tertiary-container": "#ece1ff", "surface-container-highest": "#dae2fd", "tertiary-fixed": "#e9ddff", "tertiary": "#5d25c7", "on-tertiary-fixed": "#23005c", "tertiary-container": "#7645e0" }, "borderRadius": { "DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px" }, "spacing": { "gutter": "1.25rem", "gutter-sm": "0.75rem", "space-xl": "2.5rem", "space-md": "1rem", "margin-mobile": "1rem", "space-sm": "0.5rem", "gutter-lg": "1.75rem", "space-lg": "1.5rem", "margin": "2rem", "space-xs": "0.25rem" }, "fontFamily": { "title-md": ["Manrope"], "body-sm": ["Manrope"], "headline-lg-mobile": ["Space Grotesk"], "label-sm": ["JetBrains Mono"], "headline-md": ["Space Grotesk"], "label-md": ["JetBrains Mono"], "headline-xl": ["Space Grotesk"], "headline-lg": ["Space Grotesk"], "headline-xl-mobile": ["Space Grotesk"], "body-lg": ["Manrope"], "headline-sm": ["Space Grotesk"], "body-md": ["Manrope"] }, "fontSize": { "title-md": ["16px", { "lineHeight": "24px", "letterSpacing": "0em", "fontWeight": "600" }], "body-sm": ["12px", { "lineHeight": "18px", "letterSpacing": "0.015em", "fontWeight": "400" }], "headline-lg-mobile": ["26px", { "lineHeight": "32px", "letterSpacing": "-0.01em", "fontWeight": "600" }], "label-sm": ["10px", { "lineHeight": "14px", "letterSpacing": "0.06em", "fontWeight": "500" }], "headline-md": ["24px", { "lineHeight": "32px", "letterSpacing": "-0.015em", "fontWeight": "500" }], "label-md": ["12px", { "lineHeight": "16px", "letterSpacing": "0.04em", "fontWeight": "500" }], "headline-xl": ["48px", { "lineHeight": "56px", "letterSpacing": "-0.03em", "fontWeight": "600" }], "headline-lg": ["36px", { "lineHeight": "44px", "letterSpacing": "-0.02em", "fontWeight": "600" }], "headline-xl-mobile": ["32px", { "lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "600" }], "body-lg": ["16px", { "lineHeight": "24px", "letterSpacing": "0em", "fontWeight": "400" }], "headline-sm": ["20px", { "lineHeight": "28px", "letterSpacing": "-0.01em", "fontWeight": "500" }], "body-md": ["14px", { "lineHeight": "20px", "letterSpacing": "0.01em", "fontWeight": "400" }] } } } }</script></head><body class="bg-background font-body-md text-body-md text-on-surface antialiased"><header class="fixed top-0 left-0 right-0 w-full z-50 bg-surface-container-lowest/80 backdrop-blur-xl shadow-[0_1px_8px_rgba(0,0,0,0.04)]"><div class="h-20 w-full px-gutter-lg flex items-center justify-between"><div class="flex items-center gap-space-lg"><a class="flex items-center gap-space-sm group" data-path="accueil" href="#"><img src="https://lh3.googleusercontent.com/aida/AEtjO1WfQYCtiqeNG54ygjSuWgezzJvNRFn46pLCNvp2e7Id3bhtMXk6yjzUgbnZSeZCVHUweMxEgpifSLDwnI1WmJJ24cWXR44dN6sUMHvuOdznVvI91v8NcptI5RfJsyMjpuA2VnUxe3lOdTB8lNMvFv7A6c7sRRzgj9miA3MLgf599L1cAc92XDf_De3VbOMEkNSsklNgO0A6ezaUNwBiBHRSfQM93befgRVuUv-l9vV5GxcEYQbNQ1iOmAo" alt="Sensorium Logo" class="w-8 h-8 rounded-full object-cover"><div class="flex flex-col"><div class="flex items-center gap-space-xs"><span class="font-headline-sm text-headline-sm tracking-tight text-on-surface font-semibold">Sensorium</span><span class="font-label-sm text-label-sm px-1.5 py-0.5 rounded bg-surface-container-high text-primary uppercase">Core</span></div><span class="font-label-sm text-label-sm text-primary tracking-widest uppercase font-semibold">SPIDER TWIN</span></div></a><nav class="hidden xl:flex items-center gap-space-xs" data-active-classes="bg-surface-container text-on-surface font-semibold"><a class="px-space-md py-space-sm rounded-lg font-body-md text-body-md text-on-surface-variant hover:text-on-surface hover:bg-surface-container-low transition-colors" data-path="accueil" href="#">Accueil</a><a class="px-space-md py-space-sm rounded-lg font-body-md text-body-md text-on-surface-variant hover:text-on-surface hover:bg-surface-container-low transition-colors" href="/site/solutions.html" data-path="solutions">Solutions</a><a class="px-space-md py-space-sm rounded-lg font-body-md text-body-md text-on-surface-variant hover:text-on-surface hover:bg-surface-container-low transition-colors" href="/site/benefices_roi.html" data-path="benefices-roi">Bénéfices &amp; ROI</a><a class="px-space-md py-space-sm rounded-lg font-body-md text-body-md text-on-surface-variant hover:text-on-surface hover:bg-surface-container-low transition-colors" href="/site/piliers_industriels.html" data-path="piliers">Piliers</a><a class="px-space-md py-space-sm rounded-lg font-body-md text-body-md text-on-surface-variant hover:text-on-surface hover:bg-surface-container-low transition-colors" href="/site/temoignages.html" data-path="temoignages">Témoignages</a><a class="px-space-md py-space-sm rounded-lg font-body-md text-body-md text-on-surface-variant hover:text-on-surface hover:bg-surface-container-low transition-colors" href="/site/tarifs.html" data-path="tarifs">Tarifs</a></nav></div><div class="flex items-center gap-space-md"><a class="hidden md:inline-flex items-center px-space-lg py-space-sm rounded-xl font-body-md text-body-md font-medium text-on-surface bg-surface-container-lowest/80 hover:bg-surface-container transition-all shadow-[0_1px_8px_rgba(0,0,0,0.04)]" href="/site/demo.html" data-path="demander-une-demo">Demander une Démo</a><a class="inline-flex items-center px-space-lg py-space-sm rounded-xl font-body-md text-body-md font-semibold text-on-primary bg-gradient-to-r from-primary to-primary-container hover:from-primary-container hover:to-primary shadow-[0_0_20px_rgba(124,58,237,0.35)] transition-all" href="/site/authentification.html" data-path="demarrer-essai-gratuit">Démarrer Essai Gratuit</a><a href="/dashboard" class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-primary text-white text-xs font-semibold shadow hover:opacity-90 ml-space-xs" title="Ouvrir le Cockpit"><span class="material-symbols-outlined text-[16px]">speed</span><span>Cockpit</span></a></div></div></header><main class="w-full pt-20 bg-background"><div class="flex flex-col w-full">
+<!-- Top Specular Atmospheric Field -->
+<div class="relative w-full px-gutter-lg pt-space-xl pb-space-lg overflow-hidden">
+<div class="absolute -top-32 -left-20 w-96 h-96 rounded-full bg-primary/10 blur-[100px] pointer-events-none"></div>
+<div class="absolute top-10 right-0 w-[30rem] h-[30rem] rounded-full bg-secondary-container/20 blur-[120px] pointer-events-none"></div>
+<!-- Micro Breadcrumb & Spatial Marker -->
+<div class="flex flex-wrap items-center justify-between gap-space-sm mb-space-lg">
+<div class="flex items-center gap-space-xs bg-surface-container-lowest/80 backdrop-blur-md px-space-md py-1.5 rounded-full shadow-sm">
+<span class="w-2 h-2 rounded-full bg-secondary animate-pulse"></span>
+<span class="font-label-sm text-label-sm uppercase tracking-wider text-secondary">Proof Engine // Live Data 2024-2025</span>
+<span class="text-outline-variant">/</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant">Validated Real Estate Metrics</span>
+</div>
+<div class="flex items-center gap-space-sm text-on-surface-variant font-label-md text-label-md">
+<span class="material-symbols-outlined text-[16px] text-primary">verified_user</span>
+<span class="">Audits certifiés ISO 50001 &amp; BACS Niveau A</span>
+</div>
+</div>
+<!-- Editorial Intro & Value Stance -->
+<div class="max-w-4xl flex flex-col gap-space-sm mb-space-xl">
+<div class="inline-flex items-center gap-2">
+<span class="font-label-md text-label-md font-semibold text-primary uppercase tracking-widest">Preuves de performance</span>
+<span class="h-px w-12 bg-primary/40"></span>
+</div>
+<h1 class="font-headline-xl text-headline-xl text-on-surface font-semibold tracking-tight">
+        La confiance des leaders de l'immobilier tertiaire et institutionnel.
+      </h1>
+<p class="font-body-lg text-body-lg text-on-surface-variant max-w-2xl">
+        Découvrez comment les plus grands gestionnaires d'actifs pilotent leur neutralité carbone, réduisent massivement leurs charges OPEX et automatisent la conformité réglementaire grâce au jumeau numérique Spider Twin.
+      </p>
+</div>
+<!-- KPI HUD Cluster -->
+<div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-space-md mb-space-xl">
+<!-- Metric 1 -->
+<div class="relative bg-surface-container-lowest/90 backdrop-blur-xl p-space-lg rounded-xl shadow-sm flex flex-col justify-between overflow-hidden">
+<div class="absolute top-0 right-0 w-24 h-24 bg-primary/5 rounded-bl-full pointer-events-none"></div>
+<div class="flex items-center justify-between mb-space-sm">
+<span class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">Surface Active</span>
+<span class="material-symbols-outlined text-primary text-[20px]">apartment</span>
+</div>
+<div class="flex flex-col gap-1">
+<div class="flex items-baseline gap-1">
+<span class="font-headline-lg text-headline-lg font-semibold text-on-surface tracking-tight">48</span>
+<span class="font-headline-md text-headline-md text-primary font-semibold">M m²</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Patrimoine tertiaire supervisé en temps réel</p>
+</div>
+<div class="mt-space-md pt-space-xs flex items-center justify-between">
+<span class="font-label-sm text-label-sm text-secondary font-medium">+3.2M m² ce trimestre</span>
+<span class="w-1.5 h-1.5 rounded-full bg-secondary"></span>
+</div>
+</div>
+<!-- Metric 2 -->
+<div class="relative bg-surface-container-lowest/90 backdrop-blur-xl p-space-lg rounded-xl shadow-sm flex flex-col justify-between overflow-hidden">
+<div class="absolute top-0 right-0 w-24 h-24 bg-secondary/5 rounded-bl-full pointer-events-none"></div>
+<div class="flex items-center justify-between mb-space-sm">
+<span class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">OPEX Préservés</span>
+<span class="material-symbols-outlined text-secondary text-[20px]">savings</span>
+</div>
+<div class="flex flex-col gap-1">
+<div class="flex items-baseline gap-1">
+<span class="font-headline-lg text-headline-lg font-semibold text-on-surface tracking-tight">18.4</span>
+<span class="font-headline-md text-headline-md text-secondary font-semibold">M€</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant">D'économies brutes générées pour nos clients en 2024</p>
+</div>
+<div class="mt-space-md pt-space-xs flex items-center justify-between">
+<span class="font-label-sm text-label-sm text-on-surface-variant">ROI moyen constaté : 6.8 mois</span>
+<span class="material-symbols-outlined text-[16px] text-secondary">trending_up</span>
+</div>
+</div>
+<!-- Metric 3 -->
+<div class="relative bg-surface-container-lowest/90 backdrop-blur-xl p-space-lg rounded-xl shadow-sm flex flex-col justify-between overflow-hidden">
+<div class="absolute top-0 right-0 w-24 h-24 bg-primary/5 rounded-bl-full pointer-events-none"></div>
+<div class="flex items-center justify-between mb-space-sm">
+<span class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">Satisfaction Utilisateur</span>
+<span class="material-symbols-outlined text-primary text-[20px]">sentiment_very_satisfied</span>
+</div>
+<div class="flex flex-col gap-1">
+<div class="flex items-baseline gap-1">
+<span class="font-headline-lg text-headline-lg font-semibold text-on-surface tracking-tight">99.4</span>
+<span class="font-headline-md text-headline-md text-primary font-semibold">%</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Taux de renouvellement &amp; recommandation directe</p>
+</div>
+<div class="mt-space-md pt-space-xs flex items-center gap-1">
+<div class="flex text-amber-500">
+<span class="material-symbols-outlined text-[16px]" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-[16px]" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-[16px]" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-[16px]" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-[16px]" style="font-variation-settings: 'FILL' 1;">star</span>
+</div>
+<span class="font-label-sm text-label-sm text-on-surface-variant ml-1">Score CSAT 4.97/5</span>
+</div>
+</div>
+<!-- Metric 4 -->
+<div class="relative bg-surface-container-lowest/90 backdrop-blur-xl p-space-lg rounded-xl shadow-sm flex flex-col justify-between overflow-hidden">
+<div class="absolute top-0 right-0 w-24 h-24 bg-secondary/5 rounded-bl-full pointer-events-none"></div>
+<div class="flex items-center justify-between mb-space-sm">
+<span class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">Sécurité Juridique</span>
+<span class="material-symbols-outlined text-secondary text-[20px]">gavel</span>
+</div>
+<div class="flex flex-col gap-1">
+<div class="flex items-baseline gap-1">
+<span class="font-headline-lg text-headline-lg font-semibold text-on-surface tracking-tight">0</span>
+<span class="font-body-md text-body-md text-on-surface font-semibold ml-2">Litige</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Décret Tertiaire, Décret BACS &amp; CSRD conformes à 100%</p>
+</div>
+<div class="mt-space-md pt-space-xs flex items-center justify-between">
+<span class="font-label-sm text-label-sm text-secondary font-medium">Plateforme OPERAT synchronisée</span>
+<span class="material-symbols-outlined text-[16px] text-secondary">sync_saved_locally</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Deep Dive Case Studies: Bespoke Asymmetric Flow -->
+<div class="w-full px-gutter-lg flex flex-col gap-space-xl">
+<!-- Section Indicator -->
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-space-sm">
+<span class="font-label-md text-label-md text-primary font-semibold">[CASE STUDY ARCHIVE]</span>
+<span class="h-2 w-2 rounded-full bg-primary"></span>
+<span class="font-label-md text-label-md text-on-surface-variant">Retours d'expérience concrets</span>
+</div>
+<span class="font-label-sm text-label-sm text-on-surface-variant">3 Déploiements Majeurs Sélectionnés</span>
+</div>
+<!-- Case 1: Foncière Tertiaire Européenne - La Défense -->
+<div class="relative bg-surface-container-lowest rounded-xl shadow-md overflow-hidden flex flex-col xl:flex-row">
+<!-- Media Side -->
+<div class="relative w-full xl:w-5/12 min-h-[380px] xl:min-h-full">
+<img class="absolute inset-0 w-full h-full object-cover" data-alt="A modern glass skyscraper at dusk in the financial district of La Defense in Paris with soft violet interior ambient lighting reflections and subtle glowing telemetry network overlays, photorealistic corporate architectural photography." src="https://lh3.googleusercontent.com/aida-public/AB6AXuA67aWC3fF6wejpQAQjsLa41FclGzJ-ynUsOvAA9jT4C-SMahS5tek73jgt2HyrH68EdTjvCAOnPMdG-5yXhvb3B5SLEx3PsUOubZjQiAyASXOXh3JsXBPD5O_p0WeFEfQfgeqOGSgqXlfaZTN6UO6l4zB8L91dn3xWTs7nTkXrMjjwUqV42_l9serSSbO2Un6Pd4fBOFD0iS4e-MlqbfU2Rb16rwKcaH6kLdsZIJvIqDz3eshrSAic">
+<div class="absolute inset-0 bg-gradient-to-t from-inverse-surface/80 via-inverse-surface/20 to-transparent"></div>
+<div class="absolute top-space-md left-space-md flex flex-wrap gap-2">
+<span class="bg-surface-container-lowest/90 backdrop-blur-md px-3 py-1 rounded-full font-label-sm text-label-sm text-on-surface font-semibold shadow-sm">
+            45 000 m²
+          </span>
+<span class="bg-primary text-on-primary px-3 py-1 rounded-full font-label-sm text-label-sm font-semibold shadow-sm">
+            Tour Tertiaire IGH
+          </span>
+</div>
+<div class="absolute bottom-space-md left-space-md right-space-md text-inverse-on-surface">
+<p class="font-label-sm text-label-sm uppercase tracking-wider text-secondary-fixed">Localisation</p>
+<p class="font-title-md text-title-md font-semibold text-inverse-on-surface">Paris La Défense — Tour Horizon West</p>
+</div>
+</div>
+<!-- Narrative Side -->
+<div class="w-full xl:w-7/12 p-space-lg xl:p-space-xl flex flex-col justify-between">
+<div>
+<div class="flex flex-wrap items-center justify-between gap-space-sm mb-space-md">
+<div>
+<span class="font-label-sm text-label-sm text-primary uppercase font-semibold">Étude de Cas 01 // Foncière Européenne</span>
+<h2 class="font-headline-md text-headline-md text-on-surface font-semibold mt-1">
+                Reprendre le contrôle des dérives climatiques et restaurer le confort locatif
+              </h2>
+</div>
+</div>
+<!-- Problem vs Solution Matrix -->
+<div class="grid grid-cols-1 md:grid-cols-2 gap-space-md mb-space-lg">
+<div class="bg-surface-container-low p-space-md rounded-lg">
+<div class="flex items-center gap-space-xs text-error font-title-md text-title-md font-semibold mb-space-xs">
+<span class="material-symbols-outlined text-[18px]">warning</span>
+<span class="">Défi Initial</span>
+</div>
+<p class="font-body-md text-body-md text-on-surface-variant">
+                Inflation brutale des charges de +1.8 M€ due à des régulations CVC chaotiques. Tensions extrêmes avec les preneurs à bail (plaintes thermiques quotidiennes, score de satisfaction tombé à 5.8/10).
+              </p>
+</div>
+<div class="bg-surface-container p-space-md rounded-lg">
+<div class="flex items-center gap-space-xs text-primary font-title-md text-title-md font-semibold mb-space-xs">
+<span class="material-symbols-outlined text-[18px]">hub</span>
+<span class="">Action Spider Twin</span>
+</div>
+<p class="font-body-md text-body-md text-on-surface-variant">
+                Déploiement en 14 jours du jumeau spatial thermique : recalibrage automatisé des CTA, pilotage prédictif météo-dépendant et redistribution d'air optimisée étage par étage.
+              </p>
+</div>
+</div>
+<!-- Quantified Results Bar -->
+<div class="grid grid-cols-3 gap-space-sm py-space-md mb-space-lg bg-surface-container-lowest">
+<div class="flex flex-col">
+<span class="font-headline-md text-headline-md font-semibold text-secondary">-44%</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant">Sur la facture CVC en 4 mois</span>
+</div>
+<div class="flex flex-col">
+<span class="font-headline-md text-headline-md font-semibold text-primary">7 Mois</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant">Pour atteindre le plein ROI</span>
+</div>
+<div class="flex flex-col">
+<span class="font-headline-md text-headline-md font-semibold text-on-surface">9.4/10</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant">Indice de confort locataires</span>
+</div>
+</div>
+</div>
+<!-- Verified Quote -->
+<div class="bg-surface-container-high/40 p-space-md rounded-xl flex items-start gap-space-md">
+<div class="w-12 h-12 rounded-full overflow-hidden shrink-0">
+<img class="w-full h-full object-cover" data-alt="Close-up professional portrait of a French corporate executive director in a tailored charcoal navy blazer with gentle daylight, confident and pleasant expression, high quality studio aesthetic." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAUakb4Z4_5nVOo9KodHzeDBUt9tC8FGxfFtDX0VaE6pvSsab9UHGqJMOlUP_VGwZWgyV56h4OvhR6KhascbTPdS4JmSoBPj7XfuS4x91hQIebnEKhl_fMan6y3eYex6HkoOKcQEszdILnkffC_RJ1sAWrme-jxbyuVa4DvPhU8gBos7F0oj6x_sK72p9bOkD09jRjWuCgGBPau9yYcmk-4BFUrTIJ--WywvanQEjZ9Up-aL8HubQ9R">
+</div>
+<div class="flex flex-col">
+<p class="font-body-md text-body-md text-on-surface italic mb-space-xs">
+              « BeeCarbonat nous a permis d'éteindre une crise locataire majeure tout en redressant notre NOI. L'impact financier a été immédiat, et nous avons transformé un actif énergivore en vitrine ESG pour nos investisseurs. »
+            </p>
+<div class="flex flex-wrap items-center gap-space-xs">
+<span class="font-title-md text-title-md text-on-surface font-semibold">Antoine de Montmirail</span>
+<span class="text-on-surface-variant text-body-sm">•</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant">Directeur Général, Foncière Tertiaire Européenne</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Case 2: Groupe Assurances AXA Immobilier - Multi-Sites -->
+<div class="relative bg-surface-container-lowest rounded-xl shadow-md overflow-hidden flex flex-col xl:flex-row-reverse">
+<!-- Media Side -->
+<div class="relative w-full xl:w-5/12 min-h-[380px] xl:min-h-full">
+<img class="absolute inset-0 w-full h-full object-cover" data-alt="Corporate headquarters of a French insurance asset manager with immaculate architectural glass facade, minimalist atrium with green indoor garden and discreet digital carbon dashboards, warm natural light." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBFXQBfi0QXfTNkJxPrqD28YlL1cq5lzXrN3PAnHjdIpFxCBMc0REUULqawxN78l64PRnPcboY0gUQmK5sFoML6qSatf4zHMx6goDphUGpqLPKg_wxD3JcqrrAmTNqfPclWwkS0y6OaQsRYJirkly30X6-VJWnMH_297iHKSbyXATWwvpSdk4GvW6v4OnhmTrY_ct-O2Q7SQyESXbsDquNExMpylIY3akb0HQFpv3BqjJPlcrb9fFGQ">
+<div class="absolute inset-0 bg-gradient-to-t from-inverse-surface/80 via-inverse-surface/20 to-transparent"></div>
+<div class="absolute top-space-md left-space-md flex flex-wrap gap-2">
+<span class="bg-surface-container-lowest/90 backdrop-blur-md px-3 py-1 rounded-full font-label-sm text-label-sm text-on-surface font-semibold shadow-sm">
+            18 Immeubles
+          </span>
+<span class="bg-secondary text-on-secondary px-3 py-1 rounded-full font-label-sm text-label-sm font-semibold shadow-sm">
+            Portefeuille National
+          </span>
+</div>
+<div class="absolute bottom-space-md left-space-md right-space-md text-inverse-on-surface">
+<p class="font-label-sm text-label-sm uppercase tracking-wider text-secondary-fixed">Envergure</p>
+<p class="font-title-md text-title-md font-semibold text-inverse-on-surface">Paris, Lyon, Bordeaux, Lille — 182 000 m² cumulés</p>
+</div>
+</div>
+<!-- Narrative Side -->
+<div class="w-full xl:w-7/12 p-space-lg xl:p-space-xl flex flex-col justify-between">
+<div>
+<div class="flex flex-wrap items-center justify-between gap-space-sm mb-space-md">
+<div>
+<span class="font-label-sm text-label-sm text-secondary uppercase font-semibold">Étude de Cas 02 // Assurance &amp; Gestion d'Actifs</span>
+<h2 class="font-headline-md text-headline-md text-on-surface font-semibold mt-1">
+                Conformité BACS &amp; CSRD automatisée sur un portefeuille complexe
+              </h2>
+</div>
+</div>
+<!-- Problem vs Solution Matrix -->
+<div class="grid grid-cols-1 md:grid-cols-2 gap-space-md mb-space-lg">
+<div class="bg-surface-container-low p-space-md rounded-lg">
+<div class="flex items-center gap-space-xs text-error font-title-md text-title-md font-semibold mb-space-xs">
+<span class="material-symbols-outlined text-[18px]">data_alert</span>
+<span class="">Défi Initial</span>
+</div>
+<p class="font-body-md text-body-md text-on-surface-variant">
+                Données de comptage éparpillées sur 18 sites hétérogènes, retards critiques sur le reporting CSRD extra-financier et devis d'audit externes exorbitants pour la mise aux normes BACS.
+              </p>
+</div>
+<div class="bg-surface-container p-space-md rounded-lg">
+<div class="flex items-center gap-space-xs text-secondary font-title-md text-title-md font-semibold mb-space-xs">
+<span class="material-symbols-outlined text-[18px]">verified</span>
+<span class="">Action Spider Twin</span>
+</div>
+<p class="font-body-md text-body-md text-on-surface-variant">
+                Connexion directe API aux GTB existantes sans remplacement matériel. Génération continue du registre carbone vérifiable et dossier de certification BACS clé en main.
+              </p>
+</div>
+</div>
+<!-- Quantified Results Bar -->
+<div class="grid grid-cols-3 gap-space-sm py-space-md mb-space-lg bg-surface-container-lowest">
+<div class="flex flex-col">
+<span class="font-headline-md text-headline-md font-semibold text-primary">100%</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant">Automatisation reporting CSRD</span>
+</div>
+<div class="flex flex-col">
+<span class="font-headline-md text-headline-md font-semibold text-secondary">320 000 €</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant">Économisés en conseil externe</span>
+</div>
+<div class="flex flex-col">
+<span class="font-headline-md text-headline-md font-semibold text-on-surface">BACS Cl. A</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant">Obtenu sur 100% des actifs</span>
+</div>
+</div>
+</div>
+<!-- Verified Quote -->
+<div class="bg-surface-container-high/40 p-space-md rounded-xl flex items-start gap-space-md">
+<div class="w-12 h-12 rounded-full overflow-hidden shrink-0">
+<img class="w-full h-full object-cover" data-alt="Professional environmental sustainability director woman in her forties with sharp styling, neutral studio light, smart contemporary office background, warm authentic demeanor." src="https://lh3.googleusercontent.com/aida-public/AB6AXuD_pUEa0tde3qa_w8MAv9_MvudP3zdAIevqqsIC8nomV8bA15l0NTxK7J6gr1tgHbitOXLkODO-BnAFg4Sa9TgfHKSfQNtOwX5x0ODYL7LsKVWA9xBEcAjANXNdJAOO-Ra8CIiGilh8cF6EouhEJ6B-n3iYI1DloArBMi7e7BbdV--zho5NanQXegKh2ZPyxZOKd8hG69mW5P4I1vC3wE3FGMJc1njfGw93iVEdFc4x7mfi2HDrdQGq">
+</div>
+<div class="flex flex-col">
+<p class="font-body-md text-body-md text-on-surface italic mb-space-xs">
+              « Là où les cabinets de conseil nous annonçaient neuf mois de travail d'inventaire, Spider Twin a branché et certifié l'ensemble de nos 18 sites en quelques semaines. La conformité réglementaire est devenue un non-sujet. »
+            </p>
+<div class="flex flex-wrap items-center gap-space-xs">
+<span class="font-title-md text-title-md text-on-surface font-semibold">Claire Laurent</span>
+<span class="text-on-surface-variant text-body-sm">•</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant">Directrice RSE, AXA Immobilier France</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Case 3: Parc Logistique Bouygues Immobilier -->
+<div class="relative bg-surface-container-lowest rounded-xl shadow-md overflow-hidden flex flex-col xl:flex-row">
+<!-- Media Side -->
+<div class="relative w-full xl:w-5/12 min-h-[380px] xl:min-h-full">
+<img class="absolute inset-0 w-full h-full object-cover" data-alt="Massive state-of-the-art sustainable logistics warehouse hub with solar panel array on rooftop, modern loading bays, illuminated by clean morning sun, pristine industrial engineering visual." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCZXRdpaOQSkDwuLPFAHdjSf9TkFP0Bz4prPJLL7cdtqIkpIDQ6_ha7T_Q77NyXWog9l6ss3ef9Y26Is3WuaIx-mh5O1rOpzOcMGXxWZSqSw217DkshvKvlnwWc8eW1ss8qi8hcgXXrz-jLHc9gVRPqXcwuDGbkqmWA09lmsGcwx7Tbv2EJBsZJU3IE8JOBoCda_QQxj4HqdpsDGXRCrkxBqFrVKh8en2ww_1A4kWeJxHqkHC0MitdM">
+<div class="absolute inset-0 bg-gradient-to-t from-inverse-surface/80 via-inverse-surface/20 to-transparent"></div>
+<div class="absolute top-space-md left-space-md flex flex-wrap gap-2">
+<span class="bg-surface-container-lowest/90 backdrop-blur-md px-3 py-1 rounded-full font-label-sm text-label-sm text-on-surface font-semibold shadow-sm">
+            80 000 m²
+          </span>
+<span class="bg-primary text-on-primary px-3 py-1 rounded-full font-label-sm text-label-sm font-semibold shadow-sm">
+            Hub Logistique XXL
+          </span>
+</div>
+<div class="absolute bottom-space-md left-space-md right-space-md text-inverse-on-surface">
+<p class="font-label-sm text-label-sm uppercase tracking-wider text-secondary-fixed">Infrastructure</p>
+<p class="font-title-md text-title-md font-semibold text-inverse-on-surface">Plateforme Nord-Île-de-France</p>
+</div>
+</div>
+<!-- Narrative Side -->
+<div class="w-full xl:w-7/12 p-space-lg xl:p-space-xl flex flex-col justify-between">
+<div>
+<div class="flex flex-wrap items-center justify-between gap-space-sm mb-space-md">
+<div>
+<span class="font-label-sm text-label-sm text-primary uppercase font-semibold">Étude de Cas 03 // Supply Chain &amp; Logistique</span>
+<h2 class="font-headline-md text-headline-md text-on-surface font-semibold mt-1">
+                Éradication des dérives nocturnes et libération du temps de maintenance
+              </h2>
+</div>
+</div>
+<!-- Problem vs Solution Matrix -->
+<div class="grid grid-cols-1 md:grid-cols-2 gap-space-md mb-space-lg">
+<div class="bg-surface-container-low p-space-md rounded-lg">
+<div class="flex items-center gap-space-xs text-error font-title-md text-title-md font-semibold mb-space-xs">
+<span class="material-symbols-outlined text-[18px]">power_off</span>
+<span class="">Défi Initial</span>
+</div>
+<p class="font-body-md text-body-md text-on-surface-variant">
+                Volumes thermiques disproportionnés chauffés inutilement hors heures de chargement, surconsommations fantômes nocturnes et astreintes techniques surchargées.
+              </p>
+</div>
+<div class="bg-surface-container p-space-md rounded-lg">
+<div class="flex items-center gap-space-xs text-primary font-title-md text-title-md font-semibold mb-space-xs">
+<span class="material-symbols-outlined text-[18px]">sensors</span>
+<span class="">Action Spider Twin</span>
+</div>
+<p class="font-body-md text-body-md text-on-surface-variant">
+                Cartographie 3D des flux thermiques, détection dynamique d'ouvertures de portes de quai et scénarisation automatisée des aérothermes selon le planning d'exploitation réel.
+              </p>
+</div>
+</div>
+<!-- Quantified Results Bar -->
+<div class="grid grid-cols-3 gap-space-sm py-space-md mb-space-lg bg-surface-container-lowest">
+<div class="flex flex-col">
+<span class="font-headline-md text-headline-md font-semibold text-secondary">-38%</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant">Consommation gaz &amp; électricité</span>
+</div>
+<div class="flex flex-col">
+<span class="font-headline-md text-headline-md font-semibold text-primary">15h / sem.</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant">Économisées par les techniciens</span>
+</div>
+<div class="flex flex-col">
+<span class="font-headline-md text-headline-md font-semibold text-on-surface">-410 t</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant">Émissions CO₂ évitées / an</span>
+</div>
+</div>
+</div>
+<!-- Verified Quote -->
+<div class="bg-surface-container-high/40 p-space-md rounded-xl flex items-start gap-space-md">
+<div class="w-12 h-12 rounded-full overflow-hidden shrink-0">
+<img class="w-full h-full object-cover" data-alt="Technical operations director in smart industrial facility, senior engineering executive with glasses and confident professional stance, warm natural workplace illumination." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAOQ9c-tNRR9uReB5YX1bhnIKcvJoeGNs30e59vJ1H1nohXOJ4SWPAMf8jMG_iKpNIZbDob7Cy-K-tfNCdEAKuA11blMNJ4CAYJFuK_Up6Ex2cS00GpYeRZ4QRWa5Ooa8gXWnelsoJz5-WpF_xEo5EMPwIgA-2E2Jxyhm0D312fHlaX61f9iDB0TmRvEho4gNImhPYlli_3vNsMdLGOiAjSy2Z14d1DZ3Vz1zd8NTQwy9U06P1XvCWN">
+</div>
+<div class="flex flex-col">
+<p class="font-body-md text-body-md text-on-surface italic mb-space-xs">
+              « La finesse de l'analyse spatiale nous a ouvert les yeux : nous chauffions des quais ouverts la nuit. L'équipe de maintenance se concentre enfin sur la prévention plutôt que sur la gestion des pannes urgentes. »
+            </p>
+<div class="flex flex-wrap items-center gap-space-xs">
+<span class="font-title-md text-title-md text-on-surface font-semibold">Gérard Beaulieu</span>
+<span class="text-on-surface-variant text-body-sm">•</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant">Directeur Technique, Bouygues Immobilier Logistique</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Real-Time Interactive Telemetry Snapshot (Inline SVG visual) -->
+<div class="w-full px-gutter-lg my-space-xl">
+<div class="bg-surface-container-lowest p-space-lg xl:p-space-xl rounded-xl shadow-sm flex flex-col gap-space-md">
+<div class="flex flex-col md:flex-row md:items-center justify-between gap-space-sm">
+<div>
+<span class="font-label-sm text-label-sm text-secondary uppercase font-semibold">Télémétrie Décarbonation</span>
+<h3 class="font-headline-sm text-headline-sm text-on-surface font-semibold">
+            Corrélation Moyenne : Réduction Énergétique vs Déploiement Spider Twin
+          </h3>
+</div>
+<div class="flex items-center gap-space-md">
+<div class="flex items-center gap-1.5 font-label-sm text-label-sm text-on-surface-variant">
+<span class="w-3 h-3 rounded-sm bg-primary"></span>
+<span class="">Objectif Décret Tertiaire 2030 (-40%)</span>
+</div>
+<div class="flex items-center gap-1.5 font-label-sm text-label-sm text-on-surface-variant">
+<span class="w-3 h-3 rounded-sm bg-secondary"></span>
+<span class="">Performance Réelle BeeCarbonat</span>
+</div>
+</div>
+</div>
+<!-- Minimal SVG Performance Curve Chart -->
+<div class="w-full h-44 bg-surface-container-low rounded-lg p-space-md relative overflow-hidden flex items-end">
+<svg class="w-full h-full text-primary" fill="none" preserveAspectRatio="none" viewBox="0 0 900 120">
+<!-- Grid Lines -->
+<line stroke="currentColor" stroke-opacity="0.08" stroke-width="1" x1="0" x2="900" y1="20" y2="20"></line>
+<line stroke="currentColor" stroke-opacity="0.08" stroke-width="1" x1="0" x2="900" y1="60" y2="60"></line>
+<line stroke="currentColor" stroke-opacity="0.08" stroke-width="1" x1="0" x2="900" y1="100" y2="100"></line>
+<!-- Regulatory Threshold Baseline (Dotted) -->
+<path d="M 0,85 L 900,85" stroke="#7b7487" stroke-dasharray="6,6" stroke-width="1.5"></path>
+<!-- Performance Gradient Fill -->
+<defs>
+<linearGradient id="curveGradient" x1="0" x2="0" y1="0" y2="1">
+<stop offset="0%" stop-color="#7c3aed" stop-opacity="0.35"></stop>
+<stop offset="100%" stop-color="#00687a" stop-opacity="0.0"></stop>
+</linearGradient>
+</defs>
+<path d="M 0,20 Q 200,28 350,55 T 650,95 L 900,105 L 900,120 L 0,120 Z" fill="url(#curveGradient)"></path>
+<!-- Actual Progress Line -->
+<path d="M 0,20 Q 200,28 350,55 T 650,95 L 900,105" stroke="#00687a" stroke-linecap="round" stroke-width="3"></path>
+<!-- Key Milestones Points -->
+<circle cx="0" cy="20" fill="#630ed4" r="4"></circle>
+<circle cx="350" cy="55" fill="#00687a" r="4"></circle>
+<circle cx="650" cy="95" fill="#00687a" r="4"></circle>
+<circle cx="900" cy="105" fill="#57dffe" r="5"></circle>
+</svg>
+<div class="absolute bottom-2 left-4 font-label-sm text-label-sm text-on-surface-variant">M0 (Audit Initial)</div>
+<div class="absolute bottom-2 left-1/3 font-label-sm text-label-sm text-on-surface-variant">M3 (Calibration Jumeau)</div>
+<div class="absolute bottom-2 left-2/3 font-label-sm text-label-sm text-on-surface-variant">M6 (Optimisation Continue)</div>
+<div class="absolute bottom-2 right-4 font-label-sm text-label-sm font-semibold text-secondary">M12 (-42.8% Moyen)</div>
+</div>
+</div>
+</div>
+<!-- Verified User Reviews & Operational Endorsements -->
+<div class="w-full px-gutter-lg pb-space-xl">
+<div class="flex flex-col gap-space-xs mb-space-lg">
+<span class="font-label-md text-label-md text-primary font-semibold uppercase">Retours d'Exploitation Terrain</span>
+<h2 class="font-headline-md text-headline-md text-on-surface font-semibold">
+        Ce qu'en disent les gestionnaires techniques &amp; directeurs d'actifs
+      </h2>
+<p class="font-body-md text-body-md text-on-surface-variant">
+        Avis collectés auprès de professionnels certifiés pilotant quotidiennement la plateforme.
+      </p>
+</div>
+<!-- Review Cards Grid -->
+<div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-space-md">
+<!-- Review 1 -->
+<div class="bg-surface-container-lowest p-space-lg rounded-xl shadow-sm flex flex-col justify-between hover:shadow-md transition-shadow">
+<div>
+<div class="flex items-center justify-between mb-space-sm">
+<div class="flex text-amber-500">
+<span class="material-symbols-outlined text-[18px]" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-[18px]" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-[18px]" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-[18px]" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-[18px]" style="font-variation-settings: 'FILL' 1;">star</span>
+</div>
+<span class="font-label-sm text-label-sm bg-surface-container-high px-2 py-0.5 rounded text-on-surface-variant font-medium">Vérifié OPERAT</span>
+</div>
+<h4 class="font-title-md text-title-md text-on-surface font-semibold mb-space-xs">
+            « Plus aucune surprise lors des audits annuels »
+          </h4>
+<p class="font-body-md text-body-md text-on-surface-variant mb-space-md">
+            L'interconnexion instantanée avec les automates Siemens et Schneider nous a évité de réinvestir dans du matériel neuf. Le gain de temps sur la déclaration annuelle OPERAT est inestimable.
+          </p>
+</div>
+<div class="flex items-center gap-space-sm pt-space-sm">
+<div class="w-10 h-10 rounded-full bg-surface-container flex items-center justify-center font-headline-sm text-headline-sm font-semibold text-primary">
+            ML
+          </div>
+<div>
+<p class="font-title-md text-title-md text-on-surface font-semibold">Marc-Louis Vaneck</p>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Asset Manager Senior, Covivio Horizon</p>
+</div>
+</div>
+</div>
+<!-- Review 2 -->
+<div class="bg-surface-container-lowest p-space-lg rounded-xl shadow-sm flex flex-col justify-between hover:shadow-md transition-shadow">
+<div>
+<div class="flex items-center justify-between mb-space-sm">
+<div class="flex text-amber-500">
+<span class="material-symbols-outlined text-[18px]" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-[18px]" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-[18px]" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-[18px]" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-[18px]" style="font-variation-settings: 'FILL' 1;">star</span>
+</div>
+<span class="font-label-sm text-label-sm bg-surface-container-high px-2 py-0.5 rounded text-on-surface-variant font-medium">BACS Niveau A</span>
+</div>
+<h4 class="font-title-md text-title-md text-on-surface font-semibold mb-space-xs">
+            « La visualisation 3D change absolument tout »
+          </h4>
+<p class="font-body-md text-body-md text-on-surface-variant mb-space-md">
+            Comprendre instantanément où part la chaleur dans un complexe de 60 000 m² à travers une interface fluide permet à nos techniciens d'intervenir au mètre près en moins de 10 minutes.
+          </p>
+</div>
+<div class="flex items-center gap-space-sm pt-space-sm">
+<div class="w-10 h-10 rounded-full bg-surface-container flex items-center justify-center font-headline-sm text-headline-sm font-semibold text-secondary">
+            SB
+          </div>
+<div>
+<p class="font-title-md text-title-md text-on-surface font-semibold">Sophie Benhamou</p>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Responsable Exploitation &amp; CAFM, Gecina</p>
+</div>
+</div>
+</div>
+<!-- Review 3 -->
+<div class="bg-surface-container-lowest p-space-lg rounded-xl shadow-sm flex flex-col justify-between hover:shadow-md transition-shadow">
+<div>
+<div class="flex items-center justify-between mb-space-sm">
+<div class="flex text-amber-500">
+<span class="material-symbols-outlined text-[18px]" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-[18px]" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-[18px]" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-[18px]" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-[18px]" style="font-variation-settings: 'FILL' 1;">star</span>
+</div>
+<span class="font-label-sm text-label-sm bg-surface-container-high px-2 py-0.5 rounded text-on-surface-variant font-medium">ISO 50001</span>
+</div>
+<h4 class="font-title-md text-title-md text-on-surface font-semibold mb-space-xs">
+            « ROI validé en 5 mois sur notre campus »
+          </h4>
+<p class="font-body-md text-body-md text-on-surface-variant mb-space-md">
+            L'algorithme prédictif a calé les courbes de chauffe sur la météo locale réelle et les présences déclarées par nos badges d'accès. Résultat : une chute de 36% dès le premier hiver.
+          </p>
+</div>
+<div class="flex items-center gap-space-sm pt-space-sm">
+<div class="w-10 h-10 rounded-full bg-surface-container flex items-center justify-center font-headline-sm text-headline-sm font-semibold text-primary">
+            FD
+          </div>
+<div>
+<p class="font-title-md text-title-md text-on-surface font-semibold">François Dupray</p>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Directeur Immobilier &amp; Environnement de Travail</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Reassurance Trust Badges Grid -->
+<div class="w-full px-gutter-lg pb-space-xl">
+<div class="bg-surface-container-low rounded-xl p-space-lg flex flex-wrap items-center justify-around gap-space-md text-on-surface-variant">
+<div class="flex items-center gap-space-sm">
+<span class="material-symbols-outlined text-primary text-[28px]">shield</span>
+<div class="flex flex-col">
+<span class="font-title-md text-title-md font-semibold text-on-surface">ISO 27001 &amp; HDS</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant">Données hébergées en France (SecNumCloud)</span>
+</div>
+</div>
+<div class="flex items-center gap-space-sm">
+<span class="material-symbols-outlined text-secondary text-[28px]">speed</span>
+<div class="flex flex-col">
+<span class="font-title-md text-title-md font-semibold text-on-surface">Déploiement Agile</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant">Non-intrusif, sans coupure d'exploitation</span>
+</div>
+</div>
+<div class="flex items-center gap-space-sm">
+<span class="material-symbols-outlined text-primary text-[28px]">account_balance</span>
+<div class="flex flex-col">
+<span class="font-title-md text-title-md font-semibold text-on-surface">Garantie Réglementaire</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant">Conformité Décret BACS &amp; CSRD assurée</span>
+</div>
+</div>
+</div>
+</div>
+<!-- High-Impact Full-Width Bottom CTA Corridor -->
+<div class="w-full px-gutter-lg pb-space-xl">
+<div class="relative bg-gradient-to-br from-inverse-surface via-on-background to-inverse-surface text-inverse-on-surface rounded-xl p-space-lg md:p-space-xl overflow-hidden shadow-xl">
+<!-- Decorative Iridescent Spheres -->
+<div class="absolute -right-20 -bottom-20 w-80 h-80 rounded-full bg-primary-container/30 blur-[80px] pointer-events-none"></div>
+<div class="absolute -left-10 top-0 w-64 h-64 rounded-full bg-secondary-container/20 blur-[70px] pointer-events-none"></div>
+<div class="relative z-10 flex flex-col xl:flex-row xl:items-center justify-between gap-space-lg">
+<div class="max-w-2xl flex flex-col gap-space-sm">
+<div class="inline-flex items-center gap-2">
+<span class="font-label-sm text-label-sm text-secondary-fixed uppercase tracking-wider font-semibold">Prochaine étape</span>
+<span class="w-1.5 h-1.5 rounded-full bg-secondary-fixed"></span>
+<span class="font-label-sm text-label-sm text-inverse-on-surface/80">Audit préliminaire sous 48h</span>
+</div>
+<h2 class="font-headline-lg text-headline-lg font-semibold text-inverse-on-surface tracking-tight">
+            Rejoignez les gestionnaires d'actifs décarbonés les plus performants.
+          </h2>
+<p class="font-body-lg text-body-lg text-inverse-on-surface/80">
+            Évaluez en direct le potentiel d'économies de vos bâtiments et préparez vos échéances BACS et Décret Tertiaire sans risque opérationnel.
+          </p>
+</div>
+<div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-space-md shrink-0">
+<a class="px-space-lg py-3.5 rounded-xl font-body-md text-body-md font-semibold text-on-surface bg-surface-container-lowest hover:bg-surface-container-low transition-all shadow-md text-center flex items-center justify-center gap-2" href="/site/demo.html" data-path="demander-une-demo">
+<span class="material-symbols-outlined text-[18px]">calendar_today</span>
+<span class="">Planifier une Session Démo</span>
+</a>
+<a class="px-space-lg py-3.5 rounded-xl font-body-md text-body-md font-semibold text-on-primary bg-gradient-to-r from-primary to-primary-container hover:from-primary-container hover:to-primary shadow-[0_0_20px_rgba(124,58,237,0.4)] transition-all text-center flex items-center justify-center gap-2" href="/site/authentification.html" data-path="demarrer-essai-gratuit">
+<span class="">Démarrer un Essai sur 1 Actif</span>
+<span class="material-symbols-outlined text-[18px]">arrow_forward</span>
+</a>
+</div>
+</div>
+</div>
+</div>
+</div></main><footer class="w-full bg-surface-container-low mt-space-xl"><div class="w-full px-gutter-lg py-space-xl flex flex-col gap-space-xl"><div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-space-xl"><div class="lg:col-span-2 flex flex-col gap-space-md"><div class="flex items-center gap-space-sm"><img src="https://lh3.googleusercontent.com/aida/AEtjO1WfQYCtiqeNG54ygjSuWgezzJvNRFn46pLCNvp2e7Id3bhtMXk6yjzUgbnZSeZCVHUweMxEgpifSLDwnI1WmJJ24cWXR44dN6sUMHvuOdznVvI91v8NcptI5RfJsyMjpuA2VnUxe3lOdTB8lNMvFv7A6c7sRRzgj9miA3MLgf599L1cAc92XDf_De3VbOMEkNSsklNgO0A6ezaUNwBiBHRSfQM93befgRVuUv-l9vV5GxcEYQbNQ1iOmAo" alt="Sensorium Logo" class="w-8 h-8 rounded-full object-cover"><span class="font-headline-sm text-headline-sm font-semibold text-on-surface">Sensorium</span></div><p class="font-body-md text-body-md text-on-surface-variant max-w-md">Plateforme de jumeau numérique Sensorium Spider Twin dédiée à la décarbonation industrielle, la modélisation spatiale et le monitoring temps réel des infrastructures éco-énergétiques.</p><div class="flex items-center gap-space-sm text-on-surface-variant font-label-md text-label-md"><span class="w-2 h-2 rounded-full bg-secondary"></span><span class="">Infrastructure Telemetry Status: Optimal</span></div></div><div class="flex flex-col gap-space-sm"><h3 class="font-title-md text-title-md text-on-surface font-semibold">Solutions</h3><nav class="flex flex-col gap-space-xs"><a class="font-body-md text-body-md text-on-surface-variant hover:text-on-surface transition-colors" href="/site/solutions.html" data-path="solutions">Spider Spatial Twin</a><a class="font-body-md text-body-md text-on-surface-variant hover:text-on-surface transition-colors" href="/site/solutions.html" data-path="solutions">Télémesure &amp; Capteurs</a><a class="font-body-md text-body-md text-on-surface-variant hover:text-on-surface transition-colors" href="/site/solutions.html" data-path="solutions">Audit Carbone Temps Réel</a><a class="font-body-md text-body-md text-on-surface-variant hover:text-on-surface transition-colors" href="/site/solutions.html" data-path="solutions">Simulation Énergétique</a></nav></div><div class="flex flex-col gap-space-sm"><h3 class="font-title-md text-title-md text-on-surface font-semibold">Entreprise</h3><nav class="flex flex-col gap-space-xs"><a class="font-body-md text-body-md text-on-surface-variant hover:text-on-surface transition-colors" href="/site/piliers_industriels.html" data-path="piliers">Nos Piliers</a><a class="font-body-md text-body-md text-on-surface-variant hover:text-on-surface transition-colors" href="/site/benefices_roi.html" data-path="benefices-roi">Bénéfices &amp; ROI</a><a class="font-body-md text-body-md text-on-surface-variant hover:text-on-surface transition-colors" href="/site/temoignages.html" data-path="temoignages">Témoignages Clients</a><a class="font-body-md text-body-md text-on-surface-variant hover:text-on-surface transition-colors" href="/site/tarifs.html" data-path="tarifs">Grille Tarifaire</a></nav></div><div class="flex flex-col gap-space-sm"><h3 class="font-title-md text-title-md text-on-surface font-semibold">Contact &amp; Légal</h3><nav class="flex flex-col gap-space-xs"><a class="font-body-md text-body-md text-on-surface-variant hover:text-on-surface transition-colors" href="/site/demo.html" data-path="demander-une-demo">Support &amp; Contact</a><a class="font-body-md text-body-md text-on-surface-variant hover:text-on-surface transition-colors" data-path="mentions-legales" href="#">Mentions Légales</a><a class="font-body-md text-body-md text-on-surface-variant hover:text-on-surface transition-colors" data-path="confidentialite" href="#">Politique de Confidentialité</a><a class="font-body-md text-body-md text-on-surface-variant hover:text-on-surface transition-colors" data-path="securite" href="#">Sécurité &amp; Données</a></nav></div></div><div class="flex flex-col md:flex-row items-center justify-between gap-space-md pt-space-lg text-on-surface-variant font-label-md text-label-md"><p class="">© 2025 Sensorium SPIDER TWIN. Tous droits réservés.</p><div class="flex items-center gap-space-lg"><span class="">ISO 27001 Certified Architecture</span><span class="">Telemetry API v4.2</span></div></div></div></footer>
+
+</body></html>

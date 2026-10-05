@@ -1,0 +1,582 @@
+<!DOCTYPE html><html lang="fr"><head><meta charset="utf-8"><meta content="width=device-width, initial-scale=1.0" name="viewport"><meta content="web_standard" name="shell-type"><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"><link href="https://fonts.googleapis.com" rel="preconnect"><link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"><link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&amp;family=Manrope:wght@400;500;600;700&amp;family=Space+Grotesk:wght@500;600;700&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"><style>@layer base{html,body{margin:0;padding:0;}body{overscroll-behavior:none;}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}</style><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config = { darkMode: "class", theme: { extend: { "colors": { "error": "#ba1a1a", "on-secondary-fixed-variant": "#004e5c", "secondary-fixed": "#acedff", "on-secondary": "#ffffff", "surface-variant": "#dae2fd", "background": "#faf8ff", "inverse-primary": "#d2bbff", "on-primary": "#ffffff", "inverse-surface": "#283044", "outline-variant": "#ccc3d8", "surface": "#faf8ff", "on-primary-fixed": "#25005a", "on-background": "#131b2e", "on-primary-container": "#ede0ff", "surface-dim": "#d2d9f4", "inverse-on-surface": "#eef0ff", "primary-fixed-dim": "#d2bbff", "on-surface-variant": "#4a4455", "error-container": "#ffdad6", "primary-container": "#7c3aed", "surface-container-low": "#f2f3ff", "surface-bright": "#faf8ff", "on-primary-fixed-variant": "#5a00c6", "on-surface": "#131b2e", "on-error": "#ffffff", "primary": "#630ed4", "surface-tint": "#732ee4", "primary-fixed": "#eaddff", "secondary-container": "#57dffe", "surface-container-high": "#e2e7ff", "surface-container-lowest": "#ffffff", "on-secondary-container": "#006172", "secondary": "#00687a", "on-tertiary-fixed-variant": "#5516be", "on-error-container": "#93000a", "surface-container": "#eaedff", "on-secondary-fixed": "#001f26", "outline": "#7b7487", "tertiary-fixed-dim": "#d0bcff", "secondary-fixed-dim": "#4cd7f6", "on-tertiary": "#ffffff", "on-tertiary-container": "#ece1ff", "surface-container-highest": "#dae2fd", "tertiary-fixed": "#e9ddff", "tertiary": "#5d25c7", "on-tertiary-fixed": "#23005c", "tertiary-container": "#7645e0" }, "borderRadius": { "DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px" }, "spacing": { "gutter": "1.25rem", "gutter-sm": "0.75rem", "space-xl": "2.5rem", "space-md": "1rem", "margin-mobile": "1rem", "space-sm": "0.5rem", "gutter-lg": "1.75rem", "space-lg": "1.5rem", "margin": "2rem", "space-xs": "0.25rem" }, "fontFamily": { "title-md": ["Manrope"], "body-sm": ["Manrope"], "headline-lg-mobile": ["Space Grotesk"], "label-sm": ["JetBrains Mono"], "headline-md": ["Space Grotesk"], "label-md": ["JetBrains Mono"], "headline-xl": ["Space Grotesk"], "headline-lg": ["Space Grotesk"], "headline-xl-mobile": ["Space Grotesk"], "body-lg": ["Manrope"], "headline-sm": ["Space Grotesk"], "body-md": ["Manrope"] }, "fontSize": { "title-md": ["16px", { "lineHeight": "24px", "letterSpacing": "0em", "fontWeight": "600" }], "body-sm": ["12px", { "lineHeight": "18px", "letterSpacing": "0.015em", "fontWeight": "400" }], "headline-lg-mobile": ["26px", { "lineHeight": "32px", "letterSpacing": "-0.01em", "fontWeight": "600" }], "label-sm": ["10px", { "lineHeight": "14px", "letterSpacing": "0.06em", "fontWeight": "500" }], "headline-md": ["24px", { "lineHeight": "32px", "letterSpacing": "-0.015em", "fontWeight": "500" }], "label-md": ["12px", { "lineHeight": "16px", "letterSpacing": "0.04em", "fontWeight": "500" }], "headline-xl": ["48px", { "lineHeight": "56px", "letterSpacing": "-0.03em", "fontWeight": "600" }], "headline-lg": ["36px", { "lineHeight": "44px", "letterSpacing": "-0.02em", "fontWeight": "600" }], "headline-xl-mobile": ["32px", { "lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "600" }], "body-lg": ["16px", { "lineHeight": "24px", "letterSpacing": "0em", "fontWeight": "400" }], "headline-sm": ["20px", { "lineHeight": "28px", "letterSpacing": "-0.01em", "fontWeight": "500" }], "body-md": ["14px", { "lineHeight": "20px", "letterSpacing": "0.01em", "fontWeight": "400" }] } } } }</script></head><body class="bg-background font-body-md text-body-md text-on-surface antialiased"><header class="fixed top-0 left-0 right-0 w-full z-50 bg-surface-container-lowest/80 backdrop-blur-xl shadow-[0_1px_8px_rgba(0,0,0,0.04)]"><div class="h-20 w-full px-gutter-lg flex items-center justify-between"><div class="flex items-center gap-space-lg"><a class="flex items-center gap-space-sm group" data-path="accueil" href="#"><img src="https://lh3.googleusercontent.com/aida/AEtjO1WfQYCtiqeNG54ygjSuWgezzJvNRFn46pLCNvp2e7Id3bhtMXk6yjzUgbnZSeZCVHUweMxEgpifSLDwnI1WmJJ24cWXR44dN6sUMHvuOdznVvI91v8NcptI5RfJsyMjpuA2VnUxe3lOdTB8lNMvFv7A6c7sRRzgj9miA3MLgf599L1cAc92XDf_De3VbOMEkNSsklNgO0A6ezaUNwBiBHRSfQM93befgRVuUv-l9vV5GxcEYQbNQ1iOmAo" alt="Sensorium Logo" class="w-10 h-10 rounded-full object-cover"><div class="flex flex-col"><div class="flex items-center gap-space-xs"><span class="font-headline-sm text-headline-sm tracking-tight text-on-surface font-semibold">Sensorium</span><span class="font-label-sm text-label-sm px-1.5 py-0.5 rounded bg-surface-container-high text-primary uppercase">Core</span></div><span class="font-label-sm text-label-sm text-primary tracking-widest uppercase font-semibold">SPIDER TWIN</span></div></a><nav class="hidden xl:flex items-center gap-space-xs" data-active-classes="bg-surface-container text-on-surface font-semibold"><a class="px-space-md py-space-sm rounded-lg font-body-md text-body-md text-on-surface-variant hover:text-on-surface hover:bg-surface-container-low transition-colors" data-path="accueil" href="#">Accueil</a><a class="px-space-md py-space-sm rounded-lg font-body-md text-body-md text-on-surface-variant hover:text-on-surface hover:bg-surface-container-low transition-colors" href="/site/solutions.html" data-path="solutions">Solutions</a><a class="px-space-md py-space-sm rounded-lg font-body-md text-body-md text-on-surface-variant hover:text-on-surface hover:bg-surface-container-low transition-colors" href="/site/benefices_roi.html" data-path="benefices-roi">Bénéfices &amp; ROI</a><a class="px-space-md py-space-sm rounded-lg font-body-md text-body-md text-on-surface-variant hover:text-on-surface hover:bg-surface-container-low transition-colors" href="/site/piliers_industriels.html" data-path="piliers">Piliers</a><a class="px-space-md py-space-sm rounded-lg font-body-md text-body-md text-on-surface-variant hover:text-on-surface hover:bg-surface-container-low transition-colors" href="/site/temoignages.html" data-path="temoignages">Témoignages</a><a class="px-space-md py-space-sm rounded-lg font-body-md text-body-md text-on-surface-variant hover:text-on-surface hover:bg-surface-container-low transition-colors" href="/site/tarifs.html" data-path="tarifs">Tarifs</a></nav></div><div class="flex items-center gap-space-md"><a class="hidden md:inline-flex items-center px-space-lg py-space-sm rounded-xl font-body-md text-body-md font-medium text-on-surface bg-surface-container-lowest/80 hover:bg-surface-container transition-all shadow-[0_1px_8px_rgba(0,0,0,0.04)]" href="/site/demo.html" data-path="demander-une-demo">Demander une Démo</a><a class="inline-flex items-center px-space-lg py-space-sm rounded-xl font-body-md text-body-md font-semibold text-on-primary bg-gradient-to-r from-primary to-primary-container hover:from-primary-container hover:to-primary shadow-[0_0_20px_rgba(124,58,237,0.35)] transition-all" href="/site/authentification.html" data-path="demarrer-essai-gratuit">Démarrer Essai Gratuit</a><a href="/dashboard" class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-primary text-white text-xs font-semibold shadow hover:opacity-90 ml-space-xs" title="Ouvrir le Cockpit"><span class="material-symbols-outlined text-[16px]">speed</span><span>Cockpit</span></a></div></div></header><main class="w-full pt-20 bg-background"><div class="flex flex-col w-full relative">
+<!-- Specular Ambient Ambient Overlays (Contained) -->
+<div class="absolute top-0 right-0 w-[55vw] h-[550px] bg-gradient-to-bl from-primary-fixed/30 via-secondary-fixed/15 to-transparent pointer-events-none rounded-full blur-3xl -z-10 transform translate-x-1/4 -translate-y-12"></div>
+<div class="absolute top-[35%] left-[-10vw] w-[45vw] h-[450px] bg-gradient-to-tr from-secondary-fixed/25 via-primary-fixed-dim/20 to-transparent pointer-events-none rounded-full blur-3xl -z-10"></div>
+<!-- Micro Coordinate Banner / Metadata Header -->
+<section class="w-full px-gutter-lg pt-space-lg pb-space-xs flex flex-wrap items-center justify-between gap-space-sm">
+<div class="flex items-center gap-space-sm">
+<div class="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-surface-container shadow-sm">
+<span class="w-2 h-2 rounded-full bg-secondary-container animate-pulse"></span>
+<span class="font-label-sm text-label-sm text-secondary uppercase font-semibold">SESSION DIRIGEANT • 30 MIN DISPONIBLE</span>
+</div>
+<span class="hidden sm:inline font-label-sm text-label-sm text-on-surface-variant/80">LATENCY: 12ms | CIPHER: AES-256</span>
+</div>
+<div class="flex items-center gap-space-md">
+<span class="font-label-sm text-label-sm text-on-surface-variant font-medium">CADRE RÉGLEMENTAIRE : DÉCRET TERTIAIRE &amp; BACS</span>
+<span class="w-1.5 h-1.5 rounded-full bg-outline-variant"></span>
+<span class="font-label-sm text-label-sm text-primary font-semibold">ISO 27001</span>
+</div>
+</section>
+<!-- Hero Header Block -->
+<section class="w-full px-gutter-lg pt-space-sm pb-space-lg max-w-5xl">
+<div class="inline-flex items-center gap-space-xs px-3 py-1 rounded-full bg-surface-container-high text-primary font-label-md text-label-md uppercase tracking-wider mb-space-sm">
+<span class="material-symbols-outlined text-[15px]" style="font-variation-settings: 'FILL' 1;">bolt</span>
+      Audit Initial &amp; Diagnostic Temps Réel
+    </div>
+<h1 class="font-headline-xl text-headline-xl text-on-surface tracking-tight font-bold leading-tight">
+      Réservez votre Démo Personnalisée de <span class="bg-gradient-to-r from-primary to-primary-container bg-clip-text text-transparent">30 minutes</span> avec un expert en efficacité énergétique.
+    </h1>
+<p class="mt-space-sm font-body-lg text-body-lg text-on-surface-variant max-w-3xl">
+      Évaluez sans engagement la décarbonation passive et active de vos bâtiments tertiaires et industriels. Visualisez votre jumeau thermique spatial sans capteurs intrusifs ni arrêt d'exploitation.
+    </p>
+</section>
+<!-- Main 2-Column Section -->
+<section class="w-full px-gutter-lg pb-space-xl">
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-space-xl items-start">
+<!-- Left Column: Discovery, Proof & Assets (7 Cols on desktop) -->
+<div class="lg:col-span-6 xl:col-span-7 flex flex-col gap-space-lg">
+<!-- Pillar Cards Grid -->
+<div class="flex flex-col gap-space-md">
+<div class="flex items-center justify-between">
+<h2 class="font-headline-sm text-headline-sm text-on-surface font-semibold flex items-center gap-space-xs">
+<span class="material-symbols-outlined text-primary">visibility</span>
+              Au programme de votre session exécutive
+            </h2>
+<span class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">Durée : 30:00</span>
+</div>
+<div class="grid grid-cols-1 sm:grid-cols-2 gap-space-md">
+<!-- Card 1 -->
+<div class="group p-space-md rounded-xl bg-surface-container-lowest shadow-sm hover:shadow-md transition-all flex flex-col justify-between gap-space-sm relative overflow-hidden">
+<div class="absolute -right-6 -bottom-6 w-24 h-24 bg-primary-fixed/20 rounded-full blur-xl pointer-events-none"></div>
+<div class="w-10 h-10 rounded-lg bg-surface-container-high flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-on-primary transition-colors">
+<span class="material-symbols-outlined text-[22px]">analytics</span>
+</div>
+<div>
+<h3 class="font-title-md text-title-md text-on-surface font-semibold mb-1">Audit Flash de votre Parc</h3>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Estimation immédiate de vos gisements de gains financiers (kW/h et €) basée sur votre typologie de surface.</p>
+</div>
+<div class="pt-2 flex items-center gap-2 font-label-sm text-label-sm text-primary font-semibold">
+<span class="">Calculateur ROI live</span>
+<span class="material-symbols-outlined text-[14px]">arrow_forward</span>
+</div>
+</div>
+<!-- Card 2 -->
+<div class="group p-space-md rounded-xl bg-surface-container-lowest shadow-sm hover:shadow-md transition-all flex flex-col justify-between gap-space-sm relative overflow-hidden">
+<div class="absolute -right-6 -bottom-6 w-24 h-24 bg-secondary-fixed/30 rounded-full blur-xl pointer-events-none"></div>
+<div class="w-10 h-10 rounded-lg bg-surface-container-high flex items-center justify-center text-secondary group-hover:bg-secondary group-hover:text-on-secondary transition-colors">
+<span class="material-symbols-outlined text-[22px]">view_in_ar</span>
+</div>
+<div>
+<h3 class="font-title-md text-title-md text-on-surface font-semibold mb-1">Démonstration Twin Live</h3>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Observez comment BeeCarbonat régule CVC, CTA et pompes à chaleur de manière non invasive et sans travaux.</p>
+</div>
+<div class="pt-2 flex items-center gap-2 font-label-sm text-label-sm text-secondary font-semibold">
+<span class="">Régulation autonome</span>
+<span class="material-symbols-outlined text-[14px]">arrow_forward</span>
+</div>
+</div>
+<!-- Card 3 -->
+<div class="group p-space-md rounded-xl bg-surface-container-lowest shadow-sm hover:shadow-md transition-all flex flex-col justify-between gap-space-sm relative overflow-hidden">
+<div class="w-10 h-10 rounded-lg bg-surface-container-high flex items-center justify-center text-primary-container group-hover:bg-primary-container group-hover:text-on-primary transition-colors">
+<span class="material-symbols-outlined text-[22px]">rocket_launch</span>
+</div>
+<div>
+<h3 class="font-title-md text-title-md text-on-surface font-semibold mb-1">Déploiement Express 48h</h3>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Présentation de l'intégration logicielle API &amp; protocoles BACnet/Modbus sans coupure de chaîne d'exploitation.</p>
+</div>
+<div class="pt-2 flex items-center gap-2 font-label-sm text-label-sm text-primary font-semibold">
+<span class="">Zéro downtime</span>
+<span class="material-symbols-outlined text-[14px]">arrow_forward</span>
+</div>
+</div>
+<!-- Card 4 -->
+<div class="group p-space-md rounded-xl bg-surface-container-lowest shadow-sm hover:shadow-md transition-all flex flex-col justify-between gap-space-sm relative overflow-hidden">
+<div class="w-10 h-10 rounded-lg bg-surface-container-high flex items-center justify-center text-tertiary group-hover:bg-tertiary group-hover:text-on-tertiary transition-colors">
+<span class="material-symbols-outlined text-[22px]">verified_user</span>
+</div>
+<div>
+<h3 class="font-title-md text-title-md text-on-surface font-semibold mb-1">Feuille de Route Décret &amp; BACS</h3>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Livrable réglementaire pour sécuriser vos jalons 2025/2030 et valider l'éligibilité aux certificats CEE.</p>
+</div>
+<div class="pt-2 flex items-center gap-2 font-label-sm text-label-sm text-tertiary font-semibold">
+<span class="">Dossier de conformité</span>
+<span class="material-symbols-outlined text-[14px]">arrow_forward</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Visual Context Card with Telemetry Chart -->
+<div class="w-full p-space-lg rounded-2xl bg-surface-container-low shadow-sm flex flex-col md:flex-row gap-space-lg items-center">
+<div class="w-full md:w-1/2 flex flex-col gap-space-xs">
+<span class="font-label-sm text-label-sm uppercase font-semibold text-secondary">Spatial Twin Interface Preview</span>
+<h4 class="font-headline-sm text-headline-sm font-semibold text-on-surface">Audit thermique temps réel</h4>
+<p class="font-body-sm text-body-sm text-on-surface-variant">
+              Visualisation vectorielle en direct d'un complexe de 24 500 m². Les flux thermiques anormaux sont détectés et corrigés algorithmiquement en continu.
+            </p>
+<div class="flex items-center gap-space-md mt-space-xs pt-space-xs">
+<div>
+<div class="font-headline-sm text-headline-sm text-primary font-bold">-28.4%</div>
+<div class="font-label-sm text-label-sm text-on-surface-variant">Consommation CVC</div>
+</div>
+<div class="w-px h-8 bg-outline-variant"></div>
+<div>
+<div class="font-headline-sm text-headline-sm text-secondary font-bold">4.2 mois</div>
+<div class="font-label-sm text-label-sm text-on-surface-variant">Retour sur Investissement</div>
+</div>
+</div>
+</div>
+<!-- Inline Telemetry SVG Component -->
+<div class="w-full md:w-1/2 h-44 rounded-xl bg-surface-container-lowest p-space-sm flex flex-col justify-between shadow-inner relative overflow-hidden">
+<div class="flex items-center justify-between text-on-surface-variant">
+<span class="font-label-sm text-label-sm flex items-center gap-1">
+<span class="w-1.5 h-1.5 rounded-full bg-secondary"></span> SIMULATION_FLUX_SITE_A
+              </span>
+<span class="font-label-sm text-label-sm text-secondary font-mono">LIVE 60fps</span>
+</div>
+<svg class="w-full h-24 text-primary" fill="none" preserveAspectRatio="none" viewBox="0 0 280 90">
+<!-- Grid Lines -->
+<line stroke="currentColor" stroke-dasharray="2 2" stroke-opacity="0.08" x1="0" x2="280" y1="20" y2="20"></line>
+<line stroke="currentColor" stroke-dasharray="2 2" stroke-opacity="0.08" x1="0" x2="280" y1="50" y2="50"></line>
+<line stroke="currentColor" stroke-dasharray="2 2" stroke-opacity="0.08" x1="0" x2="280" y1="75" y2="75"></line>
+<!-- Gradient Area -->
+<defs>
+<linearGradient id="chartGrad" x1="0%" x2="0%" y1="0%" y2="100%">
+<stop offset="0%" stop-color="currentColor" stop-opacity="0.25"></stop>
+<stop offset="100%" stop-color="currentColor" stop-opacity="0.0"></stop>
+</linearGradient>
+</defs>
+<path d="M0,65 Q35,40 70,55 T140,25 T210,40 T280,15 L280,90 L0,90 Z" fill="url(#chartGrad)"></path>
+<!-- Primary Line -->
+<path d="M0,65 Q35,40 70,55 T140,25 T210,40 T280,15" fill="none" stroke="currentColor" stroke-linecap="round" stroke-width="2.5"></path>
+<!-- Optimized Target Line (Secondary cyan) -->
+<path d="M0,75 Q40,65 80,68 T160,50 T240,45 T280,35" fill="none" stroke="#00687a" stroke-dasharray="4 3" stroke-width="1.5"></path>
+<!-- Node dots -->
+<circle class="fill-primary" cx="140" cy="25" r="4"></circle>
+<circle class="stroke-primary" cx="140" cy="25" opacity="0.4" r="8" stroke-width="1.5"></circle>
+<circle class="fill-primary" cx="280" cy="15" r="3.5"></circle>
+</svg>
+<div class="flex items-center justify-between font-label-sm text-label-sm text-on-surface-variant">
+<span class="">08:00 - Charge initiale</span>
+<span class="text-primary font-medium">Point d'optimisation auto à 14:30</span>
+<span class="">18:00</span>
+</div>
+</div>
+</div>
+<!-- Trust & Reassurance Badges -->
+<div class="grid grid-cols-1 sm:grid-cols-3 gap-space-sm pt-space-xs">
+<div class="flex items-center gap-space-sm p-space-sm rounded-xl bg-surface-container-lowest shadow-sm">
+<div class="w-8 h-8 rounded-lg bg-surface-container-high flex items-center justify-center text-primary shrink-0">
+<span class="material-symbols-outlined text-[18px]">lock</span>
+</div>
+<div class="flex flex-col">
+<span class="font-title-md text-title-md text-on-surface font-semibold text-[13px] leading-tight">ISO 27001 &amp; HDS</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant text-[11px]">Confidentialité absolue</span>
+</div>
+</div>
+<div class="flex items-center gap-space-sm p-space-sm rounded-xl bg-surface-container-lowest shadow-sm">
+<div class="w-8 h-8 rounded-lg bg-surface-container-high flex items-center justify-center text-primary shrink-0">
+<span class="material-symbols-outlined text-[18px]">handshake</span>
+</div>
+<div class="flex flex-col">
+<span class="font-title-md text-title-md text-on-surface font-semibold text-[13px] leading-tight">Sans engagement</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant text-[11px]">Diagnostic préliminaire offert</span>
+</div>
+</div>
+<div class="flex items-center gap-space-sm p-space-sm rounded-xl bg-surface-container-lowest shadow-sm">
+<div class="w-8 h-8 rounded-lg bg-surface-container-high flex items-center justify-center text-primary shrink-0">
+<span class="material-symbols-outlined text-[18px]">engineering</span>
+</div>
+<div class="flex flex-col">
+<span class="font-title-md text-title-md text-on-surface font-semibold text-[13px] leading-tight">Ingénieur Dédié</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant text-[11px]">Expert thermique certifié</span>
+</div>
+</div>
+</div>
+<!-- Social Proof: Express Testimonial & Client Logos -->
+<div class="flex flex-col gap-space-sm p-space-lg rounded-2xl bg-surface-container-lowest shadow-sm">
+<div class="flex items-center gap-space-sm">
+<div class="w-12 h-12 rounded-full overflow-hidden shrink-0 shadow-sm">
+<img class="w-full h-full object-cover" data-alt="Corporate headshot of an executive energy operations manager in a high-tech control center, wearing a navy blazer, confident and approachable, crisp ambient cyan and purple background reflections." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDfJpQToaYGOeqZzVxnecOtWy8wyjLFWAYnLOv4cjevWik3gr2FH_rJTc0p4PQXLhB2zQm8pNJa1trYAjKRlNmNBhgtZ9qlis-9j1LDAGjMS1gyw5tc1br34yDhU-w2eCm71sGcFhnbteJx60rBTcb0YTVyhx0Mnwuoae5Wh3mjyvJqwqk0ECFoQkpfZeYdoBQsdnhREBpgNbHNhOOiow0A5FCXjC72N5FE8l1VCwn50XgvUjoHTZZJ">
+</div>
+<div class="flex flex-col">
+<div class="flex items-center gap-1 text-secondary">
+<span class="material-symbols-outlined text-[16px]" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-[16px]" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-[16px]" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-[16px]" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-[16px]" style="font-variation-settings: 'FILL' 1;">star</span>
+</div>
+<p class="font-title-md text-title-md text-on-surface font-semibold text-[14px]">Marc Vanhoutte • Directeur Immobilier &amp; Exploitation</p>
+<span class="font-body-sm text-body-sm text-on-surface-variant text-[12px]">Parc Tertiaire IDF (142 000 m²)</span>
+</div>
+</div>
+<p class="font-body-md text-body-md text-on-surface italic mt-space-xs">
+            « La démo de 30 minutes a été décisive. Les ingénieurs de BeeCarbonat avaient déjà pré-modélisé nos typologies de façades et nous ont montré 310 000 € d'économies annuelles sans modifier nos centrales existantes. Déployé en 3 jours. »
+          </p>
+<div class="pt-space-sm mt-space-xs flex flex-wrap items-center justify-between gap-space-md">
+<span class="font-label-sm text-label-sm uppercase tracking-wider text-on-surface-variant font-semibold">Ils pilotent leurs parcs avec Spider Twin :</span>
+<div class="flex items-center gap-space-lg grayscale opacity-80 hover:grayscale-0 hover:opacity-100 transition-all">
+<span class="font-headline-sm text-headline-sm font-bold tracking-tighter text-on-surface-variant">AXA</span>
+<span class="font-headline-sm text-headline-sm font-bold tracking-tight text-on-surface-variant">BOUYGUES</span>
+<span class="font-headline-sm text-headline-sm font-semibold tracking-normal text-on-surface-variant">Schneider</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Right Column: Interactive Executive Booking Form (5 Cols on desktop) -->
+<div class="lg:col-span-6 xl:col-span-5 w-full">
+<div class="w-full bg-surface-container-lowest rounded-2xl shadow-xl p-space-lg sm:p-space-xl flex flex-col gap-space-md relative overflow-hidden backdrop-blur-xl">
+<!-- Top bar decoration -->
+<div class="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-primary via-primary-container to-secondary-container"></div>
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-2">
+<span class="w-2.5 h-2.5 rounded-full bg-primary animate-ping"></span>
+<span class="font-label-md text-label-md font-semibold text-primary uppercase">Planification Directe</span>
+</div>
+<span class="font-label-sm text-label-sm text-on-surface-variant px-2 py-0.5 rounded bg-surface-container">CALENDRIER SYNCHRONISÉ</span>
+</div>
+<div>
+<h3 class="font-headline-md text-headline-md text-on-surface font-bold tracking-tight">Configurez votre Démo</h3>
+<p class="font-body-sm text-body-sm text-on-surface-variant mt-1">Sélectionnez vos coordonnées et votre fenêtre horaire sécurisée.</p>
+</div>
+<!-- Form Fields -->
+<form class="flex flex-col gap-space-md" id="demo-booking-form" onsubmit="event.preventDefault(); handleBookingSubmit();">
+<!-- Identity row -->
+<div class="grid grid-cols-1 sm:grid-cols-2 gap-space-sm">
+<div class="flex flex-col gap-1">
+<label class="font-label-md text-label-md text-on-surface font-semibold" for="full-name">Nom &amp; Prénom *</label>
+<div class="relative">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant text-[18px]">badge</span>
+<input class="w-full pl-9 pr-3 py-2.5 rounded-xl bg-surface-container-low text-on-surface font-body-sm text-body-sm focus:outline-none focus:bg-surface-container-lowest shadow-sm placeholder:text-on-surface-variant/50" id="full-name" placeholder="Alexandre de Montmirail" required="" type="text">
+</div>
+</div>
+<div class="flex flex-col gap-1">
+<label class="font-label-md text-label-md text-on-surface font-semibold" for="company">Société / Foncière *</label>
+<div class="relative">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant text-[18px]">domain</span>
+<input class="w-full pl-9 pr-3 py-2.5 rounded-xl bg-surface-container-low text-on-surface font-body-sm text-body-sm focus:outline-none focus:bg-surface-container-lowest shadow-sm placeholder:text-on-surface-variant/50" id="company" placeholder="Gecina, Foncière Immobilière..." required="" type="text">
+</div>
+</div>
+</div>
+<!-- Contact Row -->
+<div class="grid grid-cols-1 sm:grid-cols-2 gap-space-sm">
+<div class="flex flex-col gap-1">
+<label class="font-label-md text-label-md text-on-surface font-semibold" for="work-email">Email Professionnel *</label>
+<div class="relative">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant text-[18px]">alternate_email</span>
+<input class="w-full pl-9 pr-3 py-2.5 rounded-xl bg-surface-container-low text-on-surface font-body-sm text-body-sm focus:outline-none focus:bg-surface-container-lowest shadow-sm placeholder:text-on-surface-variant/50" id="work-email" placeholder="a.montmirail@groupe.fr" required="" type="email">
+</div>
+</div>
+<div class="flex flex-col gap-1">
+<label class="font-label-md text-label-md text-on-surface font-semibold" for="phone-number">Téléphone Direct *</label>
+<div class="relative">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant text-[18px]">call</span>
+<input class="w-full pl-9 pr-3 py-2.5 rounded-xl bg-surface-container-low text-on-surface font-body-sm text-body-sm focus:outline-none focus:bg-surface-container-lowest shadow-sm placeholder:text-on-surface-variant/50" id="phone-number" placeholder="+33 6 12 34 56 78" required="" type="tel">
+</div>
+</div>
+</div>
+<!-- Surface Selection (Pill Radios) -->
+<div class="flex flex-col gap-1.5 pt-space-xs">
+<div class="flex items-center justify-between">
+<label class="font-label-md text-label-md text-on-surface font-semibold">Superficie approximative du parc *</label>
+<span class="font-label-sm text-label-sm text-on-surface-variant">Multi-sites acceptés</span>
+</div>
+<div class="grid grid-cols-3 gap-space-xs">
+<button class="surface-btn p-2.5 rounded-xl bg-surface-container-low text-center flex flex-col items-center justify-center transition-all hover:bg-surface-container" onclick="selectSurface(this, '&lt; 10 000 m²')" type="button">
+<span class="font-title-md text-title-md text-[13px] font-semibold text-on-surface">&lt; 10 000 m²</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant text-[10px]">1 à 3 bâtiments</span>
+</button>
+<button class="surface-btn p-2.5 rounded-xl bg-primary text-on-primary text-center flex flex-col items-center justify-center shadow-md transition-all" onclick="selectSurface(this, '10 000 à 50 000 m²')" type="button">
+<span class="font-title-md text-title-md text-[13px] font-semibold text-on-primary">10 - 50k m²</span>
+<span class="font-label-sm text-label-sm text-on-primary-container text-[10px]">Campus ou Siège</span>
+</button>
+<button class="surface-btn p-2.5 rounded-xl bg-surface-container-low text-center flex flex-col items-center justify-center transition-all hover:bg-surface-container" onclick="selectSurface(this, '&gt; 50 000 m²')" type="button">
+<span class="font-title-md text-title-md text-[13px] font-semibold text-on-surface">&gt; 50 000 m²</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant text-[10px]">Portefeuille Global</span>
+</button>
+</div>
+<input id="selected-surface" type="hidden" value="10 000 à 50 000 m²">
+</div>
+<!-- Calendar / Slot Picker Container -->
+<div class="flex flex-col gap-2 pt-space-xs">
+<div class="flex items-center justify-between">
+<label class="font-label-md text-label-md text-on-surface font-semibold flex items-center gap-1.5">
+<span class="material-symbols-outlined text-[16px] text-primary">calendar_today</span>
+                  Sélectionnez un créneau (30 min)
+                </label>
+<span class="font-label-sm text-label-sm text-secondary font-semibold">Fuseau Paris (CET)</span>
+</div>
+<!-- Day selector tabs -->
+<div class="grid grid-cols-4 gap-1.5 bg-surface-container-low p-1 rounded-xl">
+<button class="day-tab py-1.5 px-2 rounded-lg text-center bg-surface-container-lowest shadow-sm text-on-surface font-label-md text-label-md font-semibold" onclick="switchDay(this, 'Jeu 24 Oct')" type="button">
+<div class="text-[11px] text-on-surface-variant">JEU</div>
+<div class="text-[14px]">24 Oct</div>
+</button>
+<button class="day-tab py-1.5 px-2 rounded-lg text-center text-on-surface-variant font-label-md text-label-md hover:bg-surface-container" onclick="switchDay(this, 'Ven 25 Oct')" type="button">
+<div class="text-[11px]">VEN</div>
+<div class="text-[14px]">25 Oct</div>
+</button>
+<button class="day-tab py-1.5 px-2 rounded-lg text-center text-on-surface-variant font-label-md text-label-md hover:bg-surface-container" onclick="switchDay(this, 'Lun 28 Oct')" type="button">
+<div class="text-[11px]">LUN</div>
+<div class="text-[14px]">28 Oct</div>
+</button>
+<button class="day-tab py-1.5 px-2 rounded-lg text-center text-on-surface-variant font-label-md text-label-md hover:bg-surface-container" onclick="switchDay(this, 'Mar 29 Oct')" type="button">
+<div class="text-[11px]">MAR</div>
+<div class="text-[14px]">29 Oct</div>
+</button>
+</div>
+<!-- Time slots grid -->
+<div class="grid grid-cols-3 gap-2 mt-1" id="slots-container">
+<button class="slot-btn py-2 px-1 text-center rounded-lg bg-surface-container-low hover:bg-surface-container text-on-surface font-label-md text-label-md transition-all" onclick="selectSlot(this, '09:30 - 10:00')" type="button">
+                  09:30 - 10:00
+                </button>
+<button class="slot-btn py-2 px-1 text-center rounded-lg bg-surface-container-low hover:bg-surface-container text-on-surface font-label-md text-label-md transition-all" onclick="selectSlot(this, '11:00 - 11:30')" type="button">
+                  11:00 - 11:30
+                </button>
+<button class="slot-btn py-2 px-1 text-center rounded-lg bg-primary-container text-on-primary font-label-md text-label-md shadow-md transition-all" onclick="selectSlot(this, '14:00 - 14:30')" type="button">
+                  14:00 - 14:30
+                </button>
+<button class="slot-btn py-2 px-1 text-center rounded-lg bg-surface-container-low hover:bg-surface-container text-on-surface font-label-md text-label-md transition-all" onclick="selectSlot(this, '15:30 - 16:00')" type="button">
+                  15:30 - 16:00
+                </button>
+<button class="slot-btn py-2 px-1 text-center rounded-lg bg-surface-container-low hover:bg-surface-container text-on-surface font-label-md text-label-md transition-all" onclick="selectSlot(this, '16:30 - 17:00')" type="button">
+                  16:30 - 17:00
+                </button>
+<button class="slot-btn py-2 px-1 text-center rounded-lg bg-surface-container-low hover:bg-surface-container text-on-surface font-label-md text-label-md transition-all" onclick="selectSlot(this, '17:30 - 18:00')" type="button">
+                  17:30 - 18:00
+                </button>
+</div>
+<input id="selected-slot" type="hidden" value="Jeu 24 Oct @ 14:00 - 14:30">
+</div>
+<!-- Submit Button -->
+<button class="w-full mt-space-sm py-3.5 px-space-md rounded-xl font-headline-sm text-headline-sm text-on-primary bg-gradient-to-r from-primary to-primary-container hover:from-primary-container hover:to-primary shadow-lg transition-all flex items-center justify-center gap-space-xs group" id="submit-btn" type="submit">
+<span class="">Confirmer mon Créneau de Démo (Gratuit)</span>
+<span class="material-symbols-outlined text-[20px] group-hover:translate-x-1 transition-transform">event_available</span>
+</button>
+<!-- Reassurance Note below CTA -->
+<div class="flex items-start gap-2 pt-1">
+<span class="material-symbols-outlined text-secondary text-[18px] shrink-0 mt-0.5">mark_email_read</span>
+<p class="font-body-sm text-body-sm text-on-surface-variant leading-relaxed">
+                Vous recevrez une invitation instantanée par email contenant l'accès visioconférence chiffré et le rappel de votre synthèse pré-audit.
+              </p>
+</div>
+</form>
+<!-- Dynamic Success Notification Panel (Hidden by default) -->
+<div class="hidden absolute inset-0 bg-surface-container-lowest/95 backdrop-blur-md p-space-xl flex flex-col items-center justify-center text-center z-20" id="booking-success-modal">
+<div class="w-16 h-16 rounded-full bg-secondary-fixed flex items-center justify-center text-on-secondary-fixed-variant mb-space-sm shadow-md animate-bounce">
+<span class="material-symbols-outlined text-[36px]">check_circle</span>
+</div>
+<h4 class="font-headline-md text-headline-md font-bold text-on-surface">Créneau Confirmé avec Succès !</h4>
+<p class="font-body-md text-body-md text-on-surface-variant mt-2 max-w-sm" id="success-summary">
+              Votre session exécutive de 30 minutes a été programmée. Un lien sécurisé et les accès à votre portail préliminaire ont été envoyés.
+            </p>
+<div class="mt-space-md p-space-sm rounded-xl bg-surface-container-low w-full max-w-xs text-left font-label-md text-label-md text-on-surface">
+<div class="flex justify-between py-1">
+<span class="text-on-surface-variant">Intervenant :</span>
+<span class="font-semibold">Ingénieur Thermicien Référent</span>
+</div>
+<div class="flex justify-between py-1">
+<span class="text-on-surface-variant">Plateforme :</span>
+<span class="font-semibold">Visioconférence Sécurisée HDS</span>
+</div>
+</div>
+<button class="mt-space-lg px-space-lg py-2.5 rounded-xl bg-primary text-on-primary font-body-md text-body-md font-semibold" onclick="dismissSuccessModal()">
+              Fermer la vue
+            </button>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Photo Gallery Showcase Section -->
+<section class="w-full px-gutter-lg py-space-xl bg-surface-container-low/50">
+<div class="max-w-6xl mx-auto flex flex-col gap-space-lg">
+<div class="flex flex-col sm:flex-row sm:items-end justify-between gap-space-sm">
+<div>
+<span class="font-label-sm text-label-sm text-primary uppercase font-bold tracking-widest">INFRASTRUCTURE • DÉPLOIEMENT RÉEL</span>
+<h2 class="font-headline-lg text-headline-lg text-on-surface font-bold">Un déploiement chirurgical dans vos locaux</h2>
+</div>
+<p class="font-body-md text-body-md text-on-surface-variant max-w-md">
+          Nos protocoles s'interfacent directement sur vos automates sans toucher au câblage et sans mobiliser vos équipes de maintenance.
+        </p>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-space-lg">
+<div class="relative rounded-2xl overflow-hidden shadow-md group h-72">
+<img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" data-alt="High-tech modern building management control room with luminous ultra-clean screens showing 3D digital twin visualizations of ventilation ducts, soft violet and cyan ambient glow, architectural photography style." src="https://lh3.googleusercontent.com/aida-public/AB6AXuB0ByU7w_o-mQhjTGZqUTC4zlFbVcdyrWvqwuLA3-ISfEcgX6oLk-OVqwcJ6pDA3jWKXQZhkZWwRQWW2e-jFR3XD0Sc6fDEd_VEVfrDY_7gaGPM1rxHFLz6wsp6MFpjQa8CsssavTNH5Un8JgRX39-aB6qqJ4P70dBlaBhcDhwdUy39zV9A7Wk_umD3tsuSITi8L5B8WRpOo4QKsiXRv6XFoJm3I7Jcv2iuj79t-YjjZsGJebsozC_R">
+<div class="absolute inset-0 bg-gradient-to-t from-inverse-surface/90 via-inverse-surface/20 to-transparent flex flex-col justify-end p-space-lg">
+<span class="font-label-sm text-label-sm text-secondary-fixed uppercase font-semibold">Supervision Centralisée</span>
+<h3 class="font-headline-sm text-headline-sm text-inverse-on-surface font-semibold">Cockpit de Pilotage Multi-Sites</h3>
+<p class="font-body-sm text-body-sm text-surface-container-highest/80">Agrégation continue des flux thermiques sur plus de 400 000 m² connectés simultanément.</p>
+</div>
+</div>
+<div class="relative rounded-2xl overflow-hidden shadow-md group h-72">
+<img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" data-alt="Close-up of sleek industrial automation cabinet with clean fiber optic cables, discreet cyan LED status indicators, minimalist and ultra-clean electrical engineering standard." src="https://lh3.googleusercontent.com/aida-public/AB6AXuB5ME2vb5W-1omecUjyL9CNROieKBwpLM7jjwx4Tx09En-sh_3OcQCFljJe5g7dH05Hctjk6xsfhyWlzYFN2mNq2YQX2WfgEMVMjuFUCnRkJMG0fnMJWzM0JpAKOYflKiGpBB83e4fDxeR2t2NgZrDmfuyFz7YeeSiBVSId1ByxtReyH6Sy-OQ74S0nE_fc_-wMTzGX7p6CSXCSBNP0AYiP0Y42wIuIvqpaitDuIVOYdknyu12-qB61">
+<div class="absolute inset-0 bg-gradient-to-t from-inverse-surface/90 via-inverse-surface/20 to-transparent flex flex-col justify-end p-space-lg">
+<span class="font-label-sm text-label-sm text-primary-fixed uppercase font-semibold">Passerelle Non-Intrusive</span>
+<h3 class="font-headline-sm text-headline-sm text-inverse-on-surface font-semibold">Connecteurs Universels BACnet &amp; Modbus</h3>
+<p class="font-body-sm text-body-sm text-surface-container-highest/80">Raccordement en mode passif/actif instantané sans interruption de production ou de confort.</p>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- FAQ Section (Doutes levés : Délais, Matériel, GTB) -->
+<section class="w-full px-gutter-lg py-space-xl">
+<div class="max-w-4xl mx-auto flex flex-col gap-space-lg">
+<div class="text-center flex flex-col items-center gap-space-xs">
+<span class="font-label-sm text-label-sm text-primary font-bold uppercase tracking-wider">Réponses Précises</span>
+<h2 class="font-headline-lg text-headline-lg text-on-surface font-bold">Questions fréquentes sur la Démo et le Déploiement</h2>
+<p class="font-body-md text-body-md text-on-surface-variant max-w-xl">
+          Toutes les précisions techniques pour préparer sereinement votre échange de 30 minutes.
+        </p>
+</div>
+<div class="flex flex-col gap-space-sm" id="faq-accordion">
+<!-- FAQ Item 1 -->
+<div class="rounded-xl bg-surface-container-lowest shadow-sm overflow-hidden">
+<button class="w-full px-space-lg py-space-md text-left flex items-center justify-between gap-space-md hover:bg-surface-container-low transition-colors" onclick="toggleFaq(this)" type="button">
+<span class="font-title-md text-title-md text-on-surface font-semibold">Quels sont les délais concrets pour voir les premières économies d'énergie ?</span>
+<span class="material-symbols-outlined text-primary text-[20px] transform transition-transform">expand_more</span>
+</button>
+<div class="faq-content px-space-lg pb-space-md pt-0 text-on-surface-variant font-body-md text-body-md">
+            Dès l'interfaçage de l'algorithme Spider Twin (sous 48 heures ouvrées), l'optimisation passive s'active. Les premières baisses de puissance souscrite et l'ajustement dynamique des courbes de chauffe/climatisation sont mesurables dès les 7 premiers jours d'exploitation.
+          </div>
+</div>
+<!-- FAQ Item 2 -->
+<div class="rounded-xl bg-surface-container-lowest shadow-sm overflow-hidden">
+<button class="w-full px-space-lg py-space-md text-left flex items-center justify-between gap-space-md hover:bg-surface-container-low transition-colors" onclick="toggleFaq(this)" type="button">
+<span class="font-title-md text-title-md text-on-surface font-semibold">Un investissement matériel lourd ou des travaux sont-ils requis ?</span>
+<span class="material-symbols-outlined text-primary text-[20px] transform transition-transform">expand_more</span>
+</button>
+<div class="faq-content hidden px-space-lg pb-space-md pt-0 text-on-surface-variant font-body-md text-body-md">
+            Non. BeeCarbonat est conçu sur un paradigme logiciel pur (SaaS &amp; Edge léger). Nous exploitons vos capteurs et sous-compteurs existants. Aucun tirage de câble invasif, aucune fermeture d'étage, ni perçage de cloisons ne sont nécessaires.
+          </div>
+</div>
+<!-- FAQ Item 3 -->
+<div class="rounded-xl bg-surface-container-lowest shadow-sm overflow-hidden">
+<button class="w-full px-space-lg py-space-md text-left flex items-center justify-between gap-space-md hover:bg-surface-container-low transition-colors" onclick="toggleFaq(this)" type="button">
+<span class="font-title-md text-title-md text-on-surface font-semibold">Ma GTB / GTC actuelle est ancienne. BeeCarbonat est-elle compatible ?</span>
+<span class="material-symbols-outlined text-primary text-[20px] transform transition-transform">expand_more</span>
+</button>
+<div class="faq-content hidden px-space-lg pb-space-md pt-0 text-on-surface-variant font-body-md text-body-md">
+            Oui. Notre couche d'abstraction matérielle gère nativement plus de 80 protocoles industriels (BACnet IP/MSTP, Modbus RTU/TCP, LonWorks, KNX, MQTT, ainsi que les passerelles propriétaires Siemens, Schneider, Johnson Controls, Distech). Même en l'absence totale de GTB, des micro-passerelles sans fil LoRaWAN s'installent en une demi-journée.
+          </div>
+</div>
+<!-- FAQ Item 4 -->
+<div class="rounded-xl bg-surface-container-lowest shadow-sm overflow-hidden">
+<button class="w-full px-space-lg py-space-md text-left flex items-center justify-between gap-space-md hover:bg-surface-container-low transition-colors" onclick="toggleFaq(this)" type="button">
+<span class="font-title-md text-title-md text-on-surface font-semibold">Comment préparez-vous l'audit préliminaire avant notre appel ?</span>
+<span class="material-symbols-outlined text-primary text-[20px] transform transition-transform">expand_more</span>
+</button>
+<div class="faq-content hidden px-space-lg pb-space-md pt-0 text-on-surface-variant font-body-md text-body-md">
+            À partir de votre nom d'entreprise et de votre adresse de site, notre moteur croise les données de cadastre solaire, de DJU (Degrés Jours Unifiés) météorologiques et les ratios de référence de votre typologie tertiaire pour projeter une cartographie thermique estimative avant même la visio.
+          </div>
+</div>
+</div>
+<!-- Quick Action / Support Contact Direct -->
+<div class="p-space-lg rounded-2xl bg-surface-container flex flex-col sm:flex-row items-center justify-between gap-space-md">
+<div class="flex items-center gap-space-md">
+<div class="w-12 h-12 rounded-xl bg-surface-container-lowest flex items-center justify-center text-primary shadow-sm shrink-0">
+<span class="material-symbols-outlined text-[24px]">contact_support</span>
+</div>
+<div>
+<h4 class="font-title-md text-title-md text-on-surface font-semibold">Vous avez un parc complexe ou un appel d'offres en cours ?</h4>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Nos directeurs de mission thermique échangent directement avec vos équipes techniques.</p>
+</div>
+</div>
+<a class="px-space-md py-2.5 rounded-xl bg-surface-container-lowest hover:bg-surface-container-high text-on-surface font-body-md text-body-md font-semibold whitespace-nowrap shadow-sm transition-all flex items-center gap-1.5" href="mailto:expert@beecarbonat.com">
+<span class="material-symbols-outlined text-[18px]">mail</span>
+          Contacter l'Ingénierie
+        </a>
+</div>
+</div>
+</section>
+<!-- Interactive Logic Script -->
+<script>
+    let activeDay = "Jeu 24 Oct";
+    let activeSlot = "14:00 - 14:30";
+    let activeSurface = "10 000 à 50 000 m²";
+
+    function selectSurface(button, val) {
+      document.querySelectorAll('.surface-btn').forEach(btn => {
+        btn.classList.remove('bg-primary', 'text-on-primary', 'shadow-md');
+        btn.classList.add('bg-surface-container-low', 'text-on-surface');
+        const labels = btn.querySelectorAll('span');
+        if (labels[0]) labels[0].classList.replace('text-on-primary', 'text-on-surface');
+        if (labels[1]) labels[1].classList.replace('text-on-primary-container', 'text-on-surface-variant');
+      });
+
+      button.classList.remove('bg-surface-container-low', 'text-on-surface');
+      button.classList.add('bg-primary', 'text-on-primary', 'shadow-md');
+      const labels = button.querySelectorAll('span');
+      if (labels[0]) labels[0].classList.replace('text-on-surface', 'text-on-primary');
+      if (labels[1]) labels[1].classList.replace('text-on-surface-variant', 'text-on-primary-container');
+
+      activeSurface = val;
+      document.getElementById('selected-surface').value = val;
+    }
+
+    function switchDay(tab, dayText) {
+      document.querySelectorAll('.day-tab').forEach(t => {
+        t.classList.remove('bg-surface-container-lowest', 'shadow-sm', 'text-on-surface', 'font-semibold');
+        t.classList.add('text-on-surface-variant');
+      });
+
+      tab.classList.add('bg-surface-container-lowest', 'shadow-sm', 'text-on-surface', 'font-semibold');
+      tab.classList.remove('text-on-surface-variant');
+
+      activeDay = dayText;
+      updateFullSlotString();
+    }
+
+    function selectSlot(button, slotText) {
+      document.querySelectorAll('.slot-btn').forEach(btn => {
+        btn.classList.remove('bg-primary-container', 'text-on-primary', 'shadow-md');
+        btn.classList.add('bg-surface-container-low', 'text-on-surface');
+      });
+
+      button.classList.remove('bg-surface-container-low', 'text-on-surface');
+      button.classList.add('bg-primary-container', 'text-on-primary', 'shadow-md');
+
+      activeSlot = slotText;
+      updateFullSlotString();
+    }
+
+    function updateFullSlotString() {
+      const combined = activeDay + " @ " + activeSlot;
+      document.getElementById('selected-slot').value = combined;
+    }
+
+    function handleBookingSubmit() {
+      const name = document.getElementById('full-name').value || 'Participant';
+      const company = document.getElementById('company').value || 'Votre entreprise';
+      const summaryText = document.getElementById('success-summary');
+      
+      summaryText.innerText = 'Rendez-vous validé pour ' + name + ' (' + company + ') le ' + activeDay + ' à ' + activeSlot + '. Un lien chiffré a été transmis avec la note de cadrage Décret Tertiaire.';
+      
+      const modal = document.getElementById('booking-success-modal');
+      modal.classList.remove('hidden');
+    }
+
+    function dismissSuccessModal() {
+      const modal = document.getElementById('booking-success-modal');
+      modal.classList.add('hidden');
+    }
+
+    function toggleFaq(button) {
+      const content = button.nextElementSibling;
+      const icon = button.querySelector('.material-symbols-outlined');
+      const isHidden = content.classList.contains('hidden');
+
+      if (isHidden) {
+        content.classList.remove('hidden');
+        icon.classList.add('rotate-180');
+      } else {
+        content.classList.add('hidden');
+        icon.classList.remove('rotate-180');
+      }
+    }
+  </script>
+</div></main><footer class="w-full bg-surface-container-low mt-space-xl"><div class="w-full px-gutter-lg py-space-xl flex flex-col gap-space-xl"><div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-space-xl"><div class="lg:col-span-2 flex flex-col gap-space-md"><div class="flex items-center gap-space-sm"><img src="https://lh3.googleusercontent.com/aida/AEtjO1WfQYCtiqeNG54ygjSuWgezzJvNRFn46pLCNvp2e7Id3bhtMXk6yjzUgbnZSeZCVHUweMxEgpifSLDwnI1WmJJ24cWXR44dN6sUMHvuOdznVvI91v8NcptI5RfJsyMjpuA2VnUxe3lOdTB8lNMvFv7A6c7sRRzgj9miA3MLgf599L1cAc92XDf_De3VbOMEkNSsklNgO0A6ezaUNwBiBHRSfQM93befgRVuUv-l9vV5GxcEYQbNQ1iOmAo" alt="Sensorium Logo" class="w-9 h-9 rounded-full object-cover"><span class="font-headline-sm text-headline-sm font-semibold text-on-surface">Sensorium</span></div><p class="font-body-md text-body-md text-on-surface-variant max-w-md">Plateforme de jumeau numérique Spider Twin dédiée à la décarbonation industrielle, la modélisation spatiale et le monitoring temps réel des infrastructures éco-énergétiques.</p><div class="flex items-center gap-space-sm text-on-surface-variant font-label-md text-label-md"><span class="w-2 h-2 rounded-full bg-secondary"></span><span class="">Infrastructure Telemetry Status: Optimal</span></div></div><div class="flex flex-col gap-space-sm"><h3 class="font-title-md text-title-md text-on-surface font-semibold">Solutions</h3><nav class="flex flex-col gap-space-xs"><a class="font-body-md text-body-md text-on-surface-variant hover:text-on-surface transition-colors" href="/site/solutions.html" data-path="solutions">Spider Spatial Twin</a><a class="font-body-md text-body-md text-on-surface-variant hover:text-on-surface transition-colors" href="/site/solutions.html" data-path="solutions">Télémesure &amp; Capteurs</a><a class="font-body-md text-body-md text-on-surface-variant hover:text-on-surface transition-colors" href="/site/solutions.html" data-path="solutions">Audit Carbone Temps Réel</a><a class="font-body-md text-body-md text-on-surface-variant hover:text-on-surface transition-colors" href="/site/solutions.html" data-path="solutions">Simulation Énergétique</a></nav></div><div class="flex flex-col gap-space-sm"><h3 class="font-title-md text-title-md text-on-surface font-semibold">Entreprise</h3><nav class="flex flex-col gap-space-xs"><a class="font-body-md text-body-md text-on-surface-variant hover:text-on-surface transition-colors" href="/site/piliers_industriels.html" data-path="piliers">Nos Piliers</a><a class="font-body-md text-body-md text-on-surface-variant hover:text-on-surface transition-colors" href="/site/benefices_roi.html" data-path="benefices-roi">Bénéfices &amp; ROI</a><a class="font-body-md text-body-md text-on-surface-variant hover:text-on-surface transition-colors" href="/site/temoignages.html" data-path="temoignages">Témoignages Clients</a><a class="font-body-md text-body-md text-on-surface-variant hover:text-on-surface transition-colors" href="/site/tarifs.html" data-path="tarifs">Grille Tarifaire</a></nav></div><div class="flex flex-col gap-space-sm"><h3 class="font-title-md text-title-md text-on-surface font-semibold">Contact &amp; Légal</h3><nav class="flex flex-col gap-space-xs"><a class="font-body-md text-body-md text-on-surface-variant hover:text-on-surface transition-colors" href="/site/demo.html" data-path="demander-une-demo">Support &amp; Contact</a><a class="font-body-md text-body-md text-on-surface-variant hover:text-on-surface transition-colors" data-path="mentions-legales" href="#">Mentions Légales</a><a class="font-body-md text-body-md text-on-surface-variant hover:text-on-surface transition-colors" data-path="confidentialite" href="#">Politique de Confidentialité</a><a class="font-body-md text-body-md text-on-surface-variant hover:text-on-surface transition-colors" data-path="securite" href="#">Sécurité &amp; Données</a></nav></div></div><div class="flex flex-col md:flex-row items-center justify-between gap-space-md pt-space-lg text-on-surface-variant font-label-md text-label-md"><p class="">© 2025 Sensorium SPIDER TWIN. Tous droits réservés.</p><div class="flex items-center gap-space-lg"><span class="">ISO 27001 Certified Architecture</span><span class="">Telemetry API v4.2</span></div></div></div></footer>
+
+</body></html>
