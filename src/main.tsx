@@ -16,12 +16,19 @@ console.error = (...args: unknown[]) => {
   }
 };
 
-if (import.meta.env.DEV && 'serviceWorker' in navigator) {
+if (typeof window !== 'undefined' && 'serviceWorker' in navigator) {
   navigator.serviceWorker.getRegistrations().then((registrations) => {
     for (const registration of registrations) {
       registration.unregister();
     }
   });
+  if ('caches' in window) {
+    caches.keys().then((names) => {
+      for (const name of names) {
+        caches.delete(name);
+      }
+    });
+  }
 }
 
 import { BrowserRouter } from 'react-router-dom';
