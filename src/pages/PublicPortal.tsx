@@ -96,8 +96,12 @@ export default function PublicPortal({
     return () => clearInterval(interval);
   }, []);
 
-  const handleNavigate = (path: ActiveNavPath) => {
-    setCurrentView(path);
+  const handleNavigate = (path: ActiveNavPath | 'dashboard') => {
+    if (path === 'dashboard') {
+      handleEnterDashboard();
+      return;
+    }
+    setCurrentView(path as ActiveNavPath);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 

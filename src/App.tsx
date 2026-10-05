@@ -461,8 +461,9 @@ export default function App() {
       case "cockpit":
       case "digital-twin":
         return (
-          <div className="p-2 sm:p-4 lg:p-6 max-w-[1700px] mx-auto min-h-[calc(100vh-100px)]">
+          <div className="p-0 sm:p-2 lg:p-4 max-w-[1700px] mx-auto min-h-[calc(100vh-100px)]">
             <CockpitConsoleView
+              isEmbedded={true}
               onNavigate={(path) => {
                 if (path === "vault") {
                   setActivePage("vault");

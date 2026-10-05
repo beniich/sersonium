@@ -3,9 +3,10 @@ import React, { useState, useEffect } from 'react';
 interface CockpitConsoleViewProps {
   onNavigate: (path: any) => void;
   onClose?: () => void;
+  isEmbedded?: boolean;
 }
 
-export const CockpitConsoleView: React.FC<CockpitConsoleViewProps> = ({ onNavigate, onClose }) => {
+export const CockpitConsoleView: React.FC<CockpitConsoleViewProps> = ({ onNavigate, onClose, isEmbedded = false }) => {
   const [activeFloor, setActiveFloor] = useState('Floor 04 - Core Automation Bay');
   const [activeFloorKey, setActiveFloorKey] = useState('FL04');
   const [wireframeOn, setWireframeOn] = useState(true);
@@ -71,102 +72,104 @@ export const CockpitConsoleView: React.FC<CockpitConsoleViewProps> = ({ onNaviga
   };
 
   return (
-    <div className="w-full min-h-screen bg-[#fbf8ff] flex text-[#1b1b20]">
-      {/* Fixed Left Sidebar */}
-      <aside className="hidden lg:flex fixed left-0 top-0 h-full w-72 bg-[#f5f2fa] shadow-[4px_0_16px_rgba(112,104,133,0.12)] z-50 flex-col justify-between p-4">
-        <div className="flex flex-col gap-6">
-          <div className="tactile-plate p-3 rounded-xl flex items-center gap-3">
-            <div className="w-9 h-9 rounded-lg bg-[#7c3aed] flex items-center justify-center text-white shadow-sm">
-              <span className="material-symbols-outlined text-[20px]">grid_view</span>
+    <div className={`w-full min-h-screen bg-[#fbf8ff] flex text-[#1b1b20] ${isEmbedded ? 'rounded-2xl overflow-hidden' : ''}`}>
+      {/* Fixed Left Sidebar - Only shown in full standalone portal mode */}
+      {!isEmbedded && (
+        <aside className="hidden lg:flex fixed left-0 top-0 h-full w-72 bg-[#f5f2fa] shadow-[4px_0_16px_rgba(112,104,133,0.12)] z-50 flex-col justify-between p-4">
+          <div className="flex flex-col gap-6">
+            <div className="tactile-plate p-3 rounded-xl flex items-center gap-3">
+              <div className="w-9 h-9 rounded-lg bg-[#7c3aed] flex items-center justify-center text-white shadow-sm">
+                <span className="material-symbols-outlined text-[20px]">grid_view</span>
+              </div>
+              <div className="flex flex-col">
+                <span className="font-['Space_Grotesk'] text-sm font-bold text-[#1b1b20]">Cockpit Console</span>
+                <span className="font-['Space_Grotesk'] text-[10px] text-[#4a4455] uppercase">Spider TWIN Ops</span>
+              </div>
             </div>
-            <div className="flex flex-col">
-              <span className="font-['Space_Grotesk'] text-sm font-bold text-[#1b1b20]">Cockpit Console</span>
-              <span className="font-['Space_Grotesk'] text-[10px] text-[#4a4455] uppercase">Spider TWIN Ops</span>
+
+            <div className="tactile-debossed px-3 py-2 rounded-xl flex items-center justify-between">
+              <span className="font-['Space_Grotesk'] text-[10px] text-[#4a4455] font-bold">EDGE TELEMETRY</span>
+              <span className="inline-flex items-center gap-1 font-['Space_Grotesk'] text-[10px] text-[#630ed4] font-bold">
+                <span className="w-2 h-2 rounded-full bg-[#630ed4] animate-pulse"></span>
+                14.8k Nodes
+              </span>
             </div>
+
+            <nav className="flex flex-col gap-1">
+              <button
+                onClick={() => onNavigate('cockpit')}
+                className="flex items-center gap-3 px-3 py-2.5 rounded-xl tactile-plate text-[#630ed4] font-['Space_Grotesk'] text-sm font-bold transition-all text-left"
+              >
+                <span className="material-symbols-outlined text-[20px]">tune</span>
+                <span>Cockpit Master</span>
+              </button>
+              <button
+                onClick={() => onNavigate('3d-digital-twin')}
+                className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-[#4a4455] hover:bg-[#e9e7ee] hover:text-[#1b1b20] transition-all font-['Space_Grotesk'] text-sm font-medium text-left"
+              >
+                <span className="material-symbols-outlined text-[20px]">view_in_ar</span>
+                <span>3D Twin Visualizer</span>
+              </button>
+              <button
+                onClick={() => onNavigate('grafana-observability')}
+                className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-[#4a4455] hover:bg-[#e9e7ee] hover:text-[#1b1b20] transition-all font-['Space_Grotesk'] text-sm font-medium text-left"
+              >
+                <span className="material-symbols-outlined text-[20px]">query_stats</span>
+                <span>Grafana Stream</span>
+              </button>
+              <button
+                onClick={() => onNavigate('esg-carbon')}
+                className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-[#4a4455] hover:bg-[#e9e7ee] hover:text-[#1b1b20] transition-all font-['Space_Grotesk'] text-sm font-medium text-left"
+              >
+                <span className="material-symbols-outlined text-[20px]">co2</span>
+                <span>Carbon Telemetry</span>
+              </button>
+              <button
+                onClick={() => onNavigate('6-core-pillars')}
+                className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-[#4a4455] hover:bg-[#e9e7ee] hover:text-[#1b1b20] transition-all font-['Space_Grotesk'] text-sm font-medium text-left"
+              >
+                <span className="material-symbols-outlined text-[20px]">stacks</span>
+                <span>Core Automation</span>
+              </button>
+              <button
+                onClick={() => onNavigate('architecture')}
+                className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-[#4a4455] hover:bg-[#e9e7ee] hover:text-[#1b1b20] transition-all font-['Space_Grotesk'] text-sm font-medium text-left"
+              >
+                <span className="material-symbols-outlined text-[20px]">schema</span>
+                <span>System Topology</span>
+              </button>
+            </nav>
           </div>
 
-          <div className="tactile-debossed px-3 py-2 rounded-xl flex items-center justify-between">
-            <span className="font-['Space_Grotesk'] text-[10px] text-[#4a4455] font-bold">EDGE TELEMETRY</span>
-            <span className="inline-flex items-center gap-1 font-['Space_Grotesk'] text-[10px] text-[#630ed4] font-bold">
-              <span className="w-2 h-2 rounded-full bg-[#630ed4] animate-pulse"></span>
-              14.8k Nodes
-            </span>
-          </div>
-
-          <nav className="flex flex-col gap-1">
-            <button
-              onClick={() => onNavigate('cockpit')}
-              className="flex items-center gap-3 px-3 py-2.5 rounded-xl tactile-plate text-[#630ed4] font-['Space_Grotesk'] text-sm font-bold transition-all text-left"
-            >
-              <span className="material-symbols-outlined text-[20px]">tune</span>
-              <span>Cockpit Master</span>
-            </button>
-            <button
-              onClick={() => onNavigate('3d-digital-twin')}
-              className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-[#4a4455] hover:bg-[#e9e7ee] hover:text-[#1b1b20] transition-all font-['Space_Grotesk'] text-sm font-medium text-left"
-            >
-              <span className="material-symbols-outlined text-[20px]">view_in_ar</span>
-              <span>3D Twin Visualizer</span>
-            </button>
-            <button
-              onClick={() => onNavigate('grafana-observability')}
-              className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-[#4a4455] hover:bg-[#e9e7ee] hover:text-[#1b1b20] transition-all font-['Space_Grotesk'] text-sm font-medium text-left"
-            >
-              <span className="material-symbols-outlined text-[20px]">query_stats</span>
-              <span>Grafana Stream</span>
-            </button>
-            <button
-              onClick={() => onNavigate('esg-carbon')}
-              className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-[#4a4455] hover:bg-[#e9e7ee] hover:text-[#1b1b20] transition-all font-['Space_Grotesk'] text-sm font-medium text-left"
-            >
-              <span className="material-symbols-outlined text-[20px]">co2</span>
-              <span>Carbon Telemetry</span>
-            </button>
-            <button
-              onClick={() => onNavigate('6-core-pillars')}
-              className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-[#4a4455] hover:bg-[#e9e7ee] hover:text-[#1b1b20] transition-all font-['Space_Grotesk'] text-sm font-medium text-left"
-            >
-              <span className="material-symbols-outlined text-[20px]">stacks</span>
-              <span>Core Automation</span>
-            </button>
-            <button
-              onClick={() => onNavigate('architecture')}
-              className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-[#4a4455] hover:bg-[#e9e7ee] hover:text-[#1b1b20] transition-all font-['Space_Grotesk'] text-sm font-medium text-left"
-            >
-              <span className="material-symbols-outlined text-[20px]">schema</span>
-              <span>System Topology</span>
-            </button>
-          </nav>
-        </div>
-
-        <div className="flex flex-col gap-3">
-          <div className="tactile-debossed p-3 rounded-xl flex flex-col gap-1">
-            <div className="flex items-center justify-between">
-              <span className="font-['Space_Grotesk'] text-[10px] text-[#4a4455] font-semibold">AUTH ROTATION</span>
-              <span className="font-['Space_Grotesk'] text-[10px] text-[#630ed4] font-bold">23:59:59</span>
+          <div className="flex flex-col gap-3">
+            <div className="tactile-debossed p-3 rounded-xl flex flex-col gap-1">
+              <div className="flex items-center justify-between">
+                <span className="font-['Space_Grotesk'] text-[10px] text-[#4a4455] font-semibold">AUTH ROTATION</span>
+                <span className="font-['Space_Grotesk'] text-[10px] text-[#630ed4] font-bold">23:59:59</span>
+              </div>
+              <span className="font-['Space_Grotesk'] text-[10px] text-[#7b7487]">Hardware HSM Lock #420</span>
             </div>
-            <span className="font-['Space_Grotesk'] text-[10px] text-[#7b7487]">Hardware HSM Lock #420</span>
-          </div>
 
-          <div
-            onClick={() => onNavigate('vault')}
-            className="tactile-plate p-2.5 rounded-xl flex items-center gap-2 cursor-pointer hover:bg-white transition-colors"
-          >
-            <div className="w-8 h-8 rounded-full bg-[#630ed4] flex items-center justify-center text-white">
-              <span className="material-symbols-outlined text-[18px]">person</span>
-            </div>
-            <div className="flex flex-col text-left">
-              <span className="font-['Space_Grotesk'] text-[11px] text-[#1b1b20] font-bold">Dr. A. Mercer</span>
-              <span className="font-['Space_Grotesk'] text-[10px] text-[#4a4455]">Facility SuperAdmin</span>
+            <div
+              onClick={() => onNavigate('vault')}
+              className="tactile-plate p-2.5 rounded-xl flex items-center gap-2 cursor-pointer hover:bg-white transition-colors"
+            >
+              <div className="w-8 h-8 rounded-full bg-[#630ed4] flex items-center justify-center text-white">
+                <span className="material-symbols-outlined text-[18px]">person</span>
+              </div>
+              <div className="flex flex-col text-left">
+                <span className="font-['Space_Grotesk'] text-[11px] text-[#1b1b20] font-bold">Dr. A. Mercer</span>
+                <span className="font-['Space_Grotesk'] text-[10px] text-[#4a4455]">Facility SuperAdmin</span>
+              </div>
             </div>
           </div>
-        </div>
-      </aside>
+        </aside>
+      )}
 
-      {/* Main Main Content with Sidebar Offset */}
-      <div className="flex-1 lg:pl-72 flex flex-col min-h-screen">
+      {/* Main Main Content */}
+      <div className={`flex-1 flex flex-col min-h-screen ${isEmbedded ? 'w-full' : 'lg:pl-72'}`}>
         {/* Top Header inside Cockpit */}
-        <header className="fixed top-0 left-0 lg:left-72 right-0 h-20 bg-[#fbf8ff]/90 backdrop-blur-md shadow-[0_4px_16px_rgba(112,104,133,0.08)] z-40 flex items-center justify-between px-4 sm:px-6">
+        <header className={`${isEmbedded ? 'sticky top-0 w-full' : 'fixed top-0 left-0 lg:left-72 right-0'} h-20 bg-[#fbf8ff]/95 backdrop-blur-md shadow-[0_4px_16px_rgba(112,104,133,0.08)] z-30 flex items-center justify-between px-4 sm:px-6`}>
           <div className="flex items-center gap-2">
             <div className="tactile-debossed px-3 py-1.5 rounded-xl flex items-center gap-2">
               <span className="material-symbols-outlined text-[#630ed4] text-[18px]">domain</span>
@@ -198,11 +201,22 @@ export const CockpitConsoleView: React.FC<CockpitConsoleViewProps> = ({ onNaviga
               <span className="material-symbols-outlined text-[16px]">bolt</span>
               <span>Execute Override</span>
             </button>
+            <button
+              onClick={() => onNavigate('dashboard')}
+              className="group relative flex items-center gap-1.5 px-3.5 py-2 rounded-xl font-['Space_Grotesk'] text-[11px] font-bold text-white cursor-pointer active:scale-95 transition-all overflow-hidden shadow-md"
+              style={{
+                background: 'linear-gradient(135deg, #7c3aed 0%, #4f46e5 60%, #2563eb 100%)',
+              }}
+              title="Passer en Mode Pro SENSORIUM"
+            >
+              <span className="material-symbols-outlined text-[14px] text-yellow-300">workspace_premium</span>
+              <span>Mode Pro</span>
+            </button>
             {onClose && (
               <button
                 onClick={onClose}
                 className="tactile-btn p-2 rounded-xl text-[#4a4455] hover:text-[#ba1a1a]"
-                title="Close Cockpit"
+                title="Fermer Cockpit (Retour accueil)"
               >
                 <span className="material-symbols-outlined text-[18px]">close</span>
               </button>
@@ -211,7 +225,7 @@ export const CockpitConsoleView: React.FC<CockpitConsoleViewProps> = ({ onNaviga
         </header>
 
         {/* Cockpit Canvas Body */}
-        <main className="pt-24 px-4 sm:px-6 py-4 flex flex-col gap-6 select-none max-w-7xl w-full mx-auto">
+        <main className={`${isEmbedded ? 'pt-4' : 'pt-24'} px-4 sm:px-6 py-4 flex flex-col gap-6 select-none max-w-7xl w-full mx-auto`}>
           {/* Top Hardware Deck HUD: BIM Level Selector & Actuator Knobs */}
           <section className="tactile-plate rounded-xl p-4 flex flex-col gap-4">
             <div className="flex flex-wrap items-center justify-between gap-2">
