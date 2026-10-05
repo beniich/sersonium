@@ -26,6 +26,7 @@ const EsgGrafanaView = lazy(() => import('../components/EsgGrafanaView').then(m 
 
 interface PublicPortalProps {
   onSignIn: () => void;
+  onSignOut?: () => void;
   onEnterMockMode?: () => void;
   onNavigateToSection?: (page: string, itemId: string) => void;
   isDark: boolean;
@@ -36,15 +37,19 @@ interface PublicPortalProps {
   user?: User | null;
   initialView?: ActiveNavPath;
   isEmbedded?: boolean;
+  onUpgradeTier?: (tier: any) => void;
 }
 
 export default function PublicPortal({
   onSignIn,
+  onSignOut,
   onEnterMockMode,
   onNavigateToSection: _onNavigateToSection,
   state: _globalState,
+  user,
   initialView = 'architecture',
   isEmbedded = false,
+  onUpgradeTier,
 }: PublicPortalProps) {
   const [currentView, setCurrentView] = useState<ActiveNavPath>(initialView);
   const [isScheduleOpen, setIsScheduleOpen] = useState(false);
@@ -156,6 +161,11 @@ export default function PublicPortal({
           onOpenVault={() => handleNavigate('vault')}
           tokenCountdown={tokenCountdown}
           isEmbedded={isEmbedded}
+          user={user}
+          onSignIn={onSignIn}
+          onSignOut={onSignOut}
+          subscriptionTier={_globalState?.subscriptionTier || 'free'}
+          onOpenPricing={() => handleNavigate('pricing')}
         />
       )}
 
@@ -187,7 +197,12 @@ export default function PublicPortal({
         {/* VIEW 3 — PLANS TARIFAIRES & SOUSCRIPTION */}
         {currentView === 'pricing' && (
           <>
-            <PricingView onUnlockCockpit={() => handleNavigate('cockpit')} />
+            <PricingView
+              onUnlockCockpit={() => handleNavigate('cockpit')}
+              user={user}
+              onSignIn={onSignIn}
+              onUpgradeTier={onUpgradeTier}
+            />
             <Footer onNavigate={handleNavigate} />
           </>
         )}

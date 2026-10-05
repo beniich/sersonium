@@ -407,8 +407,10 @@ export default function DashboardLayout(props: any) {
             )}
           </div>
 
-          {/* Zero-Config Edge Terminal Hardware Badge */}
-          <TerminalStatusBadge />
+          {/* Zero-Config Edge Terminal Hardware Badge (hidden on narrow phones) */}
+          <div className="hidden sm:block">
+            <TerminalStatusBadge />
+          </div>
 
           {/* ← Retour au Site Web (BeeCarbonat SPIDER) */}
           {onReturnToPortal && (
@@ -477,38 +479,33 @@ export default function DashboardLayout(props: any) {
             </button>
           )}
 
-          {/* Mode Pill */}
-          <button
-            onClick={onToggleMockMode}
-            className={`flex items-center gap-1.5 text-xs font-mono px-2.5 py-1 sm:py-1.5 rounded-full border transition-all cursor-pointer min-h-[36px] ${
-              isMockMode
-                ? "bg-amber-500/10 border-amber-500/30 text-amber-600 dark:text-amber-400 hover:bg-amber-500/20"
-                : "bg-emerald-500/10 border-emerald-500/30 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500/20"
-            }`}
-            title="Toggle data mode"
+          {/* PRODUCTION LIVE Badge (replaces mock mode toggle) */}
+          <div
+            className="flex items-center gap-1.5 text-xs font-mono px-2.5 py-1 sm:py-1.5 rounded-full border bg-emerald-500/10 border-emerald-500/30 text-emerald-600 dark:text-emerald-400 min-h-[36px]"
+            title="Application en mode Production — données Firestore réelles"
           >
-            <span className={`w-1.5 h-1.5 rounded-full animate-pulse ${isMockMode ? "bg-amber-500" : "bg-emerald-500"}`} />
-            <span className="text-[10px] sm:text-[11px] font-semibold">{isMockMode ? t.mockMode.mockMode : t.mockMode.liveMode}</span>
-          </button>
+            <span className="w-1.5 h-1.5 rounded-full animate-pulse bg-emerald-500" />
+            <span className="text-[10px] sm:text-[11px] font-semibold">PRODUCTION • LIVE</span>
+          </div>
 
-          {/* Quick Mobile Mode Button */}
+          {/* Quick Mobile Mode Button (hidden on small phones) */}
           <button
             onClick={() => handleSelectService("infrastructure", "cmms-mobile")}
-            className="flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-full bg-orange-500/10 hover:bg-orange-500/20 dark:bg-orange-500/15 dark:hover:bg-orange-500/25 border border-orange-500/30 text-orange-600 dark:text-orange-400 text-xs font-semibold transition-all cursor-pointer min-h-[36px]"
+            className="hidden sm:flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-full bg-orange-500/10 hover:bg-orange-500/20 dark:bg-orange-500/15 dark:hover:bg-orange-500/25 border border-orange-500/30 text-orange-600 dark:text-orange-400 text-xs font-semibold transition-all cursor-pointer min-h-[36px]"
             title="Switch to Mobile Field Technician Interface"
           >
             <Smartphone className="w-3.5 h-3.5 text-orange-500" />
-            <span className="hidden sm:inline">{t.header.mobileMode}</span>
+            <span className="hidden md:inline">{t.header.mobileMode}</span>
           </button>
 
-          {/* Quick Setup Floating Drawer Trigger */}
+          {/* Quick Setup Floating Drawer Trigger (hidden on small phones) */}
           <button
             onClick={() => setIsQuickSetupOpen(true)}
-            className="flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-full bg-orange-500/10 hover:bg-orange-500/20 dark:bg-orange-500/15 dark:hover:bg-orange-500/25 border border-orange-500/30 text-orange-600 dark:text-orange-400 text-xs font-medium transition-all cursor-pointer min-h-[36px]"
+            className="hidden sm:flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-full bg-orange-500/10 hover:bg-orange-500/20 dark:bg-orange-500/15 dark:hover:bg-orange-500/25 border border-orange-500/30 text-orange-600 dark:text-orange-400 text-xs font-medium transition-all cursor-pointer min-h-[36px]"
             title="Open quick telemetry setup"
           >
             <SlidersHorizontal className="w-3.5 h-3.5 text-orange-500 animate-pulse" />
-            <span className="hidden sm:inline">{t.header.quickSetup}</span>
+            <span className="hidden md:inline">{t.header.quickSetup}</span>
           </button>
 
           {/* Strategic Export (PDF & CSV) */}
@@ -669,70 +666,7 @@ export default function DashboardLayout(props: any) {
         </div>
       )}
 
-      {/* Mock Mode Simulation Control Bar */}
-      {isMockMode && (
-        <div className="bg-slate-100/90 dark:bg-[#09090b] border-b border-slate-200 dark:border-white/[0.06] px-3 sm:px-6 py-2 flex items-center justify-between gap-3 text-xs z-30 overflow-x-auto no-scrollbar transition-colors duration-300">
-          <div className="flex items-center gap-2 flex-shrink-0">
-            <span className="w-2 h-2 rounded-full bg-orange-500 animate-pulse" />
-            <span className="font-medium text-slate-700 dark:text-neutral-300 text-xs">
-              {t.mockMode.simulators}
-            </span>
-          </div>
-
-          <div className="flex items-center gap-1.5 sm:gap-2 flex-nowrap flex-shrink-0">
-            {simulateTrafficSpike && (
-              <button
-                onClick={simulateTrafficSpike}
-                className="px-2.5 py-1 bg-white dark:bg-white/[0.05] hover:bg-slate-50 dark:hover:bg-white/[0.1] border border-slate-200 dark:border-white/[0.08] text-slate-700 dark:text-neutral-300 hover:text-slate-900 dark:hover:text-white rounded-md text-[11px] font-mono flex items-center gap-1.5 transition-colors cursor-pointer min-h-[32px] whitespace-nowrap shadow-2xs"
-              >
-                <Zap className="w-3 h-3 text-orange-500 dark:text-orange-400" />
-                <span>+Traffic</span>
-              </button>
-            )}
-            {simulateSecurityIncident && (
-              <button
-                onClick={simulateSecurityIncident}
-                className="px-2.5 py-1 bg-white dark:bg-white/[0.05] hover:bg-slate-50 dark:hover:bg-white/[0.1] border border-slate-200 dark:border-white/[0.08] text-slate-700 dark:text-neutral-300 hover:text-slate-900 dark:hover:text-white rounded-md text-[11px] font-mono flex items-center gap-1.5 transition-colors cursor-pointer min-h-[32px] whitespace-nowrap shadow-2xs"
-              >
-                <Shield className="w-3 h-3 text-red-500 dark:text-red-400" />
-                <span>+WAF</span>
-              </button>
-            )}
-            {simulateNodeAlert && (
-              <button
-                onClick={simulateNodeAlert}
-                className="px-2.5 py-1 bg-white dark:bg-white/[0.05] hover:bg-slate-50 dark:hover:bg-white/[0.1] border border-slate-200 dark:border-white/[0.08] text-slate-700 dark:text-neutral-300 hover:text-slate-900 dark:hover:text-white rounded-md text-[11px] font-mono flex items-center gap-1.5 transition-colors cursor-pointer min-h-[32px] whitespace-nowrap shadow-2xs"
-              >
-                <Server className="w-3 h-3 text-amber-500 dark:text-amber-400" />
-                <span>+CAFM</span>
-              </button>
-            )}
-            {onToggleSimulatedOffline && (
-              <button
-                onClick={onToggleSimulatedOffline}
-                className={`px-2.5 py-1 rounded-md text-[11px] font-mono flex items-center gap-1.5 transition-colors cursor-pointer min-h-[32px] whitespace-nowrap shadow-2xs border ${
-                  isOnline
-                    ? "bg-white dark:bg-white/[0.05] hover:bg-slate-50 dark:hover:bg-white/[0.1] border-slate-200 dark:border-white/[0.08] text-slate-700 dark:text-neutral-300"
-                    : "bg-amber-500/20 border-amber-500/40 text-amber-700 dark:text-amber-300 animate-pulse font-bold"
-                }`}
-                title="Simulate offline loss of connectivity & PWA cache fallback"
-              >
-                {isOnline ? <Wifi className="w-3 h-3 text-emerald-500" /> : <WifiOff className="w-3 h-3 text-amber-500" />}
-                <span>{isOnline ? "Simulate Offline" : "Restore Online"}</span>
-              </button>
-            )}
-            {resetMockData && (
-              <button
-                onClick={resetMockData}
-                className="px-2 py-1 text-slate-500 dark:text-neutral-400 hover:text-slate-800 dark:hover:text-neutral-200 text-[11px] flex items-center gap-1 transition-colors cursor-pointer min-h-[32px] whitespace-nowrap"
-              >
-                <RotateCcw className="w-3 h-3" />
-                <span>Reset</span>
-              </button>
-            )}
-          </div>
-        </div>
-      )}
+      {/* No mock banner in production mode */}
 
       {/* Main Layout Container */}
       <div className="flex flex-1 overflow-hidden h-[calc(100vh-56px)] sm:h-[calc(100vh-64px)] relative z-10">

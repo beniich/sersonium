@@ -1,10 +1,14 @@
 import React, { useState } from 'react';
+import type { User } from 'firebase/auth';
 
 interface PricingViewProps {
   onUnlockCockpit: () => void;
+  user?: User | null;
+  onSignIn?: () => void;
+  onUpgradeTier?: (tier: 'free' | 'silver' | 'pro' | 'enterprise') => void;
 }
 
-export const PricingView: React.FC<PricingViewProps> = ({ onUnlockCockpit }) => {
+export const PricingView: React.FC<PricingViewProps> = ({ onUnlockCockpit, user, onSignIn, onUpgradeTier }) => {
   const [isYearly, setIsYearly] = useState(false);
   const [selectedTier, setSelectedTier] = useState({
     name: 'Pro - Hypervision Twin',
@@ -38,7 +42,21 @@ export const PricingView: React.FC<PricingViewProps> = ({ onUnlockCockpit }) => 
   };
 
   const handlePaypalAction = (actionTitle: string, desc: string) => {
+    // If user is not signed in, prompt sign-in first
+    if (!user) {
+      showNotification('Connexion Requise', 'Veuillez vous connecter pour finaliser votre abonnement.');
+      setTimeout(() => { if (onSignIn) onSignIn(); }, 800);
+      return;
+    }
     showNotification(actionTitle, desc);
+    // Determine tier from selected plan
+    const tierMap: Record<string, 'free' | 'silver' | 'pro' | 'enterprise'> = {
+      'Starter - BIM Foundation': 'silver',
+      'Pro - Hypervision Twin': 'pro',
+      'Enterprise - Sovereign Fleet': 'enterprise',
+    };
+    const tier = tierMap[selectedTier.name] || 'pro';
+    if (onUpgradeTier) onUpgradeTier(tier);
     setTimeout(() => {
       onUnlockCockpit();
     }, 1800);

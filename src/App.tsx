@@ -25,8 +25,10 @@ const CockpitConsoleView = lazy(() => import("./components/CockpitConsoleView").
 const VaultView = lazy(() => import("./components/VaultView").then(m => ({ default: m.VaultView })));
 const EsgGrafanaView = lazy(() => import("./components/EsgGrafanaView").then(m => ({ default: m.EsgGrafanaView })));
 import { useGlobalState } from "./hooks/useGlobalState";
-import { initAuth, googleSignIn, logout } from "./firebase";
+import { initAuth, googleSignIn, logout, db } from "./firebase";
+import { doc, setDoc } from "firebase/firestore";
 import type { User } from "firebase/auth";
+import type { SubscriptionTier } from "./types";
 
 export type ThemeMode = "system" | "light" | "dark";
 
@@ -272,28 +274,8 @@ export default function App() {
     return () => unsubscribe();
   }, []);
 
-  const [isMockMode, setIsMockMode] = useState<boolean>(() => {
-    if (typeof window !== "undefined") {
-      // /dashboard URL → auto-enable mock mode for direct access
-      if (window.location.pathname === "/dashboard") return true;
-      try {
-        const stored = localStorage.getItem("cafm_mock_mode");
-        if (stored !== null) return stored === "true";
-      } catch {
-        // localStorage not available
-      }
-    }
-    // Default to false so landing page is shown to visitors
-    return false;
-  });
-
-  // Auto-redirect /dashboard → mock mode dashboard
-  useEffect(() => {
-    if (location.pathname === "/dashboard" && !isMockMode) {
-      setIsMockMode(true);
-      try { localStorage.setItem("cafm_mock_mode", "true"); } catch {}
-    }
-  }, [location.pathname]);
+  // Production mode: always false – never use mock data
+  const isMockMode = false;
 
   const { 
     state, 
@@ -303,25 +285,19 @@ export default function App() {
     simulateSecurityIncident, 
     simulateNodeAlert, 
     resetMockData 
-  } = useGlobalState(user?.uid || null, isMockMode);
+  } = useGlobalState(user?.uid || null, false);
 
-  const toggleMockMode = () => {
-    setIsMockMode(prev => {
-      const next = !prev;
-      try {
-        localStorage.setItem("cafm_mock_mode", String(next));
-      } catch {}
-      return next;
-    });
-  };
+  // In production mode, toggling mock is a no-op (always live)
+  const toggleMockMode = () => {};
 
   const handleEnterDashboard = (targetPage: string = "overview") => {
+    if (!user) {
+      // User not signed in → trigger Google sign-in
+      handleSignIn();
+      return;
+    }
     setActivePage(targetPage);
     setActiveItemId(targetPage === "cockpit" ? "spider-cockpit" : "ov-general");
-    setIsMockMode(true);
-    try {
-      localStorage.setItem("cafm_mock_mode", "true");
-    } catch {}
     navigate(targetPage === "overview" ? "/dashboard" : `/${targetPage}`);
   };
 
@@ -329,13 +305,22 @@ export default function App() {
     handleEnterDashboard("overview");
   };
 
+  // Persist subscription tier to Firestore when user upgrades
+  const handleUpgradeTier = async (tier: SubscriptionTier) => {
+    try {
+      localStorage.setItem("sensorium_subscription_tier", tier);
+      if (state) state.subscriptionTier = tier;
+      if (user?.uid) {
+        await setDoc(doc(db, `users/${user.uid}/profile`, "subscription"), { tier, updatedAt: new Date().toISOString() }, { merge: true });
+      }
+    } catch (err) {
+      console.warn("Failed to persist subscription tier:", err);
+    }
+  };
+
   const handleReturnToPortal = () => {
     setActivePage("portal");
     setActiveItemId("spider-portal");
-    setIsMockMode(false);
-    try {
-      localStorage.setItem("cafm_mock_mode", "false");
-    } catch {}
     navigate("/");
   };
 
@@ -389,12 +374,12 @@ export default function App() {
   }, [location.pathname]);
 
   const handleNavigateFromPortal = (page: string, itemId: string) => {
+    if (!user) {
+      handleSignIn();
+      return;
+    }
     setActivePage(page);
     setActiveItemId(itemId);
-    setIsMockMode(true);
-    try {
-      localStorage.setItem("cafm_mock_mode", "true");
-    } catch {}
     navigate(page === "overview" ? "/dashboard" : `/${page}`);
   };
 
@@ -405,6 +390,7 @@ export default function App() {
         <LanguageContext.Provider value={languageContextValue}>
           <PublicPortal
             onSignIn={handleSignIn}
+            onSignOut={logout}
             onEnterMockMode={() => handleEnterDashboard("overview")}
             onLaunchCockpit={() => handleEnterDashboard("cockpit")}
             onNavigateToSection={handleNavigateFromPortal}
@@ -415,6 +401,7 @@ export default function App() {
             state={state || undefined}
             user={user}
             isEmbedded={false}
+            onUpgradeTier={handleUpgradeTier}
           />
         </LanguageContext.Provider>
       </ThemeContext.Provider>
@@ -422,7 +409,7 @@ export default function App() {
   }
 
   // For protected / internal application dashboard views: show quick spinner only while auth is resolving
-  if (authLoading && !isMockMode) {
+  if (authLoading) {
     return (
       <ThemeContext.Provider value={themeContextValue}>
         <LanguageContext.Provider value={languageContextValue}>
@@ -480,9 +467,7 @@ export default function App() {
         <PricingPage 
           state={state} 
           isDark={isDark} 
-          onUpgradeTier={(tier) => {
-            if (state) state.subscriptionTier = tier;
-          }}
+          onUpgradeTier={handleUpgradeTier}
           onSelectTab={(id: string) => {
             setActiveItemId(id);
             setActivePage("infrastructure");
@@ -495,6 +480,7 @@ export default function App() {
           <div className="w-full bg-[#fbf8ff] text-[#1b1b20] rounded-2xl overflow-hidden shadow-sm border border-slate-200/80 dark:border-white/[0.08]">
             <PublicPortal
               onSignIn={handleSignIn}
+              onSignOut={logout}
               onEnterMockMode={handleEnterMockMode}
               onNavigateToSection={handleNavigateFromPortal}
               isDark={isDark}
@@ -505,6 +491,7 @@ export default function App() {
               user={user}
               initialView={activePage === "architecture" ? "architecture" : "architecture"}
               isEmbedded={true}
+              onUpgradeTier={handleUpgradeTier}
             />
           </div>
         );
