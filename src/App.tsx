@@ -454,7 +454,7 @@ export default function App() {
       case "overview": return <OverviewPage {...commonProps} />;
       case "strategy": return <StrategyPage {...commonProps} />;
       case "compliance": return <ComplianceManager isDark={isDark} />;
-      case "resilience": return <ResiliencePage isDark={isDark} />;
+      case "resilience": return <ResiliencePage isDark={isDark} activeItemId={activeItemId} />;
       case "brand-vision": return <BrandVisionPage isDark={isDark} />;
       case "ad-campaigns": return <AdCampaignsPage isDark={isDark} />;
       case "security": return <SecurityPage {...commonProps} />;

@@ -131,10 +131,17 @@ function KpiCard({ icon: Icon, label, value, sub, color }: {
 
 interface ResiliencePageProps {
   isDark?: boolean;
+  activeItemId?: string;
 }
 
-export default function ResiliencePage({ isDark = true }: ResiliencePageProps) {
-  const [activeTab, setActiveTab] = useState<ActiveTab>("dora");
+export default function ResiliencePage({ isDark = true, activeItemId }: ResiliencePageProps) {
+  const getInitialTab = (): ActiveTab => {
+    if (activeItemId === "res-dns" || activeItemId === "res-psr") return "dns";
+    if (activeItemId === "res-incidents") return "incidents";
+    return "dora";
+  };
+
+  const [activeTab, setActiveTab] = useState<ActiveTab>(getInitialTab);
   const [metrics, setMetrics] = useState<DoraAuditMetrics | null>(null);
   const [fleetSummary, setFleetSummary] = useState<DnsFleetSummary | null>(null);
   const [criticalDomains, setCriticalDomains] = useState<DomainAsset[]>([]);
@@ -144,6 +151,17 @@ export default function ResiliencePage({ isDark = true }: ResiliencePageProps) {
   const [isExportingBind, setIsExportingBind] = useState(false);
   const [domainSearch, setDomainSearch] = useState("");
   const [selectedReq, setSelectedReq] = useState<DoraRequirement | null>(null);
+
+  // Sync tab with activeItemId when user clicks sidebar nav
+  useEffect(() => {
+    if (activeItemId === "res-dns" || activeItemId === "res-psr") {
+      setActiveTab("dns");
+    } else if (activeItemId === "res-incidents") {
+      setActiveTab("incidents");
+    } else if (activeItemId === "res-dora") {
+      setActiveTab("dora");
+    }
+  }, [activeItemId]);
 
   // Load DORA metrics
   useEffect(() => {
