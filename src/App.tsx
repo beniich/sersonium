@@ -3,6 +3,7 @@ import { useNavigate, useLocation, Routes, Route, Navigate } from "react-router-
 import { AnimatePresence, motion } from "motion/react";
 import DashboardLayout from "./components/DashboardLayout";
 import PublicPortal from "./pages/PublicPortal";
+import { SubscriptionGuard } from "./bridge/SubscriptionGuard";
 import { Loader2 } from "lucide-react";
 
 // Lazy-load dashboard pages to make initial website load ultra-fast and reduce main bundle
@@ -439,7 +440,7 @@ export default function App() {
     );
   }
 
-  const renderPage = () => {
+  const renderCorePage = () => {
     const commonProps = {
       state,
       isDark,
@@ -463,38 +464,6 @@ export default function App() {
       case "storage": return <StoragePage {...commonProps} />;
       case "workspace": return <WorkspacePage {...commonProps} />;
       case "telemetry": return <KafkaMonitor {...commonProps} />;
-      case "pricing": return (
-        <PricingPage 
-          state={state} 
-          isDark={isDark} 
-          onUpgradeTier={handleUpgradeTier}
-          onSelectTab={(id: string) => {
-            setActiveItemId(id);
-            setActivePage("infrastructure");
-          }}
-        />
-      );
-      case "portal":
-      case "architecture":
-        return (
-          <div className="w-full bg-[#fbf8ff] text-[#1b1b20] rounded-2xl overflow-hidden shadow-sm border border-slate-200/80 dark:border-white/[0.08]">
-            <PublicPortal
-              onSignIn={handleSignIn}
-              onSignOut={logout}
-              onEnterMockMode={handleEnterMockMode}
-              onNavigateToSection={handleNavigateFromPortal}
-              isDark={isDark}
-              toggleTheme={toggleTheme}
-              mode={mode}
-              authError={authError}
-              state={state}
-              user={user}
-              initialView={activePage === "architecture" ? "architecture" : "architecture"}
-              isEmbedded={true}
-              onUpgradeTier={handleUpgradeTier}
-            />
-          </div>
-        );
       case "cockpit":
       case "digital-twin":
         return (
@@ -566,6 +535,60 @@ export default function App() {
         );
       default: return <OverviewPage {...commonProps} />;
     }
+  };
+
+  const renderPage = () => {
+    // 🌐 TIER 1 : Site Web Vitrine
+    if (activePage === "portal" || activePage === "architecture") {
+      return (
+        <div className="w-full bg-[#fbf8ff] text-[#1b1b20] rounded-2xl overflow-hidden shadow-sm border border-slate-200/80 dark:border-white/[0.08]">
+          <PublicPortal
+            onSignIn={handleSignIn}
+            onSignOut={logout}
+            onEnterMockMode={handleEnterMockMode}
+            onNavigateToSection={handleNavigateFromPortal}
+            isDark={isDark}
+            toggleTheme={toggleTheme}
+            mode={mode}
+            authError={authError}
+            state={state}
+            user={user}
+            initialView={activePage === "architecture" ? "architecture" : "architecture"}
+            isEmbedded={true}
+            onUpgradeTier={handleUpgradeTier}
+          />
+        </div>
+      );
+    }
+
+    // 🌉 TIER 2 : Pont d'Abonnement (Tarifs & Paiement)
+    if (activePage === "pricing") {
+      return (
+        <PricingPage 
+          state={state} 
+          isDark={isDark} 
+          onUpgradeTier={handleUpgradeTier}
+          onSelectTab={(id: string) => {
+            setActiveItemId(id);
+            setActivePage("infrastructure");
+          }}
+        />
+      );
+    }
+
+    // 🚀 TIER 3 : L'Application Cockpit SaaS protégée par le Pont d'Abonnement
+    return (
+      <SubscriptionGuard
+        user={user}
+        onSignIn={handleSignIn}
+        onSelectPlan={(tier) => {
+          handleUpgradeTier(tier.toLowerCase() as any);
+        }}
+        onReturnToVitrine={handleReturnToPortal}
+      >
+        {renderCorePage()}
+      </SubscriptionGuard>
+    );
   };
 
   return (

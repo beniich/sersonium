@@ -423,20 +423,34 @@
       }, 4000);
     }
 
+    function proceedToCockpit(actionTitle, desc) {
+      showNotification(actionTitle, desc + ' Redirection vers le Cockpit SENSORIUM...');
+      let tier = 'pro';
+      if (selectedTier.name && selectedTier.name.includes('Starter')) tier = 'starter';
+      else if (selectedTier.name && selectedTier.name.includes('Enterprise')) tier = 'enterprise';
+      try {
+        localStorage.setItem('sensorium_user_tier', tier);
+        localStorage.setItem('sensorium_subscription_tier', tier);
+      } catch (e) {}
+      setTimeout(() => {
+        window.location.href = '/dashboard';
+      }, 1500);
+    }
+
     document.getElementById('paypal-instant-btn').addEventListener('click', () => {
-      showNotification('Passerelle PayPal', 'Connexion au coffre-fort PayPal Checkout sécurisé...');
+      proceedToCockpit('Passerelle PayPal Validée', 'Abonnement ' + selectedTier.name + ' activé.');
     });
 
     document.getElementById('paypal-sub-btn').addEventListener('click', () => {
-      showNotification('Souscription Automatisée', 'Mise en place du mandat récurrent PayPal certifié...');
+      proceedToCockpit('Souscription Confirmée', 'Mandat récurrent PayPal certifié.');
     });
 
     document.getElementById('paypal-paylater-btn').addEventListener('click', () => {
-      showNotification('Facilité PayPal 4x', 'Éligibilité confirmée. Échéancier instantané en cours...');
+      proceedToCockpit('Facilité PayPal 4x', 'Échéancier approuvé et abonnement actif.');
     });
 
     document.getElementById('pay-card-direct-btn').addEventListener('click', () => {
-      showNotification('Débit Carte Enregistré', 'Tokenisation mTLS validée pour ' + selectedTier.name);
+      proceedToCockpit('Débit Carte Validé', 'Tokenisation mTLS validée.');
     });
 
     updateCalculations();

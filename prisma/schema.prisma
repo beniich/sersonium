@@ -34,6 +34,10 @@ model Organization {
   certifications Certification[]
   permits     Permit[]
   insurances  Insurance[]
+  subscriptions Subscription[]
+  licenseKeys LicenseKey[]
+  entitlements Entitlement[]
+  accessGateLogs AccessGateLog[]
   needsSync   Boolean   @default(false)
 
   @@map("organizations")
@@ -151,12 +155,15 @@ model Invoice {
   paypalOrderId String?
   payerEmail    String?
   paymentMethod String?  @default("paypal") // paypal_account, card_via_paypal
+  subscriptionId String?
   createdAt     DateTime @default(now())
   updatedAt    DateTime @updatedAt
 
   organization Organization @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  subscription Subscription? @relation(fields: [subscriptionId], references: [id], onDelete: SetNull)
 
   @@index([tenantId])
+  @@index([subscriptionId])
   @@map("invoices")
 }
 
@@ -339,4 +346,114 @@ model Insurance {
   @@index([tenantId])
   @@map("insurances")
 }
+
+// ============================================================================
+// PONT D'ACCÈS & D'ABONNEMENT SAAS (SUBSCRIPTION & LICENSING BRIDGE)
+// ============================================================================
+
+model Plan {
+  id               String         @id @default(cuid())
+  code             String         @unique // FREE, STARTER, PRO, ENTERPRISE
+  name             String
+  description      String?
+  priceMonthly     Float          @default(0.0)
+  priceYearly      Float          @default(0.0)
+  currency         String         @default("EUR")
+  monthlyTokens    Int            @default(1000)
+  maxAssets        Int            @default(5)
+  maxUsers         Int            @default(2)
+  has3dDigitalTwin Boolean        @default(false)
+  hasZtnaHardware  Boolean        @default(false)
+  hasRealtimeKafka Boolean        @default(false)
+  hasEsgExport     Boolean        @default(false)
+  features         String?        // JSON string list of feature bullet points
+  isActive         Boolean        @default(true)
+  createdAt        DateTime       @default(now())
+  updatedAt        DateTime       @updatedAt
+
+  subscriptions    Subscription[]
+
+  @@map("plans")
+}
+
+model Subscription {
+  id                 String       @id @default(cuid())
+  tenantId           String
+  planId             String
+  status             String       @default("active") // trialing, active, past_due, canceled, unpaid, paused
+  billingCycle       String       @default("monthly") // monthly, yearly
+  provider           String       @default("paypal") // paypal, stripe, manual, license_key
+  providerSubId      String?      @unique
+  providerCustomerId String?
+  currentPeriodStart DateTime     @default(now())
+  currentPeriodEnd   DateTime
+  trialEndsAt        DateTime?
+  cancelAtPeriodEnd  Boolean      @default(false)
+  canceledAt         DateTime?
+  createdAt          DateTime     @default(now())
+  updatedAt          DateTime     @updatedAt
+
+  organization       Organization @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  plan               Plan         @relation(fields: [planId], references: [id])
+  invoices           Invoice[]
+
+  @@index([tenantId])
+  @@index([planId])
+  @@index([status])
+  @@map("subscriptions")
+}
+
+model LicenseKey {
+  id                  String       @id @default(cuid())
+  tenantId            String
+  licenseKey          String       @unique // e.g. "SENS-PRO-8F9A-2B4C"
+  tier                String       @default("PRO") // STARTER, PRO, ENTERPRISE
+  hardwareFingerprint String?      // Hardware binding (Appliance HSM)
+  validUntil          DateTime
+  status              String       @default("ACTIVE") // ACTIVE, REVOKED, EXPIRED
+  activatedAt         DateTime?
+  createdAt           DateTime     @default(now())
+  updatedAt           DateTime     @updatedAt
+
+  organization        Organization @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId])
+  @@map("license_keys")
+}
+
+model Entitlement {
+  id         String       @id @default(cuid())
+  tenantId   String
+  featureKey String       // e.g. "MODULE_COCKPIT_3D", "MODULE_OBSERVABILITY", "MODULE_COMPUTE"
+  isGranted  Boolean      @default(true)
+  quotaLimit Int?         // -1 for unlimited
+  quotaUsed  Int          @default(0)
+  createdAt  DateTime     @default(now())
+  updatedAt  DateTime     @updatedAt
+
+  organization Organization @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@unique([tenantId, featureKey])
+  @@index([tenantId])
+  @@map("entitlements")
+}
+
+model AccessGateLog {
+  id           String       @id @default(cuid())
+  tenantId     String
+  userId       String?
+  requestedUri String       // e.g. "/cockpit", "/infrastructure", "/compute"
+  action       String       // "GRANTED", "DENIED_UNPAID", "DENIED_UNAUTHENTICATED", "DENIED_QUOTA_EXCEEDED"
+  reason       String?      // Details
+  ipAddress    String?
+  userAgent    String?
+  createdAt    DateTime     @default(now())
+
+  organization Organization @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId])
+  @@index([createdAt])
+  @@map("access_gate_logs")
+}
+
 

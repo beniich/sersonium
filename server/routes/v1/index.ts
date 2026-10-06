@@ -15,6 +15,7 @@ import groundingRoutes from "./grounding.routes.js";
 import showcaseRoutes from "./showcase.routes.js";
 import paypalRoutes from "./paypal.routes.js";
 import terminalRoutes from "./terminal.routes.js";
+import bridgeRoutes from "./bridge.routes.js";
 import complianceRoutes from "./compliance.routes.js";
 import iotRoutes from "./iot.routes.js";
 import { apiRateLimiter } from "../../middlewares/rateLimit.middleware.js";
@@ -36,6 +37,9 @@ router.use("/auth", authRoutes);
 
 // Public Showcase Sandbox Endpoints (AI Inference & Worker Execution)
 router.use("/showcase", showcaseRoutes);
+
+// Passerelle d'Accès et d'Abonnement (Bridge Gateway: Plans, License Keys, Subscription Status)
+router.use("/bridge", bridgeRoutes);
 
 // Passerelle de Paiement et Abonnements PayPal (Ordres, Captures, Webhooks)
 router.use("/paypal", paypalRoutes);

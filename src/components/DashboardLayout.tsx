@@ -34,7 +34,8 @@ import {
   WifiOff,
   Crown,
   Languages,
-  Smartphone
+  Smartphone,
+  ExternalLink
 } from "lucide-react";
 
 import { useLanguage } from "../App";

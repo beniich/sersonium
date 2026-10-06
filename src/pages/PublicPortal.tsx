@@ -28,6 +28,7 @@ interface PublicPortalProps {
   onSignIn: () => void;
   onSignOut?: () => void;
   onEnterMockMode?: () => void;
+  onLaunchCockpit?: () => void;
   onNavigateToSection?: (page: string, itemId: string) => void;
   isDark: boolean;
   toggleTheme: () => void;
@@ -44,6 +45,7 @@ export default function PublicPortal({
   onSignIn,
   onSignOut,
   onEnterMockMode,
+  onLaunchCockpit,
   onNavigateToSection: _onNavigateToSection,
   state: _globalState,
   user,
@@ -156,7 +158,7 @@ export default function PublicPortal({
         <TactileHeader
           activePath={currentView}
           onNavigate={handleNavigate}
-          onLaunchCockpit={() => handleNavigate('cockpit')}
+          onLaunchCockpit={() => onLaunchCockpit ? onLaunchCockpit() : handleNavigate('cockpit')}
           onLaunchDashboard={handleEnterDashboard}
           onOpenVault={() => handleNavigate('vault')}
           tokenCountdown={tokenCountdown}
