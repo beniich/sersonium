@@ -1,0 +1,769 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+  <title>Sensorium — Tailored Spatial AI Solutions for Every Real Estate Asset Class</title>
+  <meta content="web_standard" name="shell-type"/>
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com" rel="preconnect"/>
+  <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+  <style>
+    @layer base{
+      html,body{margin:0;padding:0;}
+      body{overscroll-behavior:none;}
+      main>:first-child{margin-top:0!important;}
+      main>:last-child{margin-bottom:0!important;}
+    }
+    ::-webkit-scrollbar{display:none;}
+  </style>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          "colors": {
+            "primary": "#630ed4",
+            "on-primary-fixed-variant": "#5a00c6",
+            "on-secondary-container": "#fffbff",
+            "outline": "#7b7487",
+            "secondary-fixed-dim": "#d3bbff",
+            "secondary-fixed": "#ebddff",
+            "on-primary": "#ffffff",
+            "error": "#ba1a1a",
+            "inverse-primary": "#d2bbff",
+            "on-primary-fixed": "#25005a",
+            "surface-container-low": "#f5f2fa",
+            "tertiary-fixed-dim": "#6bd8cb",
+            "secondary-container": "#8b4ef7",
+            "surface-container-lowest": "#ffffff",
+            "surface-container": "#efedf4",
+            "on-tertiary-fixed-variant": "#005049",
+            "on-error": "#ffffff",
+            "on-tertiary-container": "#8df9ea",
+            "surface-container-high": "#e9e7ee",
+            "tertiary-fixed": "#89f5e7",
+            "on-secondary": "#ffffff",
+            "secondary": "#712edd",
+            "on-secondary-fixed": "#250059",
+            "on-surface": "#1b1b20",
+            "surface-variant": "#e3e1e8",
+            "tertiary-container": "#00746a",
+            "primary-container": "#7c3aed",
+            "surface-tint": "#732ee4",
+            "inverse-surface": "#303035",
+            "surface-container-highest": "#e3e1e8",
+            "on-primary-container": "#ede0ff",
+            "error-container": "#ffdad6",
+            "outline-variant": "#ccc3d8",
+            "surface": "#fbf8ff",
+            "surface-dim": "#dbd9e0",
+            "inverse-on-surface": "#f2f0f7",
+            "primary-fixed-dim": "#d2bbff",
+            "on-tertiary-fixed": "#00201d",
+            "tertiary": "#005952",
+            "on-error-container": "#93000a",
+            "background": "#fbf8ff",
+            "on-background": "#1b1b20",
+            "on-surface-variant": "#4a4455",
+            "on-secondary-fixed-variant": "#5b00c5",
+            "primary-fixed": "#eaddff",
+            "surface-bright": "#fbf8ff",
+            "on-tertiary": "#ffffff"
+          },
+          "borderRadius": {
+            "DEFAULT": "0.25rem",
+            "lg": "0.5rem",
+            "xl": "0.75rem",
+            "full": "9999px"
+          },
+          "spacing": {
+            "space-xs": "0.25rem",
+            "margin": "2rem",
+            "space-sm": "0.5rem",
+            "margin-mobile": "1rem",
+            "space-xl": "2.5rem",
+            "gutter": "1.5rem",
+            "gutter-mobile": "0.75rem",
+            "space-lg": "1.5rem",
+            "space-md": "1rem"
+          },
+          "fontFamily": {
+            "title-md": ["Space Grotesk"],
+            "body-md": ["Inter"],
+            "headline-lg": ["Space Grotesk"],
+            "label-md": ["Space Grotesk"],
+            "body-sm": ["Inter"],
+            "title-lg": ["Space Grotesk"],
+            "headline-lg-mobile": ["Space Grotesk"],
+            "headline-xl-mobile": ["Space Grotesk"],
+            "body-lg": ["Inter"],
+            "label-lg": ["Space Grotesk"],
+            "headline-xl": ["Space Grotesk"],
+            "headline-md": ["Space Grotesk"],
+            "label-sm": ["Space Grotesk"]
+          },
+          "fontSize": {
+            "title-md": ["15px", { "lineHeight": "20px", "fontWeight": "500" }],
+            "body-md": ["14px", { "lineHeight": "20px", "fontWeight": "400" }],
+            "headline-lg": ["32px", { "lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "600" }],
+            "label-md": ["11px", { "lineHeight": "14px", "letterSpacing": "0.06em", "fontWeight": "600" }],
+            "body-sm": ["12px", { "lineHeight": "16px", "fontWeight": "400" }],
+            "title-lg": ["18px", { "lineHeight": "24px", "letterSpacing": "-0.005em", "fontWeight": "600" }],
+            "headline-lg-mobile": ["24px", { "lineHeight": "32px", "letterSpacing": "-0.01em", "fontWeight": "600" }],
+            "headline-xl-mobile": ["32px", { "lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+            "body-lg": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+            "label-lg": ["13px", { "lineHeight": "16px", "letterSpacing": "0.04em", "fontWeight": "600" }],
+            "headline-xl": ["48px", { "lineHeight": "56px", "letterSpacing": "-0.03em", "fontWeight": "700" }],
+            "headline-md": ["22px", { "lineHeight": "28px", "letterSpacing": "-0.01em", "fontWeight": "600" }],
+            "label-sm": ["10px", { "lineHeight": "12px", "letterSpacing": "0.08em", "fontWeight": "700" }]
+          }
+        }
+      }
+    };
+  </script>
+</head>
+<body class="bg-surface font-body-md text-on-surface antialiased">
+  
+  <!-- NAVIGATION HEADER -->
+  <header class="fixed top-0 left-0 right-0 z-50 bg-surface/85 backdrop-blur-xl shadow-[0_4px_20px_rgba(112,104,133,0.08)]">
+    <div class="h-20 w-full px-space-lg flex items-center justify-between gap-space-md">
+      
+      <!-- Brand Logo -->
+      <a href="/site/index.html" class="flex items-center gap-space-md shrink-0 text-inherit no-underline">
+        <img alt="Sensorium Brand Logo" class="h-8 w-auto object-contain" src="https://lh3.googleusercontent.com/aida/AEtjO1WRFSKGlOREhaxLa619nByAkAZx68yjIiD7YGCDlHkDzFPvuvL46tgm6536dzUzmU3Fun5MR1CU8fPxNo0AmjObVJkutLmqWrbm2u0_di3mIPNC8xcFsnFDOlClnhKYTERlc-w-bmsR0Za_YZQ9ZlBDHQENP3D2d3xJC2XdbUENqmnRu7OELHw8zUl2zFagteZxHYPaEoyCT4wULX3VarXurCQbZ5GOT1g1c018i47j8FvVpWZR4uKU7Co"/>
+        <div class="flex flex-col">
+          <span class="font-title-lg text-title-lg tracking-tight text-on-surface font-bold">Sensorium</span>
+          <span class="font-label-sm text-label-sm text-primary uppercase tracking-widest font-semibold">Spider CAFM &amp; Digital Twin</span>
+        </div>
+      </a>
+
+      <!-- Desktop Nav -->
+      <nav class="hidden xl:flex items-center gap-space-xs bg-surface-container-low px-space-xs py-space-xs rounded-xl shadow-[inset_2px_2px_5px_rgba(112,104,133,0.14),inset_-2px_-2px_5px_rgba(255,255,255,0.9)]">
+        <a class="px-space-md py-space-xs rounded-lg font-title-md text-title-md text-on-surface-variant hover:text-on-surface hover:bg-surface-container transition-all" href="/site/index.html">Overview</a>
+        <a class="px-space-md py-space-xs rounded-lg font-title-md text-title-md text-on-surface-variant hover:text-on-surface hover:bg-surface-container transition-all" href="/site/jumeau_numerique_3d.html">Digital Twin Core</a>
+        <a class="px-space-md py-space-xs rounded-lg font-title-md text-title-md text-primary font-bold bg-surface-container-high shadow-[inset_2px_2px_4px_rgba(112,104,133,0.18),inset_-2px_-2px_4px_rgba(255,255,255,0.9)]" href="/site/sector_solutions.html">Sector Solutions</a>
+        <a class="px-space-md py-space-xs rounded-lg font-title-md text-title-md text-on-surface-variant hover:text-on-surface hover:bg-surface-container transition-all" href="/site/architecture.html">Spider CAFM</a>
+        <a class="px-space-md py-space-xs rounded-lg font-title-md text-title-md text-on-surface-variant hover:text-on-surface hover:bg-surface-container transition-all" href="/site/digital_twin_lifecycle.html">Telemetry AI</a>
+        <a class="px-space-md py-space-xs rounded-lg font-title-md text-title-md text-on-surface-variant hover:text-on-surface hover:bg-surface-container transition-all" href="/site/piliers_industriels.html">Infrastructure</a>
+        <a class="px-space-md py-space-xs rounded-lg font-title-md text-title-md text-on-surface-variant hover:text-on-surface hover:bg-surface-container transition-all" href="/site/tarifs.html">Pricing</a>
+      </nav>
+
+      <!-- Language switch & CTA Actions -->
+      <div class="flex items-center gap-space-sm shrink-0">
+        
+        <!-- Language Switcher -->
+        <div class="flex items-center bg-surface-container-low px-space-xs py-space-xs rounded-full shadow-[inset_2px_2px_4px_rgba(112,104,133,0.16),inset_-2px_-2px_4px_rgba(255,255,255,0.9)] font-label-md text-label-md">
+          <button class="px-space-xs py-space-xs rounded-full bg-surface-container-highest text-primary font-bold shadow-[2px_2px_5px_rgba(112,104,133,0.18)]" type="button">EN</button>
+          <a class="px-space-xs py-space-xs rounded-full text-on-surface-variant hover:text-on-surface transition-colors" href="/site/solutions.html">FR</a>
+          <a class="px-space-xs py-space-xs rounded-full text-on-surface-variant hover:text-on-surface transition-colors" href="/site/solutions.html">ES</a>
+        </div>
+
+        <a class="hidden sm:inline-flex items-center px-space-md py-space-sm rounded-xl font-label-lg text-label-lg text-on-surface bg-surface shadow-[4px_4px_10px_rgba(112,104,133,0.18),-4px_-4px_10px_rgba(255,255,255,1)] hover:bg-surface-container-low transition-all" href="/site/authentification.html">Login</a>
+        
+        <a class="inline-flex items-center px-space-lg py-space-sm rounded-xl font-label-lg text-label-lg text-on-primary bg-primary-container shadow-[0_0_16px_rgba(124,58,237,0.45),4px_4px_12px_rgba(112,104,133,0.24)] hover:bg-primary transition-all active:scale-[0.98]" href="/site/demo.html">Request Demo</a>
+        
+        <!-- Cockpit Quick Launch Link -->
+        <a href="/dashboard" class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-primary text-white text-xs font-semibold shadow-[0_0_12px_rgba(99,14,212,0.4)] hover:opacity-95 transition-all" title="Ouvrir le Cockpit SENSORIUM">
+          <span class="material-symbols-outlined text-[16px]">speed</span>
+          <span class="hidden md:inline">Cockpit</span>
+        </a>
+
+      </div>
+    </div>
+  </header>
+
+  <!-- MAIN BODY -->
+  <main class="w-full pt-20 bg-surface min-h-[calc(100vh-20rem)]">
+    <div class="flex flex-col w-full">
+      <div class="w-full px-space-md lg:px-space-xl py-space-xl flex flex-col gap-space-xl max-w-7xl mx-auto">
+        
+        <!-- Top Breadcrumb & Status Telemetry -->
+        <div class="flex flex-wrap items-center justify-between gap-space-md">
+          <div class="inline-flex items-center gap-space-xs px-space-md py-space-xs rounded-full bg-surface-container-low shadow-[inset_2px_2px_4px_rgba(112,104,133,0.18),inset_-2px_-2px_4px_rgba(255,255,255,0.9)]">
+            <span class="w-2 h-2 rounded-full bg-primary animate-pulse shadow-[0_0_8px_rgba(124,58,237,0.7)]"></span>
+            <span class="font-label-md text-label-md text-primary uppercase tracking-widest">Spatial Twin &amp; Asset Decarbonization // Sectorial Intelligence</span>
+          </div>
+          <div class="flex items-center gap-space-sm text-on-surface-variant font-label-sm text-label-sm">
+            <span class="inline-flex items-center gap-1 px-space-sm py-space-xs rounded-lg bg-surface shadow-[2px_2px_6px_rgba(112,104,133,0.14),-2px_-2px_6px_rgba(255,255,255,0.9)]">
+              <span class="material-symbols-outlined text-[14px] text-tertiary">hub</span>
+              <span>BACS Class A Autonomous</span>
+            </span>
+            <span class="inline-flex items-center gap-1 px-space-sm py-space-xs rounded-lg bg-surface shadow-[2px_2px_6px_rgba(112,104,133,0.14),-2px_-2px_6px_rgba(255,255,255,0.9)]">
+              <span class="material-symbols-outlined text-[14px] text-primary">dynamic_form</span>
+              <span>BACnet/IP • Modbus • LoRa</span>
+            </span>
+          </div>
+        </div>
+
+        <!-- Editorial Header Block -->
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-space-lg items-end">
+          <div class="lg:col-span-8 flex flex-col gap-space-sm">
+            <div class="flex items-center gap-space-xs font-label-md text-label-md text-on-surface-variant uppercase tracking-wider">
+              <span>Enterprise Asset Decarbonization</span>
+              <span class="text-primary font-bold">/</span>
+              <span>Multi-Tenant Portfolios</span>
+            </div>
+            <h1 class="font-headline-xl text-headline-xl text-on-surface tracking-tight">
+              Tailored Spatial AI Solutions for Every Real Estate Asset Class
+            </h1>
+            <p class="font-body-lg text-body-lg text-on-surface-variant max-w-3xl">
+              Gain immediate oversight and autonomous climate governance across commercial office towers, logistics hubs, healthcare facilities, and multi-tenant portfolios without hardware overhaul.
+            </p>
+          </div>
+          <div class="lg:col-span-4 flex flex-col items-start lg:items-end gap-space-sm">
+            <div class="p-space-md rounded-xl bg-surface-container-low shadow-[inset_2px_2px_5px_rgba(112,104,133,0.14),inset_-2px_-2px_5px_rgba(255,255,255,0.95)] flex flex-col gap-1 w-full max-w-xs">
+              <div class="flex items-center justify-between text-on-surface-variant font-label-sm text-label-sm">
+                <span>NETWORK CLIMATE DRIFT</span>
+                <span class="text-tertiary font-bold">0.03°C STABLE</span>
+              </div>
+              <div class="w-full h-1.5 rounded-full bg-surface-container-highest overflow-hidden relative">
+                <div class="absolute left-0 top-0 bottom-0 bg-primary w-[88%] rounded-full shadow-[0_0_6px_rgba(124,58,237,0.6)]"></div>
+              </div>
+              <span class="font-body-sm text-body-sm text-on-surface-variant">Live cluster: 1,480,000 m² under active spatial control</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Macro Metrics Bar (4 Tactile Neumorphic Badges) -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-space-md">
+          <div class="group p-space-md rounded-xl bg-surface shadow-[6px_6px_14px_rgba(112,104,133,0.14),-6px_-6px_14px_rgba(255,255,255,0.95)] hover:shadow-[inset_2px_2px_5px_rgba(112,104,133,0.16),inset_-2px_-2px_5px_rgba(255,255,255,0.95)] transition-all">
+            <div class="flex items-center justify-between text-primary mb-space-xs">
+              <span class="material-symbols-outlined text-[20px]">energy_savings_leaf</span>
+              <span class="font-label-sm text-label-sm px-space-xs py-0.5 rounded bg-primary/10 text-primary">AUDITED</span>
+            </div>
+            <div class="font-headline-lg text-headline-lg text-on-surface tracking-tight">-38%</div>
+            <div class="font-title-md text-title-md text-on-surface mt-1">Average Fluid Reduction</div>
+            <p class="font-body-sm text-body-sm text-on-surface-variant mt-1">Verified OPEX shrinkage over consecutive heating &amp; cooling seasons.</p>
+          </div>
+
+          <div class="group p-space-md rounded-xl bg-surface shadow-[6px_6px_14px_rgba(112,104,133,0.14),-6px_-6px_14px_rgba(255,255,255,0.95)] hover:shadow-[inset_2px_2px_5px_rgba(112,104,133,0.16),inset_-2px_-2px_5px_rgba(255,255,255,0.95)] transition-all">
+            <div class="flex items-center justify-between text-primary mb-space-xs">
+              <span class="material-symbols-outlined text-[20px]">bolt</span>
+              <span class="font-label-sm text-label-sm px-space-xs py-0.5 rounded bg-primary/10 text-primary">ZERO RISK</span>
+            </div>
+            <div class="font-headline-lg text-headline-lg text-on-surface tracking-tight">48 Hours</div>
+            <div class="font-title-md text-title-md text-on-surface mt-1">Integration Velocity</div>
+            <p class="font-body-sm text-body-sm text-on-surface-variant mt-1">Non-intrusive edge gateway tapping BMS trunks without downtime.</p>
+          </div>
+
+          <div class="group p-space-md rounded-xl bg-surface shadow-[6px_6px_14px_rgba(112,104,133,0.14),-6px_-6px_14px_rgba(255,255,255,0.95)] hover:shadow-[inset_2px_2px_5px_rgba(112,104,133,0.16),inset_-2px_-2px_5px_rgba(255,255,255,0.95)] transition-all">
+            <div class="flex items-center justify-between text-tertiary mb-space-xs">
+              <span class="material-symbols-outlined text-[20px]">trending_up</span>
+              <span class="font-label-sm text-label-sm px-space-xs py-0.5 rounded bg-tertiary/10 text-tertiary">VALUATION</span>
+            </div>
+            <div class="font-headline-lg text-headline-lg text-on-surface tracking-tight">+12%</div>
+            <div class="font-title-md text-title-md text-on-surface mt-1">Green Asset Uplift</div>
+            <p class="font-body-sm text-body-sm text-on-surface-variant mt-1">Direct yield expansion on asset appraisal via ESG brown discount hedge.</p>
+          </div>
+
+          <div class="group p-space-md rounded-xl bg-surface shadow-[6px_6px_14px_rgba(112,104,133,0.14),-6px_-6px_14px_rgba(255,255,255,0.95)] hover:shadow-[inset_2px_2px_5px_rgba(112,104,133,0.16),inset_-2px_-2px_5px_rgba(255,255,255,0.95)] transition-all">
+            <div class="flex items-center justify-between text-primary mb-space-xs">
+              <span class="material-symbols-outlined text-[20px]">verified_user</span>
+              <span class="font-label-sm text-label-sm px-space-xs py-0.5 rounded bg-primary/10 text-primary">EU MANDATE</span>
+            </div>
+            <div class="font-headline-lg text-headline-lg text-on-surface tracking-tight">100%</div>
+            <div class="font-title-md text-title-md text-on-surface mt-1">Regulatory Assurance</div>
+            <p class="font-body-sm text-body-sm text-on-surface-variant mt-1">BACS Class A compliance, CSRD carbon ledgers, and IPMVP protocol.</p>
+          </div>
+        </div>
+
+        <!-- Section Heading Divider -->
+        <div class="flex items-center justify-between pt-space-md">
+          <div class="flex items-center gap-space-sm">
+            <span class="w-3 h-3 rounded-full bg-primary-container shadow-[0_0_10px_rgba(124,58,237,0.5)]"></span>
+            <h2 class="font-headline-lg text-headline-lg text-on-surface">Target Asset Classes</h2>
+          </div>
+          <span class="hidden md:inline-block font-label-md text-label-md text-on-surface-variant tracking-wider uppercase">
+            ARCHITECTURAL RUNTIMES 01 — 04
+          </span>
+        </div>
+
+        <!-- Detailed Asset Segments (4 Rich Bento Cards) -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-space-lg">
+          
+          <!-- SEGMENT 01: Commercial Office Towers -->
+          <div class="flex flex-col justify-between p-space-lg rounded-2xl bg-surface shadow-[8px_8px_20px_rgba(112,104,133,0.15),-8px_-8px_20px_rgba(255,255,255,0.95)] relative overflow-hidden group">
+            <div class="flex flex-col gap-space-md">
+              <div class="flex items-start justify-between gap-space-sm">
+                <div class="flex flex-col">
+                  <span class="font-label-sm text-label-sm text-primary uppercase tracking-widest font-semibold">Segment 01 // Grade-A Vertical Real Estate</span>
+                  <h3 class="font-headline-md text-headline-md text-on-surface mt-1">Commercial Office Towers &amp; Headquarters</h3>
+                </div>
+                <span class="px-space-sm py-1 rounded-full text-primary bg-primary/10 font-label-sm text-label-sm font-semibold">Class A Towers</span>
+              </div>
+              
+              <!-- Visual preview -->
+              <div class="w-full h-48 rounded-xl overflow-hidden shadow-[inset_2px_2px_5px_rgba(112,104,133,0.2)] relative">
+                <img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" alt="Commercial skyscraper" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBlEW7wJj4a-oOi7tfa4jiIQ6_OpvYTkykjbAvJQRfc4Lmq0f_RWPaamYsZPms2HWSMB_tqYF75fZ_YIDuaW0oYGkFBkbbGwxYCh4SMbcFKK7rUsirXjC33u6STSWVVD4bDR7JhU6kh9mvu6YGvkCSYpB7TkKQmVYrQ86KJQ1pm2MrdwkUCKSJpsgiXp-gQrA9SQ-imvn3MRIvy7UD33cpGBuxUweWyxG_wnvPkOsYU3HmdGi6h6lr9"/>
+                <div class="absolute inset-0 bg-gradient-to-t from-inverse-surface/85 via-inverse-surface/20 to-transparent flex items-end p-space-md">
+                  <div class="flex items-center gap-space-md text-on-secondary-container">
+                    <div class="flex items-center gap-1 font-label-sm text-label-sm">
+                      <span class="material-symbols-outlined text-[16px] text-tertiary-fixed">sensors</span>
+                      <span>4,280 VAV Boxes Active</span>
+                    </div>
+                    <div class="flex items-center gap-1 font-label-sm text-label-sm">
+                      <span class="material-symbols-outlined text-[16px] text-primary-fixed-dim">groups</span>
+                      <span>Occupancy Sync: 94.2%</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Feature Tag Matrix -->
+              <div class="flex flex-wrap gap-space-xs">
+                <span class="px-space-sm py-space-xs rounded-lg bg-surface-container-low text-on-surface-variant font-label-sm text-label-sm shadow-[inset_1px_1px_2px_rgba(112,104,133,0.1),inset_-1px_-1px_2px_rgba(255,255,255,0.8)]">Dynamic Occupancy Zoning</span>
+                <span class="px-space-sm py-space-xs rounded-lg bg-surface-container-low text-on-surface-variant font-label-sm text-label-sm shadow-[inset_1px_1px_2px_rgba(112,104,133,0.1),inset_-1px_-1px_2px_rgba(255,255,255,0.8)]">Predictive AHU Curves</span>
+                <span class="px-space-sm py-space-xs rounded-lg bg-surface-container-low text-on-surface-variant font-label-sm text-label-sm shadow-[inset_1px_1px_2px_rgba(112,104,133,0.1),inset_-1px_-1px_2px_rgba(255,255,255,0.8)]">Green Lease Ledger</span>
+                <span class="px-space-sm py-space-xs rounded-lg bg-surface-container-low text-on-surface-variant font-label-sm text-label-sm shadow-[inset_1px_1px_2px_rgba(112,104,133,0.1),inset_-1px_-1px_2px_rgba(255,255,255,0.8)]">Zero Energy Penalty</span>
+              </div>
+
+              <!-- Micro Metric Dial -->
+              <div class="grid grid-cols-3 gap-space-xs p-space-sm rounded-xl bg-surface-container-low shadow-[inset_2px_2px_5px_rgba(112,104,133,0.15),inset_-2px_-2px_5px_rgba(255,255,255,0.9)]">
+                <div class="flex flex-col">
+                  <span class="font-label-sm text-label-sm text-on-surface-variant">HVAC EXPENSE</span>
+                  <span class="font-title-lg text-title-lg text-primary font-bold">-35% to -45%</span>
+                </div>
+                <div class="flex flex-col">
+                  <span class="font-label-sm text-label-sm text-on-surface-variant">THERMAL BAL.</span>
+                  <span class="font-title-lg text-title-lg text-on-surface font-bold">100% Auto</span>
+                </div>
+                <div class="flex flex-col">
+                  <span class="font-label-sm text-label-sm text-on-surface-variant">FINES RISK</span>
+                  <span class="font-title-lg text-title-lg text-tertiary font-bold">0.00 €</span>
+                </div>
+              </div>
+            </div>
+            
+            <div class="pt-space-md flex items-center justify-between">
+              <a class="inline-flex items-center gap-space-xs font-title-md text-title-md text-primary hover:text-secondary font-semibold transition-colors" href="/site/demo.html?segment=office">
+                <span>Explore Office Solutions</span>
+                <span class="material-symbols-outlined text-[18px]">arrow_forward</span>
+              </a>
+              <span class="font-label-sm text-label-sm text-on-surface-variant">BACS P-01 Active</span>
+            </div>
+          </div>
+
+          <!-- SEGMENT 02: Logistics Hubs -->
+          <div class="flex flex-col justify-between p-space-lg rounded-2xl bg-surface shadow-[8px_8px_20px_rgba(112,104,133,0.15),-8px_-8px_20px_rgba(255,255,255,0.95)] relative overflow-hidden group">
+            <div class="flex flex-col gap-space-md">
+              <div class="flex items-start justify-between gap-space-sm">
+                <div class="flex flex-col">
+                  <span class="font-label-sm text-label-sm text-primary uppercase tracking-widest font-semibold">Segment 02 // Industrial Logistics &amp; Distribution</span>
+                  <h3 class="font-headline-md text-headline-md text-on-surface mt-1">Logistics Hubs &amp; Fulfillment Centers</h3>
+                </div>
+                <span class="px-space-sm py-1 rounded-full text-tertiary bg-tertiary/10 font-label-sm text-label-sm font-semibold">High-Bay Warehousing</span>
+              </div>
+              
+              <!-- Visual preview -->
+              <div class="w-full h-48 rounded-xl overflow-hidden shadow-[inset_2px_2px_5px_rgba(112,104,133,0.2)] relative">
+                <img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" alt="Logistics fulfillment center" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAJn_-H6Zwah653hKnretdaCZbNYoZoPX4SWgcAG8BlCiURdcyos8NISHCLAR8MzJ18Q8-x4cMx4DkW8aRz-GEn6tcP8Y6bPeAviXtubg-Ma_0zVac_7ELvXdIV6i0Kybb8V4qdC6bvfIrzJryP8jY7VWJ_5wi9TjHBwqBZn8fHDpRk3ZuX3sSB7pXexaBN3QaZ3LJHIUZTuPfNsijiR_419SjXaRuMBwddm8YDgZ7tbln-zt1bqpJ4"/>
+                <div class="absolute inset-0 bg-gradient-to-t from-inverse-surface/85 via-inverse-surface/20 to-transparent flex items-end p-space-md">
+                  <div class="flex items-center gap-space-md text-on-secondary-container">
+                    <div class="flex items-center gap-1 font-label-sm text-label-sm">
+                      <span class="material-symbols-outlined text-[16px] text-tertiary-fixed">solar_power</span>
+                      <span>Rooftop Solar Sync: 88.4%</span>
+                    </div>
+                    <div class="flex items-center gap-1 font-label-sm text-label-sm">
+                      <span class="material-symbols-outlined text-[16px] text-primary-fixed-dim">ev_station</span>
+                      <span>Fleet Depot Charging: Auto</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Feature Tag Matrix -->
+              <div class="flex flex-wrap gap-space-xs">
+                <span class="px-space-sm py-space-xs rounded-lg bg-surface-container-low text-on-surface-variant font-label-sm text-label-sm shadow-[inset_1px_1px_2px_rgba(112,104,133,0.1),inset_-1px_-1px_2px_rgba(255,255,255,0.8)]">High-Bay Destratification</span>
+                <span class="px-space-sm py-space-xs rounded-lg bg-surface-container-low text-on-surface-variant font-label-sm text-label-sm shadow-[inset_1px_1px_2px_rgba(112,104,133,0.1),inset_-1px_-1px_2px_rgba(255,255,255,0.8)]">Dock Barrier Controls</span>
+                <span class="px-space-sm py-space-xs rounded-lg bg-surface-container-low text-on-surface-variant font-label-sm text-label-sm shadow-[inset_1px_1px_2px_rgba(112,104,133,0.1),inset_-1px_-1px_2px_rgba(255,255,255,0.8)]">Solar PV Optimization</span>
+                <span class="px-space-sm py-space-xs rounded-lg bg-surface-container-low text-on-surface-variant font-label-sm text-label-sm shadow-[inset_1px_1px_2px_rgba(112,104,133,0.1),inset_-1px_-1px_2px_rgba(255,255,255,0.8)]">EV Fleet Orchestration</span>
+              </div>
+
+              <!-- Micro Metric Dial -->
+              <div class="grid grid-cols-3 gap-space-xs p-space-sm rounded-xl bg-surface-container-low shadow-[inset_2px_2px_5px_rgba(112,104,133,0.15),inset_-2px_-2px_5px_rgba(255,255,255,0.9)]">
+                <div class="flex flex-col">
+                  <span class="font-label-sm text-label-sm text-on-surface-variant">GAS/HEATING LOSS</span>
+                  <span class="font-title-lg text-title-lg text-primary font-bold">-30% to -50%</span>
+                </div>
+                <div class="flex flex-col">
+                  <span class="font-label-sm text-label-sm text-on-surface-variant">PV SELF-USE</span>
+                  <span class="font-title-lg text-title-lg text-on-surface font-bold">&gt;85% Net</span>
+                </div>
+                <div class="flex flex-col">
+                  <span class="font-label-sm text-label-sm text-on-surface-variant">PAYBACK</span>
+                  <span class="font-title-lg text-title-lg text-tertiary font-bold">&lt; 14 Mo</span>
+                </div>
+              </div>
+            </div>
+            
+            <div class="pt-space-md flex items-center justify-between">
+              <a class="inline-flex items-center gap-space-xs font-title-md text-title-md text-primary hover:text-secondary font-semibold transition-colors" href="/site/demo.html?segment=logistics">
+                <span>Explore Logistics Solutions</span>
+                <span class="material-symbols-outlined text-[18px]">arrow_forward</span>
+              </a>
+              <span class="font-label-sm text-label-sm text-on-surface-variant">BACS P-02 Active</span>
+            </div>
+          </div>
+
+          <!-- SEGMENT 03: Institutional Real Estate Funds -->
+          <div class="flex flex-col justify-between p-space-lg rounded-2xl bg-surface shadow-[8px_8px_20px_rgba(112,104,133,0.15),-8px_-8px_20px_rgba(255,255,255,0.95)] relative overflow-hidden group">
+            <div class="flex flex-col gap-space-md">
+              <div class="flex items-start justify-between gap-space-sm">
+                <div class="flex flex-col">
+                  <span class="font-label-sm text-label-sm text-primary uppercase tracking-widest font-semibold">Segment 03 // Real Estate Funds &amp; REITS</span>
+                  <h3 class="font-headline-md text-headline-md text-on-surface mt-1">Institutional Funds &amp; Mixed Portfolios</h3>
+                </div>
+                <span class="px-space-sm py-1 rounded-full text-primary bg-primary/10 font-label-sm text-label-sm font-semibold">10 to 500+ Assets</span>
+              </div>
+              
+              <!-- Visual preview -->
+              <div class="w-full h-48 rounded-xl overflow-hidden shadow-[inset_2px_2px_5px_rgba(112,104,133,0.2)] relative">
+                <img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" alt="Financial district" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAW88lo3gzFBQX15YvhMuIONJhvvt02W3nFM7gj48mdh8PE_NYcKDSHvP35DVRDQPQ2OnXI_JOWPUCBeqB1-d__GaFlbtLV7WYldnjvB7w6O_NQkeZ0jdaSjQnAedLrrfSpAv-7CDTd7gieZXVu0OdCmfjXJXqNoZWgvbi_QRr3vAT4l2rsq8P8kfi7efYTAFmeufQpKhg-JA9sEleAUl5LEFR3yqYdKtjwTBD5Nif51Q5cfeckDDED"/>
+                <div class="absolute inset-0 bg-gradient-to-t from-inverse-surface/85 via-inverse-surface/20 to-transparent flex items-end p-space-md">
+                  <div class="flex items-center gap-space-md text-on-secondary-container">
+                    <div class="flex items-center gap-1 font-label-sm text-label-sm">
+                      <span class="material-symbols-outlined text-[16px] text-tertiary-fixed">domain</span>
+                      <span>142 Assets Ingested</span>
+                    </div>
+                    <div class="flex items-center gap-1 font-label-sm text-label-sm">
+                      <span class="material-symbols-outlined text-[16px] text-primary-fixed-dim">query_stats</span>
+                      <span>CSRD Double Materiality: OK</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Feature Tag Matrix -->
+              <div class="flex flex-wrap gap-space-xs">
+                <span class="px-space-sm py-space-xs rounded-lg bg-surface-container-low text-on-surface-variant font-label-sm text-label-sm shadow-[inset_1px_1px_2px_rgba(112,104,133,0.1),inset_-1px_-1px_2px_rgba(255,255,255,0.8)]">Unified Portfolio Cockpit</span>
+                <span class="px-space-sm py-space-xs rounded-lg bg-surface-container-low text-on-surface-variant font-label-sm text-label-sm shadow-[inset_1px_1px_2px_rgba(112,104,133,0.1),inset_-1px_-1px_2px_rgba(255,255,255,0.8)]">ESG Due Diligence</span>
+                <span class="px-space-sm py-space-xs rounded-lg bg-surface-container-low text-on-surface-variant font-label-sm text-label-sm shadow-[inset_1px_1px_2px_rgba(112,104,133,0.1),inset_-1px_-1px_2px_rgba(255,255,255,0.8)]">1-Click GRESB Export</span>
+                <span class="px-space-sm py-space-xs rounded-lg bg-surface-container-low text-on-surface-variant font-label-sm text-label-sm shadow-[inset_1px_1px_2px_rgba(112,104,133,0.1),inset_-1px_-1px_2px_rgba(255,255,255,0.8)]">CAPEX Hedging Model</span>
+              </div>
+
+              <!-- Micro Metric Dial -->
+              <div class="grid grid-cols-3 gap-space-xs p-space-sm rounded-xl bg-surface-container-low shadow-[inset_2px_2px_5px_rgba(112,104,133,0.15),inset_-2px_-2px_5px_rgba(255,255,255,0.9)]">
+                <div class="flex flex-col">
+                  <span class="font-label-sm text-label-sm text-on-surface-variant">VALUATION LIFT</span>
+                  <span class="font-title-lg text-title-lg text-primary font-bold">+12% Premium</span>
+                </div>
+                <div class="flex flex-col">
+                  <span class="font-label-sm text-label-sm text-on-surface-variant">DASHBOARD</span>
+                  <span class="font-title-lg text-title-lg text-on-surface font-bold">1 Cockpit</span>
+                </div>
+                <div class="flex flex-col">
+                  <span class="font-label-sm text-label-sm text-on-surface-variant">ESG AUDITING</span>
+                  <span class="font-title-lg text-title-lg text-tertiary font-bold">Instant</span>
+                </div>
+              </div>
+            </div>
+            
+            <div class="pt-space-md flex items-center justify-between">
+              <a class="inline-flex items-center gap-space-xs font-title-md text-title-md text-primary hover:text-secondary font-semibold transition-colors" href="/site/demo.html?segment=reits">
+                <span>Explore Institutional Solutions</span>
+                <span class="material-symbols-outlined text-[18px]">arrow_forward</span>
+              </a>
+              <span class="font-label-sm text-label-sm text-on-surface-variant">BACS P-03 Active</span>
+            </div>
+          </div>
+
+          <!-- SEGMENT 04: Healthcare & University Campuses -->
+          <div class="flex flex-col justify-between p-space-lg rounded-2xl bg-surface shadow-[8px_8px_20px_rgba(112,104,133,0.15),-8px_-8px_20px_rgba(255,255,255,0.95)] relative overflow-hidden group">
+            <div class="flex flex-col gap-space-md">
+              <div class="flex items-start justify-between gap-space-sm">
+                <div class="flex flex-col">
+                  <span class="font-label-sm text-label-sm text-primary uppercase tracking-widest font-semibold">Segment 04 // Critical Infrastructure</span>
+                  <h3 class="font-headline-md text-headline-md text-on-surface mt-1">Healthcare Facilities &amp; University Campuses</h3>
+                </div>
+                <span class="px-space-sm py-1 rounded-full text-error bg-error-container text-on-error-container font-label-sm text-label-sm font-semibold">Mission Critical</span>
+              </div>
+              
+              <!-- Visual preview -->
+              <div class="w-full h-48 rounded-xl overflow-hidden shadow-[inset_2px_2px_5px_rgba(112,104,133,0.2)] relative">
+                <img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" alt="Clinical hospital laboratory" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDAr6XvsQMU0POHcmya6wlu20NVgUGpPGvPFRHmHQ0SawNHr4OrXsQYlJnKLZWDG1ty3I8nmkW0wJTexfKR8quvoRM-8qzUguv9PmUjMK9cVvf7wYUr9CRikCJEJ2LkUXf9kY7zE1p2ZlfE5xVRQlzBV-MgBDWPzOPuaI4JV4_0pu-av56driVO21bmolTx59LCvc_RXk7hShOIgg1a42-ocG8TctRd7EKzDweS2f5HDUDnV6pjjTFY"/>
+                <div class="absolute inset-0 bg-gradient-to-t from-inverse-surface/85 via-inverse-surface/20 to-transparent flex items-end p-space-md">
+                  <div class="flex items-center gap-space-md text-on-secondary-container">
+                    <div class="flex items-center gap-1 font-label-sm text-label-sm">
+                      <span class="material-symbols-outlined text-[16px] text-tertiary-fixed">air</span>
+                      <span>CO2 Level: 580 ppm</span>
+                    </div>
+                    <div class="flex items-center gap-1 font-label-sm text-label-sm">
+                      <span class="material-symbols-outlined text-[16px] text-primary-fixed-dim">verified</span>
+                      <span>Negative Pressure Lock: Secured</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Feature Tag Matrix -->
+              <div class="flex flex-wrap gap-space-xs">
+                <span class="px-space-sm py-space-xs rounded-lg bg-surface-container-low text-on-surface-variant font-label-sm text-label-sm shadow-[inset_1px_1px_2px_rgba(112,104,133,0.1),inset_-1px_-1px_2px_rgba(255,255,255,0.8)]">Clean Room Pressure Control</span>
+                <span class="px-space-sm py-space-xs rounded-lg bg-surface-container-low text-on-surface-variant font-label-sm text-label-sm shadow-[inset_1px_1px_2px_rgba(112,104,133,0.1),inset_-1px_-1px_2px_rgba(255,255,255,0.8)]">&lt;700 ppm CO2 Strict Target</span>
+                <span class="px-space-sm py-space-xs rounded-lg bg-surface-container-low text-on-surface-variant font-label-sm text-label-sm shadow-[inset_1px_1px_2px_rgba(112,104,133,0.1),inset_-1px_-1px_2px_rgba(255,255,255,0.8)]">Chiller Plant Redundancy</span>
+                <span class="px-space-sm py-space-xs rounded-lg bg-surface-container-low text-on-surface-variant font-label-sm text-label-sm shadow-[inset_1px_1px_2px_rgba(112,104,133,0.1),inset_-1px_-1px_2px_rgba(255,255,255,0.8)]">Microbial Air Assurance</span>
+              </div>
+
+              <!-- Micro Metric Dial -->
+              <div class="grid grid-cols-3 gap-space-xs p-space-sm rounded-xl bg-surface-container-low shadow-[inset_2px_2px_5px_rgba(112,104,133,0.15),inset_-2px_-2px_5px_rgba(255,255,255,0.9)]">
+                <div class="flex flex-col">
+                  <span class="font-label-sm text-label-sm text-on-surface-variant">REDUNDANCY</span>
+                  <span class="font-title-lg text-title-lg text-primary font-bold">24/7 Hot</span>
+                </div>
+                <div class="flex flex-col">
+                  <span class="font-label-sm text-label-sm text-on-surface-variant">AIR AUDIT</span>
+                  <span class="font-title-lg text-title-lg text-on-surface font-bold">Strict ISO</span>
+                </div>
+                <div class="flex flex-col">
+                  <span class="font-label-sm text-label-sm text-on-surface-variant">CHILLER SAVINGS</span>
+                  <span class="font-title-lg text-title-lg text-tertiary font-bold">-28% OPEX</span>
+                </div>
+              </div>
+            </div>
+            
+            <div class="pt-space-md flex items-center justify-between">
+              <a class="inline-flex items-center gap-space-xs font-title-md text-title-md text-primary hover:text-secondary font-semibold transition-colors" href="/site/demo.html?segment=healthcare">
+                <span>Explore Healthcare Solutions</span>
+                <span class="material-symbols-outlined text-[18px]">arrow_forward</span>
+              </a>
+              <span class="font-label-sm text-label-sm text-on-surface-variant">BACS P-04 Active</span>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Rapid 48-Hour Protocol Section ("Zero-Downtime Deployment Architecture") -->
+        <div class="flex flex-col gap-space-lg p-space-lg lg:p-space-xl rounded-2xl bg-surface-container-low shadow-[inset_3px_3px_8px_rgba(112,104,133,0.12),inset_-3px_-3px_8px_rgba(255,255,255,0.9)]">
+          <div class="flex flex-col md:flex-row md:items-end justify-between gap-space-md">
+            <div class="flex flex-col gap-space-xs">
+              <span class="font-label-md text-label-md text-primary uppercase tracking-widest font-semibold">Rapid Onboarding SLA</span>
+              <h2 class="font-headline-lg text-headline-lg text-on-surface font-bold">Zero-Downtime Deployment Protocol</h2>
+              <p class="font-body-md text-body-md text-on-surface-variant max-w-2xl">
+                Sensorium does not replace your field controllers or rip out physical infrastructure. We wrap your existing BACnet, Modbus, and LoRaWAN networks in an autonomous digital layer within 48 hours.
+              </p>
+            </div>
+            <div class="inline-flex items-center gap-2 px-space-md py-space-sm rounded-xl bg-surface shadow-[4px_4px_10px_rgba(112,104,133,0.15),-4px_-4px_10px_rgba(255,255,255,0.95)]">
+              <span class="material-symbols-outlined text-primary text-[22px]">timer</span>
+              <div class="flex flex-col">
+                <span class="font-label-sm text-label-sm text-on-surface-variant">DEPLOYMENT VELOCITY</span>
+                <span class="font-title-md text-title-md text-on-surface font-bold">≤ 48 Hours Guarantee</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- 3-Step Physical Modular Pipeline -->
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-space-lg relative">
+            
+            <!-- Step 1 -->
+            <div class="p-space-md rounded-xl bg-surface shadow-[6px_6px_14px_rgba(112,104,133,0.14),-6px_-6px_14px_rgba(255,255,255,0.95)] flex flex-col gap-space-md relative">
+              <div class="flex items-center justify-between">
+                <div class="w-10 h-10 rounded-lg bg-surface-container flex items-center justify-center font-headline-md text-headline-md text-primary shadow-[inset_2px_2px_4px_rgba(112,104,133,0.15),inset_-2px_-2px_4px_rgba(255,255,255,0.9)] font-bold">
+                  1
+                </div>
+                <span class="font-label-sm text-label-sm px-space-xs py-0.5 rounded bg-primary/10 text-primary font-semibold">T + 08 HOURS</span>
+              </div>
+              <div class="flex flex-col gap-1">
+                <h3 class="font-title-lg text-title-lg text-on-surface font-bold">Secure Edge Gateway Connection</h3>
+                <p class="font-body-sm text-body-sm text-on-surface-variant">
+                  Zero-disruption plug-in into local field buses (BACnet/IP, Modbus TCP, KNX, LoRaWAN). Read-only encrypted telemetry tunnel with hardware isolator.
+                </p>
+              </div>
+              <div class="p-space-xs rounded bg-surface-container-low font-label-sm text-label-sm text-on-surface-variant flex items-center gap-1 shadow-[inset_1px_1px_3px_rgba(112,104,133,0.1)]">
+                <span class="material-symbols-outlined text-[14px] text-tertiary">check_circle</span>
+                <span>Zero IP conflicts • Zero hardware rip-out</span>
+              </div>
+            </div>
+
+            <!-- Step 2 -->
+            <div class="p-space-md rounded-xl bg-surface shadow-[6px_6px_14px_rgba(112,104,133,0.14),-6px_-6px_14px_rgba(255,255,255,0.95)] flex flex-col gap-space-md relative">
+              <div class="flex items-center justify-between">
+                <div class="w-10 h-10 rounded-lg bg-surface-container flex items-center justify-center font-headline-md text-headline-md text-primary shadow-[inset_2px_2px_4px_rgba(112,104,133,0.15),inset_-2px_-2px_4px_rgba(255,255,255,0.9)] font-bold">
+                  2
+                </div>
+                <span class="font-label-sm text-label-sm px-space-xs py-0.5 rounded bg-primary/10 text-primary font-semibold">T + 24 HOURS</span>
+              </div>
+              <div class="flex flex-col gap-1">
+                <h3 class="font-title-lg text-title-lg text-on-surface font-bold">Automated Spatial Semantic Mapping</h3>
+                <p class="font-body-sm text-body-sm text-on-surface-variant">
+                  BIM, CAD, and IFC point ingestion automatically binds raw physical data points to spatial twins, zone geometry, and thermal envelope models.
+                </p>
+              </div>
+              <div class="p-space-xs rounded bg-surface-container-low font-label-sm text-label-sm text-on-surface-variant flex items-center gap-1 shadow-[inset_1px_1px_3px_rgba(112,104,133,0.1)]">
+                <span class="material-symbols-outlined text-[14px] text-tertiary">check_circle</span>
+                <span>Self-labeling AI • Brick Schema Ready</span>
+              </div>
+            </div>
+
+            <!-- Step 3 -->
+            <div class="p-space-md rounded-xl bg-surface shadow-[6px_6px_14px_rgba(112,104,133,0.14),-6px_-6px_14px_rgba(255,255,255,0.95)] flex flex-col gap-space-md relative">
+              <div class="flex items-center justify-between">
+                <div class="w-10 h-10 rounded-lg bg-surface-container flex items-center justify-center font-headline-md text-headline-md text-primary shadow-[inset_2px_2px_4px_rgba(112,104,133,0.15),inset_-2px_-2px_4px_rgba(255,255,255,0.9)] font-bold">
+                  3
+                </div>
+                <span class="font-label-sm text-label-sm px-space-xs py-0.5 rounded bg-tertiary/10 text-tertiary font-semibold">T + 48 HOURS</span>
+              </div>
+              <div class="flex flex-col gap-1">
+                <h3 class="font-title-lg text-title-lg text-on-surface font-bold">Closed-Loop AI Optimization Active</h3>
+                <p class="font-body-sm text-body-sm text-on-surface-variant">
+                  Autonomous micro-setpoint adjustments engage. Live continuous measurement against IPMVP baseline with instant energy verification.
+                </p>
+              </div>
+              <div class="p-space-xs rounded bg-surface-container-low font-label-sm text-label-sm text-on-surface-variant flex items-center gap-1 shadow-[inset_1px_1px_3px_rgba(112,104,133,0.1)]">
+                <span class="material-symbols-outlined text-[14px] text-tertiary">check_circle</span>
+                <span>Realized energy OPEX drop on Day 3</span>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- Live Telemetry Cockpit Preview Strip -->
+        <div class="p-space-lg rounded-2xl bg-surface shadow-[8px_8px_20px_rgba(112,104,133,0.15),-8px_-8px_20px_rgba(255,255,255,0.95)] flex flex-col gap-space-md">
+          <div class="flex flex-wrap items-center justify-between gap-space-sm">
+            <div class="flex items-center gap-space-sm">
+              <div class="w-8 h-8 rounded-full bg-primary flex items-center justify-center text-on-primary shadow-[0_0_12px_rgba(124,58,237,0.4)]">
+                <span class="material-symbols-outlined text-[18px]">stream</span>
+              </div>
+              <div>
+                <h3 class="font-title-lg text-title-lg text-on-surface font-bold">Closed-Loop Setpoint Calibration Feed</h3>
+                <span class="font-label-sm text-label-sm text-on-surface-variant font-medium">Active IPMVP Option C Mathematical Baselines</span>
+              </div>
+            </div>
+            <div class="flex items-center gap-space-xs font-label-sm text-label-sm">
+              <span class="px-space-sm py-1 rounded bg-surface-container-high text-on-surface shadow-[inset_1px_1px_2px_rgba(112,104,133,0.1)] font-semibold">ZONE 01: 21.4°C</span>
+              <span class="px-space-sm py-1 rounded bg-surface-container-high text-on-surface shadow-[inset_1px_1px_2px_rgba(112,104,133,0.1)] font-semibold">ZONE 02: 21.8°C</span>
+              <span class="px-space-sm py-1 rounded bg-surface-container-high text-on-surface shadow-[inset_1px_1px_2px_rgba(112,104,133,0.1)] font-semibold">ZONE 03: 20.9°C</span>
+            </div>
+          </div>
+          
+          <!-- Tactile Telemetry Graph Preview (Inline SVG) -->
+          <div class="w-full h-36 rounded-xl bg-surface-container-low p-space-md flex flex-col justify-between shadow-[inset_2px_2px_5px_rgba(112,104,133,0.14),inset_-2px_-2px_5px_rgba(255,255,255,0.9)] relative overflow-hidden">
+            <div class="flex items-center justify-between z-10">
+              <span class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider font-semibold">CHILLED WATER RUNTIME PROFILE • 24-HOUR TRAJECTORY</span>
+              <span class="font-label-sm text-label-sm text-primary font-bold">SMART FLUID DIVERSION: 41.2 kW AVG</span>
+            </div>
+            <!-- Graph SVG -->
+            <svg class="w-full h-20 text-primary" preserveAspectRatio="none" viewBox="0 0 500 80">
+              <line stroke="rgba(112,104,133,0.1)" stroke-dasharray="4 4" x1="0" x2="500" y1="20" y2="20"></line>
+              <line stroke="rgba(112,104,133,0.1)" stroke-dasharray="4 4" x1="0" x2="500" y1="50" y2="50"></line>
+              <path d="M0,60 Q70,65 140,50 T280,30 T420,45 T500,35" fill="none" stroke="#7b7487" stroke-dasharray="3 3" stroke-width="2"></path>
+              <path d="M0,70 Q70,72 140,65 T280,48 T420,58 T500,52" fill="none" stroke="currentColor" stroke-width="3"></path>
+              <path d="M0,70 Q70,72 140,65 T280,48 T420,58 T500,52 L500,80 L0,80 Z" fill="rgba(124, 58, 237, 0.08)"></path>
+            </svg>
+            <div class="flex items-center justify-between text-on-surface-variant font-label-sm text-label-sm z-10 font-medium">
+              <span>00:00 UTC</span>
+              <span>06:00 (Pre-Cooling Engaged)</span>
+              <span>12:00 (Peak Shaving Active)</span>
+              <span>18:00 (Ramp Down)</span>
+              <span>23:59 UTC</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Bottom Interactive Conversion Banner -->
+        <div class="p-space-lg lg:p-space-xl rounded-3xl bg-surface shadow-[10px_10px_24px_rgba(112,104,133,0.18),-10px_-10px_24px_rgba(255,255,255,0.95)] flex flex-col lg:flex-row items-center justify-between gap-space-lg relative overflow-hidden">
+          <div class="flex items-center gap-space-md max-w-2xl">
+            <div class="w-16 h-16 rounded-2xl bg-surface-container-high flex items-center justify-center shrink-0 shadow-[4px_4px_10px_rgba(112,104,133,0.15),-4px_-4px_10px_rgba(255,255,255,0.9)]">
+              <img alt="Sensorium Emblem" class="w-10 h-10 object-contain" src="https://lh3.googleusercontent.com/aida/AEtjO1WRFSKGlOREhaxLa619nByAkAZx68yjIiD7YGCDlHkDzFPvuvL46tgm6536dzUzmU3Fun5MR1CU8fPxNo0AmjObVJkutLmqWrbm2u0_di3mIPNC8xcFsnFDOlClnhKYTERlc-w-bmsR0Za_YZQ9ZlBDHQENP3D2d3xJC2XdbUENqmnRu7OELHw8zUl2zFagteZxHYPaEoyCT4wULX3VarXurCQbZ5GOT1g1c018i47j8FvVpWZR4uKU7Co"/>
+            </div>
+            <div class="flex flex-col gap-1">
+              <span class="font-label-md text-label-md text-primary uppercase tracking-widest font-semibold">Autonomous Spatial Transition</span>
+              <h3 class="font-headline-md text-headline-md text-on-surface font-bold">Ready to convert your building portfolio into autonomous energy-saving assets?</h3>
+              <p class="font-body-md text-body-md text-on-surface-variant">
+                Connect your property management engineers with our digital twin specialists. Calculate guaranteed kilowatt and carbon savings across your actual asset portfolio.
+              </p>
+            </div>
+          </div>
+          <div class="flex flex-col sm:flex-row items-center gap-space-sm shrink-0 w-full lg:w-auto">
+            <a href="/site/tarifs.html" class="w-full sm:w-auto px-space-lg py-space-md rounded-xl font-label-lg text-label-lg text-on-surface bg-surface shadow-[5px_5px_12px_rgba(112,104,133,0.18),-5px_-5px_12px_rgba(255,255,255,1)] hover:bg-surface-container-low transition-all text-center no-underline">
+              Request 14-Day Pilot Protocol
+            </a>
+            <a href="/site/demo.html" class="w-full sm:w-auto px-space-lg py-space-md rounded-xl font-label-lg text-label-lg text-on-primary bg-primary-container shadow-[0_0_20px_rgba(124,58,237,0.45),4px_4px_12px_rgba(112,104,133,0.22)] hover:bg-primary active:scale-[0.98] transition-all text-center flex items-center justify-center gap-space-xs no-underline">
+              <span>Book a 30-min Executive Briefing</span>
+              <span class="material-symbols-outlined text-[18px]">calendar_today</span>
+            </a>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </main>
+
+  <!-- FOOTER -->
+  <footer class="w-full bg-surface-container-low mt-space-xl pt-space-xl pb-space-lg shadow-[inset_0_4px_12px_rgba(112,104,133,0.06)]">
+    <div class="w-full px-space-lg flex flex-col gap-space-xl max-w-7xl mx-auto">
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-space-lg">
+        
+        <div class="lg:col-span-2 flex flex-col gap-space-md">
+          <div class="flex items-center gap-space-sm">
+            <img alt="Sensorium Logo" class="h-8 w-auto object-contain" src="https://lh3.googleusercontent.com/aida/AEtjO1WRFSKGlOREhaxLa619nByAkAZx68yjIiD7YGCDlHkDzFPvuvL46tgm6536dzUzmU3Fun5MR1CU8fPxNo0AmjObVJkutLmqWrbm2u0_di3mIPNC8xcFsnFDOlClnhKYTERlc-w-bmsR0Za_YZQ9ZlBDHQENP3D2d3xJC2XdbUENqmnRu7OELHw8zUl2zFagteZxHYPaEoyCT4wULX3VarXurCQbZ5GOT1g1c018i47j8FvVpWZR4uKU7Co"/>
+            <span class="font-title-lg text-title-lg text-on-surface font-bold">Sensorium</span>
+          </div>
+          <p class="font-body-md text-body-md text-on-surface-variant max-w-sm">
+            Industrial facility infrastructure integrated with high-precision digital twin automation, predictive maintenance, and autonomous cyber-physical building controls.
+          </p>
+          <div class="flex items-center gap-space-xs text-on-surface-variant">
+            <span class="material-symbols-outlined text-[18px] text-tertiary">shield_lock</span>
+            <span class="font-label-sm text-label-sm uppercase tracking-wider text-tertiary font-semibold">Level 4 Autonomous Orchestration Ready</span>
+          </div>
+        </div>
+
+        <div class="flex flex-col gap-space-sm">
+          <span class="font-label-lg text-label-lg uppercase tracking-wider text-primary font-bold">Platform</span>
+          <a class="font-body-md text-body-md text-on-surface-variant hover:text-on-surface transition-colors" href="/site/jumeau_numerique_3d.html">Digital Twin Core</a>
+          <a class="font-body-md text-body-md text-on-surface-variant hover:text-on-surface transition-colors" href="/site/architecture.html">Spider CAFM Hub</a>
+          <a class="font-body-md text-body-md text-on-surface-variant hover:text-on-surface transition-colors" href="/site/digital_twin_lifecycle.html">Predictive Telemetry</a>
+          <a class="font-body-md text-body-md text-on-surface-variant hover:text-on-surface transition-colors" href="/site/piliers_industriels.html">Asset Topology</a>
+        </div>
+
+        <div class="flex flex-col gap-space-sm">
+          <span class="font-label-lg text-label-lg uppercase tracking-wider text-primary font-bold">Solutions</span>
+          <a class="font-body-md text-body-md text-on-surface-variant hover:text-on-surface transition-colors" href="/site/piliers_industriels.html">Mission Critical Hyperscale</a>
+          <a class="font-body-md text-body-md text-on-surface-variant hover:text-on-surface transition-colors" href="/site/index.html">Smart Campus Networks</a>
+          <a class="font-body-md text-body-md text-on-surface-variant hover:text-on-surface transition-colors" href="/site/architecture.html">BACS Decarbonization</a>
+          <a class="font-body-md text-body-md text-on-surface-variant hover:text-on-surface transition-colors" href="/site/demo.html">Executive Proof-of-Concept</a>
+        </div>
+
+        <div class="flex flex-col gap-space-sm">
+          <span class="font-label-lg text-label-lg uppercase tracking-wider text-primary font-bold">Compliance &amp; Trust</span>
+          <div class="flex flex-wrap gap-space-xs pt-space-xs">
+            <div class="flex items-center gap-1 px-space-sm py-space-xs rounded-lg bg-surface shadow-[2px_2px_6px_rgba(112,104,133,0.12),-2px_-2px_6px_rgba(255,255,255,0.9)] font-semibold">
+              <span class="material-symbols-outlined text-[14px] text-tertiary">verified</span>
+              <span class="font-label-sm text-label-sm text-on-surface">ISO 27001</span>
+            </div>
+            <div class="flex items-center gap-1 px-space-sm py-space-xs rounded-lg bg-surface shadow-[2px_2px_6px_rgba(112,104,133,0.12),-2px_-2px_6px_rgba(255,255,255,0.9)] font-semibold">
+              <span class="material-symbols-outlined text-[14px] text-tertiary">energy_program_saving</span>
+              <span class="font-label-sm text-label-sm text-on-surface">BACS Class A</span>
+            </div>
+            <div class="flex items-center gap-1 px-space-sm py-space-xs rounded-lg bg-surface shadow-[2px_2px_6px_rgba(112,104,133,0.12),-2px_-2px_6px_rgba(255,255,255,0.9)] font-semibold">
+              <span class="material-symbols-outlined text-[14px] text-tertiary">policy</span>
+              <span class="font-label-sm text-label-sm text-on-surface">GDPR</span>
+            </div>
+            <div class="flex items-center gap-1 px-space-sm py-space-xs rounded-lg bg-surface shadow-[2px_2px_6px_rgba(112,104,133,0.12),-2px_-2px_6px_rgba(255,255,255,0.9)] font-semibold">
+              <span class="material-symbols-outlined text-[14px] text-tertiary">security</span>
+              <span class="font-label-sm text-label-sm text-on-surface">SOC 2 Type II</span>
+            </div>
+          </div>
+          <span class="font-body-sm text-body-sm text-on-surface-variant pt-space-xs">
+            Continuously audited by independent accredited certification bodies.
+          </span>
+        </div>
+
+      </div>
+
+      <div class="pt-space-md flex flex-col md:flex-row items-center justify-between gap-space-md shadow-[inset_0_1px_0_rgba(112,104,133,0.15)]">
+        <span class="font-body-sm text-body-sm text-on-surface-variant">© 2025 Sensorium Systems Inc. Autonomous Digital Twin Architecture. All rights reserved.</span>
+        <div class="flex items-center gap-space-md">
+          <a class="font-body-sm text-body-sm text-on-surface-variant hover:text-on-surface transition-colors" href="/site/index.html">Privacy Policy</a>
+          <a class="font-body-sm text-body-sm text-on-surface-variant hover:text-on-surface transition-colors" href="/site/architecture.html">Security Architecture</a>
+          <a class="font-body-sm text-body-sm text-on-surface-variant hover:text-on-surface transition-colors" href="/dashboard">System Status</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+</body>
+</html>
