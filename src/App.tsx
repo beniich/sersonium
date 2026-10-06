@@ -22,6 +22,7 @@ const AdCampaignsPage = lazy(() => import("./pages/AdCampaignsPage"));
 const PricingPage = lazy(() => import("./pages/PricingPage"));
 const KafkaMonitor = lazy(() => import("./components/KafkaMonitor"));
 const ComplianceManager = lazy(() => import("./pages/admin/ComplianceManager"));
+const ResiliencePage = lazy(() => import("./pages/ResiliencePage"));
 const CockpitConsoleView = lazy(() => import("./components/CockpitConsoleView").then(m => ({ default: m.CockpitConsoleView })));
 const VaultView = lazy(() => import("./components/VaultView").then(m => ({ default: m.VaultView })));
 const EsgGrafanaView = lazy(() => import("./components/EsgGrafanaView").then(m => ({ default: m.EsgGrafanaView })));
@@ -453,6 +454,7 @@ export default function App() {
       case "overview": return <OverviewPage {...commonProps} />;
       case "strategy": return <StrategyPage {...commonProps} />;
       case "compliance": return <ComplianceManager isDark={isDark} />;
+      case "resilience": return <ResiliencePage isDark={isDark} />;
       case "brand-vision": return <BrandVisionPage isDark={isDark} />;
       case "ad-campaigns": return <AdCampaignsPage isDark={isDark} />;
       case "security": return <SecurityPage {...commonProps} />;

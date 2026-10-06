@@ -21,6 +21,7 @@ import {
   requestLogger, 
   errorHandler 
 } from "./server/middlewares/index.js";
+import { resilienceGuard, canaryHeaderInjector } from "./server/middlewares/resilience.middleware.js";
 
 async function startServer() {
   // Initialize multi-tenant database seed if required
@@ -58,6 +59,10 @@ async function startServer() {
   app.use(antiReplayGuard);
   app.use(requestLogger);
   app.use(auditMiddleware);
+
+  // 2. Résilience DORA: Circuit Breaker & Canary Header Injection (Art. 24 & 26)
+  app.use("/api", resilienceGuard);
+  app.use("/api", canaryHeaderInjector);
 
   // Endpoint d'Observabilité Prometheus (/metrics)
   app.get("/metrics", async (req, res) => {

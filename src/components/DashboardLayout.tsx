@@ -204,6 +204,17 @@ export const SENSORIUM_SERVICE_SUITE: SidebarServiceGroup[] = [
     ]
   },
   {
+    id: "grp-resilience",
+    name: "Infrastructure & Digital Resilience",
+    icon: Shield,
+    items: [
+      { id: "res-dora", label: "DORA Compliance Dashboard", page: "resilience", badge: "DORA", badgeType: "fips", keywords: "dora compliance resilience ue 2022 2554 piliers articles audit pas icdc" },
+      { id: "res-dns", label: "Flotte DNS Souveraine (1 571)", page: "resilience", badge: "DNS", badgeType: "live", keywords: "dns domaines fleet 1571 anycast dnssec ssl icdc cdc 25ml148 souverain" },
+      { id: "res-incidents", label: "Incidents P1 / P2 DORA", page: "resilience", keywords: "incidents p1 p2 dora acpr anssi escalade notification classification" },
+      { id: "res-psr", label: "Export PSR RFC 1035 (BIND)", page: "resilience", badge: "PSR", badgeType: "default", keywords: "psr plan reversibilite rfc 1035 bind zone export souverain migration" }
+    ]
+  },
+  {
     id: "grp-strategy",
     name: "Governance & Strategy",
     icon: Target,

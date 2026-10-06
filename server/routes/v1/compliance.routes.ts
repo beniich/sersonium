@@ -8,10 +8,16 @@ import {
   updateComplianceItem,
   deleteComplianceItem,
   ComplianceController,
+  getDoraMetrics,
+  getServiceHealth,
 } from "../../controllers/compliance.controller.js";
 import { authenticateToken, requireRole } from "../../middlewares/auth.middleware.js";
 
 const router = Router();
+
+// ── DORA Resilience Endpoints (public-read, authenticated) ────────────────────
+router.get("/dora-metrics", authenticateToken, getDoraMetrics);
+router.get("/service-health", authenticateToken, getServiceHealth);
 
 // 1. Récupération globale (par défaut ou par orgId)
 router.get("/", authenticateToken, getComplianceOverview);
@@ -28,3 +34,4 @@ router.put("/item", authenticateToken, requireRole("admin"), updateComplianceIte
 router.delete("/:category/:id", authenticateToken, requireRole("admin"), deleteComplianceItem);
 
 export default router;
+
