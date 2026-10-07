@@ -18,6 +18,7 @@ import terminalRoutes from "./terminal.routes.js";
 import bridgeRoutes from "./bridge.routes.js";
 import complianceRoutes from "./compliance.routes.js";
 import iotRoutes from "./iot.routes.js";
+import masterControlRoutes from "./masterControl.routes.js";
 import { apiRateLimiter } from "../../middlewares/rateLimit.middleware.js";
 import { csrfProtection } from "../../middlewares/csrf.middleware.js";
 import { executeSecurityAction } from "../../controllers/security.controller.js";
@@ -91,6 +92,9 @@ router.use("/grounding", groundingRoutes);
 
 // IoT Telemetry Stream (Kafka)
 router.use("/iot", iotRoutes);
+
+// Master Control Panel (Tableau de Bord Exécutif CEO/CTO)
+router.use("/master-control", masterControlRoutes);
 
 // Security Actions
 router.post("/security/action", executeSecurityAction);

@@ -23,6 +23,7 @@ const PricingPage = lazy(() => import("./pages/PricingPage"));
 const KafkaMonitor = lazy(() => import("./components/KafkaMonitor"));
 const ComplianceManager = lazy(() => import("./pages/admin/ComplianceManager"));
 const ResiliencePage = lazy(() => import("./pages/ResiliencePage"));
+const MasterControlPanel = lazy(() => import("./components/MasterControlPanel").then(m => ({ default: m.MasterControlPanel })));
 const CockpitConsoleView = lazy(() => import("./components/CockpitConsoleView").then(m => ({ default: m.CockpitConsoleView })));
 const VaultView = lazy(() => import("./components/VaultView").then(m => ({ default: m.VaultView })));
 const EsgGrafanaView = lazy(() => import("./components/EsgGrafanaView").then(m => ({ default: m.EsgGrafanaView })));
@@ -451,6 +452,7 @@ export default function App() {
       onSelectTab: (id: string) => setActiveItemId(id)
     };
     switch (activePage) {
+      case "master-control": return <MasterControlPanel isDark={isDark} />;
       case "overview": return <OverviewPage {...commonProps} />;
       case "strategy": return <StrategyPage {...commonProps} />;
       case "compliance": return <ComplianceManager isDark={isDark} />;

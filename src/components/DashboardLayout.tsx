@@ -69,6 +69,7 @@ export const SENSORIUM_SERVICE_SUITE: SidebarServiceGroup[] = [
     name: "Overview & ERP",
     icon: Layers,
     items: [
+      { id: "ov-master", label: "Master Control Panel (CEO/CTO)", page: "master-control", badge: "Command", badgeType: "live", keywords: "master control ceo cto executive tenants billing sockets db waste traffic server status command center" },
       { id: "ov-general", label: "Unified Dashboard & KPIs", page: "overview", badge: "Live", badgeType: "live", keywords: "cockpit metrics global home erp kpi dashboard" },
       { id: "ov-floorplan", label: "2D Building Floor Plan (CAFM)", page: "overview", badge: "2D SVG", badgeType: "svg", keywords: "floor plan campus datacenter svg rooms" },
       { id: "ov-map", label: "Global POP Map", page: "overview", keywords: "map geography nodes pop points presence" },
