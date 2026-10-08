@@ -22,6 +22,9 @@ import masterControlRoutes from "./masterControl.routes.js";
 import { apiRateLimiter } from "../../middlewares/rateLimit.middleware.js";
 import { csrfProtection } from "../../middlewares/csrf.middleware.js";
 import { executeSecurityAction } from "../../controllers/security.controller.js";
+import { requireActiveSubscription } from "../../middlewares/subscriptionGate.middleware.js";
+import { authenticateToken } from "../../middlewares/auth.middleware.js";
+import { requireTenant } from "../../middlewares/tenant.middleware.js";
 
 const router = Router();
 
@@ -51,50 +54,56 @@ router.use("/terminal", terminalRoutes);
 // Application du bouclier anti-CSRF sur toutes les routes à modification d'état (POST, PUT, PATCH, DELETE)
 router.use(csrfProtection);
 
+// =========================================================================
+// COCKPIT PROTECTED ROUTES (Requiert Auth + Tenant + Abonnement Actif)
+// Résout la faille du "Saut du Paywall" et assure l'étanchéité complète.
+// =========================================================================
+const cockpitAccess = [authenticateToken, requireTenant, requireActiveSubscription("STARTER")];
+
 // Carbon Management & Scope Metrics (Multi-Tenant Isolated)
-router.use("/carbon", carbonRoutes);
+router.use("/carbon", cockpitAccess, carbonRoutes);
 
 // Infrastructure Assets (Powered by crudFactory & RBAC permissions)
-router.use("/assets", assetRoutes);
+router.use("/assets", cockpitAccess, assetRoutes);
 
 // Observability, Metrics & Audit Trail
-router.use("/observability", observabilityRoutes);
+router.use("/observability", cockpitAccess, observabilityRoutes);
 
 // Sprint 1: Manage (Billing, Jetons & Credits)
-router.use("/manage", manageRoutes);
+router.use("/manage", cockpitAccess, manageRoutes);
 
 // Sprint 1: Zero Trust (Access Policies & Enforcement)
-router.use("/zero-trust", zeroTrustRoutes);
+router.use("/zero-trust", cockpitAccess, zeroTrustRoutes);
 
 // Sprint 2: Infrastructure (CAFM & Predictive Maintenance)
-router.use("/cafm", cafmRoutes);
+router.use("/cafm", cockpitAccess, cafmRoutes);
 
 // Sprint 2: Storage & DB (S3/R2 Presigned URLs & File Metadata)
-router.use("/storage", storageRoutes);
+router.use("/storage", cockpitAccess, storageRoutes);
 
 // Sprint 3: Global Traffic & Edge Network
-router.use("/traffic", trafficRoutes);
+router.use("/traffic", cockpitAccess, trafficRoutes);
 
 // Sprint 3: Security & WAF
-router.use("/security/waf", wafRoutes);
+router.use("/security/waf", cockpitAccess, wafRoutes);
 
 // Sprint 4: Compute & AI (Gemini Log Analysis & Diagnostics)
-router.use("/ai", aiRoutes);
+router.use("/ai", cockpitAccess, aiRoutes);
 
 // Sprint 4: Strategy & OKRs
-router.use("/strategy", strategyRoutes);
+router.use("/strategy", cockpitAccess, strategyRoutes);
 
 // Niveau 3: Sovereign Compliance Registry (Certifications, Permits, Insurances)
-router.use("/compliance", complianceRoutes);
+router.use("/compliance", cockpitAccess, complianceRoutes);
 
 // Grounding (Google Search & Maps)
-router.use("/grounding", groundingRoutes);
+router.use("/grounding", cockpitAccess, groundingRoutes);
 
 // IoT Telemetry Stream (Kafka)
-router.use("/iot", iotRoutes);
+router.use("/iot", cockpitAccess, iotRoutes);
 
 // Master Control Panel (Tableau de Bord Exécutif CEO/CTO)
-router.use("/master-control", masterControlRoutes);
+router.use("/master-control", cockpitAccess, masterControlRoutes);
 
 // Security Actions
 router.post("/security/action", executeSecurityAction);
