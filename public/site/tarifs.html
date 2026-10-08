@@ -457,4 +457,41 @@
   </script>
 </div></main><footer class="w-full bg-surface-container-low mt-space-xl border-t border-surface-variant/40"><div class="w-full px-gutter py-space-xl flex flex-col gap-space-lg"><div class="grid grid-cols-1 md:grid-cols-4 gap-space-lg"><div class="flex flex-col gap-space-sm"><div class="flex items-center gap-2"><img src="https://lh3.googleusercontent.com/aida/AEtjO1WfQYCtiqeNG54ygjSuWgezzJvNRFn46pLCNvp2e7Id3bhtMXk6yjzUgbnZSeZCVHUweMxEgpifSLDwnI1WmJJ24cWXR44dN6sUMHvuOdznVvI91v8NcptI5RfJsyMjpuA2VnUxe3lOdTB8lNMvFv7A6c7sRRzgj9miA3MLgf599L1cAc92XDf_De3VbOMEkNSsklNgO0A6ezaUNwBiBHRSfQM93befgRVuUv-l9vV5GxcEYQbNQ1iOmAo" alt="Sensorium Logo" class="w-8 h-8 rounded-full object-cover"><span class="font-title-md text-title-md font-bold text-on-surface">Sensorium CAFM Hub</span></div><p class="font-body-sm text-body-sm text-on-surface-variant">Continuous spatial telemetry, real-time HVAC balancing, and embodied carbon monitoring across tier-4 commercial facility estates.</p></div><div class="flex flex-col gap-space-xs"><span class="font-label-md text-label-md uppercase tracking-wider text-on-surface font-bold">Compliance &amp; Security</span><div class="flex flex-wrap gap-2 mt-1"><div class="tactile-debossed px-2.5 py-1 rounded-lg text-on-surface-variant font-label-sm text-label-sm font-semibold">ISO 27001</div><div class="tactile-debossed px-2.5 py-1 rounded-lg text-on-surface-variant font-label-sm text-label-sm font-semibold">SOC 2 Type II</div><div class="tactile-debossed px-2.5 py-1 rounded-lg text-on-surface-variant font-label-sm text-label-sm font-semibold">CSRD Ready</div><div class="tactile-debossed px-2.5 py-1 rounded-lg text-on-surface-variant font-label-sm text-label-sm font-semibold">BACnet/IP</div></div></div><div class="flex flex-col gap-space-xs"><span class="font-label-md text-label-md uppercase tracking-wider text-on-surface font-bold">Telemetry Status</span><div class="tactile-plate p-3 rounded-xl flex flex-col gap-1"><div class="flex justify-between items-center"><span class="font-label-sm text-label-sm text-on-surface-variant">Broker Sync</span><span class="font-label-sm text-label-sm text-primary font-bold">99.998% SLA</span></div><div class="w-full bg-surface-container-high h-1.5 rounded-full overflow-hidden"><div class="bg-primary h-full w-[99%]"></div></div><div class="flex justify-between items-center mt-1"><span class="font-label-sm text-label-sm text-on-surface-variant">Cluster Epoch</span><span class="font-label-sm text-label-sm text-on-surface font-semibold">#SP-4981-EU</span></div></div></div><div class="flex flex-col gap-space-xs"><span class="font-label-md text-label-md uppercase tracking-wider text-on-surface font-bold">Architecture Controls</span><div class="flex flex-col gap-1"><a class="font-body-sm text-body-sm text-on-surface-variant hover:text-on-surface" data-path="architecture" href="#">BIM Engine 4.0</a><a class="font-body-sm text-body-sm text-on-surface-variant hover:text-on-surface" data-path="esg-carbon" href="#">Carbon Offset Audit Vault</a><a class="font-body-sm text-body-sm text-on-surface-variant hover:text-on-surface" data-path="grafana-observability" href="#">Grafana Metric Pipes</a></div></div></div><div class="tactile-debossed p-3 rounded-xl flex flex-col sm:flex-row items-center justify-between gap-space-sm"><div class="flex items-center gap-2"><span class="material-symbols-outlined text-primary text-[18px]">verified_user</span><span class="font-label-md text-label-md text-on-surface-variant">Hardware Security Module Active • Zero-Trust Mesh • AES-256 GCM Payload Vault</span></div><span class="font-label-sm text-label-sm text-on-surface-variant">© 2024 Sensorium Spider Systems. Industrial Facility Automation.</span></div></div></footer>
 
+
+<script id="sensorium-navigation-bridge">
+(function() {
+  var pathMap = {"accueil":"/site/accueil.html","architecture":"/site/architecture.html","authentification":"/site/authentification.html","connexion":"/site/authentification.html","demarrer-essai-gratuit":"/site/authentification.html","benefices-roi":"/site/benefices_roi.html","benefices_roi":"/site/benefices_roi.html","demo":"/site/demo.html","demander-une-demo":"/site/demo.html","digital-twin-lifecycle":"/site/digital_twin_lifecycle.html","digital_twin_lifecycle":"/site/digital_twin_lifecycle.html","esg-carbon":"/site/esg_carbon.html","esg-and-carbon":"/site/esg_carbon.html","esg_carbon":"/site/esg_carbon.html","3d-digital-twin":"/site/jumeau_numerique_3d.html","jumeau_numerique_3d":"/site/jumeau_numerique_3d.html","piliers":"/site/piliers_industriels.html","piliers_industriels":"/site/piliers_industriels.html","6-core-pillars":"/site/piliers_industriels.html","sector_solutions":"/site/sector_solutions.html","solutions":"/site/solutions.html","tarifs":"/site/tarifs.html","pricing":"/site/tarifs.html","temoignages":"/site/temoignages.html","cockpit":"/dashboard","grafana-observability":"/dashboard"};
+  
+  document.addEventListener('click', function(e) {
+    var el = e.target.closest('[data-path]');
+    if (!el) return;
+    var target = el.getAttribute('data-path');
+    if (!target) return;
+    
+    e.preventDefault();
+    if (pathMap[target]) {
+      window.location.href = pathMap[target];
+    } else if (target === 'cockpit' || target === 'overview') {
+      window.location.href = '/dashboard';
+    } else {
+      window.location.href = '/site/' + target + '.html';
+    }
+  });
+
+  // Assurer la redirection automatique de tous les boutons Cockpit / Dashboard vers /dashboard
+  document.querySelectorAll('a, button').forEach(function(btn) {
+    var text = (btn.textContent || '').trim().toLowerCase();
+    if (text.includes('cockpit') || text.includes('execute override') || text.includes('launch cockpit')) {
+      if (!btn.getAttribute('href') || btn.getAttribute('href') === '#') {
+        btn.setAttribute('href', '/dashboard');
+        btn.onclick = function(ev) {
+          ev.preventDefault();
+          window.location.href = '/dashboard';
+        };
+      }
+    }
+  });
+})();
+</script>
+
 </body></html>

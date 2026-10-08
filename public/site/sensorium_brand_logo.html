@@ -27,3 +27,38 @@
   <circle cx="26" cy="64" r="2.5" fill="#fde047"/>
   <circle cx="26" cy="36" r="2.5" fill="#fde047"/>
 </svg>
+<script id="sensorium-navigation-bridge">
+(function() {
+  var pathMap = {"accueil":"/site/accueil.html","architecture":"/site/architecture.html","authentification":"/site/authentification.html","connexion":"/site/authentification.html","demarrer-essai-gratuit":"/site/authentification.html","benefices-roi":"/site/benefices_roi.html","benefices_roi":"/site/benefices_roi.html","demo":"/site/demo.html","demander-une-demo":"/site/demo.html","digital-twin-lifecycle":"/site/digital_twin_lifecycle.html","digital_twin_lifecycle":"/site/digital_twin_lifecycle.html","esg-carbon":"/site/esg_carbon.html","esg-and-carbon":"/site/esg_carbon.html","esg_carbon":"/site/esg_carbon.html","3d-digital-twin":"/site/jumeau_numerique_3d.html","jumeau_numerique_3d":"/site/jumeau_numerique_3d.html","piliers":"/site/piliers_industriels.html","piliers_industriels":"/site/piliers_industriels.html","6-core-pillars":"/site/piliers_industriels.html","sector_solutions":"/site/sector_solutions.html","solutions":"/site/solutions.html","tarifs":"/site/tarifs.html","pricing":"/site/tarifs.html","temoignages":"/site/temoignages.html","cockpit":"/dashboard","grafana-observability":"/dashboard"};
+  
+  document.addEventListener('click', function(e) {
+    var el = e.target.closest('[data-path]');
+    if (!el) return;
+    var target = el.getAttribute('data-path');
+    if (!target) return;
+    
+    e.preventDefault();
+    if (pathMap[target]) {
+      window.location.href = pathMap[target];
+    } else if (target === 'cockpit' || target === 'overview') {
+      window.location.href = '/dashboard';
+    } else {
+      window.location.href = '/site/' + target + '.html';
+    }
+  });
+
+  // Assurer la redirection automatique de tous les boutons Cockpit / Dashboard vers /dashboard
+  document.querySelectorAll('a, button').forEach(function(btn) {
+    var text = (btn.textContent || '').trim().toLowerCase();
+    if (text.includes('cockpit') || text.includes('execute override') || text.includes('launch cockpit')) {
+      if (!btn.getAttribute('href') || btn.getAttribute('href') === '#') {
+        btn.setAttribute('href', '/dashboard');
+        btn.onclick = function(ev) {
+          ev.preventDefault();
+          window.location.href = '/dashboard';
+        };
+      }
+    }
+  });
+})();
+</script>

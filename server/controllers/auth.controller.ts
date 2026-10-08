@@ -266,3 +266,72 @@ export const getProfile = async (req: AuthenticatedRequest, res: Response): Prom
     }
   });
 };
+
+/**
+ * GET /api/v1/auth/google/url
+ * Renvoie l'URL d'autorisation Google OAuth 2.0 (compatible sersonium.cloudindustrie.com)
+ */
+export const getGoogleAuthUrl = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { includeGmail } = req.query;
+    const { gmailService } = await import("../services/gmail.service.js");
+    const url = gmailService.getAuthorizationUrl(includeGmail === "true");
+    res.status(200).json({ success: true, url });
+  } catch (error: any) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+};
+
+/**
+ * GET /api/v1/auth/google/callback
+ * Point de rappel après consentement Google OAuth 2.0
+ */
+export const handleGoogleCallback = async (req: Request, res: Response): Promise<void> => {
+  const { code, error } = req.query;
+
+  if (error || !code) {
+    res.redirect(`/?auth_error=${encodeURIComponent(String(error || "Authorization code missing"))}`);
+    return;
+  }
+
+  try {
+    const { gmailService } = await import("../services/gmail.service.js");
+    const tokens = await gmailService.exchangeCodeForTokens(String(code));
+    const googleProfile = await gmailService.getUserProfile(tokens.access_token);
+
+    // Payload de session utilisateur Sensorium
+    const userPayload: UserPayload = {
+      userId: `google_${googleProfile.id}`,
+      email: googleProfile.email,
+      role: "admin", // Rôle par défaut
+      tenantId: "tenant_enterprise_cloudindustrie",
+      organizationName: "Cloud Industrie - SENSORIUM",
+      subscriptionTier: "enterprise"
+    };
+
+    const accessToken = signAccessToken(userPayload);
+    const refreshData = signRefreshToken(userPayload);
+
+    // Configuration des cookies de session
+    const cookieOptions = getRefreshTokenCookieOptions();
+    res.cookie(REFRESH_TOKEN_COOKIE_NAME, refreshData.token, cookieOptions);
+
+    const csrfToken = generateCsrfToken();
+    res.cookie(CSRF_COOKIE_NAME, csrfToken, {
+      httpOnly: false,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax",
+      path: "/"
+    });
+
+    // Redirection vers le dashboard Sensorium avec le token
+    const redirectBase = process.env.NODE_ENV === "production"
+      ? "https://sersonium.cloudindustrie.com"
+      : (process.env.APP_URL || "http://localhost:3000");
+
+    res.redirect(`${redirectBase}/?access_token=${accessToken}&auth_provider=google`);
+  } catch (err: any) {
+    res.redirect(`/?auth_error=${encodeURIComponent(err.message)}`);
+  }
+};
+

@@ -61,9 +61,11 @@ export const TactileHeader: React.FC<TactileHeaderProps> = ({
               onClick={() => handleNavClick('architecture')}
               className="tactile-plate w-10 h-10 sm:w-11 sm:h-11 rounded-xl flex items-center justify-center cursor-pointer hover:scale-105 transition-transform"
             >
-              <div className="w-6 h-6 sm:w-7 sm:h-7 rounded-lg bg-[#7c3aed] flex items-center justify-center text-white shadow-sm">
-                <span className="material-symbols-outlined text-[16px] sm:text-[18px]">deployed_code</span>
-              </div>
+              <img
+                src="/apple-touch-icon.png"
+                alt="SENSORIUM"
+                className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg object-contain shadow-sm"
+              />
             </div>
             <div className="flex flex-col cursor-pointer" onClick={() => handleNavClick('architecture')}>
               <div className="flex items-center gap-1.5">

@@ -233,6 +233,9 @@ sensorium_system_uptime_seconds ${snapshot.uptimeSeconds}
     apiRouterV1(req, res, next);
   });
 
+  // Service direct des pages HTML statiques du site vitrine Jumeau Numérique (/site/*)
+  app.use("/site", express.static(path.join(process.cwd(), "public", "site")));
+
   // Public Privacy Policy route for Google Play & OAuth validation
   app.get("/privacy", (req, res) => {
     res.sendFile(path.join(process.cwd(), "public", "privacy.html"));

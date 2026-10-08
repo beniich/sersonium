@@ -11,12 +11,14 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
           {/* Col 1 */}
           <div className="flex flex-col gap-2">
-            <div className="flex items-center gap-2">
-              <div className="w-6 h-6 rounded-lg bg-[#7c3aed] flex items-center justify-center text-white">
-                <span className="material-symbols-outlined text-[14px]">hub</span>
-              </div>
-              <span className="font-['Space_Grotesk'] text-sm font-bold text-[#1b1b20]">
-                Spider CAFM Hub
+            <div className="flex items-center gap-2.5">
+              <img 
+                src="/apple-touch-icon.png" 
+                alt="SENSORIUM Logo" 
+                className="w-7 h-7 rounded-lg shadow-md object-contain border border-[#7c3aed]/20" 
+              />
+              <span className="font-['Space_Grotesk'] text-sm font-bold text-[#1b1b20] tracking-wide">
+                SENSORIUM Spider Hub
               </span>
             </div>
             <p className="text-xs text-[#4a4455] leading-relaxed">
