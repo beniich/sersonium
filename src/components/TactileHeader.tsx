@@ -2,6 +2,10 @@ import React, { useState } from 'react';
 import type { User } from 'firebase/auth';
 
 export type ActiveNavPath =
+  | 'hub'
+  | 'lacaza'
+  | 'sensorium'
+  | 'nanobanana'
   | 'architecture'
   | '6-core-pillars'
   | '3d-digital-twin'

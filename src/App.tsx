@@ -395,7 +395,6 @@ export default function App() {
             onSignIn={handleSignIn}
             onSignOut={logout}
             onEnterMockMode={() => handleEnterDashboard("overview")}
-            onLaunchCockpit={() => handleEnterDashboard("cockpit")}
             onNavigateToSection={handleNavigateFromPortal}
             isDark={isDark}
             toggleTheme={toggleTheme}
@@ -410,6 +409,7 @@ export default function App() {
       </ThemeContext.Provider>
     );
   }
+
 
   // For protected / internal application dashboard views: show quick spinner only while auth is resolving
   if (authLoading) {
@@ -557,7 +557,7 @@ export default function App() {
             authError={authError}
             state={state}
             user={user}
-            initialView={activePage === "architecture" ? "architecture" : "architecture"}
+            initialView={activePage === "architecture" ? "hub" : "hub"}
             isEmbedded={true}
             onUpgradeTier={handleUpgradeTier}
           />

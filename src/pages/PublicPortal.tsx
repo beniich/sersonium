@@ -16,6 +16,9 @@ import { CtaSection } from '../components/CtaSection';
 import { Footer } from '../components/Footer';
 import { ScheduleModal } from '../components/ScheduleModal';
 import { TelemetryMetrics, SpatialNode, GlobalState } from '../types';
+import { ShowcaseHub } from '../components/ShowcaseHub';
+import { XiaomiLanding } from '../components/XiaomiLanding';
+import { SensoriumShowcase, NanoBananaShowcase } from '../components/SensoriumShowcase';
 import type { User } from 'firebase/auth';
 
 // Lazy-load heavier interactive sub-views on demand to make landing page load instant
@@ -217,6 +220,47 @@ export default function PublicPortal({
           </>
         )}
       </Suspense>
+
+      {/* SHOWCASE HUB */}
+      {currentView === 'hub' && (
+        <ShowcaseHub
+          onSelectTheme={(theme) => handleNavigate(theme as ActiveNavPath)}
+          onEnterDashboard={handleEnterDashboard}
+          isAuthenticated={!!user}
+          onSignIn={onSignIn}
+        />
+      )}
+
+      {/* LACAZA OS / XIAOMI EDITION */}
+      {currentView === 'lacaza' && (
+        <XiaomiLanding
+          onSignIn={onSignIn}
+          onEnterDashboard={handleEnterDashboard}
+          state={_globalState}
+        />
+      )}
+
+      {/* SENSORIUM */}
+      {currentView === 'sensorium' && (
+        <SensoriumShowcase
+          onSignIn={onSignIn}
+          onEnterDashboard={handleEnterDashboard}
+          onNavigateToSection={_onNavigateToSection || (() => {})}
+          state={_globalState}
+          user={user}
+        />
+      )}
+
+      {/* NANO BANANA */}
+      {currentView === 'nanobanana' && (
+        <NanoBananaShowcase
+          onSignIn={onSignIn}
+          onEnterDashboard={handleEnterDashboard}
+          onNavigateToSection={_onNavigateToSection || (() => {})}
+          state={_globalState}
+          user={user}
+        />
+      )}
 
       {/* VIEW 5 — ARCHITECTURE & SYSTEM TOPOLOGY / 6 PILLARS (nat---spider-cafm design) */}
       {(currentView === 'architecture' || currentView === '6-core-pillars') && (
