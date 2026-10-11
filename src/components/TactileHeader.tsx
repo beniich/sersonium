@@ -63,13 +63,30 @@ export const TactileHeader: React.FC<TactileHeaderProps> = ({
           <div className="flex items-center gap-2.5 sm:gap-4 shrink-0">
             <div
               onClick={() => handleNavClick('architecture')}
-              className="tactile-plate w-10 h-10 sm:w-11 sm:h-11 rounded-xl flex items-center justify-center cursor-pointer hover:scale-105 transition-transform"
+              className="w-10 h-10 sm:w-11 sm:h-11 rounded-xl flex items-center justify-center cursor-pointer hover:scale-105 transition-transform overflow-hidden shrink-0"
+              style={{ background: 'linear-gradient(135deg, #1c1c1f 0%, #0e0e11 60%, #050507 100%)', border: '1px solid rgba(255,255,255,0.14)', boxShadow: '0 4px 16px rgba(0,0,0,0.6)' }}
+              title="SENSORIUM Spider CAFM"
             >
-              <img
-                src="/apple-touch-icon.png"
-                alt="SENSORIUM"
-                className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg object-contain shadow-sm"
-              />
+              <svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-6 h-6 sm:w-7 sm:h-7">
+                <defs>
+                  <linearGradient id="thGold" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" stopColor="#FFFFFF" />
+                    <stop offset="45%" stopColor="#F5D061" />
+                    <stop offset="100%" stopColor="#E5A93B" />
+                  </linearGradient>
+                  <radialGradient id="thCore" cx="50%" cy="50%" r="50%">
+                    <stop offset="0%" stopColor="#FDE68A" />
+                    <stop offset="100%" stopColor="#D97706" />
+                  </radialGradient>
+                </defs>
+                <path d="M16 3L27.25 9.5V22.5L16 29L4.75 22.5V9.5L16 3Z" stroke="url(#thGold)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                <circle cx="16" cy="16" r="7.5" stroke="rgba(255,255,255,0.2)" strokeWidth="1" strokeDasharray="2 2" />
+                <circle cx="16" cy="16" r="4.5" stroke="url(#thGold)" strokeWidth="1.2" />
+                <circle cx="16" cy="16" r="2.2" fill="url(#thCore)" />
+                <circle cx="16" cy="6.5" r="1.1" fill="#FFFFFF" />
+                <circle cx="24.2" cy="20.7" r="1.1" fill="#FFFFFF" />
+                <circle cx="7.8" cy="20.7" r="1.1" fill="#FFFFFF" />
+              </svg>
             </div>
             <div className="flex flex-col cursor-pointer" onClick={() => handleNavClick('architecture')}>
               <div className="flex items-center gap-1.5">
