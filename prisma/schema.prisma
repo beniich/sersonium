@@ -38,6 +38,7 @@ model Organization {
   licenseKeys LicenseKey[]
   entitlements Entitlement[]
   accessGateLogs AccessGateLog[]
+  uemTerminals  UemTerminal[]
   needsSync   Boolean   @default(false)
 
   @@map("organizations")
@@ -454,6 +455,91 @@ model AccessGateLog {
   @@index([tenantId])
   @@index([createdAt])
   @@map("access_gate_logs")
+}
+
+// ============================================================================
+// UEM — UNIFIED ENDPOINT MANAGEMENT
+// Gestion des postes de travail, commandes à distance, politiques & alertes DLP
+// ============================================================================
+
+model UemTerminal {
+  id           String   @id @default(cuid())
+  tenantId     String
+  terminalId   String                          // Identifiant logique de l'agent (ex: "PC-CMR-001")
+  hostname     String
+  os           String   @default("Unknown")    // "Windows", "Linux", "macOS"
+  osVersion    String?
+  cpuCores     Int      @default(0)
+  ramGb        Float    @default(0.0)
+  diskGb       Float    @default(0.0)
+  installedApps String  @default("[]")         // JSON array de strings
+  lastIp       String?
+  agentVersion String   @default("1.0.0")
+  status       String   @default("UNKNOWN")    // ONLINE, OFFLINE, WARNING, CRITICAL, UNKNOWN
+  lastSeen     DateTime @default(now())
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  organization Organization @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@unique([tenantId, terminalId])
+  @@index([tenantId])
+  @@index([tenantId, status])
+  @@index([tenantId, lastSeen])
+  @@map("uem_terminals")
+}
+
+model UemCommandQueue {
+  id           String    @id @default(cuid())
+  tenantId     String
+  terminalId   String                           // Correspond à UemTerminal.terminalId
+  commandType  String                           // BLOCK_USB, INSTALL_APP, REBOOT, etc.
+  payload      String    @default("{}")         // JSON string
+  status       String    @default("PENDING")    // PENDING, EXECUTING, DONE, FAILED, TIMEOUT
+  result       String?                          // Résultat retourné par l'agent
+  createdBy    String?                          // userId de l'admin
+  createdAt    DateTime  @default(now())
+  executedAt   DateTime?
+  updatedAt    DateTime  @updatedAt
+
+  @@index([tenantId])
+  @@index([terminalId, status])
+  @@index([tenantId, createdAt])
+  @@map("uem_command_queue")
+}
+
+model UemSecurityPolicy {
+  id        String   @id @default(cuid())
+  tenantId  String
+  groupId   String                            // "default", "all", ou un terminalId spécifique
+  policy    String   @default("{}")           // JSON SecurityPolicy
+  updatedBy String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([tenantId, groupId])
+  @@index([tenantId])
+  @@map("uem_security_policies")
+}
+
+model UemAlert {
+  id              String    @id @default(cuid())
+  tenantId        String
+  terminalId      String
+  alertType       String                        // NON_COMPLIANT_SOFTWARE, USB_BLOCKED, AGENT_OFFLINE, etc.
+  severity        String    @default("MEDIUM")  // LOW, MEDIUM, HIGH, CRITICAL
+  message         String
+  details         String?   @default("{}")      // JSON
+  status          String    @default("OPEN")    // OPEN, ACKNOWLEDGED, RESOLVED
+  acknowledgedBy  String?
+  acknowledgedAt  DateTime?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  @@index([tenantId])
+  @@index([tenantId, status])
+  @@index([tenantId, terminalId])
+  @@map("uem_alerts")
 }
 
 

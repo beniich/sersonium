@@ -21,7 +21,9 @@ import {
   X,
   CreditCard,
   Users,
+  Building2,
 } from "lucide-react";
+import ClientRegistrationModal from "./ClientRegistrationModal";
 import {
   masterControlService,
   type MasterControlData,
@@ -40,6 +42,7 @@ export const MasterControlPanel: React.FC<MasterControlPanelProps> = ({ isDark =
   const [filterPlan, setFilterPlan] = useState<string>("ALL");
   const [filterStatus, setFilterStatus] = useState<string>("ALL");
   const [selectedRow, setSelectedRow] = useState<MasterControlRow | null>(null);
+  const [showClientModal, setShowClientModal] = useState(false);
   const [sortField, setSortField] = useState<keyof MasterControlRow>("tenantName");
   const [sortAsc, setSortAsc] = useState(true);
 
@@ -187,6 +190,14 @@ export const MasterControlPanel: React.FC<MasterControlPanelProps> = ({ isDark =
           >
             <FileSpreadsheet size={13} />
             <span>Export CSV</span>
+          </button>
+
+          <button
+            onClick={() => setShowClientModal(true)}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-gradient-to-r from-orange-500 to-amber-600 hover:from-orange-600 hover:to-amber-700 text-white text-xs font-semibold transition cursor-pointer shadow-md shadow-orange-500/20"
+          >
+            <Building2 size={13} />
+            <span>+ Enregistrer un Client &amp; Flotte</span>
           </button>
         </div>
       </div>
@@ -660,6 +671,15 @@ export const MasterControlPanel: React.FC<MasterControlPanelProps> = ({ isDark =
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* ── Modal Enregistrement Client & Configuration Réseau UEM ── */}
+      <ClientRegistrationModal
+        isOpen={showClientModal}
+        onClose={() => setShowClientModal(false)}
+        onClientRegistered={() => {
+          fetchData();
+        }}
+      />
     </div>
   );
 };

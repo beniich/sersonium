@@ -1,0 +1,9 @@
+{
+  "serverUrl": "https://api.sensorium.io/api/v1/uem",
+  "agentKey": "SENS-AGENT-CMR-SECURE-KEY",
+  "tenantId": "TENANT_ID_HERE",
+  "terminalId": "DESKTOP-457VH9P-win32",
+  "agentVersion": "1.0.0",
+  "pollIntervalMs": 60000,
+  "logFile": "C:\\Users\\pc gold\\projet dash\\Adash pull XXXXXXXXXXXXX\\SENSORIUM\\sersonium\\agent\\agent.log"
+}

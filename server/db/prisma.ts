@@ -35,3 +35,5 @@ export const rawPrisma =
 if (process.env.NODE_ENV !== "production") {
   globalForPrisma.prisma = rawPrisma;
 }
+
+export default rawPrisma;

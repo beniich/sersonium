@@ -160,6 +160,19 @@ export const SENSORIUM_SERVICE_SUITE: SidebarServiceGroup[] = [
     ]
   },
   {
+    id: "grp-uem",
+    name: "UEM Endpoint Management",
+    icon: Smartphone,
+    items: [
+      { id: "uem-cockpit", label: "UEM Cockpit — Terminaux CMR", page: "uem", badge: "UEM", badgeType: "live", keywords: "uem endpoint management terminaux pc mac linux agent deploy" },
+      { id: "uem-commands", label: "Commandes à distance", page: "uem", keywords: "usb bluetooth reboot shutdown install patch deploy commands uem" },
+      { id: "uem-alerts", label: "Alertes DLP & Conformité", page: "uem", badge: "DLP", badgeType: "ia", keywords: "dlp data loss prevention non compliant software alert security" },
+      { id: "uem-policies", label: "Politiques de sécurité", page: "uem", keywords: "policy security usb bluetooth firewall blacklist apps uem" },
+      { id: "uem-deploy", label: "Déploiement d'applications", page: "uem", keywords: "deploy patch software install msi update endpoint" },
+      { id: "uem-comparison", label: "Comparatif ManageEngine vs SENSORIUM", page: "comparison", badge: "VS", badgeType: "ia", keywords: "comparatif benchmark manageengine vs sensorium uem souverainete dora pas" }
+    ]
+  },
+  {
     id: "grp-zerotrust",
     name: "Zero Trust & Access (ZTNA)",
     icon: Lock,
@@ -283,6 +296,7 @@ export default function DashboardLayout(props: any) {
       case "grp-infrastructure": return t.sidebar.infrastructure;
       case "grp-network": return t.sidebar.network;
       case "grp-security": return t.sidebar.security;
+      case "grp-uem": return "UEM Endpoints";
       case "grp-zerotrust": return t.sidebar.zeroTrust;
       case "grp-storage": return t.sidebar.storage;
       case "grp-telemetry": return t.sidebar.telemetry;

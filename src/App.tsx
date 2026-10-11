@@ -23,6 +23,8 @@ const PricingPage = lazy(() => import("./pages/PricingPage"));
 const KafkaMonitor = lazy(() => import("./components/KafkaMonitor"));
 const ComplianceManager = lazy(() => import("./pages/admin/ComplianceManager"));
 const ResiliencePage = lazy(() => import("./pages/ResiliencePage"));
+const UemPage = lazy(() => import("./pages/UemPage"));
+const ComparisonPage = lazy(() => import("./pages/ComparisonPage"));
 const MasterControlPanel = lazy(() => import("./components/MasterControlPanel").then(m => ({ default: m.MasterControlPanel })));
 const CockpitConsoleView = lazy(() => import("./components/CockpitConsoleView").then(m => ({ default: m.CockpitConsoleView })));
 const VaultView = lazy(() => import("./components/VaultView").then(m => ({ default: m.VaultView })));
@@ -461,6 +463,8 @@ export default function App() {
       case "ad-campaigns": return <AdCampaignsPage isDark={isDark} />;
       case "security": return <SecurityPage {...commonProps} />;
       case "infrastructure": return <InfrastructurePage {...commonProps} />;
+      case "uem": return <UemPage isDark={isDark} />;
+      case "comparison": return <ComparisonPage isDark={isDark} onNavigate={(p) => setActivePage(p as any)} />;
       case "compute": return <ComputePage {...commonProps} />;
       case "settings": return <SettingsPage {...commonProps} />;
       case "network": return <NetworkPage {...commonProps} />;

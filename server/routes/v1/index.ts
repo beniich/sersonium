@@ -19,6 +19,7 @@ import bridgeRoutes from "./bridge.routes.js";
 import complianceRoutes from "./compliance.routes.js";
 import iotRoutes from "./iot.routes.js";
 import masterControlRoutes from "./masterControl.routes.js";
+import uemCockpitRoutes, { uemAgentRoutes } from "./uem.routes.js";
 import { apiRateLimiter } from "../../middlewares/rateLimit.middleware.js";
 import { csrfProtection } from "../../middlewares/csrf.middleware.js";
 import { executeSecurityAction } from "../../controllers/security.controller.js";
@@ -50,6 +51,10 @@ router.use("/paypal", paypalRoutes);
 
 // Hardware Terminal Edge Callbacks & Observability (Installation Success & Heartbeat)
 router.use("/terminal", terminalRoutes);
+
+// UEM Endpoint Agent Callbacks & Bootstrap (Pas de CSRF, auth par clé secrète X-Agent-Key)
+router.use("/uem/agent", uemAgentRoutes);
+router.use("/uem/installer", uemAgentRoutes);
 
 // Application du bouclier anti-CSRF sur toutes les routes à modification d'état (POST, PUT, PATCH, DELETE)
 router.use(csrfProtection);
@@ -104,6 +109,9 @@ router.use("/iot", cockpitAccess, iotRoutes);
 
 // Master Control Panel (Tableau de Bord Exécutif CEO/CTO)
 router.use("/master-control", cockpitAccess, masterControlRoutes);
+
+// UEM — Unified Endpoint Management Cockpit (gestion terminaux, commandes à distance, politiques DLP)
+router.use("/uem", cockpitAccess, uemCockpitRoutes);
 
 // Security Actions
 router.post("/security/action", executeSecurityAction);
