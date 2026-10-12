@@ -32,10 +32,9 @@ import {
   FileText,
   Wifi,
   WifiOff,
-  Crown,
-  Languages,
-  Smartphone,
-  ExternalLink
+  ExternalLink,
+  PanelLeftClose,
+  PanelLeftOpen
 } from "lucide-react";
 
 import { useLanguage } from "../App";
@@ -285,7 +284,24 @@ export default function DashboardLayout(props: any) {
   const [isPricingModalOpen, setIsPricingModalOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [collapsedGroups, setCollapsedGroups] = useState<Record<string, boolean>>({});
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState<boolean>(() => {
+    try {
+      return localStorage.getItem("sensorium_sidebar_collapsed") === "true";
+    } catch {
+      return false;
+    }
+  });
   const [isNavExportOpen, setIsNavExportOpen] = useState(false);
+
+  const toggleSidebarCollapse = () => {
+    setIsSidebarCollapsed(prev => {
+      const next = !prev;
+      try {
+        localStorage.setItem("sensorium_sidebar_collapsed", String(next));
+      } catch {}
+      return next;
+    });
+  };
   const { language, toggleLanguage, setLanguage } = useLanguage();
   const t = translations[language] || translations.en;
 
@@ -408,6 +424,23 @@ export default function DashboardLayout(props: any) {
           >
             <SensoriumLogo size="sm" badgeText="CONSOLE" />
           </div>
+
+          {/* Desktop Sidebar Toggle Button */}
+          <button
+            onClick={toggleSidebarCollapse}
+            className="hidden lg:flex items-center gap-1.5 px-2 py-1.5 rounded-lg text-slate-500 dark:text-neutral-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/[0.06] transition-colors text-xs font-mono border border-slate-200/80 dark:border-white/[0.08]"
+            title={isSidebarCollapsed ? "Déployer la barre latérale" : "Réduire la barre latérale"}
+            aria-label="Toggle sidebar width"
+          >
+            {isSidebarCollapsed ? (
+              <PanelLeftOpen className="w-4 h-4 text-orange-500" />
+            ) : (
+              <PanelLeftClose className="w-4 h-4 text-slate-400 dark:text-neutral-400" />
+            )}
+            <span className="hidden xl:inline text-[11px]">
+              {isSidebarCollapsed ? "Déplier" : "Réduire"}
+            </span>
+          </button>
         </div>
         
         {/* Top Header Actions Bar */}
@@ -705,144 +738,214 @@ export default function DashboardLayout(props: any) {
       {/* Main Layout Container */}
       <div className="flex flex-1 overflow-hidden h-[calc(100vh-56px)] sm:h-[calc(100vh-64px)] relative z-10">
         
-        {/* Exhaustive Master Sidebar on Desktop (lg+) with Silky Frosted Glass */}
-        <aside className="w-64 xl:w-72 flex-shrink-0 border-r border-slate-200/80 dark:border-white/[0.07] bg-white/70 dark:bg-[#070709]/85 backdrop-blur-2xl flex flex-col hidden lg:flex transition-colors duration-300">
+        {/* Exhaustive Master Sidebar on Desktop (lg+) with Silky Frosted Glass & Collapsible State */}
+        <aside className={`${isSidebarCollapsed ? "w-16" : "w-64 xl:w-72"} flex-shrink-0 border-r border-slate-200/80 dark:border-white/[0.07] bg-white/70 dark:bg-[#070709]/85 backdrop-blur-2xl flex flex-col hidden lg:flex transition-all duration-300`}>
           
-          {/* Search and Navigation Tools Header */}
-          <div className="p-3 border-b border-slate-200/80 dark:border-white/[0.06] space-y-2">
-            <div className="relative">
-              <Search className="w-3.5 h-3.5 text-slate-400 dark:text-neutral-500 absolute left-2.5 top-1/2 -translate-y-1/2" />
-              <input
-                type="text"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Filter services..."
-                className="w-full bg-slate-100/90 dark:bg-white/[0.04] border border-slate-200 dark:border-white/[0.07] focus:border-orange-500/50 rounded-lg pl-8 pr-7 py-1.5 text-xs text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-neutral-500 outline-none transition-colors"
-              />
-              {searchQuery && (
+          {isSidebarCollapsed ? (
+            /* Mini Icon Sidebar when collapsed */
+            <div className="flex flex-col h-full py-3 items-center justify-between">
+              <div className="flex flex-col items-center gap-2 w-full px-2">
                 <button
-                  onClick={() => setSearchQuery("")}
-                  className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 dark:text-neutral-400 hover:text-slate-700 dark:hover:text-white"
+                  onClick={toggleSidebarCollapse}
+                  className="p-2 rounded-lg text-slate-500 dark:text-neutral-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/[0.06] transition-colors"
+                  title="Déployer la barre latérale"
                 >
-                  <X className="w-3 h-3" />
+                  <PanelLeftOpen className="w-5 h-5 text-orange-500" />
                 </button>
+
+                <div className="w-8 h-px bg-slate-200 dark:bg-white/[0.08] my-1" />
+
+                {/* Group icons quick navigation */}
+                <div className="flex flex-col gap-1.5 w-full items-center overflow-y-auto max-h-[calc(100vh-220px)] custom-scrollbar py-1">
+                  {SENSORIUM_SERVICE_SUITE.map(group => {
+                    const hasActive = group.items.some(it => it.id === activeItemId);
+                    const firstItem = group.items[0];
+                    return (
+                      <button
+                        key={group.id}
+                        onClick={() => firstItem && handleSelectService(firstItem.page, firstItem.id)}
+                        className={`p-2 rounded-xl transition-all relative group flex items-center justify-center ${
+                          hasActive 
+                            ? "bg-orange-500/15 text-orange-600 dark:text-orange-400 border border-orange-500/30" 
+                            : "text-slate-500 dark:text-neutral-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/[0.06]"
+                        }`}
+                        title={getGroupName(group.id, group.name)}
+                      >
+                        <group.icon className="w-4 h-4" />
+                        {hasActive && (
+                          <span className="absolute right-1 top-1 w-1.5 h-1.5 rounded-full bg-orange-500" />
+                        )}
+                        {/* Tooltip on hover */}
+                        <div className="absolute left-full ml-2 px-2 py-1 bg-slate-900 text-white text-[11px] rounded shadow-lg whitespace-nowrap opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity z-50">
+                          {getGroupName(group.id, group.name)}
+                        </div>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {onReturnToPortal && (
+                <div className="p-2 w-full flex justify-center border-t border-slate-200/80 dark:border-white/[0.07]">
+                  <button
+                    onClick={onReturnToPortal}
+                    className="p-2 rounded-lg text-slate-500 dark:text-neutral-400 hover:text-violet-600 dark:hover:text-violet-400 hover:bg-slate-100 dark:hover:bg-white/[0.06] transition-colors"
+                    title="Site Web (Vitrine BeeCarbonat)"
+                  >
+                    <Globe className="w-4 h-4 text-violet-500" />
+                  </button>
+                </div>
               )}
             </div>
-
-            <div className="flex items-center justify-between text-[10px] text-slate-500 dark:text-neutral-400 font-mono px-1">
-              <span>{filteredStructure.reduce((a, b) => a + b.items.length, 0)} {t.header.availableServices}</span>
-              <div className="flex items-center gap-2">
-                <button 
-                  onClick={expandAllGroups}
-                  className="hover:text-slate-800 dark:hover:text-neutral-200 cursor-pointer"
-                  title={t.header.expandAll}
-                >
-                  {t.header.expandAll}
-                </button>
-                <span>•</span>
-                <button 
-                  onClick={collapseAllGroups}
-                  className="hover:text-slate-800 dark:hover:text-neutral-200 cursor-pointer"
-                  title={t.header.collapseAll}
-                >
-                  {t.header.collapseAll}
-                </button>
-              </div>
-            </div>
-          </div>
-
-          {/* Scrollable Services Tree */}
-          <div className="flex-1 overflow-y-auto px-2 py-3 space-y-4 custom-scrollbar">
-            {filteredStructure.map((group) => {
-              const isCollapsed = collapsedGroups[group.id] && !searchQuery;
-              const hasActiveItem = group.items.some(item => activeItemId === item.id);
-
-              return (
-                <div key={group.id} className="space-y-1">
-                  
-                  {/* Category Header with Toggle */}
+          ) : (
+            /* Full expanded sidebar */
+            <>
+              {/* Search and Navigation Tools Header */}
+              <div className="p-3 border-b border-slate-200/80 dark:border-white/[0.06] space-y-2">
+                <div className="flex items-center justify-between gap-1">
+                  <div className="relative flex-1">
+                    <Search className="w-3.5 h-3.5 text-slate-400 dark:text-neutral-500 absolute left-2.5 top-1/2 -translate-y-1/2" />
+                    <input
+                      type="text"
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      placeholder="Filter services..."
+                      className="w-full bg-slate-100/90 dark:bg-white/[0.04] border border-slate-200 dark:border-white/[0.07] focus:border-orange-500/50 rounded-lg pl-8 pr-7 py-1.5 text-xs text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-neutral-500 outline-none transition-colors"
+                    />
+                    {searchQuery && (
+                      <button
+                        onClick={() => setSearchQuery("")}
+                        className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 dark:text-neutral-400 hover:text-slate-700 dark:hover:text-white"
+                      >
+                        <X className="w-3 h-3" />
+                      </button>
+                    )}
+                  </div>
                   <button
-                    onClick={() => toggleGroupCollapse(group.id)}
-                    className="w-full flex items-center justify-between px-2.5 py-1 rounded text-[11px] font-semibold text-slate-600 dark:text-neutral-400 hover:text-slate-900 dark:hover:text-neutral-200 hover:bg-slate-100/80 dark:hover:bg-white/[0.03] transition-colors cursor-pointer group"
+                    onClick={toggleSidebarCollapse}
+                    className="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/[0.06] transition-colors shrink-0"
+                    title="Réduire la barre latérale"
                   >
-                    <div className="flex items-center gap-2 min-w-0">
-                      <group.icon className={`w-3.5 h-3.5 flex-shrink-0 ${hasActiveItem ? "text-orange-500 dark:text-orange-400" : "text-slate-400 dark:text-neutral-500"}`} />
-                      <span className="truncate uppercase tracking-wider text-[10px] font-mono">{getGroupName(group.id, group.name)}</span>
-                    </div>
+                    <PanelLeftClose className="w-4 h-4" />
+                  </button>
+                </div>
 
-                    <div className="flex items-center gap-1.5 flex-shrink-0">
-                      <span className="text-[9px] font-mono px-1.5 py-0.5 rounded bg-slate-100 dark:bg-white/[0.04] text-slate-600 dark:text-neutral-400 group-hover:text-slate-900 dark:group-hover:text-neutral-300">
-                        {group.items.length}
-                      </span>
-                      {isCollapsed ? (
-                        <ChevronRight className="w-3 h-3 text-slate-400 dark:text-neutral-500" />
-                      ) : (
-                        <ChevronDown className="w-3 h-3 text-slate-400 dark:text-neutral-500" />
+                <div className="flex items-center justify-between text-[10px] text-slate-500 dark:text-neutral-400 font-mono px-1">
+                  <span>{filteredStructure.reduce((a, b) => a + b.items.length, 0)} {t.header.availableServices}</span>
+                  <div className="flex items-center gap-2">
+                    <button 
+                      onClick={expandAllGroups}
+                      className="hover:text-slate-800 dark:hover:text-neutral-200 cursor-pointer"
+                      title={t.header.expandAll}
+                    >
+                      {t.header.expandAll}
+                    </button>
+                    <span>•</span>
+                    <button 
+                      onClick={collapseAllGroups}
+                      className="hover:text-slate-800 dark:hover:text-neutral-200 cursor-pointer"
+                      title={t.header.collapseAll}
+                    >
+                      {t.header.collapseAll}
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              {/* Scrollable Services Tree */}
+              <div className="flex-1 overflow-y-auto px-2 py-3 space-y-4 custom-scrollbar">
+                {filteredStructure.map((group) => {
+                  const isCollapsed = collapsedGroups[group.id] && !searchQuery;
+                  const hasActiveItem = group.items.some(item => activeItemId === item.id);
+
+                  return (
+                    <div key={group.id} className="space-y-1">
+                      
+                      {/* Category Header with Toggle */}
+                      <button
+                        onClick={() => toggleGroupCollapse(group.id)}
+                        className="w-full flex items-center justify-between px-2.5 py-1 rounded text-[11px] font-semibold text-slate-600 dark:text-neutral-400 hover:text-slate-900 dark:hover:text-neutral-200 hover:bg-slate-100/80 dark:hover:bg-white/[0.03] transition-colors cursor-pointer group"
+                      >
+                        <div className="flex items-center gap-2 min-w-0">
+                          <group.icon className={`w-3.5 h-3.5 flex-shrink-0 ${hasActiveItem ? "text-orange-500 dark:text-orange-400" : "text-slate-400 dark:text-neutral-500"}`} />
+                          <span className="truncate uppercase tracking-wider text-[10px] font-mono">{getGroupName(group.id, group.name)}</span>
+                        </div>
+
+                        <div className="flex items-center gap-1.5 flex-shrink-0">
+                          <span className="text-[9px] font-mono px-1.5 py-0.5 rounded bg-slate-100 dark:bg-white/[0.04] text-slate-600 dark:text-neutral-400 group-hover:text-slate-900 dark:group-hover:text-neutral-300">
+                            {group.items.length}
+                          </span>
+                          {isCollapsed ? (
+                            <ChevronRight className="w-3 h-3 text-slate-400 dark:text-neutral-500" />
+                          ) : (
+                            <ChevronDown className="w-3 h-3 text-slate-400 dark:text-neutral-500" />
+                          )}
+                        </div>
+                      </button>
+
+                      {/* Category Items */}
+                      {!isCollapsed && (
+                        <div className="space-y-0.5 pl-2 border-l border-slate-200/80 dark:border-white/[0.04] ml-2 mt-0.5">
+                          {group.items.map(item => {
+                            const isActive = activeItemId === item.id;
+                            return (
+                              <button
+                                key={item.id}
+                                onClick={() => handleSelectService(item.page, item.id)}
+                                className={`w-full text-left px-2.5 py-1.5 text-xs rounded-md transition-all flex items-center justify-between group cursor-pointer ${
+                                  isActive 
+                                    ? "bg-orange-500/10 dark:bg-white/[0.09] text-orange-600 dark:text-white font-medium border border-orange-500/25 dark:border-white/[0.12] shadow-2xs" 
+                                    : "text-slate-600 dark:text-neutral-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100/70 dark:hover:bg-white/[0.04]"
+                                }`}
+                              >
+                                <span className="truncate text-[12px]">{item.label}</span>
+                                
+                                <div className="flex items-center gap-1.5 flex-shrink-0 ml-1.5">
+                                  {item.badge && (
+                                    <span className={`text-[9px] font-mono px-1.5 py-0.2 rounded font-semibold ${getBadgeClass(item.badgeType)}`}>
+                                      {item.badge}
+                                    </span>
+                                  )}
+                                  {isActive && (
+                                    <div className="w-1.5 h-1.5 rounded-full bg-orange-500 shadow-[0_0_6px_rgba(249,115,22,0.6)]" />
+                                  )}
+                                </div>
+                              </button>
+                            );
+                          })}
+                        </div>
                       )}
                     </div>
-                  </button>
+                  );
+                })}
 
-                  {/* Category Items */}
-                  {!isCollapsed && (
-                    <div className="space-y-0.5 pl-2 border-l border-slate-200/80 dark:border-white/[0.04] ml-2 mt-0.5">
-                      {group.items.map(item => {
-                        const isActive = activeItemId === item.id;
-                        return (
-                          <button
-                            key={item.id}
-                            onClick={() => handleSelectService(item.page, item.id)}
-                            className={`w-full text-left px-2.5 py-1.5 text-xs rounded-md transition-all flex items-center justify-between group cursor-pointer ${
-                              isActive 
-                                ? "bg-orange-500/10 dark:bg-white/[0.09] text-orange-600 dark:text-white font-medium border border-orange-500/25 dark:border-white/[0.12] shadow-2xs" 
-                                : "text-slate-600 dark:text-neutral-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100/70 dark:hover:bg-white/[0.04]"
-                            }`}
-                          >
-                            <span className="truncate text-[12px]">{item.label}</span>
-                            
-                            <div className="flex items-center gap-1.5 flex-shrink-0 ml-1.5">
-                              {item.badge && (
-                                <span className={`text-[9px] font-mono px-1.5 py-0.2 rounded font-semibold ${getBadgeClass(item.badgeType)}`}>
-                                  {item.badge}
-                                </span>
-                              )}
-                              {isActive && (
-                                <div className="w-1.5 h-1.5 rounded-full bg-orange-500 shadow-[0_0_6px_rgba(249,115,22,0.6)]" />
-                              )}
-                            </div>
-                          </button>
-                        );
-                      })}
-                    </div>
-                  )}
-                </div>
-              );
-            })}
-
-            {filteredStructure.length === 0 && (
-              <div className="text-center py-8 px-4 text-slate-400 dark:text-neutral-500 text-xs">
-                <Search className="w-6 h-6 mx-auto mb-2 opacity-40" />
-                <p>No service matching "{searchQuery}"</p>
-                <button
-                  onClick={() => setSearchQuery("")}
-                  className="mt-2 text-orange-500 dark:text-orange-400 hover:underline text-xs"
-                >
-                  Reset filter
-                </button>
+                {filteredStructure.length === 0 && (
+                  <div className="text-center py-8 px-4 text-slate-400 dark:text-neutral-500 text-xs">
+                    <Search className="w-6 h-6 mx-auto mb-2 opacity-40" />
+                    <p>No service matching "{searchQuery}"</p>
+                    <button
+                      onClick={() => setSearchQuery("")}
+                      className="mt-2 text-orange-500 dark:text-orange-400 hover:underline text-xs"
+                    >
+                      Reset filter
+                    </button>
+                  </div>
+                )}
               </div>
-            )}
-          </div>
 
-          {/* Desktop Sidebar Footer Action */}
-          {onReturnToPortal && (
-            <div className="p-3 border-t border-slate-200/80 dark:border-white/[0.07] bg-slate-50/80 dark:bg-[#0c0c0e]/80">
-              <button
-                onClick={onReturnToPortal}
-                className="w-full py-2 px-3 rounded-lg bg-white dark:bg-white/[0.04] hover:bg-slate-100 dark:hover:bg-white/[0.08] border border-slate-200 dark:border-white/[0.07] text-slate-700 dark:text-neutral-300 hover:text-slate-900 dark:hover:text-white text-xs font-medium flex items-center justify-center gap-2 transition-all cursor-pointer group shadow-2xs"
-              >
-                <Globe className="w-3.5 h-3.5 text-violet-500 group-hover:scale-110 transition-transform" />
-                <span>Site Web (Vitrine BeeCarbonat)</span>
-              </button>
-            </div>
+              {/* Desktop Sidebar Footer Action */}
+              {onReturnToPortal && (
+                <div className="p-3 border-t border-slate-200/80 dark:border-white/[0.07] bg-slate-50/80 dark:bg-[#0c0c0e]/80">
+                  <button
+                    onClick={onReturnToPortal}
+                    className="w-full py-2 px-3 rounded-lg bg-white dark:bg-white/[0.04] hover:bg-slate-100 dark:hover:bg-white/[0.08] border border-slate-200 dark:border-white/[0.07] text-slate-700 dark:text-neutral-300 hover:text-slate-900 dark:hover:text-white text-xs font-medium flex items-center justify-center gap-2 transition-all cursor-pointer group shadow-2xs"
+                  >
+                    <Globe className="w-3.5 h-3.5 text-violet-500 group-hover:scale-110 transition-transform" />
+                    <span>Site Web (Vitrine BeeCarbonat)</span>
+                  </button>
+                </div>
+              )}
+            </>
           )}
         </aside>
 

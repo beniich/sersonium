@@ -45,7 +45,27 @@ export function useSubscriptionGate(user: User | null | undefined) {
   });
 
   const checkSubscription = useCallback(async () => {
+    // Vérifier si un abonnement ou un essai a été sélectionné localement
+    const savedTier = (localStorage.getItem('sensorium_user_tier') || localStorage.getItem('sensorium_subscription_tier') || '').toUpperCase() as SubscriptionTier;
+    const hasValidLocalTier = savedTier === 'STARTER' || savedTier === 'PRO' || savedTier === 'ENTERPRISE';
+
     if (!user) {
+      if (hasValidLocalTier) {
+        setSubState({
+          status: 'active',
+          tier: savedTier,
+          planName: savedTier === 'ENTERPRISE' ? 'Sovereign Fleet (Essai/Abonnement)' : savedTier === 'PRO' ? 'Hypervision Twin (Essai/Abonnement)' : 'BIM Foundation (Essai/Abonnement)',
+          hasAccessToCockpit: true,
+          has3dDigitalTwin: true,
+          hasRealtimeKafka: true,
+          hasZtnaHardware: savedTier === 'ENTERPRISE',
+          tokenBalance: 5000,
+          expiresAt: new Date(Date.now() + 14 * 24 * 3600 * 1000).toISOString(),
+          isLoading: false,
+        });
+        return;
+      }
+
       setSubState({
         status: 'none',
         tier: 'FREE',
