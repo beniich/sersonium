@@ -29,6 +29,8 @@ import DetailedChartJSDashboard from "../components/dashboard/DetailedChartJSDas
 import UnifiedDashboardView from "../components/UnifiedDashboardView";
 import AssetManagementDashboard from "../components/AssetManagementDashboard";
 import PerformanceMetricsChart from "../components/PerformanceMetricsChart";
+import ModularPortletsDashboard from "../components/ModularPortletsDashboard";
+import UnifiedAssetFile from "../components/UnifiedAssetFile";
 import { User } from "firebase/auth";
 
 interface OverviewPageProps {
@@ -40,10 +42,13 @@ interface OverviewPageProps {
   onSelectTab?: (id: string) => void;
   onSelectNode?: (node: EdgeNode) => void;
   onCreateWorkOrderForNode?: (nodeId: string) => void;
+  onOpenReportModal?: () => void;
 }
 
 const MODULE_TABS = [
-  { id: "ov-general", label: "Chart.js Cockpit", icon: LayoutDashboard },
+  { id: "ov-erp-portlets", label: "⚡ Command Center (Portlets ERP)", icon: LayoutDashboard },
+  { id: "ov-asset-hub", label: "🏢 Fiche Asset Unifiée 360°", icon: Building2 },
+  { id: "ov-general", label: "Chart.js Cockpit", icon: Layers },
   { id: "ov-perf", label: "Performance Metrics", icon: TrendingUp },
   { id: "ov-hybrid", label: "Convergence View", icon: Layers },
   { id: "ov-floorplan", label: "2D Building Floorplan", icon: Compass },
@@ -93,8 +98,26 @@ export default function OverviewPage({
     { id: "WO-8924", site: "Frankfurt POP-2 Site", task: "Rack Firmware Update", priority: "Low", status: "Completed" },
   ];
 
+  const [isCompactMode, setIsCompactMode] = useState<boolean>(() => {
+    try {
+      return localStorage.getItem("sensorium_compact_mode") === "true";
+    } catch {
+      return false;
+    }
+  });
+
+  const toggleCompactMode = () => {
+    setIsCompactMode(prev => {
+      const next = !prev;
+      try {
+        localStorage.setItem("sensorium_compact_mode", String(next));
+      } catch {}
+      return next;
+    });
+  };
+
   return (
-    <div className="space-y-3 sm:space-y-3.5 animate-in fade-in duration-200">
+    <div className={`space-y-3 sm:space-y-3.5 animate-in fade-in duration-200 ${isCompactMode ? "compact-erp-mode text-xs" : ""}`}>
       
       {/* Personalized Greeting Header with Firebase Profile & Daily Tasks */}
       <DashboardGreetingHeader 
@@ -111,27 +134,64 @@ export default function OverviewPage({
         }}
       />
 
-      {/* Flagship Capsule Tabs (Compact height, low vertical gap) */}
-      <div className="flex items-center gap-1.5 overflow-x-auto pb-0.5 no-scrollbar">
-        {MODULE_TABS.map((tab) => {
-          const Icon = tab.icon;
-          const isSelected = activeTab === tab.id;
-          return (
-            <button
-              key={tab.id}
-              onClick={() => handleTabChange(tab.id)}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs transition-all whitespace-nowrap cursor-pointer min-h-[32px] ${
-                isSelected
-                  ? "bg-slate-900 text-white dark:bg-white dark:text-black font-semibold shadow-xs"
-                  : "bg-slate-100 dark:bg-white/[0.04] border border-slate-200 dark:border-white/[0.06] text-slate-600 dark:text-neutral-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-200 dark:hover:bg-white/[0.08]"
-              }`}
-            >
-              <Icon className={`w-3.5 h-3.5 ${isSelected ? "text-orange-500 dark:text-orange-600" : "text-current"}`} />
-              <span>{tab.label}</span>
-            </button>
-          );
-        })}
+      {/* Flagship Capsule Tabs + Compact Mode Toggle */}
+      <div className="flex items-center justify-between gap-2 overflow-x-auto pb-0.5 no-scrollbar">
+        <div className="flex items-center gap-1.5 shrink-0">
+          {MODULE_TABS.map((tab) => {
+            const Icon = tab.icon;
+            const isSelected = activeTab === tab.id;
+            return (
+              <button
+                key={tab.id}
+                onClick={() => handleTabChange(tab.id)}
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs transition-all whitespace-nowrap cursor-pointer min-h-[32px] ${
+                  isSelected
+                    ? "bg-slate-900 text-white dark:bg-white dark:text-black font-semibold shadow-xs"
+                    : "bg-slate-100 dark:bg-white/[0.04] border border-slate-200 dark:border-white/[0.06] text-slate-600 dark:text-neutral-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-200 dark:hover:bg-white/[0.08]"
+                }`}
+              >
+                <Icon className={`w-3.5 h-3.5 ${isSelected ? "text-orange-500 dark:text-orange-600" : "text-current"}`} />
+                <span>{tab.label}</span>
+              </button>
+            );
+          })}
+        </div>
+
+        {/* Compact ERP Mode Toggle (Feature #4) */}
+        <button
+          onClick={toggleCompactMode}
+          className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-mono shrink-0 transition-all cursor-pointer border ${
+            isCompactMode 
+              ? "bg-orange-500 text-white border-orange-600 font-bold" 
+              : "bg-slate-100 dark:bg-white/[0.04] text-slate-600 dark:text-neutral-400 border-slate-200 dark:border-white/10 hover:text-slate-900 dark:hover:text-white"
+          }`}
+          title="Bascule entre le mode Standard espacé et le mode Opérationnel Compact NetSuite"
+        >
+          <span>{isCompactMode ? "⚡ Mode Compact ERP (Actif)" : "📐 Mode Standard (Espacé)"}</span>
+        </button>
       </div>
+
+      {/* 🚀 Feature #1 NetSuite : Portlets Modulaires Command Center */}
+      {activeTab === "ov-erp-portlets" && (
+        <ModularPortletsDashboard
+          state={state}
+          isDark={isDark}
+          isCompactMode={isCompactMode}
+          onNavigateTab={handleTabChange}
+          onSelectNode={onSelectNode}
+          onOpenReportModal={onOpenReportModal}
+        />
+      )}
+
+      {/* 🚀 Feature #3 NetSuite : Fiche Asset Unifiée 360° avec Onglets & Custom Fields */}
+      {activeTab === "ov-asset-hub" && (
+        <UnifiedAssetFile
+          state={state}
+          isDark={isDark}
+          isCompactMode={isCompactMode}
+          onNavigateTab={handleTabChange}
+        />
+      )}
 
       {/* Main Content Area based on Tab */}
       {activeTab === "ov-general" && (

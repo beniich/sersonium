@@ -446,25 +446,21 @@ export default function DashboardLayout(props: any) {
         {/* Top Header Actions Bar */}
         <div className="flex items-center gap-1.5 sm:gap-3">
           
-          {/* Global Quick Search - Syncs with sidebar filter */}
-          <div className="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-full bg-slate-100 dark:bg-white/[0.04] border border-slate-200 dark:border-white/[0.07] text-xs text-slate-500 dark:text-neutral-400 w-44 lg:w-64 focus-within:border-orange-500/50 transition-all">
-            <Search className="w-3.5 h-3.5 text-slate-400 dark:text-neutral-500 flex-shrink-0" />
-            <input 
-              type="text" 
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder={t.header.searchPlaceholder}
-              className="bg-transparent border-none outline-none w-full text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-neutral-600 text-xs" 
-            />
-            {searchQuery && (
-              <button 
-                onClick={() => setSearchQuery("")}
-                className="text-slate-400 dark:text-neutral-500 hover:text-slate-700 dark:hover:text-white text-xs p-0.5"
-                title="Clear search"
-              >
-                <X className="w-3 h-3" />
-              </button>
-            )}
+          {/* Global Quick Search - Opens Omniprésente Command Palette (Cmd+K / Ctrl+K) */}
+          <div 
+            onClick={() => {
+              window.dispatchEvent(new KeyboardEvent('keydown', { key: 'k', ctrlKey: true }));
+            }}
+            className="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-full bg-slate-100 dark:bg-white/[0.04] border border-slate-200 dark:border-white/[0.07] text-xs text-slate-500 dark:text-neutral-400 w-44 lg:w-64 cursor-pointer hover:border-orange-500/50 transition-all group"
+            title="Ouvrir la Recherche Globale Omniprésente (Ctrl+K ou Cmd+K)"
+          >
+            <Search className="w-3.5 h-3.5 text-slate-400 dark:text-neutral-500 group-hover:text-orange-500 flex-shrink-0 transition-colors" />
+            <span className="flex-1 truncate text-xs text-slate-500 dark:text-neutral-400 font-sans">
+              Recherche globale ERP...
+            </span>
+            <span className="text-[10px] font-mono px-1.5 py-0.2 rounded bg-slate-200 dark:bg-white/[0.08] text-slate-600 dark:text-neutral-300 border border-slate-300 dark:border-white/[0.08]">
+              ⌘K
+            </span>
           </div>
 
           {/* Zero-Config Edge Terminal Hardware Badge (hidden on narrow phones) */}

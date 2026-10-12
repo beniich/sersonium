@@ -4,6 +4,7 @@ import { AnimatePresence, motion } from "motion/react";
 import DashboardLayout from "./components/DashboardLayout";
 import PublicPortal from "./pages/PublicPortal";
 import { SubscriptionGuard } from "./bridge/SubscriptionGuard";
+import GlobalCommandPalette from "./components/GlobalCommandPalette";
 import { Loader2 } from "lucide-react";
 
 // Lazy-load dashboard pages to make initial website load ultra-fast and reduce main bundle
@@ -264,6 +265,19 @@ export default function App() {
   const [user, setUser] = useState<User | null>(null);
   const [authLoading, setAuthLoading] = useState(true);
   const [authError, setAuthError] = useState<string | null>(null);
+  const [isCommandPaletteOpen, setIsCommandPaletteOpen] = useState(false);
+
+  // Global Omniprésence Keyboard Shortcut (Cmd+K / Ctrl+K)
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key === "k") {
+        e.preventDefault();
+        setIsCommandPaletteOpen(prev => !prev);
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, []);
 
   useEffect(() => {
     const unsubscribe = initAuth(
@@ -640,6 +654,21 @@ export default function App() {
             </motion.div>
           </AnimatePresence>
         </DashboardLayout>
+
+        {/* Global Command Palette (Cmd+K / Ctrl+K) Omniprésente */}
+        <GlobalCommandPalette
+          isOpen={isCommandPaletteOpen}
+          onClose={() => setIsCommandPaletteOpen(false)}
+          state={state}
+          onNavigatePage={(page, itemId) => {
+            setActivePage(page as any);
+            if (itemId) setActiveItemId(itemId);
+          }}
+          onSelectNode={(node) => {
+            setActivePage("infrastructure" as any);
+            setActiveItemId("inf-racks");
+          }}
+        />
       </LanguageContext.Provider>
     </ThemeContext.Provider>
   );
