@@ -8,3 +8,5 @@ coverage/
 *.db-journal
 .env*
 !.env.example
+.dev.vars*
+*.pem

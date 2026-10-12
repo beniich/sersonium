@@ -1,0 +1,44 @@
+name = "sersonium"
+main = "server.ts"
+compatibility_date = "2026-10-12"
+compatibility_flags = ["nodejs_compat"]
+
+# Domaine personnalisé Cloudflare
+# routes = [
+#   { pattern = "sersonium.cloudindustrie.com", custom_domain = true }
+# ]
+
+[vars]
+APP_URL = "https://sersonium.cloudindustrie.com"
+EMAIL_FROM = "SENSORIUM Enterprise <contact@cloudindustrie.com>"
+GMAIL_USER_EMAIL = "contact@cloudindustrie.com"
+GOOGLE_CLIENT_ID = "143662316165-5ccbrhmle3rd7v24e66bfl64k47ccl63.apps.googleusercontent.com"
+GOOGLE_PROJECT_ID = "zaphir-auth"
+GOOGLE_REDIRECT_URI = "https://sersonium.cloudindustrie.com/api/v1/auth/google/callback"
+PAYPAL_CLIENT_ID = "BAA00dyc-fm10uZX1_VVXFtVsS1-VXdWR-MlnA1hPj65_Sn1KQ4g9QUSBPzmyL7NuwdAhm0Y6BZF_iYws0"
+PAYPAL_CURRENCY = "EUR"
+PAYPAL_MODE = "live"
+PAYPAL_WEBHOOK_ID = "35E46678GU990015U"
+PAYPAL_WEBHOOK_URL = "https://sersonium.cloudindustrie.com/api/v1/paypal/webhook"
+PGDATABASE = "neondb"
+PGHOST = "ep-proud-sound-b7bpne6c-pooler.c-13.us-east-1.aws.neon.tech"
+PGHOST_UNPOOLED = "ep-proud-sound-b7bpne6c.c-13.us-east-1.aws.neon.tech"
+PGUSER = "neondb_owner"
+PRODUCTION_DOMAIN = "https://sersonium.cloudindustrie.com"
+SMTP_HOST = "smtp.gmail.com"
+SMTP_PORT = "587"
+SMTP_USER = "contact@cloudindustrie.com"
+
+# ⚠️ Note de sécurité Cloudflare :
+# Les variables sensibles suivantes doivent être injectées via "wrangler secret put" :
+# - DATABASE_URL
+# - DATABASE_URL_UNPOOLED
+# - EDGE_SECRET
+# - SMTP_PASS
+# - GEMINI_API_KEY
+# - ENCRYPTION_KEY
+# - GOOGLE_CLIENT_SECRET
+# - JWT_ACCESS_SECRET
+# - JWT_REFRESH_SECRET
+# - PAYPAL_CLIENT_SECRET
+# - PGPASSWORD
