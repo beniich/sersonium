@@ -32,7 +32,9 @@ export interface EdgeNode {
   activeShift?: number;
   workOrderId?: string;
   workOrderTitle?: string;
-  pue?: number;
+  type?: string;
+  memoryUsage?: number;
+  lastHeartbeat?: string;
 }
 
 export interface SecurityEvent {
@@ -365,6 +367,7 @@ export interface GlobalState {
   spareParts?: SparePart[];
   assetHierarchy?: AssetHierarchyItem[];
   preventivePlans?: PreventiveSchedulePlan[];
+  securityAlerts?: Array<{ id?: string; title?: string; message?: string; severity?: string; source?: string; timestamp?: string }>;
 }
 
 export interface TelemetryMetrics {

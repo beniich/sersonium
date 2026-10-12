@@ -2,7 +2,12 @@
   "name": "SENSORIUM",
   "description": "Sovereign platform for sensory intelligence, Edge AI orchestration, and real-time supervision of critical infrastructure.",
   "requestFramePermissions": [],
+  "productionDomain": "sersonium.cloudindustrie.com",
+  "version": "2.4.0",
+  "environment": "production",
   "majorCapabilities": [
-    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API",
+    "MAJOR_CAPABILITY_REALTIME_IOT_TELEMETRY",
+    "MAJOR_CAPABILITY_ENTERPRISE_RBAC_MULTI_TENANT"
   ]
 }

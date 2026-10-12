@@ -92,7 +92,7 @@ export const ModularPortletsDashboard: React.FC<ModularPortletsDashboardProps> =
   };
 
   const nodes = state?.nodes || [];
-  const criticalNodes = nodes.filter(n => n.status !== "online" || (n.cpuUsage && n.cpuUsage > 75)).slice(0, 5);
+  const criticalNodes = nodes.filter(n => (n.status as string) !== "active" || (n.cpuUsage && n.cpuUsage > 75)).slice(0, 5);
 
   return (
     <div className="w-full space-y-4">
@@ -292,7 +292,7 @@ export const ModularPortletsDashboard: React.FC<ModularPortletsDashboardProps> =
                             <td className="py-1.5 px-2 text-slate-500">{n.location}</td>
                             <td className="py-1.5 px-2">
                               <span className={`px-1.5 py-0.2 rounded text-[10px] font-semibold ${
-                                n.status === "online" 
+                                (n.status as string) === "active" || (n.status as string) === "online"
                                   ? "bg-emerald-500/10 text-emerald-500" 
                                   : "bg-rose-500/10 text-rose-500"
                               }`}>
@@ -300,7 +300,7 @@ export const ModularPortletsDashboard: React.FC<ModularPortletsDashboardProps> =
                               </span>
                             </td>
                             <td className="py-1.5 px-2">{n.cpuUsage}%</td>
-                            <td className="py-1.5 px-2">{n.memoryUsage}%</td>
+                            <td className="py-1.5 px-2">{n.ramUsage ?? n.memoryUsage ?? 0}%</td>
                             <td className="py-1.5 px-2">
                               <button
                                 onClick={() => {

@@ -48,6 +48,8 @@ import SensoriumLogo from "./SensoriumLogo";
 import QuickSetupDrawer from "./QuickSetupDrawer";
 import SubscriptionPricingModal from "./SubscriptionPricingModal";
 import TerminalStatusBadge from "./TerminalStatusBadge";
+import { useRbac, ROLE_LABELS, ROLE_COLORS, RbacRole } from "../bridge/useRbac";
+import EnterpriseLoginModal from "./EnterpriseLoginModal";
 
 export interface SidebarServiceItem {
   id: string;
@@ -202,6 +204,7 @@ export const SENSORIUM_SERVICE_SUITE: SidebarServiceGroup[] = [
     name: "Real-Time Streams (Kafka)",
     icon: Activity,
     items: [
+      { id: "tel-realtime", label: "🔴 Télémétrie Temps Réel (BACnet/MQTT)", page: "realtime", badge: "LIVE", badgeType: "live", keywords: "telemetry realtime bacnet mqtt modbus opcua iaq cvc electrical water sensors live" },
       { id: "tel-1", label: "Kafka Topics Monitoring", page: "telemetry", badge: "Kafka", badgeType: "stream", keywords: "kafka topics partitions offset stream" },
       { id: "tel-2", label: "Producers & Consumers", page: "telemetry", keywords: "producers consumers lag throughput" },
       { id: "tel-3", label: "Avro Schemas & Ingestion", page: "telemetry", keywords: "avro json schemas serialization broker" }
@@ -246,6 +249,7 @@ export const SENSORIUM_SERVICE_SUITE: SidebarServiceGroup[] = [
     name: "Administration & IAM",
     icon: Settings,
     items: [
+      { id: "iam-admin", label: "🔐 IAM & RBAC Multi-Tenant", page: "iam", badge: "Enterprise", badgeType: "live", keywords: "iam rbac roles permissions tenants sso saml azure ad enterprise auth authentication" },
       { id: "pricing-plans", label: "Plans & Pricing (Lite/Pro)", page: "pricing", badge: "Pro", badgeType: "ia", keywords: "pricing plans subscriptions paypal billing lite pro" },
       { id: "set-1", label: "Billing & PayPal Gateway", page: "settings", badge: "PayPal", badgeType: "paypal", keywords: "billing paypal cards subscriptions payments" },
       { id: "set-2", label: "Roles & RBAC Management", page: "settings", keywords: "rbac roles permissions authorizations members" },
@@ -295,6 +299,8 @@ export default function DashboardLayout(props: any) {
     }
   });
   const [isNavExportOpen, setIsNavExportOpen] = useState(false);
+  const [isEnterpriseLoginOpen, setIsEnterpriseLoginOpen] = useState(false);
+  const { session: rbacSession } = useRbac();
 
   const toggleSidebarCollapse = () => {
     setIsSidebarCollapsed(prev => {
@@ -572,6 +578,38 @@ export default function DashboardLayout(props: any) {
           >
             <SlidersHorizontal className="w-3.5 h-3.5 text-orange-500 animate-pulse" />
             <span className="hidden md:inline">{t.header.quickSetup}</span>
+          </button>
+
+          {/* Enterprise Auth / RBAC Button */}
+          <button
+            onClick={() => {
+              if (rbacSession) {
+                setActivePage("iam" as any);
+                setActiveItemId("iam-admin");
+              } else {
+                setIsEnterpriseLoginOpen(true);
+              }
+            }}
+            className={`hidden sm:flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-full text-xs font-semibold transition-all cursor-pointer min-h-[36px] ${
+              rbacSession
+                ? "bg-indigo-500/10 hover:bg-indigo-500/20 border border-indigo-500/30 text-indigo-600 dark:text-indigo-400"
+                : "bg-slate-100 hover:bg-slate-200 dark:bg-white/[0.04] dark:hover:bg-white/[0.08] border border-slate-200 dark:border-white/[0.07] text-slate-700 dark:text-neutral-300"
+            }`}
+            title={rbacSession ? `${rbacSession.displayName} · ${ROLE_LABELS[rbacSession.role]} · ${rbacSession.tenant.name}` : "Connexion Entreprise / Multi-Tenant RBAC"}
+          >
+            {rbacSession ? (
+              <>
+                <span style={{ color: ROLE_COLORS[rbacSession.role], fontSize: "14px" }}>
+                  {rbacSession.role === "SUPER_ADMIN" ? "👑" : rbacSession.role === "TENANT_ADMIN" ? "🏢" : rbacSession.role === "FACILITY_LEAD" ? "🏗️" : rbacSession.role === "FIELD_TECHNICIAN" ? "🔧" : rbacSession.role === "CSRD_AUDITOR" ? "📋" : "👁️"}
+                </span>
+                <span className="hidden md:inline" style={{ color: ROLE_COLORS[rbacSession.role] }}>{ROLE_LABELS[rbacSession.role].split(" ")[0]}</span>
+              </>
+            ) : (
+              <>
+                <LogIn className="w-3.5 h-3.5" />
+                <span className="hidden md:inline">Entreprise SSO</span>
+              </>
+            )}
           </button>
 
           {/* Strategic Export (PDF & CSV) */}
@@ -1095,6 +1133,17 @@ export default function DashboardLayout(props: any) {
           if (state) state.subscriptionTier = tier;
         }}
         isDark={isDark}
+      />
+
+      {/* Enterprise SSO / RBAC Login Modal */}
+      <EnterpriseLoginModal
+        isOpen={isEnterpriseLoginOpen}
+        onClose={() => setIsEnterpriseLoginOpen(false)}
+        onSuccess={() => {
+          setIsEnterpriseLoginOpen(false);
+          setActivePage("iam" as any);
+          setActiveItemId("iam-admin");
+        }}
       />
     </div>
   );

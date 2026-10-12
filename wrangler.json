@@ -1,0 +1,39 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "sersonium",
+  "main": "server.ts",
+  "compatibility_date": "2026-10-12",
+  "compatibility_flags": [
+    "nodejs_compat"
+  ],
+  "assets": {
+    "directory": "./dist",
+    "binding": "ASSETS"
+  },
+  "vars": {
+    "APP_URL": "https://sersonium.cloudindustrie.com",
+    "DATABASE_URL": "postgresql://neondb_owner:npg_zV6cLITsuX9N@ep-proud-sound-b7bpne6c-pooler.c-13.us-east-1.aws.neon.tech/neondb?channel_binding=require&sslmode=require",
+    "DATABASE_URL_UNPOOLED": "postgresql://neondb_owner:npg_zV6cLITsuX9N@ep-proud-sound-b7bpne6c.c-13.us-east-1.aws.neon.tech/neondb?sslmode=require",
+    "EDGE_SECRET": "sensorium_edge_iot_hmac_secret_prod_2026",
+    "EMAIL_FROM": "SENSORIUM Enterprise <contact@cloudindustrie.com>",
+    "GEMINI_API_KEY": "",
+    "GMAIL_USER_EMAIL": "contact@cloudindustrie.com",
+    "GOOGLE_CLIENT_ID": "143662316165-5ccbrhmle3rd7v24e66bfl64k47ccl63.apps.googleusercontent.com",
+    "GOOGLE_PROJECT_ID": "zaphir-auth",
+    "GOOGLE_REDIRECT_URI": "https://sersonium.cloudindustrie.com/api/v1/auth/google/callback",
+    "PAYPAL_CLIENT_ID": "BAA00dyc-fm10uZX1_VVXFtVsS1-VXdWR-MlnA1hPj65_Sn1KQ4g9QUSBPzmyL7NuwdAhm0Y6BZF_iYws0",
+    "PAYPAL_CURRENCY": "EUR",
+    "PAYPAL_MODE": "live",
+    "PAYPAL_WEBHOOK_ID": "35E46678GU990015U",
+    "PAYPAL_WEBHOOK_URL": "https://sersonium.cloudindustrie.com/api/v1/paypal/webhook",
+    "PGDATABASE": "neondb",
+    "PGHOST": "ep-proud-sound-b7bpne6c-pooler.c-13.us-east-1.aws.neon.tech",
+    "PGHOST_UNPOOLED": "ep-proud-sound-b7bpne6c.c-13.us-east-1.aws.neon.tech",
+    "PGUSER": "neondb_owner",
+    "PRODUCTION_DOMAIN": "https://sersonium.cloudindustrie.com",
+    "SMTP_HOST": "smtp.gmail.com",
+    "SMTP_PASS": "votre_mot_de_passe_application_google",
+    "SMTP_PORT": "587",
+    "SMTP_USER": "contact@cloudindustrie.com"
+  }
+}

@@ -66,7 +66,8 @@ export default function OverviewPage({
   onSignIn,
   onSelectTab,
   onSelectNode,
-  onCreateWorkOrderForNode
+  onCreateWorkOrderForNode,
+  onOpenReportModal
 }: OverviewPageProps) {
   const activeTab = MODULE_TABS.some(t => t.id === activeItemId) ? activeItemId : "ov-general";
 

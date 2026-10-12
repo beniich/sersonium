@@ -6,6 +6,8 @@ import PublicPortal from "./pages/PublicPortal";
 import { SubscriptionGuard } from "./bridge/SubscriptionGuard";
 import GlobalCommandPalette from "./components/GlobalCommandPalette";
 import { Loader2 } from "lucide-react";
+import { RbacProvider } from "./bridge/useRbac";
+import EnterpriseLoginModal from "./components/EnterpriseLoginModal";
 
 // Lazy-load dashboard pages to make initial website load ultra-fast and reduce main bundle
 const OverviewPage = lazy(() => import("./pages/OverviewPage"));
@@ -22,6 +24,8 @@ const BrandVisionPage = lazy(() => import("./pages/BrandVisionPage"));
 const AdCampaignsPage = lazy(() => import("./pages/AdCampaignsPage"));
 const PricingPage = lazy(() => import("./pages/PricingPage"));
 const KafkaMonitor = lazy(() => import("./components/KafkaMonitor"));
+const RealTimeDashboard = lazy(() => import("./components/RealTimeDashboard").then(m => ({ default: m.RealTimeDashboard })));
+const IamAdminPage = lazy(() => import("./pages/IamAdminPage").then(m => ({ default: m.IamAdminPage })));
 const ComplianceManager = lazy(() => import("./pages/admin/ComplianceManager"));
 const ResiliencePage = lazy(() => import("./pages/ResiliencePage"));
 const UemPage = lazy(() => import("./pages/UemPage"));
@@ -486,6 +490,8 @@ export default function App() {
       case "storage": return <StoragePage {...commonProps} />;
       case "workspace": return <WorkspacePage {...commonProps} />;
       case "telemetry": return <KafkaMonitor {...commonProps} />;
+      case "realtime": return <RealTimeDashboard initialConfig={{ mode: "simulation", siteProfile: "datacenter" }} />;
+      case "iam": return <IamAdminPage isDark={isDark} />;
       case "cockpit":
       case "digital-twin":
         return (
@@ -614,6 +620,7 @@ export default function App() {
   };
 
   return (
+    <RbacProvider>
     <ThemeContext.Provider value={themeContextValue}>
       <LanguageContext.Provider value={languageContextValue}>
         <DashboardLayout 
@@ -671,5 +678,6 @@ export default function App() {
         />
       </LanguageContext.Provider>
     </ThemeContext.Provider>
+    </RbacProvider>
   );
 }
