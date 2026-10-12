@@ -32,6 +32,9 @@ import {
   FileText,
   Wifi,
   WifiOff,
+  Crown,
+  Languages,
+  Smartphone,
   ExternalLink,
   PanelLeftClose,
   PanelLeftOpen
