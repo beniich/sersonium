@@ -3,6 +3,11 @@ main = "worker.ts"
 compatibility_date = "2026-10-12"
 compatibility_flags = ["nodejs_compat"]
 
+workers_dev = false
+
+[observability]
+enabled = true
+
 [build]
 command = "npm run build"
 
