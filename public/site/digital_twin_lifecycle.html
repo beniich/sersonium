@@ -117,67 +117,50 @@
 </head>
 <body class="bg-[#fafbfc] text-[#090d16] font-body-md antialiased selection:bg-purple-100 selection:text-purple-900">
 <!-- TOP LUXURY HEADER -->
-<header class="fixed top-0 w-full z-50 bg-white/80 backdrop-blur-2xl border-b border-slate-200/80 transition-all">
-<div class="max-w-[1440px] mx-auto h-20 px-6 sm:px-10 flex items-center justify-between gap-6">
-<!-- Brand Logo Haute Gamme -->
-<div class="flex items-center gap-4">
-<a class="flex items-center gap-3 group" href="#">
-<svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" style="width:40px;height:40px;flex-shrink:0;border-radius:12px;background:linear-gradient(135deg,#1c1c1f 0%,#0e0e11 55%,#050507 100%);border:1px solid rgba(255,255,255,0.14);box-shadow:0 4px 16px rgba(0,0,0,0.55);"><defs><linearGradient id="sg2" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#FFFFFF"/><stop offset="45%" stop-color="#F5D061"/><stop offset="100%" stop-color="#E5A93B"/></linearGradient><radialGradient id="sc2" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="#FDE68A"/><stop offset="100%" stop-color="#D97706"/></radialGradient></defs><path d="M32 10L52 21.5V42.5L32 54L12 42.5V21.5L32 10Z" stroke="url(#sg2)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/><circle cx="32" cy="32" r="14" stroke="rgba(255,255,255,0.2)" stroke-width="1.5" stroke-dasharray="3 3"/><circle cx="32" cy="32" r="9" stroke="url(#sg2)" stroke-width="2"/><circle cx="32" cy="32" r="4.5" fill="url(#sc2)"/><circle cx="32" cy="14" r="2.2" fill="#FFF"/><circle cx="46" cy="41" r="2.2" fill="#FFF"/><circle cx="18" cy="41" r="2.2" fill="#FFF"/></svg>
-<div class="flex flex-col">
-<div class="flex items-center gap-1.5">
-<span class="font-headline-sm text-[18px] font-bold tracking-tight text-slate-950">Sensorium</span>
-<span class="px-1.5 py-0.5 rounded text-[10px] font-label-sm font-bold bg-violet-100 text-violet-800 tracking-wider">PRO</span>
-</div>
-<span class="font-label-sm text-[11px] uppercase tracking-widest text-violet-700 font-semibold">Spider CAFM Twin</span>
-</div>
-</a>
-<!-- System Mesh Status Badge -->
-<div class="hidden 2xl:flex items-center gap-2 bg-slate-100/90 border border-slate-200/90 px-3 py-1 rounded-full text-[11px] font-label-sm">
-<span class="relative flex h-2 w-2">
-<span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-500 opacity-75"></span>
-<span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-600"></span>
-</span>
-<span class="text-slate-700 font-medium">14,890 Edge Nodes</span>
-<span class="text-slate-300">•</span>
-<span class="text-emerald-700 font-semibold">&lt; 0.4ms Ingress</span>
-</div>
-</div>
-<!-- Main Navigation -->
-<nav class="hidden lg:flex items-center gap-1 xl:gap-2 font-body-md text-sm font-medium text-slate-600">
-<a class="px-3 py-1.5 rounded-lg text-slate-900 font-semibold hover:bg-slate-100/80 transition-colors flex items-center gap-1.5" href="#token-lifecycle">
-<span class="material-symbols-outlined text-violet-600 text-[18px]">verified_user</span>
-          Token Lifecycle
-        </a>
-<a class="px-3 py-1.5 rounded-lg hover:text-slate-950 hover:bg-slate-100/80 transition-colors" href="#cockpit">3D Digital Twin</a>
-<a class="px-3 py-1.5 rounded-lg hover:text-slate-950 hover:bg-slate-100/80 transition-colors" href="#pillars">6 Core Pillars</a>
-<a class="px-3 py-1.5 rounded-lg hover:text-slate-950 hover:bg-slate-100/80 transition-colors" href="#architecture">Architecture</a>
-<a class="px-3 py-1.5 rounded-lg hover:text-slate-950 hover:bg-slate-100/80 transition-colors" href="#metrics">Compliance</a>
-</nav>
-<!-- Right Header Actions with Daily Token Countdown Chip -->
-<div class="flex items-center gap-3">
-<!-- Daily Security Token Expiry HUD Chip -->
-<div class="hidden md:flex items-center gap-2 bg-gradient-to-r from-violet-50 to-indigo-50 border border-violet-200/90 px-3 py-1.5 rounded-xl shadow-xs">
-<span class="material-symbols-outlined text-violet-700 text-[16px] animate-pulse">lock_clock</span>
-<div class="flex flex-col text-left">
-<span class="font-label-sm text-[9px] uppercase tracking-wider text-violet-900/70 font-semibold leading-none">Rolling Token</span>
-<span class="font-label-sm text-[12px] font-bold text-violet-950 tracking-tight leading-tight">Exp: 04h 22m 18s</span>
-</div>
-<span class="w-1.5 h-1.5 rounded-full bg-violet-600"></span>
-</div>
-<a class="hidden sm:inline-flex items-center px-3.5 py-2 text-sm font-semibold text-slate-700 hover:text-slate-950 hover:bg-slate-100 rounded-xl transition-all" href="#token-lifecycle">
-          Console Login
-        </a>
-<!-- Launch Cockpit Haute Gamme CTA Button -->
-<a class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold text-white bg-gradient-to-r from-violet-700 via-purple-700 to-indigo-700 hover:from-violet-800 hover:to-indigo-800 shadow-[0_4px_16px_rgba(109,40,217,0.28)] hover:shadow-[0_6px_22px_rgba(109,40,217,0.38)] transition-all transform hover:-translate-y-0.5" href="#cockpit">
-<span class="material-symbols-outlined text-[19px]">view_in_ar</span>
-<span class="">Launch Cockpit</span>
-</a>
-<!-- User profile Avatar -->
-<div class="w-9 h-9 rounded-xl bg-slate-100 border border-slate-200 flex items-center justify-center text-slate-700 hover:border-violet-300 transition-colors cursor-pointer">
-<span class="material-symbols-outlined text-[20px]">person</span>
-</div>
-</div>
-</div>
+<header class="fixed top-0 w-full z-50 bg-surface-container-lowest/85 backdrop-blur-xl border-b border-surface-variant/40 shadow-[0_1px_10px_rgba(0,0,0,0.05)]">
+  <div class="h-20 w-full px-4 sm:px-8 max-w-7xl mx-auto flex items-center justify-between gap-4">
+    <!-- Brand Logo -->
+    <a href="/site/accueil.html" class="flex items-center gap-3 text-inherit no-underline shrink-0 group">
+      <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" style="width:40px;height:40px;flex-shrink:0;border-radius:12px;background:linear-gradient(135deg,#1c1c1f 0%,#0e0e11 55%,#050507 100%);border:1px solid rgba(255,255,255,0.14);box-shadow:0 4px 16px rgba(0,0,0,0.55);">
+        <defs>
+          <linearGradient id="sg2" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#FFFFFF"/><stop offset="45%" stop-color="#F5D061"/><stop offset="100%" stop-color="#E5A93B"/></linearGradient>
+          <radialGradient id="sc2" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="#FDE68A"/><stop offset="100%" stop-color="#D97706"/></radialGradient>
+        </defs>
+        <path d="M32 10L52 21.5V42.5L32 54L12 42.5V21.5L32 10Z" stroke="url(#sg2)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+        <circle cx="32" cy="32" r="14" stroke="rgba(255,255,255,0.2)" stroke-width="1.5" stroke-dasharray="3 3"/>
+        <circle cx="32" cy="32" r="9" stroke="url(#sg2)" stroke-width="2"/>
+        <circle cx="32" cy="32" r="4.5" fill="url(#sc2)"/>
+        <circle cx="32" cy="14" r="2.2" fill="#FFF"/><circle cx="46" cy="41" r="2.2" fill="#FFF"/><circle cx="18" cy="41" r="2.2" fill="#FFF"/>
+      </svg>
+      <div class="flex flex-col">
+        <span class="font-headline-sm text-headline-sm text-on-surface font-bold tracking-tight">Sensorium</span>
+        <span class="font-label-sm text-label-sm uppercase tracking-wider text-secondary font-semibold">Spider Twin</span>
+      </div>
+    </a>
+
+    <!-- Navigation Pills -->
+    <nav class="hidden lg:flex items-center gap-1 bg-surface-container-low/80 p-1.5 rounded-xl border border-surface-variant/30">
+      <a class="px-3.5 py-1.5 font-body-md text-body-md text-on-surface-variant hover:text-on-surface hover:bg-surface-container transition-all rounded-lg" href="/site/solutions.html" data-path="solutions">Solutions</a>
+      <a class="px-3.5 py-1.5 font-body-md text-body-md text-on-surface-variant hover:text-on-surface hover:bg-surface-container transition-all rounded-lg" href="/site/architecture.html" data-path="architecture">Architecture</a>
+      <a class="px-3.5 py-1.5 font-body-md text-body-md text-on-surface-variant hover:text-on-surface hover:bg-surface-container transition-all rounded-lg" href="/site/jumeau_numerique_3d.html" data-path="3d-digital-twin">Jumeau 3D</a>
+      <a class="px-3.5 py-1.5 font-body-md text-body-md text-on-surface-variant hover:text-on-surface hover:bg-surface-container transition-all rounded-lg" href="/site/benefices_roi.html" data-path="benefices-roi">Bénéfices & ROI</a>
+      <a class="px-3.5 py-1.5 font-body-md text-body-md text-on-surface-variant hover:text-on-surface hover:bg-surface-container transition-all rounded-lg" href="/site/tarifs.html" data-path="tarifs">Tarifs</a>
+    </nav>
+
+    <!-- Header CTAs & Cockpit Access -->
+    <div class="flex items-center gap-2 sm:gap-3 shrink-0">
+      <a class="hidden sm:inline-flex items-center px-3.5 py-2 font-body-md text-body-md text-on-surface-variant hover:text-on-surface transition-colors font-medium" href="/site/authentification.html" data-path="connexion">
+        Connexion
+      </a>
+      <a class="hidden md:inline-flex items-center px-4 py-2 rounded-xl bg-surface-container-highest text-on-surface hover:bg-surface-container font-title-md text-title-md transition-all shadow-sm border border-surface-variant/40" href="/site/demo.html" data-path="demander-une-demo">
+        Démo
+      </a>
+      <a href="/dashboard" class="flex items-center gap-2 px-4 py-2 rounded-xl bg-gradient-to-r from-primary to-primary-container text-white font-title-md text-title-md font-bold shadow-lg shadow-primary/25 hover:opacity-95 hover:scale-[1.02] active:scale-95 transition-all" title="Ouvrir le Cockpit SENSORIUM">
+        <span class="material-symbols-outlined text-[18px]">speed</span>
+        <span>Cockpit</span>
+      </a>
+    </div>
+  </div>
 </header>
 <!-- MAIN WRAPPER -->
 <main class="pt-24 pb-20 w-full overflow-hidden">
