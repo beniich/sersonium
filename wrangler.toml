@@ -3,6 +3,13 @@ main = "server.ts"
 compatibility_date = "2026-10-12"
 compatibility_flags = ["nodejs_compat"]
 
+[build]
+command = "npm run build"
+
+[assets]
+directory = "./dist"
+binding = "ASSETS"
+
 # Domaine personnalisé Cloudflare
 # routes = [
 #   { pattern = "sersonium.cloudindustrie.com", custom_domain = true }
