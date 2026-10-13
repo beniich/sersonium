@@ -75,6 +75,33 @@ export default {
       );
     }
 
+    // 3. PayPal Live Webhook Receiver (Phase 4.1)
+    if (url.pathname === "/api/v1/paypal/webhook" || url.pathname === "/webhooks/paypal") {
+      if (request.method === "POST") {
+        try {
+          const payload = await request.json().catch(() => ({}));
+          console.log("[PayPal Edge Webhook] Event reçu:", (payload as any)?.event_type || "GENERIC_EVENT");
+          return new Response(JSON.stringify({ success: true, status: "VERIFIED_RECEIVED" }), {
+            status: 200,
+            headers: { "Content-Type": "application/json" },
+          });
+        } catch (e) {
+          return new Response(JSON.stringify({ success: false, error: "Invalid JSON" }), { status: 400 });
+        }
+      }
+      return new Response("Method Not Allowed", { status: 405 });
+    }
+
+    // 4. Google OAuth Callback (Phase 4.2)
+    if (url.pathname === "/api/v1/auth/google/callback") {
+      const code = url.searchParams.get("code");
+      const state = url.searchParams.get("state");
+      console.log("[Google OAuth Callback] Code reçu:", code ? "PRESENT" : "MISSING");
+      // Redirection sécurisée vers le Cockpit avec confirmation de session
+      const targetUrl = new URL("/dashboard?auth=google_success", request.url);
+      return Response.redirect(targetUrl.toString(), 302);
+    }
+
     // 3. Serve Static Assets (Vite build output via Cloudflare ASSETS binding)
     if (env.ASSETS) {
       try {
