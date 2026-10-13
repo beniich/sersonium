@@ -102,21 +102,47 @@ export default {
       return Response.redirect(targetUrl.toString(), 302);
     }
 
-    // 3. Serve Static Assets (Vite build output via Cloudflare ASSETS binding)
+    // 5. Serve Static Assets (Vite build output via Cloudflare ASSETS binding)
+    let response: Response;
     if (env.ASSETS) {
       try {
-        const response = await env.ASSETS.fetch(request);
-        if (response.status !== 404) {
-          return response;
+        let res = await env.ASSETS.fetch(request);
+        if (res.status === 404) {
+          // Fallback SPA pour React Router (index.html)
+          const spaUrl = new URL("/index.html", request.url);
+          res = await env.ASSETS.fetch(new Request(spaUrl.toString(), request));
         }
-        // Fallback SPA pour React Router (index.html)
-        const spaUrl = new URL("/index.html", request.url);
-        return await env.ASSETS.fetch(new Request(spaUrl.toString(), request));
+        response = res;
       } catch (err) {
         console.error("Asset fetch error:", err);
+        response = new Response("Internal Server Error", { status: 500 });
       }
+    } else {
+      response = new Response("Not Found", { status: 404 });
     }
 
-    return new Response("Not Found", { status: 404 });
+    // 6. Injection des En-têtes de Sécurité de Niveau Militaire (HSTS, CSP, Anti-Clickjacking)
+    const secureHeaders = new Headers(response.headers);
+    secureHeaders.set("Strict-Transport-Security", "max-age=15768000; includeSubDomains; preload");
+    secureHeaders.set("X-Content-Type-Options", "nosniff");
+    secureHeaders.set("X-Frame-Options", "SAMEORIGIN");
+    secureHeaders.set("Referrer-Policy", "strict-origin-when-cross-origin");
+    secureHeaders.set(
+      "Content-Security-Policy",
+      "default-src 'self' https: data: blob: 'unsafe-inline' 'unsafe-eval'; connect-src 'self' https: wss:; font-src 'self' https: data:; img-src 'self' https: data: blob:;"
+    );
+
+    // Contrôle d'accès CORS strict
+    const origin = request.headers.get("origin");
+    if (origin && (origin === "https://sersonium.cloudindustrie.com" || origin.endsWith(".cloudindustrie.com"))) {
+      secureHeaders.set("Access-Control-Allow-Origin", origin);
+      secureHeaders.set("Access-Control-Allow-Credentials", "true");
+    }
+
+    return new Response(response.body, {
+      status: response.status,
+      statusText: response.statusText,
+      headers: secureHeaders,
+    });
   },
 };
