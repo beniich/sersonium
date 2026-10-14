@@ -542,4 +542,31 @@ model UemAlert {
   @@map("uem_alerts")
 }
 
+// ─── Idempotence & Webhooks PayPal (Production-Ready) ────────────────────────
+model ProcessedWebhookEvent {
+  eventId     String   @id
+  eventType   String
+  processedAt DateTime @default(now())
+
+  @@map("processed_webhook_events")
+}
+
+// ─── Transactional Outbox Pattern pour Kafka (Zéro perte de données) ──────────
+model OutboxEvent {
+  id          String    @id @default(cuid())
+  topic       String
+  payload     String
+  key         String?
+  status      String    @default("PENDING") // PENDING, PROCESSING, PUBLISHED, FAILED
+  retryCount  Int       @default(0)
+  maxRetries  Int       @default(5)
+  lastError   String?
+  createdAt   DateTime  @default(now())
+  processedAt DateTime?
+
+  @@index([status, createdAt])
+  @@index([topic])
+  @@map("outbox_events")
+}
+
 

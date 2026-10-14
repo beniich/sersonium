@@ -101,7 +101,116 @@ export class AIService {
   }
 
   /**
-   * Analyse des logs d'infrastructure et détection d'anomalies via Gemini (Pattern Blueprint)
+   * Moteur d'analyse déterministe réelle des logs d'infrastructure (Fallback Circuit Breaker).
+   * Analyse exhaustive des patterns d'erreur, seuils PUE et dérives thermiques sans hallucination.
+   */
+  static runDeterministicLogChecks(logs: string, context?: string): {
+    severity: "CRITICAL" | "WARNING" | "OK";
+    summary: string;
+    rootCause: string;
+    action: string;
+  } {
+    const lower = (logs + " " + (context || "")).toLowerCase();
+
+    const criticalPatterns = [
+      { pattern: /overtemp|overheating|surchauffe/i, reason: "Dépassement de seuil thermique critique détecté sur baie serveur/CVC." },
+      { pattern: /kernel panic|segfault|hardware error/i, reason: "Défaillance matérielle bas niveau sur un nœud d'infrastructure." },
+      { pattern: /unauthorized|brute[- ]?force|sql injection|attack/i, reason: "Tentative d'intrusion ou violation de politique WAF/Sécurité." },
+      { pattern: /pue\s*[>:=]\s*([2-9]|\d{2})/i, reason: "Dérive anormale du PUE supérieure au seuil d'efficacité opérationnelle (PUE > 2.0)." }
+    ];
+
+    for (const item of criticalPatterns) {
+      if (item.pattern.test(lower)) {
+        return {
+          severity: "CRITICAL",
+          summary: `[Fallback Déterministe SRE] Alerte critique active : ${item.reason}`,
+          rootCause: item.reason,
+          action: "Déclencher l'isolement du nœud, basculer le trafic vers le cluster secondaire et contacter l'astreinte N2."
+        };
+      }
+    }
+
+    const warningPatterns = [
+      { pattern: /warning|timeout|retry|slow query/i, reason: "Latence anormale ou micro-coupures de synchronisation réseau." },
+      { pattern: /high load|cpu throttling|memory pressure/i, reason: "Saturation progressive des ressources système du nœud edge." },
+      { pattern: /co2\s*spike|emission/i, reason: "Hausse inhabituelle de l'empreinte carbone instantanée." }
+    ];
+
+    for (const item of warningPatterns) {
+      if (item.pattern.test(lower)) {
+        return {
+          severity: "WARNING",
+          summary: `[Fallback Déterministe SRE] Avertissement opérationnel : ${item.reason}`,
+          rootCause: item.reason,
+          action: "Activer le rate-limiting adaptatif et consigner les métriques dans l'AuditLog."
+        };
+      }
+    }
+
+    return {
+      severity: "OK",
+      summary: "[Fallback Déterministe SRE] Contrôle déterministe validé : Aucun pattern d'anomalie critique identifié dans les logs.",
+      rootCause: "Fonctionnement dans les tolérances nominales.",
+      action: "Poursuivre la télémétrie continue."
+    };
+  }
+
+  /**
+   * Diagnostic déterministe réel pour la télémétrie des bâtiments et CVC
+   */
+  static runDeterministicBuildingChecks(telemetry: any[]): {
+    status: "OK" | "WARNING" | "CRITICAL";
+    diagnostic: string;
+    recommendation: string;
+    energySaving: number;
+  } {
+    if (!Array.isArray(telemetry) || telemetry.length === 0) {
+      return {
+        status: "OK",
+        diagnostic: "Télémétrie CVC insuffisante pour établir une corrélation, valeurs nominales présumées.",
+        recommendation: "Vérifier la connectivité des sondes LoRaWAN/BACnet.",
+        energySaving: 0
+      };
+    }
+
+    let maxTemp = -Infinity;
+    let maxVibration = -Infinity;
+    let highPowerCount = 0;
+
+    for (const t of telemetry) {
+      if (typeof t.temperatureC === "number" && t.temperatureC > maxTemp) maxTemp = t.temperatureC;
+      if (typeof t.vibrationMmS === "number" && t.vibrationMmS > maxVibration) maxVibration = t.vibrationMmS;
+      if (typeof t.powerKw === "number" && t.powerKw > 80) highPowerCount++;
+    }
+
+    if (maxTemp > 45 || maxVibration > 4.5) {
+      return {
+        status: "CRITICAL",
+        diagnostic: `Seuils de rupture atteints : Température max ${maxTemp}°C ou vibration anormale ${maxVibration} mm/s.`,
+        recommendation: "Arrêt d'urgence de la ligne CVC concernée et inspection du compresseur.",
+        energySaving: 1200
+      };
+    }
+
+    if (maxTemp > 30 || maxVibration > 2.0 || highPowerCount > 0) {
+      return {
+        status: "WARNING",
+        diagnostic: `Dérive modérée : Température crête de ${maxTemp > -Infinity ? maxTemp + "°C" : "N/A"} et pic de consommation identifié.`,
+        recommendation: "Purger l'échangeur, vérifier la tension des courroies et équilibrer les débits.",
+        energySaving: 450
+      };
+    }
+
+    return {
+      status: "OK",
+      diagnostic: "Paramètres thermodynamiques nominaux vérifiés par contrôle déterministe.",
+      recommendation: "Maintien de la programmation horaire standard.",
+      energySaving: 150
+    };
+  }
+
+  /**
+   * Analyse des logs d'infrastructure et détection d'anomalies via Gemini
    * Protégé par Circuit Breaker et bascule déterministe automatique.
    */
   static async analyzeLogs(
@@ -146,21 +255,21 @@ Fournis un diagnostic technique concis et structuré :
           return response.text || "Analyse complétée : aucun rapport textuel renvoyé.";
         },
         () => {
-          return `[Mode Secours Circuit-Breaker / Heuristique Déterministe]
-1. Diagnostic : Analyse temps réel effectuée par le moteur heuristique de sécurité SENSORIUM (Circuit IA en protection/délestage).
-2. Télémétrie : Flux thermique et énergétique maintenus dans les tolérances opérationnelles.
-3. Action recommandée : Vérifier la redondance N+1 du datacenter et inspecter les sondes IoT associées.
-4. Score d'urgence : Modéré.`;
+          const checks = AIService.runDeterministicLogChecks(logs, context);
+          return `[Mode Secours Circuit-Breaker / Diagnostic Déterministe Vérifié]
+1. Détection d'anomalies : ${checks.summary}
+2. Cause racine identifiée : ${checks.rootCause}
+3. Action corrective recommandée : ${checks.action}
+4. Score d'urgence : ${checks.severity === "CRITICAL" ? "Critique" : checks.severity === "WARNING" ? "Moyen" : "Faible"} (Contrôle déterministe actif, IA indisponible).`;
         }
       );
     } else {
-      // Moteur heuristique expert quand GEMINI_API_KEY n'est pas renseignée
-      analysisReport = `[Analyse IA Heuristique Cloud & Datacenter]
-1. Anomalie identifiée : Présence d'événements inhabituels dans la télémétrie d'infrastructure transmise.
-2. Cause racine estimée : Fluctuation de charge sur les grappes serveurs et légère dérive thermique.
-3. Action recommandée : Activer le dynamic load-balancing et consigner les métriques PUE.
-4. Score d'urgence : Modéré.
-(Note : Définissez GEMINI_API_KEY dans vos paramètres pour l'inférence générative complète)`;
+      const checks = AIService.runDeterministicLogChecks(logs, context);
+      analysisReport = `[Mode Déterministe SRE — Clé IA non configurée]
+1. Analyse : ${checks.summary}
+2. Cause racine : ${checks.rootCause}
+3. Action recommandée : ${checks.action}
+4. Score d'urgence : ${checks.severity === "CRITICAL" ? "Critique" : checks.severity === "WARNING" ? "Moyen" : "Faible"}`;
     }
 
     // Audit de l'opération
@@ -202,12 +311,12 @@ Tâches :
 Réponds au format JSON strict :
 { "status": "OK" | "WARNING" | "CRITICAL", "diagnostic": "...", "recommendation": "...", "energySaving": 0 }`;
 
-    let jsonResponse = {
-      status: "WARNING",
-      diagnostic: "Élévation modérée de la température de retour d'eau glacée (+2.1°C)",
-      recommendation: "Vérifier le débit de la pompe secondaire et purger l'échangeur à plaques.",
-      energySaving: 480
-    };
+    let jsonResponse: {
+      status: "OK" | "WARNING" | "CRITICAL";
+      diagnostic: string;
+      recommendation: string;
+      energySaving: number;
+    } = AIService.runDeterministicBuildingChecks(telemetry);
 
     if (ai) {
       jsonResponse = await geminiCircuitBreaker.execute(
@@ -223,11 +332,12 @@ Réponds au format JSON strict :
           return jsonResponse;
         },
         () => {
+          const deterministic = AIService.runDeterministicBuildingChecks(telemetry);
           return {
-            status: "WARNING",
-            diagnostic: "Mode Secours Circuit Breaker: Diagnostic déterministe (Température et PUE stables, pas d'alerte immédiate).",
-            recommendation: "Inspection visuelle standard et maintien des consignes CVC en mode éco.",
-            energySaving: 320
+            status: deterministic.status,
+            diagnostic: `[Mode Secours Circuit Breaker Déterministe] ${deterministic.diagnostic}`,
+            recommendation: deterministic.recommendation,
+            energySaving: deterministic.energySaving
           };
         }
       );
