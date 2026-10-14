@@ -273,6 +273,113 @@ export async function seedDatabase() {
       });
     }
 
+    // ─── 7. Seed Spécial Démonstration Institutionnelle : CMR-FLEET-01 ──────────
+    const cmrTenant = "CMR-FLEET-01";
+    const existingCmr = await rawPrisma.organization.findUnique({
+      where: { slug: "cmr-fleet-01" }
+    });
+
+    if (!existingCmr) {
+      console.log("[DB Seed] Seeding CMR-FLEET-01 institutionnel & parc de terminaux...");
+      await rawPrisma.organization.create({
+        data: {
+          id: cmrTenant,
+          name: "Caisse Mutuelle de Retraite (CMR)",
+          slug: "cmr-fleet-01",
+          plan: "ENTERPRISE",
+          configVersion: 12,
+          lastConfigUpdate: new Date(Date.now() - 3 * 60 * 1000)
+        }
+      });
+
+      // Seed Terminaux UEM avec écho de version
+      const now = new Date();
+      await (rawPrisma as any).uemTerminal.createMany({
+        data: [
+          {
+            tenantId: cmrTenant,
+            terminalId: "PC-CMR-PARIS-01",
+            hostname: "SRV-DC-PAR-01",
+            os: "Windows Server 2025",
+            osVersion: "23H2",
+            cpuCores: 32,
+            ramGb: 128,
+            diskGb: 2048,
+            installedApps: JSON.stringify(["BitLocker", "SensoriumAgent", "Prometheus", "AuditSvc"]),
+            lastIp: "10.140.2.15",
+            agentVersion: "2.1.0",
+            activeVersion: 12,
+            status: "ONLINE",
+            lastSeen: now,
+          },
+          {
+            tenantId: cmrTenant,
+            terminalId: "PC-CMR-PARIS-02",
+            hostname: "POSTE-SRE-OPERATEUR",
+            os: "Windows 11 Enterprise",
+            osVersion: "23H2",
+            cpuCores: 16,
+            ramGb: 64,
+            diskGb: 1024,
+            installedApps: JSON.stringify(["CrowdStrike", "SensoriumAgent", "VSCode", "Edge"]),
+            lastIp: "10.140.4.88",
+            agentVersion: "2.1.0",
+            activeVersion: 12,
+            status: "ONLINE",
+            lastSeen: now,
+          },
+          {
+            tenantId: cmrTenant,
+            terminalId: "PC-CMR-LYON-01",
+            hostname: "SRV-EDGE-LYON",
+            os: "Ubuntu LTS Sovereign",
+            osVersion: "24.04",
+            cpuCores: 16,
+            ramGb: 32,
+            diskGb: 512,
+            installedApps: JSON.stringify(["UFW", "SensoriumAgent", "Docker"]),
+            lastIp: "10.142.1.12",
+            agentVersion: "2.1.0",
+            activeVersion: 12,
+            status: "ONLINE",
+            lastSeen: now,
+          },
+          {
+            tenantId: cmrTenant,
+            terminalId: "PC-CMR-NANTES-01",
+            hostname: "POSTE-COMPTA-03",
+            os: "Windows 10 Enterprise",
+            osVersion: "22H2",
+            cpuCores: 8,
+            ramGb: 16,
+            diskGb: 256,
+            installedApps: JSON.stringify(["Office365", "SensoriumAgent"]),
+            lastIp: "10.145.8.42",
+            agentVersion: "2.0.4",
+            activeVersion: 11, // En retard de 1 version pour la démo Time-to-Effect
+            status: "ONLINE",
+            lastSeen: new Date(now.getTime() - 45 * 1000),
+          }
+        ]
+      });
+
+      // Seed Alertes UEM critiques
+      await (rawPrisma as any).uemAlert.createMany({
+        data: [
+          {
+            tenantId: cmrTenant,
+            terminalId: "PC-CMR-NANTES-01",
+            alertType: "NON_COMPLIANT_SOFTWARE",
+            severity: "HIGH",
+            message: "Application BitTorrent détectée sur le poste comptabilité",
+            details: JSON.stringify({ violations: ["BitTorrent"] }),
+            status: "OPEN",
+            createdAt: new Date(now.getTime() - 12 * 60 * 1000)
+          }
+        ]
+      });
+    }
+
     console.log("[DB Seed] Multi-tenant initial data ready.");
   } catch (err) {
     console.error("[DB Seed] Seeding error:", err);
