@@ -16,6 +16,8 @@ model Organization {
   subscriptionExpiresAt  DateTime?
   paypalSubscriptionId   String?
   subscriptionStatus     String?   @default("inactive") // active, past_due, canceled
+  configVersion          Int       @default(1)
+  lastConfigUpdate       DateTime  @default(now())
   createdAt              DateTime  @default(now())
   updatedAt              DateTime  @updatedAt
 
@@ -475,6 +477,7 @@ model UemTerminal {
   installedApps String  @default("[]")         // JSON array de strings
   lastIp       String?
   agentVersion String   @default("1.0.0")
+  activeVersion Int     @default(1)            // Version de configuration actuellement appliquée par l'agent
   status       String   @default("UNKNOWN")    // ONLINE, OFFLINE, WARNING, CRITICAL, UNKNOWN
   lastSeen     DateTime @default(now())
   createdAt    DateTime @default(now())

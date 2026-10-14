@@ -69,11 +69,11 @@ export interface SecurityPolicy {
 export class UemService {
   /**
    * 1. Enregistre ou met à jour l'inventaire d'un terminal
-   *    Appelé par l'agent toutes les 60 secondes
+   *    Appelé par l'agent toutes les 60 secondes (avec écho de confirmation de version active)
    */
   static async registerInventory(
     tenantId: string,
-    data: TerminalInventory
+    data: TerminalInventory & { activeVersion?: number }
   ) {
     const existing = await prisma.uemTerminal.findFirst({
       where: { terminalId: data.terminalId, tenantId }
@@ -91,6 +91,7 @@ export class UemService {
       installedApps: JSON.stringify(data.installedApps),
       lastIp: data.lastIp,
       agentVersion: data.agentVersion,
+      activeVersion: data.activeVersion ?? 1,
       status: "ONLINE" as TerminalStatus,
       lastSeen: new Date(),
     };
@@ -249,6 +250,15 @@ export class UemService {
         data: { ...record, createdAt: new Date() }
       });
     }
+
+    // Incrémentation de la version de configuration globale du locataire (T0 pour le calcul de latence de propagation)
+    await prisma.organization.update({
+      where: { id: tenantId },
+      data: {
+        configVersion: { increment: 1 },
+        lastConfigUpdate: new Date()
+      }
+    }).catch(() => {});
 
     // Audit
     await prisma.auditLog.create({
@@ -431,6 +441,57 @@ export class UemService {
     return {
       organization: org,
       policy: defaultPolicy,
+    };
+  }
+
+  /**
+   * 14. Mesure du "Time-to-Effect" et statut de propagation globale de la configuration
+   * Calcule le taux d'adoption de la version active, le temps de propagation et identifie les agents en retard.
+   */
+  static async checkPropagation(tenantId: string) {
+    const org = await prisma.organization.findUnique({
+      where: { id: tenantId },
+      select: { configVersion: true, lastConfigUpdate: true }
+    });
+
+    const targetVersion = org?.configVersion ?? 1;
+    const lastUpdate = org?.lastConfigUpdate ?? new Date();
+
+    const terminals = await prisma.uemTerminal.findMany({
+      where: { tenantId },
+      select: {
+        terminalId: true,
+        hostname: true,
+        activeVersion: true,
+        lastSeen: true,
+        status: true
+      }
+    });
+
+    const total = terminals.length;
+    const syncedTerminals = terminals.filter(t => (t.activeVersion ?? 1) >= targetVersion);
+    const laggingTerminals = terminals.filter(t => (t.activeVersion ?? 1) < targetVersion);
+
+    const now = Date.now();
+    const propagationElapsedSec = Math.round((now - new Date(lastUpdate).getTime()) / 1000);
+
+    return {
+      targetVersion,
+      lastConfigUpdate: lastUpdate,
+      propagationElapsedSec,
+      totalTerminals: total,
+      syncedCount: syncedTerminals.length,
+      laggingCount: laggingTerminals.length,
+      syncPercentage: total > 0 ? Math.round((syncedTerminals.length / total) * 100) : 100,
+      isFullySynchronized: laggingTerminals.length === 0,
+      status: laggingTerminals.length === 0 ? "Synchronisé" : "Propagation en cours...",
+      laggingAgents: laggingTerminals.map(t => ({
+        terminalId: t.terminalId,
+        hostname: t.hostname,
+        currentVersion: t.activeVersion ?? 1,
+        versionsBehind: targetVersion - (t.activeVersion ?? 1),
+        lastSeen: t.lastSeen
+      }))
     };
   }
 }
