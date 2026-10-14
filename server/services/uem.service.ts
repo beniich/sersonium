@@ -5,6 +5,7 @@
 
 import { TenantPrismaClient } from "../db/tenantPrisma.js";
 import { rawPrisma as prisma } from "../db/prisma.js";
+import { OutboxService } from "./outbox.service.js";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -141,27 +142,41 @@ export class UemService {
     });
     if (!terminal) throw new Error(`Terminal ${terminalId} introuvable.`);
 
-    const cmd = await prisma.uemCommandQueue.create({
-      data: {
+    const cmd = await prisma.$transaction(async (tx) => {
+      const createdCmd = await tx.uemCommandQueue.create({
+        data: {
+          tenantId,
+          terminalId,
+          commandType,
+          payload: JSON.stringify(payload),
+          status: "PENDING",
+          createdBy: userId,
+        }
+      });
+
+      // Audit trail
+      await tx.auditLog.create({
+        data: {
+          tenantId,
+          userId,
+          action: `UEM_COMMAND_${commandType}`,
+          resource: "UemCommandQueue",
+          resourceId: createdCmd.id,
+          details: JSON.stringify({ terminalId, payload }),
+        }
+      });
+
+      // Outbox Event pour distribution Kafka en temps réel
+      await OutboxService.queueEvent(tx, "uem.commands", {
+        commandId: createdCmd.id,
         tenantId,
         terminalId,
         commandType,
-        payload: JSON.stringify(payload),
-        status: "PENDING",
-        createdBy: userId,
-      }
-    });
+        payload,
+        timestamp: new Date().toISOString()
+      });
 
-    // Audit trail
-    await prisma.auditLog.create({
-      data: {
-        tenantId,
-        userId,
-        action: `UEM_COMMAND_${commandType}`,
-        resource: "UemCommandQueue",
-        resourceId: cmd.id,
-        details: JSON.stringify({ terminalId, payload }),
-      }
+      return createdCmd;
     });
 
     return cmd;
@@ -315,16 +330,29 @@ export class UemService {
     );
 
     if (violations.length > 0) {
-      await prisma.uemAlert.create({
-        data: {
+      await prisma.$transaction(async (tx) => {
+        const alert = await tx.uemAlert.create({
+          data: {
+            tenantId,
+            terminalId,
+            alertType: "NON_COMPLIANT_SOFTWARE",
+            severity: "HIGH",
+            message: `Applications non autorisées détectées: ${violations.join(", ")}`,
+            details: JSON.stringify({ violations }),
+            status: "OPEN",
+          }
+        });
+
+        // Enregistrement atomique de l'événement Kafka dans la table Outbox
+        await OutboxService.queueEvent(tx, "uem.alerts", {
+          alertId: alert.id,
           tenantId,
           terminalId,
           alertType: "NON_COMPLIANT_SOFTWARE",
           severity: "HIGH",
-          message: `Applications non autorisées détectées: ${violations.join(", ")}`,
-          details: JSON.stringify({ violations }),
-          status: "OPEN",
-        }
+          message: alert.message,
+          timestamp: new Date().toISOString()
+        });
       });
     }
 

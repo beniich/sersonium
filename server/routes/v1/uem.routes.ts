@@ -59,4 +59,14 @@ uemCockpitRoutes.post("/policies", setSecurityPolicy);
 uemCockpitRoutes.get("/alerts", getAlerts);
 uemCockpitRoutes.patch("/alerts/:alertId/ack", acknowledgeAlert);
 
+// Canal temps réel SSE pour notification instantanée des alertes et propagation
+uemCockpitRoutes.get("/stream", (req, res) => {
+  const tenantId = (req as any).tenantId || (req.query.tenantId as string) || "CMR-FLEET-01";
+  const userId = (req as any).user?.id || (req.query.userId as string);
+  const clientId = `${tenantId}:${userId || "anon"}:${Date.now()}`;
+  import("../../services/sse.service.js").then(({ SseService }) => {
+    SseService.addClient(clientId, tenantId, userId, res);
+  });
+});
+
 export default uemCockpitRoutes;

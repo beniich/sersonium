@@ -1,5 +1,6 @@
-import { rawPrisma } from "../db/tenantPrisma.js";
+import { rawPrisma } from "../db/prisma.js";
 import { kafkaService } from "./kafka.service.js";
+import { SseService } from "./sse.service.js";
 
 export interface CreateOutboxEventParams {
   topic: string;
@@ -78,6 +79,16 @@ export class OutboxService {
               }
             });
             processed++;
+
+            // 5. Notification SSE en direct si un tenantId est présent dans le payload
+            if (parsedPayload?.tenantId) {
+              SseService.broadcastToTenant(parsedPayload.tenantId, "OUTBOX_DELIVERY_CONFIRMED", {
+                topic: event.topic,
+                eventId: event.id,
+                payload: parsedPayload,
+                timestamp: new Date().toISOString()
+              });
+            }
           } else {
             throw new Error("Kafka producer failed to acknowledge message delivery");
           }
