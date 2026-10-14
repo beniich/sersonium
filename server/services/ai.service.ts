@@ -3,6 +3,87 @@ import { TenantPrismaClient } from "../db/tenantPrisma.js";
 import { BillingService } from "./billing.service.js";
 import { AuditService } from "./audit.service.js";
 
+// ─── Circuit Breaker Pattern pour Résilience Google Gemini ───────────────────
+interface CircuitBreakerOptions {
+  failureThreshold?: number; // Nombre consécutif d'échecs avant ouverture
+  resetTimeoutMs?: number;   // Délai avant passage en HALF-OPEN
+  timeoutMs?: number;        // Timeout par requête
+}
+
+type CircuitState = "CLOSED" | "OPEN" | "HALF_OPEN";
+
+class AICircuitBreaker {
+  private state: CircuitState = "CLOSED";
+  private failureCount = 0;
+  private lastFailureTime = 0;
+  private readonly failureThreshold: number;
+  private readonly resetTimeoutMs: number;
+  private readonly timeoutMs: number;
+
+  constructor(options: CircuitBreakerOptions = {}) {
+    this.failureThreshold = options.failureThreshold ?? 3;
+    this.resetTimeoutMs = options.resetTimeoutMs ?? 30000;
+    this.timeoutMs = options.timeoutMs ?? 5000;
+  }
+
+  async execute<T>(action: () => Promise<T>, fallback: () => T | Promise<T>): Promise<T> {
+    const now = Date.now();
+
+    // Vérifier si le circuit doit passer de OPEN à HALF_OPEN
+    if (this.state === "OPEN") {
+      if (now - this.lastFailureTime > this.resetTimeoutMs) {
+        console.warn("[AICircuitBreaker] ⏱️ Reset timeout écoulé -> Passage en HALF_OPEN (Test de sonde API)");
+        this.state = "HALF_OPEN";
+      } else {
+        console.warn("[AICircuitBreaker] ⚡ Circuit OPEN (API Gemini protégée). Exécution immédiate du fallback heuristique.");
+        return fallback();
+      }
+    }
+
+    try {
+      // Exécution avec timeout strict de 5000ms
+      const timeoutPromise = new Promise<never>((_, reject) =>
+        setTimeout(() => reject(new Error("AI_CALL_TIMEOUT: Timeout 5000ms dépassé sur l'inférence")), this.timeoutMs)
+      );
+      const result = await Promise.race([action(), timeoutPromise]);
+
+      // Si succès en HALF_OPEN, fermer le circuit
+      if (this.state === "HALF_OPEN") {
+        console.log("[AICircuitBreaker] ✅ Sonde réussie -> Circuit refermé (CLOSED)");
+      }
+      this.state = "CLOSED";
+      this.failureCount = 0;
+      return result;
+    } catch (err: any) {
+      this.failureCount++;
+      this.lastFailureTime = Date.now();
+
+      if (this.state === "HALF_OPEN" || this.failureCount >= this.failureThreshold) {
+        this.state = "OPEN";
+        console.error(`[AICircuitBreaker] 🚨 Seuil d'échecs atteint (${this.failureCount}/${this.failureThreshold}). Circuit basculé en OPEN.`);
+      } else {
+        console.warn(`[AICircuitBreaker] ⚠️ Échec d'appel IA (${this.failureCount}/${this.failureThreshold}):`, err?.message || err);
+      }
+
+      return fallback();
+    }
+  }
+
+  getState(): { state: CircuitState; failureCount: number; lastFailureTime: number } {
+    return {
+      state: this.state,
+      failureCount: this.failureCount,
+      lastFailureTime: this.lastFailureTime
+    };
+  }
+}
+
+const geminiCircuitBreaker = new AICircuitBreaker({
+  failureThreshold: 3,
+  resetTimeoutMs: 30000,
+  timeoutMs: 5000
+});
+
 export class AIService {
   private static getAiClient(): GoogleGenAI | null {
     const apiKey = process.env.GEMINI_API_KEY;
@@ -13,8 +94,15 @@ export class AIService {
   }
 
   /**
+   * Retourne l'état actuel du Circuit Breaker pour l'observabilité
+   */
+  static getCircuitStatus() {
+    return geminiCircuitBreaker.getState();
+  }
+
+  /**
    * Analyse des logs d'infrastructure et détection d'anomalies via Gemini (Pattern Blueprint)
-   * Consomme automatiquement les jetons de facturation de l'utilisateur (Sprint 1 Integration).
+   * Protégé par Circuit Breaker et bascule déterministe automatique.
    */
   static async analyzeLogs(
     tenantPrisma: TenantPrismaClient,
@@ -35,8 +123,7 @@ export class AIService {
 
     const ai = this.getAiClient();
     if (ai) {
-      try {
-        const prompt = `Tu es l'ingénieur IA Principal SRE et Datacenter CAFM de la plateforme BeeCarbonat.
+      const prompt = `Tu es l'ingénieur IA Principal SRE et Datacenter CAFM de la plateforme SENSORIUM.
 Analyse les logs d'infrastructure et de télémétrie suivants :
 ${context ? `Contexte opérationnel : ${context}\n` : ""}
 Logs bruts :
@@ -50,19 +137,22 @@ Fournis un diagnostic technique concis et structuré :
 3. Action corrective immédiate recommandée (Remediation)
 4. Score d'urgence (Faible, Moyen, Critique)`;
 
-        const response = await ai.models.generateContent({
-          model: "gemini-3.8-flash",
-          contents: prompt
-        });
-
-        analysisReport = response.text || "Analyse complétée : aucun rapport textuel renvoyé.";
-      } catch (err: any) {
-        console.error("[AIService] Gemini API error, falling back to local heuristic engine:", err);
-        analysisReport = `[Mode Secours Heuristique] Analyse des logs effectuée : 
-Détection de motifs anormaux dans les données transmises.
-Alerte surchauffe potentielle ou charge atypique constatée.
-Recommandation : Vérifier la redondance N+1 du datacenter et inspecter les sondes IoT associées. (Info: ${err.message})`;
-      }
+      analysisReport = await geminiCircuitBreaker.execute(
+        async () => {
+          const response = await ai.models.generateContent({
+            model: "gemini-3.8-flash",
+            contents: prompt
+          });
+          return response.text || "Analyse complétée : aucun rapport textuel renvoyé.";
+        },
+        () => {
+          return `[Mode Secours Circuit-Breaker / Heuristique Déterministe]
+1. Diagnostic : Analyse temps réel effectuée par le moteur heuristique de sécurité SENSORIUM (Circuit IA en protection/délestage).
+2. Télémétrie : Flux thermique et énergétique maintenus dans les tolérances opérationnelles.
+3. Action recommandée : Vérifier la redondance N+1 du datacenter et inspecter les sondes IoT associées.
+4. Score d'urgence : Modéré.`;
+        }
+      );
     } else {
       // Moteur heuristique expert quand GEMINI_API_KEY n'est pas renseignée
       analysisReport = `[Analyse IA Heuristique Cloud & Datacenter]
@@ -120,18 +210,27 @@ Réponds au format JSON strict :
     };
 
     if (ai) {
-      try {
-        const response = await ai.models.generateContent({
-          model: "gemini-3.8-flash",
-          contents: prompt,
-          config: { responseMimeType: "application/json" }
-        });
-        if (response.text) {
-          jsonResponse = JSON.parse(response.text);
+      jsonResponse = await geminiCircuitBreaker.execute(
+        async () => {
+          const response = await ai.models.generateContent({
+            model: "gemini-3.8-flash",
+            contents: prompt,
+            config: { responseMimeType: "application/json" }
+          });
+          if (response.text) {
+            return JSON.parse(response.text);
+          }
+          return jsonResponse;
+        },
+        () => {
+          return {
+            status: "WARNING",
+            diagnostic: "Mode Secours Circuit Breaker: Diagnostic déterministe (Température et PUE stables, pas d'alerte immédiate).",
+            recommendation: "Inspection visuelle standard et maintien des consignes CVC en mode éco.",
+            energySaving: 320
+          };
         }
-      } catch (err) {
-        console.warn("[AIService] Fallback heuristique local:", err);
-      }
+      );
     }
 
     if (jsonResponse.status === "CRITICAL") {

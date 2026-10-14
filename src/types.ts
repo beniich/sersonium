@@ -35,6 +35,8 @@ export interface EdgeNode {
   type?: string;
   memoryUsage?: number;
   lastHeartbeat?: string;
+  /** Power Usage Effectiveness — ratio énergie totale / énergie IT (datacenter) */
+  pue?: number;
 }
 
 export interface SecurityEvent {

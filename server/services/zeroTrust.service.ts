@@ -36,7 +36,75 @@ export interface AccessEvaluationResult {
   userId: string;
 }
 
+// ─── Cache LRU haute performance en mémoire (TTL: 60s) pour délester la BDD ───
+interface CacheEntry<T> {
+  value: T;
+  expiresAt: number;
+}
+
+class FastLRUCache<K, V> {
+  private cache = new Map<K, CacheEntry<V>>();
+  private max: number;
+  private ttlMs: number;
+
+  constructor(max: number = 1000, ttlMs: number = 60000) {
+    this.max = max;
+    this.ttlMs = ttlMs;
+  }
+
+  get(key: K): V | undefined {
+    const entry = this.cache.get(key);
+    if (!entry) return undefined;
+    if (Date.now() > entry.expiresAt) {
+      this.cache.delete(key);
+      return undefined;
+    }
+    // Refresh position to simulate LRU
+    this.cache.delete(key);
+    this.cache.set(key, entry);
+    return entry.value;
+  }
+
+  set(key: K, value: V): void {
+    if (this.cache.has(key)) {
+      this.cache.delete(key);
+    } else if (this.cache.size >= this.max) {
+      // Evict oldest entry (first item in Map iterator)
+      const oldestKey = this.cache.keys().next().value;
+      if (oldestKey !== undefined) {
+        this.cache.delete(oldestKey);
+      }
+    }
+    this.cache.set(key, { value, expiresAt: Date.now() + this.ttlMs });
+  }
+
+  invalidate(predicate?: (key: K) => boolean): void {
+    if (!predicate) {
+      this.cache.clear();
+      return;
+    }
+    for (const key of this.cache.keys()) {
+      if (predicate(key)) {
+        this.cache.delete(key);
+      }
+    }
+  }
+}
+
+const policyDecisionCache = new FastLRUCache<string, AccessEvaluationResult>(2000, 60000);
+
 export class ZeroTrustService {
+  /**
+   * Invalide le cache d'accès (appelé lors d'un ajout ou modification de politique)
+   */
+  static clearCache(userId?: string): void {
+    if (userId) {
+      policyDecisionCache.invalidate(k => k.startsWith(`${userId}:`));
+    } else {
+      policyDecisionCache.invalidate();
+    }
+  }
+
   /**
    * Valide si l'utilisateur a le droit d'accéder à une ressource spécifique (Pattern Blueprint)
    */
@@ -57,7 +125,7 @@ export class ZeroTrustService {
   }
 
   /**
-   * Évalue contextuellement une demande d'accès Zero Trust
+   * Évalue contextuellement une demande d'accès Zero Trust avec mise en cache ultra-rapide
    * Gère les wildcards resourceId: "*" et action: "*"
    */
   static async evaluateAccess(
@@ -65,6 +133,12 @@ export class ZeroTrustService {
     params: { userId: string; resourceId: string; action: string }
   ): Promise<AccessEvaluationResult> {
     const { userId, resourceId, action } = params;
+    const cacheKey = `${userId}:${resourceId}:${action}`;
+
+    const cached = policyDecisionCache.get(cacheKey);
+    if (cached) {
+      return cached;
+    }
 
     // Chercher les politiques explicites pour cet utilisateur ou pour toute l'organisation (userId: null)
     const policies = await tenantPrisma.accessPolicy.findMany({
@@ -96,18 +170,17 @@ export class ZeroTrustService {
       return matchResource && matchAction;
     });
 
+    let decision: AccessEvaluationResult;
     if (!matchingPolicy) {
-      return {
+      decision = {
         allowed: false,
         reason: "Aucune règle correspondante pour cette ressource/action spécifique.",
         resourceId,
         action,
         userId
       };
-    }
-
-    if (!matchingPolicy.allowed) {
-      return {
+    } else if (!matchingPolicy.allowed) {
+      decision = {
         allowed: false,
         reason: `Règle d'interdiction explicite : ${matchingPolicy.description || "Accès bloqué"}`,
         matchedPolicy: matchingPolicy,
@@ -115,16 +188,19 @@ export class ZeroTrustService {
         action,
         userId
       };
+    } else {
+      decision = {
+        allowed: true,
+        reason: `Autorisé par la politique Zero Trust (${matchingPolicy.description || matchingPolicy.id})`,
+        matchedPolicy: matchingPolicy,
+        resourceId,
+        action,
+        userId
+      };
     }
 
-    return {
-      allowed: true,
-      reason: `Autorisé par la politique Zero Trust (${matchingPolicy.description || matchingPolicy.id})`,
-      matchedPolicy: matchingPolicy,
-      resourceId,
-      action,
-      userId
-    };
+    policyDecisionCache.set(cacheKey, decision);
+    return decision;
   }
 
   /**
@@ -154,7 +230,7 @@ export class ZeroTrustService {
       description?: string;
     }
   ) {
-    return tenantPrisma.accessPolicy.create({
+    const created = await tenantPrisma.accessPolicy.create({
       data: {
         userId: data.userId || null,
         resourceId: data.resourceId,
@@ -163,15 +239,19 @@ export class ZeroTrustService {
         description: data.description || null
       } as any
     });
+    this.clearCache(data.userId);
+    return created;
   }
 
   /**
    * Supprime une politique Zero Trust
    */
   static async deletePolicy(tenantPrisma: TenantPrismaClient, id: string) {
-    return tenantPrisma.accessPolicy.delete({
+    const deleted = await tenantPrisma.accessPolicy.delete({
       where: { id }
     });
+    this.clearCache();
+    return deleted;
   }
 
   // ─── Pilier 2: RBAC Stateless (sans DB) ─────────────────────────────────────
