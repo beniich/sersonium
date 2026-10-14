@@ -572,4 +572,22 @@ model OutboxEvent {
   @@map("outbox_events")
 }
 
+// ─── Agrégation Temporelle & Rollups de Télémétrie (Data Lake Pyramidal) ──────
+model TelemetryRollup {
+  id          String   @id @default(cuid())
+  tenantId    String
+  sensorId    String
+  interval    String   // "MINUTE", "HOUR", "DAY"
+  timestamp   DateTime // Début de la période d'agrégation
+  avgValue    Float
+  maxValue    Float
+  minValue    Float
+  count       Int      // Nombre d'échantillons compressés
+  createdAt   DateTime @default(now())
+
+  @@index([tenantId, sensorId, interval, timestamp])
+  @@index([interval, timestamp])
+  @@map("telemetry_rollups")
+}
+
 
