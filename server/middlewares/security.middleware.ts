@@ -55,9 +55,23 @@ export const securityHeaders = (req: Request, res: Response, next: NextFunction)
   // Protection contre le clickjacking & framing
   res.setHeader("X-Frame-Options", "SAMEORIGIN");
 
-  // Forcer la navigation sécurisée HTTPS
+  // Forcer la navigation sécurisée HTTPS & Content-Security-Policy
   if (process.env.NODE_ENV === "production") {
     res.setHeader("Strict-Transport-Security", "max-age=31536000; includeSubDomains; preload");
+
+    const cspDirectives = [
+      "default-src 'self'",
+      "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://maps.googleapis.com https://*.firebaseapp.com",
+      "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
+      "font-src 'self' https://fonts.gstatic.com data:",
+      "img-src 'self' data: blob: https://*.googleusercontent.com https://*.gstatic.com https://*.googleapis.com",
+      "connect-src 'self' wss: ws: https://api.sensorium.cloud https://*.googleapis.com https://*.firebaseio.com https://identitytoolkit.googleapis.com https://securetoken.googleapis.com https://*.paypal.com",
+      "frame-src 'self' https://*.firebaseapp.com https://*.paypal.com",
+      "object-src 'none'",
+      "base-uri 'self'",
+      "form-action 'self'",
+    ];
+    res.setHeader("Content-Security-Policy", cspDirectives.join("; "));
   }
 
   // Protection XSS standard

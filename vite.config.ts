@@ -61,6 +61,24 @@ export default defineConfig(({ mode }) => {
         '@': path.resolve(__dirname, '.'),
       },
     },
+    build: {
+      target: 'es2020',
+      outDir: 'dist',
+      sourcemap: false,
+      chunkSizeWarningLimit: 600,
+      rollupOptions: {
+        output: {
+          manualChunks: {
+            vendor: ['react', 'react-dom', 'react-router-dom'],
+            three: ['three'],
+            charts: ['recharts', 'chart.js', 'react-chartjs-2'],
+            motion: ['motion'],
+            icons: ['lucide-react'],
+            pdf: ['jspdf', 'jspdf-autotable'],
+          },
+        },
+      },
+    },
     server: {
       // HMR is disabled in AI Studio via DISABLE_HMR env var.
       // Do not modify – file watching is disabled to prevent flickering during agent edits.
