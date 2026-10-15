@@ -274,8 +274,9 @@ function DeployAgentModal({ onClose }: { onClose: () => void }) {
     setTimeout(() => setCopied(null), 2500);
   };
 
-  const winOneLiner = `powershell -Command "Invoke-WebRequest -Uri 'http://localhost:3000/api/v1/uem/installer/download?os=windows' -OutFile install-agent.bat; .\\install-agent.bat"`;
-  const linuxOneLiner = `curl -fsSL "http://localhost:3000/api/v1/uem/installer/download?os=linux" | sudo bash`;
+  const origin = typeof window !== "undefined" ? window.location.origin : "https://app.sensorium.cloud";
+  const winOneLiner = `powershell -Command "Invoke-WebRequest -Uri '${origin}/api/v1/uem/installer/download?os=windows' -OutFile install-agent.bat; .\\install-agent.bat"`;
+  const linuxOneLiner = `curl -fsSL "${origin}/api/v1/uem/installer/download?os=linux" | sudo bash`;
   const allInOneWin = `.\\scripts\\setup-sensorium-all-in-one.bat`;
   const allInOnePs1 = `powershell -ExecutionPolicy Bypass -File .\\scripts\\setup-sensorium-all-in-one.ps1`;
   const allInOneLinux = `sudo bash scripts/setup-sensorium-all-in-one.sh`;

@@ -1,10 +1,9 @@
 import axios from "axios";
 import { jsPDF } from "jspdf";
 import autoTable from "jspdf-autotable";
+import { computeSha256 } from "../utils/crypto.js";
 
-const API_BASE_URL = typeof window !== "undefined" && window.location.origin.includes("localhost")
-  ? `${window.location.origin}/api/v1`
-  : "/api/v1";
+const API_BASE_URL = (typeof import.meta !== "undefined" && import.meta.env?.VITE_API_BASE_URL) || "/api/v1";
 
 export interface SubscriptionDetails {
   plan: "FREE" | "SILVER" | "PRO" | "ENTERPRISE";
@@ -106,6 +105,14 @@ export class ManageService {
       grandTotal: 64.2, // Avec TVA 20%
       certificationHash: "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
     };
+
+    // Calcul de l'empreinte notariale réelle
+    try {
+      const payload = `${data.invoiceNumber}|${data.tenantName}|${data.grandTotal}|${data.date}|CERTIFIED_INVOICE`;
+      data.certificationHash = await computeSha256(payload);
+    } catch {
+      // Fallback
+    }
 
     const doc = new jsPDF();
 

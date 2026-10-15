@@ -32,9 +32,52 @@ async function startServer() {
 
   const app = express();
 
-  const PORT = 3000;
+  const PORT = Number(process.env.PORT) || 3000;
 
   // 1. Chaîne de Middlewares de Défense & Zone Tampon
+  // Configuration CORS stricte avec liste blanche et support des credentials
+  const defaultAllowedOrigins = [
+    "http://localhost:3000",
+    "http://127.0.0.1:3000",
+    "http://sensorium.local:3000",
+    "https://app.sensorium.cloud",
+    "https://sensorium.cloud",
+    "https://api.sensorium.cloud"
+  ];
+
+  const configuredOrigins = process.env.CORS_ALLOWED_ORIGINS
+    ? process.env.CORS_ALLOWED_ORIGINS.split(",").map(o => o.trim()).filter(Boolean)
+    : [];
+
+  const allowedOriginsSet = new Set([...defaultAllowedOrigins, ...configuredOrigins]);
+
+  app.use((req, res, next) => {
+    const origin = req.headers.origin;
+    if (origin) {
+      const isDev = process.env.NODE_ENV !== "production";
+      const isLocalhost = isDev && (origin.startsWith("http://localhost:") || origin.startsWith("http://127.0.0.1:"));
+      const isAllowed = allowedOriginsSet.has(origin) || isLocalhost;
+
+      if (isAllowed) {
+        res.setHeader("Access-Control-Allow-Origin", origin);
+        res.setHeader("Access-Control-Allow-Credentials", "true");
+        res.setHeader("Access-Control-Allow-Methods", "GET, POST, PUT, PATCH, DELETE, OPTIONS");
+        res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization, X-CSRF-Token, X-XSRF-Token, X-Request-Timestamp");
+        res.setHeader("Vary", "Origin");
+      } else if (!isDev) {
+        console.warn(`[CORS REJECT] Origine non autorisée rejetée: ${origin}`);
+        return res.status(403).json({
+          success: false,
+          error: "CORS Policy Violation: Origine non autorisée"
+        });
+      }
+    }
+    if (req.method === "OPTIONS") {
+      return res.sendStatus(204);
+    }
+    next();
+  });
+
   app.use(securityHeaders);
   app.use(cookieParser());
   app.use(express.json({ limit: "10mb" }));

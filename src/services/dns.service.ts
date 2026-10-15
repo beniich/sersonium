@@ -190,18 +190,24 @@ function generateMockDomains(count: number): DomainAsset[] {
   return domains;
 }
 
-const MOCK_DOMAIN_FLEET: DomainAsset[] = generateMockDomains(1571);
+let cachedFleet: DomainAsset[] | null = null;
+function getDomainFleet(): DomainAsset[] {
+  if (!cachedFleet) {
+    cachedFleet = generateMockDomains(1571);
+  }
+  return cachedFleet;
+}
 
 // ─── DNS Service ──────────────────────────────────────────────────────────────
 
 export class DnsService {
   async getFleetSummary(): Promise<DnsFleetSummary> {
     try {
-      const res = await axios.get(`${API_BASE_URL}/dns/fleet-summary`);
+      const res = await axios.get(`${API_BASE_URL}/dns/fleet-summary`, { timeout: 3000 });
       if (res.data?.success) return res.data.data;
     } catch { /* Fallback local */ }
 
-    const domains = MOCK_DOMAIN_FLEET;
+    const domains = getDomainFleet();
     return {
       totalDomains: domains.length,
       operational: domains.filter(d => d.status === "OPERATIONAL").length,
@@ -226,7 +232,23 @@ export class DnsService {
     sortBy?: "expiry" | "status" | "propagation";
   } = {}): Promise<{ domains: DomainAsset[]; total: number; page: number; totalPages: number }> {
     const { page = 1, limit = 50, status, category, search, sortBy = "expiry" } = opts;
-    let filtered = [...MOCK_DOMAIN_FLEET];
+
+    // 1. Tente de récupérer les domaines depuis l'API REST
+    try {
+      const res = await axios.get(`${API_BASE_URL}/dns/domains`, {
+        params: { page, limit, status, category, search, sortBy },
+        timeout: 3000,
+      });
+      if (res.data?.success && res.data.data?.domains) {
+        return res.data.data;
+      }
+    } catch {
+      // Repli local instantané
+    }
+
+    // 2. Repli déterministe sur le parc mémoïsé
+    const fleet = getDomainFleet();
+    let filtered = [...fleet];
     if (status) filtered = filtered.filter(d => d.status === status);
     if (category) filtered = filtered.filter(d => d.category === category);
     if (search) {
@@ -243,7 +265,8 @@ export class DnsService {
   }
 
   async getCriticalAlerts(): Promise<DomainAsset[]> {
-    return MOCK_DOMAIN_FLEET.filter(
+    const fleet = getDomainFleet();
+    return fleet.filter(
       d => d.daysUntilRegistryExpiry <= 30 ||
            d.ssl.daysUntilExpiry <= 14 ||
            d.status === "DOWN" ||
@@ -252,7 +275,8 @@ export class DnsService {
   }
 
   getCanaryMigrationPlan(domainId: string): CanaryMigrationPlan {
-    const domain = MOCK_DOMAIN_FLEET.find(d => d.id === domainId) || MOCK_DOMAIN_FLEET[0];
+    const fleet = getDomainFleet();
+    const domain = fleet.find(d => d.id === domainId) || fleet[0];
     return {
       domainId: domain.id,
       fqdn: domain.fqdn,
@@ -269,7 +293,8 @@ export class DnsService {
   /**
    * Export Souverain RFC 1035 (format BIND Zone File) — PSR AO 25ML148
    */
-  exportBind1035ZoneFile(domains: DomainAsset[] = MOCK_DOMAIN_FLEET): string {
+  exportBind1035ZoneFile(domains?: DomainAsset[]): string {
+    const activeDomains = domains || getDomainFleet();
     const now = new Date();
     const serial = now.toISOString().replace(/[-:T.Z]/g, "").slice(0, 10);
 
@@ -278,13 +303,13 @@ export class DnsService {
       `; SENSORIUM // EXPORT SOUVERAIN DNS - FORMAT RFC 1035 (BIND Zone File)`,
       `; Projet AO 25ML148 - ICDC / Caisse des Dépôts et Consignations`,
       `; Plan de Réversibilité (PSR) — ${now.toLocaleDateString("fr-FR")} ${now.toLocaleTimeString("fr-FR")}`,
-      `; Domaines : ${domains.length} zones | Conformité : RFC 1035 | DNSSEC FIPS 140-2 L3`,
+      `; Domaines : ${activeDomains.length} zones | Conformité : RFC 1035 | DNSSEC FIPS 140-2 L3`,
       `; Signature : SENS-PSR-25ML148-${serial}`,
       `; =========================================================================`,
       ``,
     ];
 
-    for (const domain of domains.slice(0, 200)) {
+    for (const domain of activeDomains.slice(0, 200)) {
       lines.push(
         `$ORIGIN ${domain.fqdn}.`,
         `$TTL 3600`,
@@ -302,9 +327,9 @@ export class DnsService {
       );
     }
 
-    if (domains.length > 200) {
+    if (activeDomains.length > 200) {
       lines.push(
-        `; ... ${domains.length - 200} zones additionnelles disponibles via l'API SENSORIUM`,
+        `; ... ${activeDomains.length - 200} zones additionnelles disponibles via l'API SENSORIUM`,
         `; GET /api/v1/dns/export-bind?full=true`,
         ``,
       );
@@ -336,7 +361,8 @@ export class DnsService {
     anycastPop: string;
   }> {
     const reachable = Math.random() > 0.02;
-    const domain = MOCK_DOMAIN_FLEET.find(d => d.fqdn === fqdn) || MOCK_DOMAIN_FLEET[0];
+    const fleet = getDomainFleet();
+    const domain = fleet.find(d => d.fqdn === fqdn) || fleet[0];
     return {
       fqdn,
       reachable,

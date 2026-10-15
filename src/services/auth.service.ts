@@ -28,6 +28,7 @@ class AuthService {
   private csrfToken: string | null = null;
   private user: AuthUser | null = null;
   private refreshPromise: Promise<string | null> | null = null;
+  private listeners: Set<(session: AuthSessionState) => void> = new Set();
 
   constructor() {
     // Attempt to load cached session or cookies
@@ -44,6 +45,26 @@ class AuthService {
         // Fallback
       }
     }
+  }
+
+  /**
+   * Subscribe to authentication state changes
+   */
+  public onAuthStateChange(listener: (session: AuthSessionState) => void): () => void {
+    this.listeners.add(listener);
+    listener(this.getSession());
+    return () => this.listeners.delete(listener);
+  }
+
+  private notifyListeners(): void {
+    const session = this.getSession();
+    this.listeners.forEach((listener) => {
+      try {
+        listener(session);
+      } catch (e) {
+        console.error("[AuthService] Error in auth state listener", e);
+      }
+    });
   }
 
   /**
@@ -74,7 +95,8 @@ class AuthService {
     try {
       const res = await fetch("/api/v1/auth/csrf-token", {
         method: "GET",
-        headers: { "Accept": "application/json" }
+        headers: { "Accept": "application/json" },
+        credentials: "include"
       });
       if (res.ok) {
         const data = await res.json();
@@ -105,6 +127,7 @@ class AuthService {
           "Content-Type": "application/json",
           "Accept": "application/json"
         },
+        credentials: "include",
         body: JSON.stringify({ email, password })
       });
 
@@ -126,6 +149,8 @@ class AuthService {
         localStorage.setItem("sensorium_auth_user", JSON.stringify(this.user));
         if (this.csrfToken) localStorage.setItem("sensorium_csrf_token", this.csrfToken);
       }
+
+      this.notifyListeners();
 
       return {
         success: true,
@@ -154,6 +179,7 @@ class AuthService {
           "Content-Type": "application/json",
           "Accept": "application/json"
         },
+        credentials: "include",
         body: JSON.stringify({ token: idToken })
       });
 
@@ -176,6 +202,8 @@ class AuthService {
         if (this.csrfToken) localStorage.setItem("sensorium_csrf_token", this.csrfToken);
       }
 
+      this.notifyListeners();
+
       return {
         success: true,
         user: this.user!
@@ -186,6 +214,27 @@ class AuthService {
         error: err.message || "Erreur de connexion Google"
       };
     }
+  }
+
+  /**
+   * Sets session manually (for mock/sync mode)
+   */
+  public setSession(user: AuthUser | null, accessToken: string | null = null, csrfToken: string | null = null): void {
+    this.user = user;
+    this.accessToken = user && !accessToken ? "sensorium_client_session_token" : accessToken;
+    if (csrfToken) this.csrfToken = csrfToken;
+
+    if (typeof localStorage !== "undefined") {
+      if (user) localStorage.setItem("sensorium_auth_user", JSON.stringify(user));
+      else localStorage.removeItem("sensorium_auth_user");
+
+      if (this.accessToken) localStorage.setItem("sensorium_access_token", this.accessToken);
+      else localStorage.removeItem("sensorium_access_token");
+
+      if (csrfToken) localStorage.setItem("sensorium_csrf_token", csrfToken);
+    }
+
+    this.notifyListeners();
   }
 
   /**
@@ -202,7 +251,8 @@ class AuthService {
           method: "POST",
           headers: {
             "Accept": "application/json"
-          }
+          },
+          credentials: "include"
         });
 
         if (res.ok) {
@@ -214,6 +264,7 @@ class AuthService {
               localStorage.setItem("sensorium_access_token", this.accessToken!);
               localStorage.setItem("sensorium_auth_user", JSON.stringify(this.user));
             }
+            this.notifyListeners();
             return this.accessToken;
           }
         }
@@ -230,15 +281,9 @@ class AuthService {
   }
 
   /**
-   * Logout and clear local tokens
+   * Logout and clear local tokens immediately
    */
   public async logout(): Promise<void> {
-    try {
-      await fetch("/api/v1/auth/logout", { method: "POST" });
-    } catch {
-      // Ignore
-    }
-
     this.accessToken = null;
     this.csrfToken = null;
     this.user = null;
@@ -247,6 +292,14 @@ class AuthService {
       localStorage.removeItem("sensorium_access_token");
       localStorage.removeItem("sensorium_auth_user");
       localStorage.removeItem("sensorium_csrf_token");
+    }
+
+    this.notifyListeners();
+
+    try {
+      await fetch("/api/v1/auth/logout", { method: "POST", credentials: "include" });
+    } catch {
+      // Ignore
     }
   }
 
@@ -290,6 +343,7 @@ class AuthService {
 
     let response = await fetch(url, {
       ...init,
+      credentials: init.credentials || "include",
       headers
     });
 
@@ -301,6 +355,7 @@ class AuthService {
         // Retry original request
         response = await fetch(url, {
           ...init,
+          credentials: init.credentials || "include",
           headers
         });
       }
@@ -314,7 +369,7 @@ class AuthService {
       accessToken: this.accessToken,
       csrfToken: this.csrfToken,
       user: this.user,
-      isAuthenticated: Boolean(this.accessToken || this.user)
+      isAuthenticated: Boolean(this.accessToken && this.user)
     };
   }
 }

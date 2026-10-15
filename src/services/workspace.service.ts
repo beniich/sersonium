@@ -1,13 +1,11 @@
 import axios from "axios";
 import { io, Socket } from "socket.io-client";
 
-const API_BASE_URL = typeof window !== "undefined" && window.location.origin.includes("localhost")
-  ? `${window.location.origin}/api/v1`
-  : "/api/v1";
+const API_BASE_URL = (typeof import.meta !== "undefined" && import.meta.env?.VITE_API_BASE_URL) || "/api/v1";
 
-const SOCKET_BASE_URL = typeof window !== "undefined"
-  ? window.location.origin
-  : "http://localhost:3000";
+const SOCKET_BASE_URL =
+  (typeof import.meta !== "undefined" && import.meta.env?.VITE_WS_URL) ||
+  (typeof window !== "undefined" ? window.location.origin : "http://localhost:3000");
 
 export interface WorkspaceUser {
   userId: string;
@@ -121,16 +119,18 @@ export class WorkspaceService {
   }
 
   /**
-   * 5. Suivi de présence en direct (Who is viewing what?)
+   * 5. Suivi de présence en direct (Who is viewing what?) avec fonction de nettoyage anti-fuite
    */
-  subscribeToPresence(onPresenceChange: (users: WorkspaceUser[]) => void): void {
+  subscribeToPresence(onPresenceChange: (users: WorkspaceUser[]) => void): () => void {
     if (!this.socket) {
       this.socket = io(SOCKET_BASE_URL, { transports: ["websocket", "polling"] });
     }
 
-    this.socket.on("presence_update", (users: WorkspaceUser[]) => {
+    const handler = (users: WorkspaceUser[]) => {
       onPresenceChange(users);
-    });
+    };
+
+    this.socket.on("presence_update", handler);
 
     // Envoi initial mock d'utilisateurs connectés
     onPresenceChange([
@@ -138,6 +138,10 @@ export class WorkspaceService {
       { userId: "usr-2", name: "Marc Vasseur", role: "Superviseur CVC", viewing: "Jumeau Numérique 3D - Pompe 01" },
       { userId: "usr-3", name: "Samira Khelifi", role: "Ingénieur Réseau", viewing: "Cartographie Anycast" },
     ]);
+
+    return () => {
+      this.socket?.off("presence_update", handler);
+    };
   }
 
   /**

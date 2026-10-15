@@ -1,8 +1,6 @@
 import axios from "axios";
 
-const API_BASE_URL = typeof window !== "undefined" && window.location.origin.includes("localhost")
-  ? `${window.location.origin}/api/v1`
-  : "/api/v1";
+const API_BASE_URL = (typeof import.meta !== "undefined" && import.meta.env?.VITE_API_BASE_URL) || "/api/v1";
 
 export interface IntrusionAttempt {
   id?: string;

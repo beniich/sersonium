@@ -1,8 +1,7 @@
 import axios from "axios";
+import { computeSha256 } from "../utils/crypto.js";
 
-const API_BASE_URL = typeof window !== "undefined" && window.location.origin.includes("localhost")
-  ? `${window.location.origin}/api/v1`
-  : "/api/v1";
+const API_BASE_URL = (typeof import.meta !== "undefined" && import.meta.env?.VITE_API_BASE_URL) || "/api/v1";
 
 export interface VaultFileItem {
   fileId: string;
@@ -101,9 +100,7 @@ export class TrustStorageService {
         });
 
         const arrayBuffer = await response.data.arrayBuffer();
-        const hashBuffer = await crypto.subtle.digest("SHA-256", arrayBuffer);
-        const hashArray = Array.from(new Uint8Array(hashBuffer));
-        actualHash = hashArray.map((b) => b.toString(16).padStart(2, "0")).join("");
+        actualHash = await computeSha256(arrayBuffer);
       } catch {
         // En mode démo / simulation locale, intégrité confirmée
         actualHash = expectedHash;
@@ -148,9 +145,7 @@ export class TrustStorageService {
   async uploadAndCertify(file: File, folder: string = "reports"): Promise<{ fileId: string; hash: string }> {
     // Calcul de l'empreinte SHA-256 locale avant téléversement
     const arrayBuffer = await file.arrayBuffer();
-    const hashBuffer = await crypto.subtle.digest("SHA-256", arrayBuffer);
-    const hashArray = Array.from(new Uint8Array(hashBuffer));
-    const localSha256 = hashArray.map((b) => b.toString(16).padStart(2, "0")).join("");
+    const localSha256 = await computeSha256(arrayBuffer);
 
     const formData = new FormData();
     formData.append("file", file);

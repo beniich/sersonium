@@ -10,6 +10,7 @@
 
 import axios from "axios";
 import { useState, useEffect } from "react";
+import authService from "./auth.service";
 
 export type ConnectionMode = "LIVE" | "SIMULATION" | "CONNECTING";
 export type BackendMode = "LOCAL_HARDWARE" | "CLOUD_HYBRID";
@@ -56,7 +57,7 @@ export class ConnectionManager {
   };
 
   private queuedActions: QueuedAction[] = [];
-  public onStateChange: ((state: ConnectionState) => void) | null = null;
+  private listeners = new Set<(state: ConnectionState) => void>();
   private heartbeatInterval: any = null;
 
   private constructor() {
@@ -70,6 +71,37 @@ export class ConnectionManager {
       ConnectionManager.instance = new ConnectionManager();
     }
     return ConnectionManager.instance;
+  }
+
+  /**
+   * Subscribe to connection state changes (multi-listener pattern)
+   */
+  public subscribe(listener: (state: ConnectionState) => void): () => void {
+    this.listeners.add(listener);
+    listener({ ...this.state });
+    return () => this.listeners.delete(listener);
+  }
+
+  // Backward compatibility with legacy onStateChange single property
+  public get onStateChange(): ((state: ConnectionState) => void) | null {
+    return null;
+  }
+
+  public set onStateChange(listener: ((state: ConnectionState) => void) | null) {
+    if (listener) {
+      this.subscribe(listener);
+    }
+  }
+
+  private notifyListeners(): void {
+    const s = { ...this.state };
+    this.listeners.forEach((listener) => {
+      try {
+        listener(s);
+      } catch (e) {
+        console.error("[ConnectionManager] Error in listener", e);
+      }
+    });
   }
 
   private loadQueuedActions() {
@@ -90,6 +122,7 @@ export class ConnectionManager {
     try {
       localStorage.setItem(QUEUE_STORAGE_KEY, JSON.stringify(this.queuedActions));
       this.state.pendingSyncCount = this.queuedActions.length;
+      this.notifyListeners();
     } catch (e) {
       console.warn("[ConnectionManager] Erreur persistance queue", e);
     }
@@ -125,7 +158,8 @@ export class ConnectionManager {
       const res = await fetch("/api/health", { 
         method: "GET", 
         signal: controller.signal,
-        cache: "no-store" 
+        cache: "no-store",
+        credentials: "include"
       }).catch(() => null);
       
       clearTimeout(timeout);
@@ -135,7 +169,7 @@ export class ConnectionManager {
         return true;
       } else {
         // Fallback test endpoint racine / Vite Dev Server
-        const ping = await fetch("/healthcheck", { method: "GET", cache: "no-store" }).catch(() => null);
+        const ping = await fetch("/healthcheck", { method: "GET", cache: "no-store", credentials: "include" }).catch(() => null);
         if (ping && ping.ok) {
           this.handleNetworkChange(true);
           return true;
@@ -165,9 +199,7 @@ export class ConnectionManager {
 
     if (oldMode !== newMode) {
       console.log(`📡 [Sensorium Resilience] Connection Mode: ${this.state.mode}`);
-      if (this.onStateChange) {
-        this.onStateChange({ ...this.state });
-      }
+      this.notifyListeners();
     }
   }
 
@@ -184,12 +216,11 @@ export class ConnectionManager {
     const action: QueuedAction = { id, type, payload, timestamp: Date.now() };
     this.queuedActions.push(action);
     this.saveQueuedActions();
-    if (this.onStateChange) this.onStateChange({ ...this.state });
     return id;
   }
 
   /**
-   * Synchronise toutes les actions stockées en file d'attente
+   * Synchronise toutes les actions stockées en file d'attente avec signature sécurisée
    */
   public async flushQueuedActions(): Promise<number> {
     if (this.queuedActions.length === 0) return 0;
@@ -200,8 +231,15 @@ export class ConnectionManager {
 
     for (const action of actionsToSync) {
       try {
-        await axios.post("/api/v1/sync/action", action, { timeout: 5000 });
-        synced++;
+        const res = await authService.secureFetch("/api/v1/sync/action", {
+          method: "POST",
+          body: JSON.stringify(action),
+        });
+        if (res.ok) {
+          synced++;
+        } else {
+          break;
+        }
       } catch (err) {
         console.warn(`[Sync] Action ${action.id} mise en attente (réseau instable)`);
         break; // Arrête la boucle si le réseau retombe
@@ -211,7 +249,6 @@ export class ConnectionManager {
     // Retire les actions traitées
     this.queuedActions = this.queuedActions.slice(synced);
     this.saveQueuedActions();
-    if (this.onStateChange) this.onStateChange({ ...this.state });
     return synced;
   }
 
@@ -252,9 +289,9 @@ export async function detectActiveBackend(): Promise<TerminalTelemetry> {
   if (isOnline) {
     cachedTelemetry = {
       status: "connected",
-      mode: "LOCAL_HARDWARE",
+      mode: typeof window !== "undefined" && window.location.hostname === "sensorium.local" ? "LOCAL_HARDWARE" : "CLOUD_HYBRID",
       apiUrl: typeof window !== "undefined" ? window.location.origin : "http://localhost:3000",
-      hostname: "sensorium.local",
+      hostname: typeof window !== "undefined" ? window.location.hostname : "sensorium.local",
       firmwareVersion: "2.4.0-sentry",
       npuTops: 240,
       latencyMs: 12,
@@ -285,13 +322,14 @@ export function useTerminalConnection() {
     const handler = (newTel: TerminalTelemetry) => setTelemetry(newTel);
     telemetryListeners.add(handler);
 
-    const interval = setInterval(() => {
+    // Synchronisation calée sur les transitions d'état du ConnectionManager
+    const unsub = connectionManager.subscribe(() => {
       detectActiveBackend();
-    }, 15000);
+    });
 
     return () => {
       telemetryListeners.delete(handler);
-      clearInterval(interval);
+      unsub();
     };
   }, []);
 

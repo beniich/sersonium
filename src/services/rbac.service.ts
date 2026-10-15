@@ -1,4 +1,6 @@
-﻿/**
+import authService, { AuthUser } from "./auth.service";
+
+/**
  * SENSORIUM — RBAC Multi-Tenant Service
  * =======================================
  * Gestion des rôles, permissions et tenants pour l'authentification entreprise.
@@ -263,9 +265,63 @@ const SESSION_KEY = "sensorium_rbac_session";
 
 class RbacService {
   private session: RbacSession | null = null;
+  private isSyncing = false;
 
   constructor() {
     this.loadFromStorage();
+    // Auto-sync with AuthService
+    if (typeof window !== "undefined") {
+      authService.onAuthStateChange((authSession) => {
+        if (this.isSyncing) return;
+        if (authSession.isAuthenticated && authSession.user) {
+          this.syncFromAuthUser(authSession.user);
+        } else if (!authSession.isAuthenticated && this.session && this.session.authMethod !== "mock") {
+          this.session = null;
+          localStorage.removeItem(SESSION_KEY);
+        }
+      });
+    }
+  }
+
+  public syncFromAuthUser(user: AuthUser): void {
+    const role = this.mapAuthRole(user.role);
+    const tenant = MOCK_TENANTS.find((t) => t.id === user.tenantId) || {
+      id: user.tenantId || "tenant-default",
+      name: user.organizationName || "Organisation SENSORIUM",
+      domain: user.email.split("@")[1] || "sensorium.ai",
+      tier: "ENTERPRISE",
+      createdAt: new Date().toISOString(),
+      maxUsers: 100,
+      features: { digitalTwin: true, realtimeKafka: true, csrdCompliance: true, ztnaHardware: true, souvereign: true },
+    };
+
+    const member: TenantMember = {
+      userId: user.userId,
+      email: user.email,
+      displayName: user.email.split("@")[0],
+      role,
+      tenantId: tenant.id,
+      isActive: true,
+      invitedAt: new Date().toISOString(),
+      invitedBy: "auth-sync",
+      mfaEnabled: true,
+    };
+
+    this.session = this.buildSession(member, tenant, "email");
+    if (user.permissions && user.permissions.length > 0) {
+      this.session.permissions = Array.from(new Set([...this.session.permissions, ...user.permissions as Permission[]]));
+    }
+    this.saveToStorage();
+  }
+
+  private mapAuthRole(roleStr: string): RbacRole {
+    const normalized = (roleStr || "").toLowerCase().replace(/[-_]/g, "");
+    if (normalized.includes("superadmin")) return "SUPER_ADMIN";
+    if (normalized.includes("admin")) return "TENANT_ADMIN";
+    if (normalized.includes("facility") || normalized.includes("operator") || normalized.includes("manager")) return "FACILITY_LEAD";
+    if (normalized.includes("tech")) return "FIELD_TECHNICIAN";
+    if (normalized.includes("audit") || normalized.includes("csrd")) return "CSRD_AUDITOR";
+    return "VIEWER";
   }
 
   private loadFromStorage(): void {
@@ -282,23 +338,64 @@ class RbacService {
     } catch { /* ignore */ }
   }
 
-  // ── Login (Mock + real-ready) ─────────────────────────────────────────────
+  // ── Login (Hybrid API + Mock resilient) ──────────────────────────────────
 
-  async loginWithEmail(email: string, _password: string): Promise<{ success: boolean; session?: RbacSession; error?: string }> {
+  async loginWithEmail(email: string, password: string): Promise<{ success: boolean; session?: RbacSession; error?: string }> {
+    // 1. Tente d'abord l'authentification réelle via l'API REST
+    this.isSyncing = true;
+    try {
+      const authRes = await authService.login(email, password);
+      if (authRes.success && authRes.user) {
+        this.syncFromAuthUser(authRes.user);
+        this.isSyncing = false;
+        return { success: true, session: this.session! };
+      }
+    } catch {
+      // Repli local en cas d'indisponibilité réseau
+    } finally {
+      this.isSyncing = false;
+    }
+
+    // 2. Repli résilient : recherche dans les membres de démonstration
     const member = MOCK_MEMBERS.find((m) => m.email === email);
-    if (!member) return { success: false, error: "Utilisateur introuvable" };
+    if (!member) return { success: false, error: "Identifiants invalides" };
     if (!member.isActive) return { success: false, error: "Compte désactivé" };
     const tenant = MOCK_TENANTS.find((t) => t.id === member.tenantId);
     if (!tenant) return { success: false, error: "Tenant introuvable" };
     this.session = this.buildSession(member, tenant, "email");
     this.saveToStorage();
+
+    // Synchronisation vers AuthService
+    authService.setSession({
+      userId: member.userId,
+      email: member.email,
+      role: member.role,
+      tenantId: tenant.id,
+      organizationName: tenant.name,
+      permissions: this.session.permissions,
+    });
+
     return { success: true, session: this.session };
   }
 
   async loginWithGoogle(googleEmail: string, displayName: string, photoUrl?: string): Promise<{ success: boolean; session?: RbacSession; error?: string }> {
-    // 1. Match par email exact dans les membres
+    // 1. Tente l'authentification Firebase OAuth vers Sensorium API
+    this.isSyncing = true;
+    try {
+      const authRes = await authService.loginWithGoogle();
+      if (authRes.success && authRes.user) {
+        this.syncFromAuthUser(authRes.user);
+        this.isSyncing = false;
+        return { success: true, session: this.session! };
+      }
+    } catch {
+      // Repli démo
+    } finally {
+      this.isSyncing = false;
+    }
+
+    // 2. Repli local sur catalogue des tenants
     let member = MOCK_MEMBERS.find((m) => m.email === googleEmail);
-    // 2. Fallback: si le domaine correspond à un tenant, mettre en VIEWER
     if (!member) {
       const domain = googleEmail.split("@")[1];
       const tenant = MOCK_TENANTS.find((t) => t.domain === domain);
@@ -317,17 +414,18 @@ class RbacService {
         };
       }
     }
-    // 3. Demo fallback
     if (!member) {
       const demoTenant = MOCK_TENANTS.find((t) => t.id === "tenant-demo")!;
       member = { userId: `google-${Date.now()}`, email: googleEmail, displayName, photoUrl, role: "VIEWER", tenantId: "tenant-demo", isActive: true, invitedAt: new Date().toISOString(), invitedBy: "sso-auto", mfaEnabled: false };
       this.session = this.buildSession(member, demoTenant, "google");
       this.saveToStorage();
+      authService.setSession({ userId: member.userId, email: member.email, role: member.role, tenantId: demoTenant.id });
       return { success: true, session: this.session };
     }
     const tenant = MOCK_TENANTS.find((t) => t.id === member!.tenantId)!;
     this.session = this.buildSession({ ...member, photoUrl }, tenant, "google");
     this.saveToStorage();
+    authService.setSession({ userId: member.userId, email: member.email, role: member.role, tenantId: tenant.id });
     return { success: true, session: this.session };
   }
 
@@ -346,12 +444,21 @@ class RbacService {
     };
     this.session = this.buildSession(mockMember, tenant, "mock");
     this.saveToStorage();
+    authService.setSession({
+      userId: mockMember.userId,
+      email: mockMember.email,
+      role,
+      tenantId: tenant.id,
+      organizationName: tenant.name,
+      permissions: this.session.permissions,
+    });
     return this.session;
   }
 
   logout(): void {
     this.session = null;
     localStorage.removeItem(SESSION_KEY);
+    authService.logout();
   }
 
   // ── Session helpers ────────────────────────────────────────────────────────
