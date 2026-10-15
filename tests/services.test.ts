@@ -189,6 +189,19 @@ async function runTests() {
     assert.ok(rawZone.includes("IN SOA"), "Enregistrement SOA manquant");
   });
 
+  // ─── 5. Tests Cryptographie Souveraine DORA (RFC 6234 / FIPS 180-4) ─────────
+  console.log("\n🔒 [Suite 5] Crypto - Conformité Empreinte SHA-256 DORA");
+  const { computeSha256 } = await import("../src/utils/crypto.js");
+
+  await test("computeSha256() doit calculer le hachage standard NIST certifié", async () => {
+    const hash = await computeSha256("hello");
+    assert.strictEqual(
+      hash,
+      "2cf24dba5fb0a30e26e83b2ac5b9e29e1b161e5c1fa7425e73043362938b9824",
+      "L'empreinte SHA-256 ne correspond pas au vecteur de test FIPS 180-4"
+    );
+  });
+
   // ─── Bilan Final ────────────────────────────────────────────────────────────
   console.log("\n" + "=".repeat(60));
   console.log(`📊 Résultat des tests : ${passedTests} réussis, ${failedTests} échoués`);

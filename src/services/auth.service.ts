@@ -35,12 +35,13 @@ class AuthService {
     if (typeof window !== "undefined") {
       try {
         const cachedUser = localStorage.getItem("sensorium_auth_user");
-        const cachedAccessToken = localStorage.getItem("sensorium_access_token");
         const cachedCsrf = this.getCookie("XSRF-TOKEN") || localStorage.getItem("sensorium_csrf_token");
 
         if (cachedUser) this.user = JSON.parse(cachedUser);
-        if (cachedAccessToken) this.accessToken = cachedAccessToken;
         if (cachedCsrf) this.csrfToken = cachedCsrf;
+
+        // Sécurité XSS : purge active de tout résidu de jeton d'accès dans localStorage
+        localStorage.removeItem("sensorium_access_token");
       } catch {
         // Fallback
       }
@@ -145,7 +146,7 @@ class AuthService {
       this.user = result.data.user;
 
       if (typeof localStorage !== "undefined") {
-        localStorage.setItem("sensorium_access_token", this.accessToken!);
+        localStorage.removeItem("sensorium_access_token");
         localStorage.setItem("sensorium_auth_user", JSON.stringify(this.user));
         if (this.csrfToken) localStorage.setItem("sensorium_csrf_token", this.csrfToken);
       }
@@ -197,7 +198,7 @@ class AuthService {
       this.user = result.data.user;
 
       if (typeof localStorage !== "undefined") {
-        localStorage.setItem("sensorium_access_token", this.accessToken!);
+        localStorage.removeItem("sensorium_access_token");
         localStorage.setItem("sensorium_auth_user", JSON.stringify(this.user));
         if (this.csrfToken) localStorage.setItem("sensorium_csrf_token", this.csrfToken);
       }
@@ -225,11 +226,9 @@ class AuthService {
     if (csrfToken) this.csrfToken = csrfToken;
 
     if (typeof localStorage !== "undefined") {
+      localStorage.removeItem("sensorium_access_token");
       if (user) localStorage.setItem("sensorium_auth_user", JSON.stringify(user));
       else localStorage.removeItem("sensorium_auth_user");
-
-      if (this.accessToken) localStorage.setItem("sensorium_access_token", this.accessToken);
-      else localStorage.removeItem("sensorium_access_token");
 
       if (csrfToken) localStorage.setItem("sensorium_csrf_token", csrfToken);
     }
@@ -261,7 +260,7 @@ class AuthService {
             this.accessToken = data.data.accessToken;
             this.user = data.data.user;
             if (typeof localStorage !== "undefined") {
-              localStorage.setItem("sensorium_access_token", this.accessToken!);
+              localStorage.removeItem("sensorium_access_token");
               localStorage.setItem("sensorium_auth_user", JSON.stringify(this.user));
             }
             this.notifyListeners();

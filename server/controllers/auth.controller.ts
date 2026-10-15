@@ -113,6 +113,15 @@ export const login = async (req: Request, res: Response): Promise<void> => {
     const cookieOptions = getRefreshTokenCookieOptions();
     res.cookie(REFRESH_TOKEN_COOKIE_NAME, refreshToken, cookieOptions);
 
+    // Set Secure HttpOnly cookie for Access Token
+    res.cookie("sensorium_access_token", accessToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: process.env.NODE_ENV === "production" ? "strict" : "lax",
+      maxAge: 15 * 60 * 1000,
+      path: "/"
+    });
+
     // Set readable CSRF cookie for client XSRF token header synchronization
     const csrfToken = generateCsrfToken();
     res.cookie(CSRF_COOKIE_NAME, csrfToken, {
@@ -194,6 +203,15 @@ export const refreshSession = async (req: AuthenticatedRequest, res: Response): 
 
     res.cookie(REFRESH_TOKEN_COOKIE_NAME, newRefreshToken, getRefreshTokenCookieOptions());
 
+    // Set Secure HttpOnly cookie for rotated Access Token
+    res.cookie("sensorium_access_token", newAccessToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: process.env.NODE_ENV === "production" ? "strict" : "lax",
+      maxAge: 15 * 60 * 1000,
+      path: "/"
+    });
+
     res.status(200).json({
       success: true,
       data: {
@@ -229,8 +247,9 @@ export const logout = async (req: AuthenticatedRequest, res: Response): Promise<
     }
   }
 
+  res.clearCookie("sensorium_access_token", { path: "/" });
   res.clearCookie(REFRESH_TOKEN_COOKIE_NAME, getRefreshTokenCookieOptions());
-  res.clearCookie(CSRF_COOKIE_NAME);
+  res.clearCookie(CSRF_COOKIE_NAME, { path: "/" });
   res.status(200).json({
     success: true,
     message: "Déconnexion réussie. Session et jetons révoqués."
@@ -315,6 +334,15 @@ export const handleGoogleCallback = async (req: Request, res: Response): Promise
     // Configuration des cookies de session
     const cookieOptions = getRefreshTokenCookieOptions();
     res.cookie(REFRESH_TOKEN_COOKIE_NAME, refreshData.token, cookieOptions);
+
+    // Set Secure HttpOnly cookie for Access Token
+    res.cookie("sensorium_access_token", accessToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: process.env.NODE_ENV === "production" ? "strict" : "lax",
+      maxAge: 15 * 60 * 1000,
+      path: "/"
+    });
 
     const csrfToken = generateCsrfToken();
     res.cookie(CSRF_COOKIE_NAME, csrfToken, {

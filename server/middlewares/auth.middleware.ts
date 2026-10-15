@@ -68,16 +68,18 @@ export const authenticateToken = (
   next: NextFunction
 ): void => {
   const authHeader = req.headers.authorization;
-  const token = authHeader && authHeader.startsWith("Bearer ") 
+  const headerToken = authHeader && authHeader.startsWith("Bearer ") 
     ? authHeader.split(" ")[1] 
     : null;
+  const cookieToken = req.cookies?.["sensorium_access_token"] || req.cookies?.["access_token"];
+  const token = headerToken || cookieToken;
 
   if (!token) {
     res.status(401).json({
       success: false,
       error: {
         code: "UNAUTHORIZED",
-        message: "Jeton d'accès manquant ou format invalide (Bearer token attendu)."
+        message: "Jeton d'accès manquant ou format invalide (Bearer token ou cookie HttpOnly attendu)."
       }
     });
     return;
