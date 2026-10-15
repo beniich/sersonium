@@ -188,7 +188,7 @@ const COMMANDS: Array<{ type: CommandType; label: string; icon: React.ReactNode;
   { type: "LOCK_SCREEN",      label: "Verrouiller",      icon: <Lock size={14}/>,      color: "text-amber-400" },
   { type: "REBOOT",           label: "Redémarrer",       icon: <RotateCcw size={14}/>, color: "text-blue-400" },
   { type: "SHUTDOWN",         label: "Éteindre",         icon: <Power size={14}/>,     color: "text-orange-400" },
-  { type: "COLLECT_LOGS",     label: "Collecter logs",   icon: <Terminal size={14}/>,  color: "text-purple-400" },
+  { type: "COLLECT_LOGS",     label: "Collecter logs",   icon: <Terminal size={14}/>,  color: "text-slate-400" },
   { type: "DEPLOY_PATCH",     label: "Déployer patch",   icon: <Download size={14}/>,  color: "text-cyan-400" },
   { type: "WIPE_DEVICE",      label: "Effacer terminal", icon: <Trash2 size={14}/>,    color: "text-red-500",  danger: true },
 ];
@@ -586,7 +586,7 @@ export default function UemPage({ isDark }: UemPageProps) {
             <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-orange-500 to-amber-600 flex items-center justify-center">
               <Shield size={16} className="text-white"/>
             </div>
-            <h1 className="text-2xl font-bold text-white tracking-tight">UEM Cockpit</h1>
+            <h1 className="text-2xl font-bold text-slate-900 dark:text-white tracking-tight">UEM Cockpit</h1>
             <span className="text-xs font-mono bg-orange-500/15 text-orange-400 border border-orange-500/30 px-2 py-0.5 rounded-full">
               Unified Endpoint Management
             </span>
@@ -598,7 +598,7 @@ export default function UemPage({ isDark }: UemPageProps) {
         <div className="flex items-center gap-2">
           <button
             onClick={() => setShowRegisterModal(true)}
-            className="flex items-center gap-2 px-3.5 py-2 rounded-lg bg-gradient-to-r from-indigo-600 via-purple-600 to-indigo-700 hover:from-indigo-500 hover:to-purple-500 text-white font-medium text-sm transition-all shadow-lg shadow-indigo-600/20"
+            className="flex items-center gap-2 px-3.5 py-2 rounded-lg bg-slate-800 hover:bg-slate-700 dark:bg-white/10 dark:hover:bg-white/15 border border-slate-700/60 dark:border-white/10 text-white font-medium text-sm transition-all shadow-sm"
           >
             <Building2 size={15}/>
             + Enregistrer Client &amp; Flotte
@@ -626,7 +626,7 @@ export default function UemPage({ isDark }: UemPageProps) {
         <StatCard label="En ligne" value={stats.onlineTerminals} icon={<Wifi size={18}/>} color="text-emerald-400"/>
         <StatCard label="Hors ligne" value={stats.offlineTerminals} icon={<WifiOff size={18}/>} color="text-slate-400"/>
         <StatCard label="Conformité" value={`${stats.complianceRate}%`} icon={<CheckCircle2 size={18}/>} color="text-teal-400"/>
-        <StatCard label="Commandes" value={stats.pendingCommands} icon={<Send size={18}/>} color="text-purple-400" sub="En attente"/>
+        <StatCard label="Commandes" value={stats.pendingCommands} icon={<Send size={18}/>} color="text-slate-400" sub="En attente"/>
         <StatCard label="Alertes" value={stats.openAlerts} icon={<AlertTriangle size={18}/>} color="text-amber-400" sub="Ouvertes"/>
       </div>
 

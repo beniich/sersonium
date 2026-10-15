@@ -113,12 +113,12 @@ export default function ComputePage({ state, isDark, activeItemId = "com-mon", o
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end border-b border-slate-200 dark:border-neutral-800 pb-4 gap-3">
         <div>
           <h1 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">Compute & Edge Servers</h1>
-          <p className="text-sm text-slate-500 dark:text-neutral-400 mt-1">lacaza.clouindustrie.com / V8 Isolates & Real-time CPU/RAM Telemetry Supervision</p>
+          <p className="text-sm text-slate-500 dark:text-neutral-400 mt-1">enterprise.sensorium.cloud / V8 Isolates & Real-time CPU/RAM Telemetry Supervision</p>
         </div>
         {currentTab === "com-1" && (
           <button 
             onClick={() => setIsWorkerModalOpen(true)}
-            className="px-3.5 py-1.5 bg-[#FF6C2C] hover:bg-[#e05b1f] text-white rounded-lg text-sm font-medium flex items-center gap-2 transition-colors cursor-pointer shadow-xs"
+            className="px-3.5 py-1.5 bg-orange-500 hover:bg-orange-600 text-white rounded-lg text-sm font-medium flex items-center gap-2 transition-colors cursor-pointer shadow-xs"
           >
             <Plus className="w-4 h-4" /> Deploy Worker
           </button>
@@ -139,7 +139,7 @@ export default function ComputePage({ state, isDark, activeItemId = "com-mon", o
             onClick={() => onSelectTab && onSelectTab(tab.id)}
             className={`px-3.5 py-2 text-xs font-medium rounded-t-lg transition-colors whitespace-nowrap cursor-pointer ${
               currentTab === tab.id
-                ? "bg-white dark:bg-neutral-900 border-t-2 border-l border-r border-t-[#FF6C2C] border-slate-200 dark:border-neutral-800 text-slate-900 dark:text-white font-bold"
+                ? "bg-white dark:bg-neutral-900 border-t-2 border-l border-r border-t-orange-500 border-slate-200 dark:border-neutral-800 text-slate-900 dark:text-white font-bold"
                 : "text-slate-500 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-neutral-900/50"
             }`}
           >
@@ -162,9 +162,9 @@ export default function ComputePage({ state, isDark, activeItemId = "com-mon", o
       {currentTab === "com-1" && (
         <div className="space-y-4">
           {/* Quick Monitoring Snapshot Banner */}
-          <div className="p-4 rounded-xl border border-orange-500/20 bg-gradient-to-r from-[#FF6C2C]/5 via-amber-500/5 to-transparent flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div className="p-4 rounded-xl border border-orange-500/20 bg-gradient-to-r from-orange-500/5 via-amber-500/5 to-transparent flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <div className="flex items-center gap-3">
-              <div className="w-9 h-9 rounded-lg bg-[#FF6C2C]/10 text-[#FF6C2C] flex items-center justify-center font-bold">
+              <div className="w-9 h-9 rounded-lg bg-orange-500/10 text-orange-500 flex items-center justify-center font-bold">
                 <Cpu className="w-5 h-5" />
               </div>
               <div>
@@ -173,13 +173,13 @@ export default function ComputePage({ state, isDark, activeItemId = "com-mon", o
                   <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
                 </div>
                 <div className="text-[11px] text-slate-500 dark:text-neutral-400 font-mono">
-                  lacaza-srv01 • AMD EPYC (8 vCPUs) • Avg Load 24.8% • RAM 11.4 GB / 32 GB
+                  sensorium-edge-01 • AMD EPYC (8 vCPUs) • Avg Load 24.8% • RAM 11.4 GB / 32 GB
                 </div>
               </div>
             </div>
             <button
               onClick={() => onSelectTab && onSelectTab("com-mon")}
-              className="px-3 py-1.5 text-xs font-bold bg-white dark:bg-neutral-800 hover:bg-orange-50 dark:hover:bg-neutral-700 text-[#FF6C2C] border border-[#FF6C2C]/30 rounded-lg transition-colors cursor-pointer self-start sm:self-center"
+              className="px-3 py-1.5 text-xs font-bold bg-white dark:bg-neutral-800 hover:bg-orange-50 dark:hover:bg-orange-950/20 text-orange-600 dark:text-orange-400 border border-orange-500/30 rounded-lg transition-colors cursor-pointer self-start sm:self-center"
             >
               Open Full Monitor →
             </button>

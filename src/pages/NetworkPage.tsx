@@ -92,7 +92,7 @@ export default function NetworkPage({ state, isDark, activeItemId = "net-1", onS
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end border-b border-slate-200 dark:border-neutral-800 pb-4 gap-3">
         <div>
           <h1 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">Edge Network & Routing</h1>
-          <p className="text-sm text-slate-500 dark:text-neutral-400 mt-1">lacaza.clouindustrie.com / Network Infrastructure & Global Anycast</p>
+          <p className="text-sm text-slate-500 dark:text-neutral-400 mt-1">enterprise.sensorium.cloud / Network Infrastructure & Global Anycast</p>
         </div>
         {currentTab === "net-1" && (
           <button 
@@ -385,14 +385,14 @@ export default function NetworkPage({ state, isDark, activeItemId = "net-1", onS
           <div className="space-y-2 text-xs font-mono">
             <div className="p-3 rounded-lg border border-slate-200 dark:border-neutral-800 bg-slate-50/50 dark:bg-neutral-900/30 flex justify-between items-center">
               <div>
-                <span className="font-bold text-slate-900 dark:text-white">ssh.enterprise.jeton.com</span>
+                <span className="font-bold text-slate-900 dark:text-white">ssh.sensorium.cloud</span>
                 <span className="text-slate-500 dark:text-neutral-400 ml-2">Port: 22 (SSH)</span>
               </div>
               <span className="text-emerald-600 dark:text-emerald-400 font-bold">Active Proxy</span>
             </div>
             <div className="p-3 rounded-lg border border-slate-200 dark:border-neutral-800 bg-slate-50/50 dark:bg-neutral-900/30 flex justify-between items-center">
               <div>
-                <span className="font-bold text-slate-900 dark:text-white">db-proxy.enterprise.jeton.com</span>
+                <span className="font-bold text-slate-900 dark:text-white">db-proxy.sensorium.cloud</span>
                 <span className="text-slate-500 dark:text-neutral-400 ml-2">Port: 5432 (PostgreSQL)</span>
               </div>
               <span className="text-emerald-600 dark:text-emerald-400 font-bold">Active Proxy</span>
@@ -462,8 +462,8 @@ export default function NetworkPage({ state, isDark, activeItemId = "net-1", onS
             <div className="p-4 rounded-xl border border-slate-200 dark:border-neutral-800 bg-slate-50/50 dark:bg-neutral-900/30 space-y-3 text-xs">
               <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
                 <div className="flex items-center gap-2">
-                  <span className="font-bold font-mono text-sm text-slate-900 dark:text-white">api.lacaza.clouindustrie.com</span>
-                  <span className="px-2 py-0.5 rounded bg-purple-100 dark:bg-purple-950 text-purple-700 dark:text-purple-400 font-bold text-[10px]">API GATEWAY</span>
+                  <span className="font-bold font-mono text-sm text-slate-900 dark:text-white">api.sensorium.cloud</span>
+                  <span className="px-2 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 font-bold text-[10px]">API GATEWAY</span>
                 </div>
                 <span className="px-2 py-0.5 rounded bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-400 font-bold font-mono">
                   Active / Realtime Edge

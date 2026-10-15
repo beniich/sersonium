@@ -569,7 +569,7 @@ export default function App() {
     // 🌐 TIER 1 : Site Web Vitrine
     if (activePage === "portal" || activePage === "architecture") {
       return (
-        <div className="w-full bg-[#fbf8ff] text-[#1b1b20] rounded-2xl overflow-hidden shadow-sm border border-slate-200/80 dark:border-white/[0.08]">
+        <div className="w-full bg-slate-50 dark:bg-[#070709] text-slate-900 dark:text-neutral-100 rounded-2xl overflow-hidden shadow-sm border border-slate-200/80 dark:border-white/[0.08]">
           <PublicPortal
             onSignIn={handleSignIn}
             onSignOut={logout}

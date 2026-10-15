@@ -79,7 +79,7 @@ export default function SecurityPage({ state, isDark, activeItemId = "sec-1", on
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end border-b border-slate-200 dark:border-neutral-800 pb-4 gap-3">
         <div>
           <h1 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">Security & WAF</h1>
-          <p className="text-sm text-slate-500 dark:text-neutral-400 mt-1">enterprise.jeton.com / Web Application Firewall & Zero-Day Defense</p>
+          <p className="text-sm text-slate-500 dark:text-neutral-400 mt-1">enterprise.sensorium.cloud / Web Application Firewall & Zero-Day Defense</p>
         </div>
         {currentTab === "sec-1" && (
           <button 

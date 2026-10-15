@@ -80,7 +80,7 @@ const PLANS = [
       "Persistent cryptographic audit trail",
       "Automated CSRD & ESG compliance exports"
     ],
-    badgeColor: "bg-purple-500/15 text-purple-600 dark:text-purple-400"
+    badgeColor: "bg-orange-500/15 text-orange-600 dark:text-orange-400"
   }
 ];
 
@@ -319,7 +319,7 @@ export default function SettingsPage({ state, isDark, activeItemId = "set-1", on
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end border-b border-neutral-200 dark:border-neutral-800 pb-4 gap-3">
         <div>
           <h1 className="text-2xl font-bold tracking-tight">Organization & Settings</h1>
-          <p className="text-sm text-neutral-500 mt-1">lacaza.clouindustrie.com / Account Governance, Subscriptions & Granular RBAC Permissions</p>
+          <p className="text-sm text-neutral-500 mt-1">enterprise.sensorium.cloud / Account Governance, Subscriptions & Granular RBAC Permissions</p>
         </div>
         {currentTab === "set-1" && (
           <div className="flex items-center gap-2">
@@ -331,9 +331,9 @@ export default function SettingsPage({ state, isDark, activeItemId = "set-1", on
             </button>
             <button 
               onClick={() => setIsTopUpOpen(true)}
-              className="px-3.5 py-1.5 bg-[#FF6C2C] hover:bg-[#e05b1f] text-white rounded-lg text-sm font-bold flex items-center gap-2 transition-colors cursor-pointer shadow-xs"
+              className="px-3.5 py-1.5 bg-orange-500 hover:bg-orange-600 text-white rounded-lg text-sm font-bold flex items-center gap-2 transition-colors cursor-pointer shadow-xs"
             >
-              <Plus className="w-4 h-4" /> Top-Up LACAZA Wallet
+              <Plus className="w-4 h-4" /> Top-Up Sovereign Wallet
             </button>
           </div>
         )}
@@ -581,7 +581,7 @@ export default function SettingsPage({ state, isDark, activeItemId = "set-1", on
                   {(state.transactions || []).length === 0 && (
                     <tr>
                       <td colSpan={5} className="p-6 text-center text-neutral-500 font-sans">
-                        No transactions found. Click "Top-Up LACAZA Wallet" to add funds.
+                        No transactions found. Click "Top-Up Sovereign Wallet" to add funds.
                       </td>
                     </tr>
                   )}

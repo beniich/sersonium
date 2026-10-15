@@ -157,7 +157,7 @@ export default function AdCampaignsPage({ isDark, onExplorePublic }: AdCampaigns
               onClick={() => setPageSection("social-simulator")}
               className={`px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 cursor-pointer ${
                 pageSection === "social-simulator"
-                  ? "bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 text-white shadow-md shadow-indigo-500/20 scale-102"
+                  ? "bg-gradient-to-r from-orange-500 to-amber-500 text-white shadow-md shadow-orange-500/20 scale-102"
                   : "text-slate-600 dark:text-neutral-300 hover:text-slate-900 dark:hover:text-white"
               }`}
             >
@@ -247,7 +247,7 @@ export default function AdCampaignsPage({ isDark, onExplorePublic }: AdCampaigns
                     href="/story-reels.html"
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="w-full py-2.5 px-4 rounded-xl bg-gradient-to-r from-blue-600 via-indigo-600 to-cyan-500 hover:opacity-95 text-white text-xs font-bold flex items-center justify-center gap-2 shadow-lg shadow-blue-500/20 active:scale-[0.98] transition cursor-pointer"
+                    className="w-full py-2.5 px-4 rounded-xl bg-gradient-to-r from-orange-500 to-amber-500 hover:opacity-95 text-white text-xs font-bold flex items-center justify-center gap-2 shadow-lg shadow-orange-500/20 active:scale-[0.98] transition cursor-pointer"
                   >
                     <ExternalLink className="w-4 h-4" />
                     <span>Open Standalone Full-Screen Mobile Reel</span>

@@ -71,7 +71,7 @@ export default function ZeroTrustPage({ state, isDark, activeItemId = "zt-1", on
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end border-b border-slate-200 dark:border-neutral-800 pb-4 gap-3">
         <div>
           <h1 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">Zero Trust & Identity</h1>
-          <p className="text-sm text-slate-500 dark:text-neutral-400 mt-1">enterprise.jeton.com / Identity-Aware Proxy & Secure Web Gateway</p>
+          <p className="text-sm text-slate-500 dark:text-neutral-400 mt-1">enterprise.sensorium.cloud / Identity-Aware Proxy & Secure Web Gateway</p>
         </div>
         {currentTab === "zt-1" && (
           <button 
@@ -319,7 +319,7 @@ export default function ZeroTrustPage({ state, isDark, activeItemId = "zt-1", on
                   value={newPolicy.users}
                   onChange={e => setNewPolicy({...newPolicy, users: e.target.value})}
                   className="w-full bg-slate-50 dark:bg-neutral-800 border border-slate-200 dark:border-neutral-700 rounded-lg px-3 py-2 text-sm font-mono text-slate-900 dark:text-white focus:outline-hidden focus:ring-2 focus:ring-orange-500"
-                  placeholder="e.g. @enterprise.jeton.com"
+                  placeholder="e.g. @enterprise.sensorium.cloud"
                 />
               </div>
 

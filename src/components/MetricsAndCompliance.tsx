@@ -49,19 +49,19 @@ export const MetricsAndCompliance: React.FC = () => {
   ];
 
   return (
-    <section className="py-20 bg-white border-t border-slate-100">
+    <section className="py-20 bg-white dark:bg-[#070709] border-t border-slate-200/80 dark:border-white/[0.08] transition-colors">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* 4 Big Numbers */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8 mb-16">
           {metrics.map((m, idx) => (
             <div key={idx} className="text-center p-4">
-              <div className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-slate-900 tracking-tight mb-1">
+              <div className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-slate-900 dark:text-white tracking-tight mb-1">
                 {m.value}
               </div>
-              <div className="text-sm font-semibold text-slate-800 mb-1">
+              <div className="text-sm font-semibold text-slate-800 dark:text-neutral-200 mb-1">
                 {m.label}
               </div>
-              <div className="text-xs text-slate-500 font-normal">
+              <div className="text-xs text-slate-500 dark:text-neutral-400 font-normal">
                 {m.detail}
               </div>
             </div>
@@ -69,19 +69,19 @@ export const MetricsAndCompliance: React.FC = () => {
         </div>
 
         {/* 4 Compliance Standards */}
-        <div className="pt-10 border-t border-slate-100 grid grid-cols-2 md:grid-cols-4 gap-6">
+        <div className="pt-10 border-t border-slate-200/80 dark:border-white/[0.08] grid grid-cols-2 md:grid-cols-4 gap-6">
           {compliance.map((c, idx) => {
             const Icon = c.icon;
             return (
               <div key={idx} className="flex items-center gap-3">
-                <div className="p-2 rounded-lg bg-indigo-50 text-indigo-600 shrink-0">
+                <div className="p-2 rounded-lg bg-orange-500/10 text-orange-600 dark:text-orange-400 shrink-0 border border-orange-500/20">
                   <Icon className="w-5 h-5" />
                 </div>
                 <div>
-                  <div className="text-xs font-bold text-slate-900">
+                  <div className="text-xs font-bold text-slate-900 dark:text-white">
                     {c.title}
                   </div>
-                  <div className="text-[11px] text-slate-500">
+                  <div className="text-[11px] text-slate-500 dark:text-neutral-400">
                     {c.desc}
                   </div>
                 </div>

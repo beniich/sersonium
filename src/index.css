@@ -240,88 +240,137 @@ body:not(.dark),
   animation: ambientZoom 12s ease-in-out infinite alternate;
 }
 
-/* BeeCarbonat Tactile Neo-Industrial Theme */
+/* ─── SENSORIUM Minimalist Design Tokens & Sovereign Surface System ────────── */
+
+/* Tactile Plates — Light Mode (Clean Slate) */
 .tactile-plate {
-  background: #f5f2fa;
-  box-shadow: 6px 6px 14px rgba(112, 104, 133, 0.18), -6px -6px 14px rgba(255, 255, 255, 0.95);
+  background: #ffffff;
+  border: 1px solid rgba(226, 232, 240, 0.8);
+  box-shadow: 0 1px 3px 0 rgba(15, 23, 42, 0.04), 0 1px 2px -1px rgba(15, 23, 42, 0.04);
 }
 
 .tactile-debossed {
-  background: #efedf4;
-  box-shadow: inset 3px 3px 6px rgba(112, 104, 133, 0.22), inset -3px -3px 6px rgba(255, 255, 255, 0.9);
+  background: #f1f5f9;
+  border: 1px solid rgba(226, 232, 240, 0.7);
+  box-shadow: inset 0 1px 2px 0 rgba(15, 23, 42, 0.06);
 }
 
 .tactile-btn {
-  background: #f5f2fa;
-  box-shadow: 4px 4px 10px rgba(112, 104, 133, 0.2), -4px -4px 10px #ffffff, inset 0 1px 0 rgba(255, 255, 255, 0.8);
+  background: #ffffff;
+  border: 1px solid rgba(226, 232, 240, 0.9);
+  color: #0f172a;
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+}
+
+.tactile-btn:hover {
+  background: #f8fafc;
+  border-color: rgba(203, 213, 225, 1);
 }
 
 .tactile-btn-primary {
-  background: linear-gradient(135deg, #7c3aed 0%, #630ed4 100%);
-  box-shadow: 4px 4px 12px rgba(99, 14, 212, 0.35), -2px -2px 6px rgba(255, 255, 255, 0.7), inset 0 1px 1px rgba(255, 255, 255, 0.4);
+  background: linear-gradient(135deg, #f97316 0%, #ea580c 100%);
+  color: #ffffff !important;
+  border: 1px solid rgba(234, 88, 12, 0.8);
+  box-shadow: 0 2px 8px -1px rgba(249, 115, 22, 0.35);
 }
 
+.tactile-btn-primary:hover {
+  background: linear-gradient(135deg, #ea580c 0%, #c2410c 100%);
+}
+
+/* Tactile Plates — Dark Mode (Sovereign Deep Slate) */
 .dark .tactile-plate {
-  background: #14141c;
-  box-shadow: 6px 6px 14px rgba(0, 0, 0, 0.5), -6px -6px 14px rgba(255, 255, 255, 0.03);
+  background: #0e0e14;
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  box-shadow: 0 4px 16px -2px rgba(0, 0, 0, 0.5);
 }
 
 .dark .tactile-debossed {
-  background: #0d0d12;
-  box-shadow: inset 3px 3px 6px rgba(0, 0, 0, 0.6), inset -3px -3px 6px rgba(255, 255, 255, 0.04);
+  background: #08080c;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  box-shadow: inset 0 2px 4px 0 rgba(0, 0, 0, 0.4);
 }
 
 .dark .tactile-btn {
-  background: #181824;
-  box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.5), -4px -4px 10px rgba(255, 255, 255, 0.03);
+  background: #14141c;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: #f1f5f9;
+  box-shadow: 0 2px 8px 0 rgba(0, 0, 0, 0.3);
 }
 
+.dark .tactile-btn:hover {
+  background: #1a1a24;
+  border-color: rgba(255, 255, 255, 0.15);
+}
 
-/* -- Spider CAFM Palette tokens (from nat---spider-cafm) ------------------- */
+/* Minimalist Surface Tokens */
+.bg-surface { background-color: #f8fafc; }
+.dark .bg-surface { background-color: #070709; }
 
-.bg-surface { background-color: #fbf8ff; }
-.bg-surface-container { background-color: #efedf4; }
-.bg-surface-container-low { background-color: #f5f2fa; }
-.bg-surface-container-high { background-color: #e9e7ee; }
-.bg-surface-container-highest { background-color: #e3e1e8; }
+.bg-surface-container { background-color: #f1f5f9; }
+.dark .bg-surface-container { background-color: #0e0e14; }
+
+.bg-surface-container-low { background-color: #f8fafc; }
+.dark .bg-surface-container-low { background-color: #0a0a0e; }
+
+.bg-surface-container-high { background-color: #e2e8f0; }
+.dark .bg-surface-container-high { background-color: #14141c; }
+
+.bg-surface-container-highest { background-color: #cbd5e1; }
+.dark .bg-surface-container-highest { background-color: #1c1c26; }
+
 .bg-surface-container-lowest { background-color: #ffffff; }
-.bg-primary-cafm { background-color: #630ed4; }
-.bg-primary-container-cafm { background-color: #7c3aed; }
-.bg-primary-fixed { background-color: #eaddff; }
-.bg-secondary-cafm { background-color: #712edd; }
-.bg-secondary-container { background-color: #8b4ef7; }
-.bg-secondary-fixed { background-color: #ebddff; }
-.bg-tertiary { background-color: #005952; }
-.bg-error-cafm { background-color: #ba1a1a; }
+.dark .bg-surface-container-lowest { background-color: #050507; }
 
-.text-on-surface-cafm { color: #1b1b20; }
-.text-on-surface-variant { color: #4a4455; }
-.text-outline-cafm { color: #7b7487; }
-.text-outline-variant { color: #ccc3d8; }
-.text-primary-cafm { color: #630ed4; }
+/* Primary Accent — SENSORIUM Orange Sovereign (Single Accent) */
+.bg-primary-cafm { background-color: #f97316; }
+.bg-primary-container-cafm { background-color: #ea580c; }
+.bg-primary-fixed { background-color: #ffedd5; }
+.dark .bg-primary-fixed { background-color: rgba(249, 115, 22, 0.15); }
 
-.border-primary-cafm { border-color: #630ed4; }
-.border-outline-cafm { border-color: #7b7487; }
-.border-outline-variant { border-color: #ccc3d8; }
-.border-surface-variant { border-color: #e3e1e8; }
+.bg-secondary-cafm { background-color: #334155; }
+.dark .bg-secondary-cafm { background-color: #1e293b; }
 
+.bg-tertiary { background-color: #059669; }
+.bg-error-cafm { background-color: #ef4444; }
+
+.text-on-surface-cafm { color: #0f172a; }
+.dark .text-on-surface-cafm { color: #f8fafc; }
+
+.text-on-surface-variant { color: #64748b; }
+.dark .text-on-surface-variant { color: #94a3b8; }
+
+.text-outline-cafm { color: #94a3b8; }
+.dark .text-outline-cafm { color: #64748b; }
+
+.text-primary-cafm { color: #f97316; }
+.border-primary-cafm { border-color: #f97316; }
+
+.border-outline-cafm { border-color: rgba(203, 213, 225, 0.8); }
+.dark .border-outline-cafm { border-color: rgba(255, 255, 255, 0.08); }
+
+.border-surface-variant { border-color: rgba(226, 232, 240, 0.8); }
+.dark .border-surface-variant { border-color: rgba(255, 255, 255, 0.06); }
+
+/* Grid and subtle dot backgrounds with neutral tones */
 .bg-grid-subtle {
   background-size: 32px 32px;
   background-image:
-    linear-gradient(to right, rgba(99, 102, 241, 0.05) 1px, transparent 1px),
-    linear-gradient(to bottom, rgba(99, 102, 241, 0.05) 1px, transparent 1px);
+    linear-gradient(to right, rgba(148, 163, 184, 0.07) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(148, 163, 184, 0.07) 1px, transparent 1px);
 }
 
 .bg-dot-matrix {
   background-size: 24px 24px;
-  background-image: radial-gradient(circle, rgba(99, 102, 241, 0.12) 1px, transparent 1px);
+  background-image: radial-gradient(circle, rgba(148, 163, 184, 0.12) 1px, transparent 1px);
 }
 
 @keyframes pulseGlow {
-  0%, 100% { opacity: 0.4; transform: scale(1); }
-  50% { opacity: 0.8; transform: scale(1.05); }
+  0%, 100% { opacity: 0.3; transform: scale(1); }
+  50% { opacity: 0.6; transform: scale(1.03); }
 }
 
 .animate-pulse-glow {
   animation: pulseGlow 4s ease-in-out infinite;
 }
+

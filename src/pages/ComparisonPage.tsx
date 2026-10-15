@@ -165,9 +165,9 @@ SENSORIUM, en revanche, est une plateforme de Résilience. Nous ne nous contento
     <div className={`min-h-screen p-4 sm:p-6 lg:p-8 ${isDark ? "bg-[#0b0f17] text-white" : "bg-slate-50 text-slate-900"} font-sans space-y-8`}>
       
       {/* ─── Hero Section ─── */}
-      <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-indigo-950 via-slate-900 to-slate-950 border border-indigo-500/20 p-6 sm:p-10 shadow-2xl">
+      <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-slate-900 via-slate-900 to-slate-950 border border-orange-500/20 p-6 sm:p-10 shadow-2xl">
         <div className="absolute top-0 right-0 w-96 h-96 bg-orange-500/10 rounded-full blur-3xl pointer-events-none" />
-        <div className="absolute bottom-0 left-0 w-96 h-96 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute bottom-0 left-0 w-96 h-96 bg-orange-500/5 rounded-full blur-3xl pointer-events-none" />
 
         <div className="relative z-10 max-w-4xl space-y-4">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-gradient-to-r from-orange-500/20 to-indigo-500/20 border border-orange-500/30 text-orange-400 text-xs font-semibold">
@@ -198,7 +198,7 @@ SENSORIUM, en revanche, est une plateforme de Résilience. Nous ne nous contento
               <Cpu size={14} className="text-cyan-400" /> Convergence IT + OT + IoT
             </span>
             <span className="px-3 py-1 rounded-lg bg-white/5 border border-white/10 text-slate-300 flex items-center gap-1.5">
-              <FileText size={14} className="text-purple-400" /> Générateur DORA &amp; PAS
+              <FileText size={14} className="text-amber-400" /> Générateur DORA &amp; PAS
             </span>
           </div>
         </div>
@@ -275,7 +275,7 @@ SENSORIUM, en revanche, est une plateforme de Résilience. Nous ne nous contento
             </div>
 
             {/* Carte SENSORIUM */}
-            <div className="p-5 sm:p-6 rounded-2xl bg-gradient-to-br from-indigo-950/40 via-slate-950/80 to-amber-950/30 border border-amber-500/40 relative space-y-3 shadow-lg">
+            <div className="p-5 sm:p-6 rounded-2xl bg-gradient-to-br from-slate-950/60 via-slate-950/80 to-amber-950/30 border border-amber-500/40 relative space-y-3 shadow-lg">
               <div className="flex items-center justify-between">
                 <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-amber-500/20 border border-amber-500/40 text-amber-300 text-xs font-bold">
                   <Sparkles size={13} className="text-amber-400" />
@@ -291,7 +291,7 @@ SENSORIUM, en revanche, est une plateforme de Résilience. Nous ne nous contento
               <div className="pt-2 flex flex-wrap gap-1.5 text-[11px]">
                 <span className="px-2 py-0.5 rounded bg-emerald-500/10 border border-emerald-500/30 text-emerald-300 font-semibold">✓ IA Prédictive avant panne</span>
                 <span className="px-2 py-0.5 rounded bg-cyan-500/10 border border-cyan-500/30 text-cyan-300 font-semibold">✓ Corrélation Bâtiment / IoT</span>
-                <span className="px-2 py-0.5 rounded bg-purple-500/10 border border-purple-500/30 text-purple-300 font-semibold">✓ Souveraineté &amp; Audit DORA</span>
+                <span className="px-2 py-0.5 rounded bg-orange-500/10 border border-orange-500/30 text-orange-300 font-semibold">✓ Souveraineté &amp; Audit DORA</span>
               </div>
             </div>
           </div>
@@ -347,15 +347,15 @@ SENSORIUM, en revanche, est une plateforme de Résilience. Nous ne nous contento
               </div>
 
               {/* Pilier 4 : Légal & Réglementaire */}
-              <div className="p-4 rounded-xl bg-slate-950/60 border border-purple-500/20 hover:border-purple-500/40 transition space-y-2">
-                <div className="w-8 h-8 rounded-lg bg-purple-500/10 border border-purple-500/30 text-purple-400 flex items-center justify-center">
+              <div className="p-4 rounded-xl bg-slate-950/60 border border-amber-500/20 hover:border-amber-500/40 transition space-y-2">
+                <div className="w-8 h-8 rounded-lg bg-amber-500/10 border border-amber-500/30 text-amber-400 flex items-center justify-center">
                   <Scale size={16} />
                 </div>
                 <h4 className="text-xs font-bold text-white uppercase tracking-wide">4. Légal &amp; Réglementaire</h4>
                 <p className="text-xs text-slate-300 leading-relaxed">
                   Conformité native <strong>DORA (Résilience opérationnelle)</strong>, NIS 2 et générateur automatique de Plans d'Assurance Sécurité (PAS) pour les régulateurs.
                 </p>
-                <div className="text-[10px] text-purple-400 font-medium">
+                <div className="text-[10px] text-amber-400 font-medium">
                   Différentiateur : Livrables juridiques opposables vs simples logs
                 </div>
               </div>
@@ -428,7 +428,7 @@ SENSORIUM, en revanche, est une plateforme de Résilience. Nous ne nous contento
                   {/* Catégorie */}
                   <td className="py-5 px-6 font-bold text-slate-200 align-top">
                     <div className="flex items-center gap-2">
-                      <span className="w-1.5 h-1.5 rounded-full bg-indigo-500 group-hover:scale-125 transition-transform" />
+                      <span className="w-1.5 h-1.5 rounded-full bg-orange-500 group-hover:scale-125 transition-transform" />
                       <span>{item.category}</span>
                     </div>
                     <p className="text-[10px] text-slate-500 mt-2 font-normal leading-normal">
@@ -492,7 +492,7 @@ SENSORIUM, en revanche, est une plateforme de Résilience. Nous ne nous contento
         </div>
 
         <div className="p-5 rounded-2xl bg-gradient-to-b from-slate-900 to-slate-950 border border-slate-800 space-y-3">
-          <div className="w-10 h-10 rounded-xl bg-purple-500/10 border border-purple-500/30 flex items-center justify-center text-purple-400">
+          <div className="w-10 h-10 rounded-xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400">
             <Building2 size={20} />
           </div>
           <h3 className="text-sm font-bold text-white">3. Souveraineté &amp; Séquestre</h3>

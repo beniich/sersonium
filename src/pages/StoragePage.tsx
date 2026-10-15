@@ -100,7 +100,7 @@ export default function StoragePage({ state, isDark, activeItemId = "db-1", onSe
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end border-b border-slate-200 dark:border-neutral-800 pb-4 gap-3">
         <div>
           <h1 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">Storage & Edge Databases</h1>
-          <p className="text-sm text-slate-500 dark:text-neutral-400 mt-1">enterprise.jeton.com / R2 Zero-Egress Storage & D1 SQLite</p>
+          <p className="text-sm text-slate-500 dark:text-neutral-400 mt-1">enterprise.sensorium.cloud / R2 Zero-Egress Storage & D1 SQLite</p>
         </div>
         {currentTab === "db-1" && (
           <button 
@@ -284,7 +284,7 @@ export default function StoragePage({ state, isDark, activeItemId = "db-1", onSe
               <span className="text-slate-800 dark:text-neutral-200">Total Video Minutes Streamed (30d)</span>
               <span className="text-emerald-600 dark:text-emerald-400">842,100 mins</span>
             </div>
-            <div className="text-slate-500 dark:text-neutral-500">HLS Ingest Endpoint: rtmp://stream.jeton.com/live</div>
+            <div className="text-slate-500 dark:text-neutral-500">HLS Ingest Endpoint: rtmp://stream.sensorium.cloud/live</div>
           </div>
         </div>
       )}

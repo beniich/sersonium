@@ -85,14 +85,14 @@ export const SENSORIUM_SERVICE_SUITE: SidebarServiceGroup[] = [
   },
   {
     id: "grp-spider-cafm",
-    name: "Spider CAFM Digital Twin",
+    name: "Digital Twin & Cockpit 3D",
     icon: Compass,
     items: [
-      { id: "spider-portal", label: "Site Web (Vitrine BeeCarbonat)", page: "portal", badge: "Web", badgeType: "default", keywords: "spider cafm site principal web landing vitrine beecarbonat twin accueil" },
-      { id: "spider-cockpit", label: "3D Cockpit Console & Actuators", page: "cockpit", badge: "3D Live", badgeType: "live", keywords: "spider cafm cockpit 3d twin threejs valves lighting hvac actuators" },
-      { id: "spider-vault", label: "Zero-Trust Ephemeral Vault", page: "vault", badge: "Vault", badgeType: "ia", keywords: "spider cafm vault zero trust ephemeral passcodes biometric access" },
-      { id: "spider-esg", label: "CSRD ESG & Industrial Grafana", page: "esg-carbon", badge: "CSRD", badgeType: "default", keywords: "spider cafm esg csrd carbon scope 1 2 3 grafana observability" },
-      { id: "spider-arch", label: "6 Core Pillars & Architecture", page: "architecture", badge: "Pillars", badgeType: "ia", keywords: "spider cafm 6 pillars core architecture topology system" }
+      { id: "spider-portal", label: "Site Public SENSORIUM", page: "portal", badge: "Web", badgeType: "default", keywords: "sensorium site principal web landing vitrine twin accueil portal" },
+      { id: "spider-cockpit", label: "Cockpit 3D & Actionneurs CVC", page: "cockpit", badge: "Live 3D", badgeType: "live", keywords: "sensorium cockpit 3d twin valves lighting hvac actuators" },
+      { id: "spider-vault", label: "Coffre-fort Éphémère ZTNA", page: "vault", badge: "Vault", badgeType: "ia", keywords: "vault zero trust ephemeral passcodes biometric access security" },
+      { id: "spider-esg", label: "Télémétrie Carbone & CSRD", page: "esg-carbon", badge: "CSRD", badgeType: "default", keywords: "esg csrd carbon scope 1 2 3 grafana observability audit" },
+      { id: "spider-arch", label: "Topologie & Piliers Système", page: "architecture", badge: "Archi", badgeType: "ia", keywords: "sensorium architecture topology pillars system" }
     ]
   },
   {
@@ -376,19 +376,14 @@ export default function DashboardLayout(props: any) {
   const getBadgeClass = (type?: string) => {
     switch (type) {
       case "live":
-        return "bg-emerald-500/10 dark:bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/25 dark:border-emerald-500/30";
+        return "bg-emerald-500/10 dark:bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/25 dark:border-emerald-500/30 font-medium";
       case "ia":
-        return "bg-purple-500/10 dark:bg-purple-500/15 text-purple-600 dark:text-purple-400 border border-purple-500/25 dark:border-purple-500/30";
-      case "svg":
-        return "bg-blue-500/10 dark:bg-blue-500/15 text-blue-600 dark:text-blue-400 border border-blue-500/25 dark:border-blue-500/30";
-      case "paypal":
-        return "bg-amber-500/10 dark:bg-amber-500/15 text-amber-600 dark:text-amber-400 border border-amber-500/25 dark:border-amber-500/30";
       case "stream":
-        return "bg-orange-500/10 dark:bg-orange-500/15 text-orange-600 dark:text-orange-400 border border-orange-500/25 dark:border-orange-500/30";
+      case "paypal":
       case "fips":
-        return "bg-cyan-500/10 dark:bg-cyan-500/15 text-cyan-600 dark:text-cyan-400 border border-cyan-500/25 dark:border-cyan-500/30";
+        return "bg-orange-500/10 dark:bg-orange-500/15 text-orange-600 dark:text-orange-400 border border-orange-500/25 dark:border-orange-500/30 font-medium";
       default:
-        return "bg-slate-100 dark:bg-white/[0.06] text-slate-700 dark:text-neutral-300 border border-slate-200 dark:border-white/[0.08]";
+        return "bg-slate-100 dark:bg-white/[0.05] text-slate-600 dark:text-neutral-400 border border-slate-200/80 dark:border-white/[0.07]";
     }
   };
 

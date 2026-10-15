@@ -56,27 +56,26 @@ export const TactileHeader: React.FC<TactileHeaderProps> = ({
 
   return (
     <>
-      <header className={`${isEmbedded ? 'sticky top-0 w-full z-20' : 'fixed top-0 w-full z-50'} bg-[#fbf8ff]/95 backdrop-blur-md shadow-[0_4px_16px_rgba(112,104,133,0.08)] border-b border-purple-100/60`}>
+      <header className={`${isEmbedded ? 'sticky top-0 w-full z-20' : 'fixed top-0 w-full z-50'} bg-white/95 dark:bg-[#070709]/95 backdrop-blur-md shadow-xs border-b border-slate-200/80 dark:border-white/[0.08] transition-colors`}>
         <div className="h-20 w-full px-3 sm:px-6 lg:px-8 flex items-center justify-between gap-2 sm:gap-4">
           
           {/* Left: Brand identity */}
           <div className="flex items-center gap-2.5 sm:gap-4 shrink-0">
             <div
               onClick={() => handleNavClick('architecture')}
-              className="w-10 h-10 sm:w-11 sm:h-11 rounded-xl flex items-center justify-center cursor-pointer hover:scale-105 transition-transform overflow-hidden shrink-0"
-              style={{ background: 'linear-gradient(135deg, #1c1c1f 0%, #0e0e11 60%, #050507 100%)', border: '1px solid rgba(255,255,255,0.14)', boxShadow: '0 4px 16px rgba(0,0,0,0.6)' }}
-              title="SENSORIUM Spider CAFM"
+              className="w-10 h-10 sm:w-11 sm:h-11 rounded-xl flex items-center justify-center cursor-pointer hover:scale-105 transition-transform overflow-hidden shrink-0 bg-slate-900 dark:bg-black border border-slate-700 dark:border-white/15 shadow-sm"
+              title="SENSORIUM Autonomous Platform"
             >
               <svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-6 h-6 sm:w-7 sm:h-7">
                 <defs>
                   <linearGradient id="thGold" x1="0%" y1="0%" x2="100%" y2="100%">
                     <stop offset="0%" stopColor="#FFFFFF" />
-                    <stop offset="45%" stopColor="#F5D061" />
-                    <stop offset="100%" stopColor="#E5A93B" />
+                    <stop offset="45%" stopColor="#F97316" />
+                    <stop offset="100%" stopColor="#EA580C" />
                   </linearGradient>
                   <radialGradient id="thCore" cx="50%" cy="50%" r="50%">
-                    <stop offset="0%" stopColor="#FDE68A" />
-                    <stop offset="100%" stopColor="#D97706" />
+                    <stop offset="0%" stopColor="#FED7AA" />
+                    <stop offset="100%" stopColor="#F97316" />
                   </radialGradient>
                 </defs>
                 <path d="M16 3L27.25 9.5V22.5L16 29L4.75 22.5V9.5L16 3Z" stroke="url(#thGold)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
@@ -90,29 +89,29 @@ export const TactileHeader: React.FC<TactileHeaderProps> = ({
             </div>
             <div className="flex flex-col cursor-pointer" onClick={() => handleNavClick('architecture')}>
               <div className="flex items-center gap-1.5">
-                <span className="font-['Space_Grotesk'] text-base sm:text-lg tracking-tight text-[#1b1b20] font-bold">
-                  BeeCarbonat
+                <span className="font-['Space_Grotesk'] text-base sm:text-lg tracking-tight text-slate-900 dark:text-white font-bold">
+                  SENSORIUM
                 </span>
-                <span className="px-1.5 py-0.5 rounded-full bg-[#eaddff] text-[#25005a] font-['Space_Grotesk'] text-[9px] sm:text-[10px] uppercase font-bold tracking-wider">
-                  SPIDER
+                <span className="px-1.5 py-0.5 rounded-full bg-orange-500/10 text-orange-600 dark:text-orange-400 border border-orange-500/20 font-['Space_Grotesk'] text-[9px] sm:text-[10px] uppercase font-bold tracking-wider">
+                  SOVEREIGN
                 </span>
               </div>
-              <span className="font-['Space_Grotesk'] text-[9px] sm:text-[10px] text-[#4a4455] uppercase tracking-wider hidden xs:inline">
-                CAFM Digital Twin
+              <span className="font-['Space_Grotesk'] text-[9px] sm:text-[10px] text-slate-500 dark:text-neutral-400 uppercase tracking-wider hidden xs:inline">
+                Spatial Hypervision &amp; Twin
               </span>
             </div>
 
             {/* Edge Nodes live pill (visible on tablet and desktop) */}
-            <div className="tactile-debossed px-3 py-1.5 rounded-full hidden md:flex items-center gap-2">
+            <div className="px-3 py-1.5 rounded-full hidden md:flex items-center gap-2 bg-slate-100 dark:bg-white/[0.04] border border-slate-200 dark:border-white/[0.08]">
               <span className="relative flex h-2 w-2">
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-500 opacity-75"></span>
                 <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
               </span>
-              <span className="font-['Space_Grotesk'] text-[10px] sm:text-[11px] text-[#4a4455] font-bold tracking-wider">
+              <span className="font-['Space_Grotesk'] text-[10px] sm:text-[11px] text-slate-600 dark:text-neutral-400 font-bold tracking-wider">
                 PRODUCTION LIVE
               </span>
-              <span className="text-[#ccc3d8] text-[10px]">|</span>
-              <span className="font-['Space_Grotesk'] text-[10px] sm:text-[11px] text-[#630ed4] font-bold">
+              <span className="text-slate-300 dark:text-neutral-700 text-[10px]">|</span>
+              <span className="font-['Space_Grotesk'] text-[10px] sm:text-[11px] text-orange-600 dark:text-orange-400 font-bold">
                 14,890 Nodes
               </span>
             </div>
@@ -120,84 +119,44 @@ export const TactileHeader: React.FC<TactileHeaderProps> = ({
 
           {/* Center: Desktop Navigation links (PC >= 1280px) */}
           <nav className="hidden xl:flex items-center gap-1.5">
-            <button
-              onClick={() => handleNavClick('architecture')}
-              className={`transition-all px-3 py-2 rounded-xl font-['Space_Grotesk'] text-[14px] ${
-                activePath === 'architecture'
-                  ? 'tactile-plate text-[#630ed4] font-bold'
-                  : 'text-[#4a4455] hover:text-[#1b1b20]'
-              }`}
-            >
-              Architecture
-            </button>
-            <button
-              onClick={() => handleNavClick('6-core-pillars')}
-              className={`transition-all px-3 py-2 rounded-xl font-['Space_Grotesk'] text-[14px] ${
-                activePath === '6-core-pillars'
-                  ? 'tactile-plate text-[#630ed4] font-bold'
-                  : 'text-[#4a4455] hover:text-[#1b1b20]'
-              }`}
-            >
-              6 Piliers
-            </button>
-            <button
-              onClick={() => handleNavClick('3d-digital-twin')}
-              className={`transition-all px-3 py-2 rounded-xl font-['Space_Grotesk'] text-[14px] ${
-                activePath === '3d-digital-twin'
-                  ? 'tactile-plate text-[#630ed4] font-bold'
-                  : 'text-[#4a4455] hover:text-[#1b1b20]'
-              }`}
-            >
-              Jumeau 3D
-            </button>
-            <button
-              onClick={() => handleNavClick('esg-carbon')}
-              className={`transition-all px-3 py-2 rounded-xl font-['Space_Grotesk'] text-[14px] ${
-                activePath === 'esg-carbon'
-                  ? 'tactile-plate text-[#630ed4] font-bold'
-                  : 'text-[#4a4455] hover:text-[#1b1b20]'
-              }`}
-            >
-              ESG &amp; Carbone
-            </button>
-            <button
-              onClick={() => handleNavClick('grafana-observability')}
-              className={`transition-all px-3 py-2 rounded-xl font-['Space_Grotesk'] text-[14px] ${
-                activePath === 'grafana-observability'
-                  ? 'tactile-plate text-[#630ed4] font-bold'
-                  : 'text-[#4a4455] hover:text-[#1b1b20]'
-              }`}
-            >
-              Grafana
-            </button>
-            <button
-              onClick={() => handleNavClick('pricing')}
-              className={`transition-all px-3 py-2 rounded-xl font-['Space_Grotesk'] text-[14px] ${
-                activePath === 'pricing'
-                  ? 'tactile-plate text-[#630ed4] font-bold'
-                  : 'text-[#4a4455] hover:text-[#1b1b20]'
-              }`}
-            >
-              Tarifs
-            </button>
+            {[
+              { id: 'architecture', label: 'Architecture' },
+              { id: '6-core-pillars', label: '6 Piliers' },
+              { id: '3d-digital-twin', label: 'Jumeau 3D' },
+              { id: 'esg-carbon', label: 'ESG & Carbone' },
+              { id: 'grafana-observability', label: 'Grafana' },
+              { id: 'pricing', label: 'Tarifs' },
+            ].map(item => (
+              <button
+                key={item.id}
+                onClick={() => handleNavClick(item.id as ActiveNavPath)}
+                className={`transition-all px-3 py-1.5 rounded-xl font-['Space_Grotesk'] text-[13px] sm:text-[14px] cursor-pointer ${
+                  activePath === item.id
+                    ? 'bg-slate-900 text-white dark:bg-white dark:text-slate-900 font-bold shadow-xs'
+                    : 'text-slate-600 dark:text-neutral-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/[0.05]'
+                }`}
+              >
+                {item.label}
+              </button>
+            ))}
             <a
               href="/site/index.html"
-              className="transition-all px-3 py-2 rounded-xl font-['Space_Grotesk'] text-[14px] text-[#4a4455] hover:text-[#630ed4] flex items-center gap-1"
+              className="transition-all px-3 py-1.5 rounded-xl font-['Space_Grotesk'] text-[13px] sm:text-[14px] text-slate-600 dark:text-neutral-400 hover:text-orange-600 dark:hover:text-orange-400 flex items-center gap-1"
               title="Site Web Vitrine Complet (12 pages)"
             >
               <span>Site Web</span>
-              <span className="text-[9px] px-1.5 py-0.5 bg-[#eaddff] text-[#25005a] rounded-full font-bold uppercase">12 PAGES</span>
+              <span className="text-[9px] px-1.5 py-0.5 bg-orange-500/10 text-orange-600 dark:text-orange-400 border border-orange-500/20 rounded-full font-bold uppercase">12 PAGES</span>
             </a>
             <a
               href="/site/benefices_roi.html"
-              className="transition-all px-3 py-2 rounded-xl font-['Space_Grotesk'] text-[14px] text-[#4a4455] hover:text-[#1b1b20] flex items-center gap-1"
+              className="transition-all px-3 py-1.5 rounded-xl font-['Space_Grotesk'] text-[13px] sm:text-[14px] text-slate-600 dark:text-neutral-400 hover:text-slate-900 dark:hover:text-white flex items-center gap-1"
               title="Bénéfices & ROI"
             >
               <span>ROI</span>
             </a>
             <a
               href="/site/demo.html"
-              className="transition-all px-3 py-2 rounded-xl font-['Space_Grotesk'] text-[14px] text-[#4a4455] hover:text-[#1b1b20] flex items-center gap-1"
+              className="transition-all px-3 py-1.5 rounded-xl font-['Space_Grotesk'] text-[13px] sm:text-[14px] text-slate-600 dark:text-neutral-400 hover:text-slate-900 dark:hover:text-white flex items-center gap-1"
               title="Demander une Démo"
             >
               <span>Démo</span>
@@ -212,25 +171,25 @@ export const TactileHeader: React.FC<TactileHeaderProps> = ({
               <div className="relative">
                 <button
                   onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
-                  className="tactile-btn px-2.5 sm:px-3 py-1.5 rounded-xl flex items-center gap-2 cursor-pointer active:scale-95 transition-all"
+                  className="px-2.5 sm:px-3 py-1.5 rounded-xl flex items-center gap-2 cursor-pointer active:scale-95 transition-all bg-slate-100 dark:bg-white/[0.04] border border-slate-200 dark:border-white/[0.08]"
                   title="Gérer mon compte"
                 >
                   {user.photoURL ? (
                     <img
                       src={user.photoURL}
                       alt={user.displayName || "Utilisateur"}
-                      className="w-7 h-7 rounded-full object-cover border border-purple-400"
+                      className="w-7 h-7 rounded-full object-cover border border-orange-400"
                     />
                   ) : (
-                    <div className="w-7 h-7 rounded-full bg-[#630ed4] flex items-center justify-center text-white text-xs font-bold">
+                    <div className="w-7 h-7 rounded-full bg-orange-500 flex items-center justify-center text-white text-xs font-bold">
                       {(user.displayName || user.email || "U")[0].toUpperCase()}
                     </div>
                   )}
                   <div className="hidden sm:flex flex-col text-left">
-                    <span className="font-['Space_Grotesk'] text-[11px] text-[#1b1b20] font-bold max-w-[110px] truncate">
+                    <span className="font-['Space_Grotesk'] text-[11px] text-slate-900 dark:text-white font-bold max-w-[110px] truncate">
                       {user.displayName || user.email?.split("@")[0] || "Compte"}
                     </span>
-                    <span className="font-['Space_Grotesk'] text-[9px] text-[#7c3aed] font-bold uppercase">
+                    <span className="font-['Space_Grotesk'] text-[9px] text-orange-600 dark:text-orange-400 font-bold uppercase">
                       {isPro ? "★ PRO ACTIF" : "PLAN GRATUIT"}
                     </span>
                   </div>
@@ -238,11 +197,11 @@ export const TactileHeader: React.FC<TactileHeaderProps> = ({
 
                 {/* User Dropdown */}
                 {isUserMenuOpen && (
-                  <div className="absolute right-0 mt-2 w-64 bg-white rounded-2xl shadow-xl border border-slate-200 p-3 z-50 text-xs animate-in fade-in duration-150">
-                    <div className="pb-2 border-b border-slate-100">
-                      <div className="font-bold text-slate-900">{user.displayName || "Utilisateur"}</div>
-                      <div className="text-[11px] text-slate-500 font-mono truncate">{user.email}</div>
-                      <div className="mt-1.5 inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-purple-50 text-purple-700 border border-purple-200">
+                  <div className="absolute right-0 mt-2 w-64 bg-white dark:bg-[#0e0e14] rounded-2xl shadow-xl border border-slate-200 dark:border-white/[0.08] p-3 z-50 text-xs animate-in fade-in duration-150">
+                    <div className="pb-2 border-b border-slate-100 dark:border-white/[0.06]">
+                      <div className="font-bold text-slate-900 dark:text-white">{user.displayName || "Utilisateur"}</div>
+                      <div className="text-[11px] text-slate-500 dark:text-neutral-400 font-mono truncate">{user.email}</div>
+                      <div className="mt-1.5 inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-orange-500/10 text-orange-600 dark:text-orange-400 border border-orange-500/20">
                         {isPro ? "Membre Pro Débloqué" : "Plan Découverte"}
                       </div>
                     </div>
@@ -254,7 +213,7 @@ export const TactileHeader: React.FC<TactileHeaderProps> = ({
                           if (onOpenPricing) onOpenPricing();
                           else handleNavClick('pricing');
                         }}
-                        className="w-full text-left px-2 py-1.5 rounded-lg hover:bg-slate-100 flex items-center gap-2 text-slate-700 font-medium"
+                        className="w-full text-left px-2 py-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-white/[0.06] flex items-center gap-2 text-slate-700 dark:text-neutral-300 font-medium cursor-pointer"
                       >
                         <span className="material-symbols-outlined text-[16px] text-amber-500">credit_card</span>
                         <span>Mon Abonnement / Tarifs</span>
@@ -266,7 +225,7 @@ export const TactileHeader: React.FC<TactileHeaderProps> = ({
                             setIsUserMenuOpen(false);
                             onLaunchDashboard();
                           }}
-                          className="w-full text-left px-2 py-1.5 rounded-lg hover:bg-slate-100 flex items-center gap-2 text-purple-700 font-bold"
+                          className="w-full text-left px-2 py-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-white/[0.06] flex items-center gap-2 text-orange-600 dark:text-orange-400 font-bold cursor-pointer"
                         >
                           <span className="material-symbols-outlined text-[16px]">dashboard</span>
                           <span>Ouvrir la Console SENSORIUM</span>
@@ -275,13 +234,13 @@ export const TactileHeader: React.FC<TactileHeaderProps> = ({
                     </div>
 
                     {onSignOut && (
-                      <div className="pt-2 border-t border-slate-100">
+                      <div className="pt-2 border-t border-slate-100 dark:border-white/[0.06]">
                         <button
                           onClick={() => {
                             setIsUserMenuOpen(false);
                             onSignOut();
                           }}
-                          className="w-full text-left px-2 py-1.5 rounded-lg hover:bg-red-50 text-red-600 font-medium flex items-center gap-2"
+                          className="w-full text-left px-2 py-1.5 rounded-lg hover:bg-red-50 dark:hover:bg-red-950/30 text-red-600 dark:text-red-400 font-medium flex items-center gap-2 cursor-pointer"
                         >
                           <span className="material-symbols-outlined text-[16px]">logout</span>
                           <span>Se Déconnecter</span>
@@ -294,7 +253,7 @@ export const TactileHeader: React.FC<TactileHeaderProps> = ({
             ) : (
               <button
                 onClick={onSignIn}
-                className="tactile-btn px-2.5 sm:px-3.5 py-1.5 sm:py-2 rounded-xl flex items-center gap-1.5 text-[#630ed4] font-['Space_Grotesk'] text-[12px] sm:text-[13px] font-bold hover:bg-[#ede0ff] active:scale-95 transition-all cursor-pointer"
+                className="px-2.5 sm:px-3.5 py-1.5 sm:py-2 rounded-xl flex items-center gap-1.5 text-slate-700 dark:text-neutral-200 bg-slate-100 dark:bg-white/[0.06] hover:bg-slate-200 dark:hover:bg-white/[0.1] border border-slate-200 dark:border-white/[0.08] font-['Space_Grotesk'] text-[12px] sm:text-[13px] font-bold active:scale-95 transition-all cursor-pointer"
                 title="S'inscrire ou se connecter avec Google"
               >
                 <span className="material-symbols-outlined text-[16px]">account_circle</span>
@@ -305,10 +264,10 @@ export const TactileHeader: React.FC<TactileHeaderProps> = ({
             {/* Cockpit 3D Button (hidden on narrow phones to avoid overflow) */}
             <button
               onClick={onLaunchCockpit}
-              className="tactile-btn px-2.5 sm:px-3 py-1.5 sm:py-2 rounded-xl hidden sm:flex items-center gap-1.5 text-[#4a4455] font-['Space_Grotesk'] text-[12px] sm:text-[13px] font-semibold hover:text-[#1b1b20] active:scale-95 transition-all cursor-pointer"
+              className="px-2.5 sm:px-3 py-1.5 sm:py-2 rounded-xl hidden sm:flex items-center gap-1.5 text-slate-700 dark:text-neutral-300 bg-slate-100 dark:bg-white/[0.04] border border-slate-200 dark:border-white/[0.08] font-['Space_Grotesk'] text-[12px] sm:text-[13px] font-semibold hover:text-slate-900 dark:hover:text-white active:scale-95 transition-all cursor-pointer"
               title="Ouvrir le Jumeau Cockpit 3D"
             >
-              <span className="material-symbols-outlined text-[16px]">sensors</span>
+              <span className="material-symbols-outlined text-[16px] text-orange-500">sensors</span>
               <span className="whitespace-nowrap">Cockpit 3D</span>
             </button>
 
@@ -317,14 +276,11 @@ export const TactileHeader: React.FC<TactileHeaderProps> = ({
               <button
                 id="btn-mode-pro-sensorium"
                 onClick={onLaunchDashboard}
-                className="group relative flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2 sm:py-2.5 rounded-xl font-['Space_Grotesk'] text-[12px] sm:text-[13px] font-bold text-white cursor-pointer active:scale-95 transition-all overflow-hidden shadow-lg hover:shadow-[0_0_24px_rgba(99,14,212,0.45)]"
-                style={{
-                  background: 'linear-gradient(135deg, #7c3aed 0%, #4f46e5 60%, #2563eb 100%)',
-                }}
+                className="group relative flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2 sm:py-2.5 rounded-xl font-['Space_Grotesk'] text-[12px] sm:text-[13px] font-bold text-white cursor-pointer active:scale-95 transition-all overflow-hidden shadow-md shadow-orange-500/20 bg-orange-500 hover:bg-orange-600"
                 title="Accéder à la console / Cockpit applicatif SENSORIUM"
               >
                 <span className="pointer-events-none absolute inset-0 bg-white/10 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-500 skew-x-12" />
-                <span className="material-symbols-outlined text-[15px] sm:text-[16px] text-yellow-300">workspace_premium</span>
+                <span className="material-symbols-outlined text-[15px] sm:text-[16px] text-amber-200">workspace_premium</span>
                 <span className="whitespace-nowrap">Console</span>
                 <span className="hidden md:inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-full bg-white/20 text-[9px] tracking-widest font-bold uppercase">
                   COCKPIT
@@ -335,7 +291,7 @@ export const TactileHeader: React.FC<TactileHeaderProps> = ({
             {/* Mobile & Tablet Hamburger Toggle (visible on all screens < 1280px) */}
             <button
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-              className="xl:hidden tactile-btn p-2 rounded-xl flex items-center justify-center text-[#1b1b20] active:scale-95 transition-all cursor-pointer min-h-[40px] min-w-[40px]"
+              className="xl:hidden p-2 rounded-xl flex items-center justify-center text-slate-700 dark:text-neutral-200 bg-slate-100 dark:bg-white/[0.04] border border-slate-200 dark:border-white/[0.08] active:scale-95 transition-all cursor-pointer min-h-[40px] min-w-[40px]"
               aria-label="Ouvrir le menu de navigation"
               title="Menu principal"
             >
@@ -357,23 +313,23 @@ export const TactileHeader: React.FC<TactileHeaderProps> = ({
           />
 
           {/* Drawer Body */}
-          <div className="relative w-5/6 max-w-sm bg-[#faf8ff] text-[#1b1b20] h-full overflow-y-auto p-5 z-10 flex flex-col justify-between shadow-2xl border-r border-purple-200">
+          <div className="relative w-5/6 max-w-sm bg-white dark:bg-[#070709] text-slate-900 dark:text-neutral-100 h-full overflow-y-auto p-5 z-10 flex flex-col justify-between shadow-2xl border-r border-slate-200 dark:border-white/[0.08]">
             <div className="space-y-4">
               
               {/* Drawer Top Bar */}
-              <div className="flex justify-between items-center pb-3 border-b border-slate-200">
+              <div className="flex justify-between items-center pb-3 border-b border-slate-200 dark:border-white/[0.08]">
                 <div className="flex items-center gap-2">
-                  <div className="w-8 h-8 rounded-lg bg-[#7c3aed] flex items-center justify-center text-white">
+                  <div className="w-8 h-8 rounded-lg bg-orange-500 flex items-center justify-center text-white">
                     <span className="material-symbols-outlined text-[18px]">deployed_code</span>
                   </div>
                   <div>
-                    <div className="font-['Space_Grotesk'] text-base font-bold text-slate-900 leading-tight">BeeCarbonat</div>
-                    <div className="text-[10px] text-purple-700 font-bold uppercase tracking-wider">Spider Twin CAFM</div>
+                    <div className="font-['Space_Grotesk'] text-base font-bold text-slate-900 dark:text-white leading-tight">SENSORIUM</div>
+                    <div className="text-[10px] text-orange-600 dark:text-orange-400 font-bold uppercase tracking-wider">Spatial Twin &amp; Hypervision</div>
                   </div>
                 </div>
                 <button
                   onClick={() => setIsMobileMenuOpen(false)}
-                  className="p-1.5 rounded-lg text-slate-400 hover:text-slate-900 hover:bg-slate-100 cursor-pointer"
+                  className="p-1.5 rounded-lg text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/[0.06] cursor-pointer"
                   aria-label="Fermer le menu"
                 >
                   <span className="material-symbols-outlined text-[22px]">close</span>
@@ -381,24 +337,24 @@ export const TactileHeader: React.FC<TactileHeaderProps> = ({
               </div>
 
               {/* User Account / Auth Card */}
-              <div className="tactile-plate p-3.5 rounded-2xl flex flex-col gap-2">
+              <div className="p-3.5 rounded-2xl flex flex-col gap-2 bg-slate-50 dark:bg-white/[0.03] border border-slate-200 dark:border-white/[0.08]">
                 {user ? (
                   <>
                     <div className="flex items-center gap-2.5">
                       {user.photoURL ? (
-                        <img src={user.photoURL} alt="" className="w-9 h-9 rounded-full object-cover border border-purple-400" />
+                        <img src={user.photoURL} alt="" className="w-9 h-9 rounded-full object-cover border border-orange-400" />
                       ) : (
-                        <div className="w-9 h-9 rounded-full bg-[#630ed4] text-white flex items-center justify-center font-bold text-sm">
+                        <div className="w-9 h-9 rounded-full bg-orange-500 text-white flex items-center justify-center font-bold text-sm">
                           {(user.displayName || user.email || "U")[0].toUpperCase()}
                         </div>
                       )}
                       <div className="flex-1 min-w-0">
-                        <div className="font-bold text-sm text-slate-900 truncate">{user.displayName || "Utilisateur"}</div>
-                        <div className="text-[11px] text-slate-500 font-mono truncate">{user.email}</div>
+                        <div className="font-bold text-sm text-slate-900 dark:text-white truncate">{user.displayName || "Utilisateur"}</div>
+                        <div className="text-[11px] text-slate-500 dark:text-neutral-400 font-mono truncate">{user.email}</div>
                       </div>
                     </div>
-                    <div className="flex items-center justify-between pt-2 border-t border-purple-100">
-                      <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-purple-100 text-purple-800">
+                    <div className="flex items-center justify-between pt-2 border-t border-slate-200 dark:border-white/[0.06]">
+                      <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-orange-500/10 text-orange-600 dark:text-orange-400 border border-orange-500/20">
                         {isPro ? "★ Membre Pro" : "Compte Découverte"}
                       </span>
                       {onSignOut && (
@@ -407,7 +363,7 @@ export const TactileHeader: React.FC<TactileHeaderProps> = ({
                             setIsMobileMenuOpen(false);
                             onSignOut();
                           }}
-                          className="text-[11px] text-red-600 font-semibold hover:underline"
+                          className="text-[11px] text-red-600 dark:text-red-400 font-semibold hover:underline cursor-pointer"
                         >
                           Déconnexion
                         </button>
@@ -416,13 +372,13 @@ export const TactileHeader: React.FC<TactileHeaderProps> = ({
                   </>
                 ) : (
                   <div className="flex flex-col gap-2">
-                    <div className="text-xs text-slate-600">Connectez-vous pour enregistrer votre jumeau et vos abonnements :</div>
+                    <div className="text-xs text-slate-600 dark:text-neutral-400">Connectez-vous pour enregistrer votre jumeau et vos abonnements :</div>
                     <button
                       onClick={() => {
                         setIsMobileMenuOpen(false);
                         if (onSignIn) onSignIn();
                       }}
-                      className="w-full py-2 px-3 rounded-xl bg-[#630ed4] hover:bg-[#5209b5] text-white text-xs font-bold flex items-center justify-center gap-2 shadow-md cursor-pointer transition-all"
+                      className="w-full py-2 px-3 rounded-xl bg-orange-500 hover:bg-orange-600 text-white text-xs font-bold flex items-center justify-center gap-2 shadow-sm cursor-pointer transition-all"
                     >
                       <span className="material-symbols-outlined text-[16px]">account_circle</span>
                       <span>S'inscrire / Connexion Google</span>
@@ -433,193 +389,98 @@ export const TactileHeader: React.FC<TactileHeaderProps> = ({
 
               {/* Navigation Links list */}
               <div className="space-y-1">
-                <div className="text-[10px] uppercase font-mono text-slate-400 px-2 tracking-wider font-bold">Navigation Principale</div>
+                <div className="text-[10px] uppercase font-mono text-slate-400 dark:text-neutral-500 px-2 tracking-wider font-bold">Navigation Principale</div>
                 
-                <button
-                  onClick={() => handleNavClick('architecture')}
-                  className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-left font-['Space_Grotesk'] text-sm font-semibold transition-all ${
-                    activePath === 'architecture' ? 'bg-[#ede0ff] text-[#630ed4]' : 'text-slate-700 hover:bg-slate-100'
-                  }`}
-                >
-                  <span className="material-symbols-outlined text-[18px]">account_tree</span>
-                  <span>Architecture &amp; Topologie</span>
-                </button>
+                {[
+                  { id: 'architecture', label: 'Architecture & Topologie', icon: 'account_tree' },
+                  { id: '6-core-pillars', label: '6 Piliers SENSORIUM', icon: 'hub' },
+                  { id: '3d-digital-twin', label: 'Jumeau Numérique 3D', icon: 'view_in_ar' },
+                  { id: 'esg-carbon', label: 'ESG & Conformité Carbone', icon: 'eco' },
+                  { id: 'grafana-observability', label: 'Grafana Observabilité', icon: 'query_stats' },
+                  { id: 'pricing', label: 'Tarifs & Abonnements', icon: 'payments', badge: 'PAYPAL' },
+                ].map(link => (
+                  <button
+                    key={link.id}
+                    onClick={() => handleNavClick(link.id as ActiveNavPath)}
+                    className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-left font-['Space_Grotesk'] text-sm font-semibold transition-all cursor-pointer ${
+                      activePath === link.id
+                        ? 'bg-orange-500/10 text-orange-600 dark:text-orange-400 border border-orange-500/20'
+                        : 'text-slate-700 dark:text-neutral-300 hover:bg-slate-100 dark:hover:bg-white/[0.04]'
+                    }`}
+                  >
+                    <span className="flex items-center gap-3">
+                      <span className="material-symbols-outlined text-[18px]">{link.icon}</span>
+                      <span>{link.label}</span>
+                    </span>
+                    {link.badge && (
+                      <span className="px-1.5 py-0.5 rounded text-[9px] bg-orange-500/10 text-orange-600 dark:text-orange-400 font-bold uppercase border border-orange-500/20">{link.badge}</span>
+                    )}
+                  </button>
+                ))}
 
-                <button
-                  onClick={() => handleNavClick('6-core-pillars')}
-                  className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-left font-['Space_Grotesk'] text-sm font-semibold transition-all ${
-                    activePath === '6-core-pillars' ? 'bg-[#ede0ff] text-[#630ed4]' : 'text-slate-700 hover:bg-slate-100'
-                  }`}
-                >
-                  <span className="material-symbols-outlined text-[18px]">hub</span>
-                  <span>6 Piliers Spider CAFM</span>
-                </button>
-
-                <button
-                  onClick={() => handleNavClick('3d-digital-twin')}
-                  className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-left font-['Space_Grotesk'] text-sm font-semibold transition-all ${
-                    activePath === '3d-digital-twin' ? 'bg-[#ede0ff] text-[#630ed4]' : 'text-slate-700 hover:bg-slate-100'
-                  }`}
-                >
-                  <span className="material-symbols-outlined text-[18px]">view_in_ar</span>
-                  <span>Jumeau Numérique 3D</span>
-                </button>
-
-                <button
-                  onClick={() => handleNavClick('esg-carbon')}
-                  className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-left font-['Space_Grotesk'] text-sm font-semibold transition-all ${
-                    activePath === 'esg-carbon' ? 'bg-[#ede0ff] text-[#630ed4]' : 'text-slate-700 hover:bg-slate-100'
-                  }`}
-                >
-                  <span className="material-symbols-outlined text-[18px]">eco</span>
-                  <span>ESG &amp; Conformité Carbone</span>
-                </button>
-
-                <button
-                  onClick={() => handleNavClick('grafana-observability')}
-                  className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-left font-['Space_Grotesk'] text-sm font-semibold transition-all ${
-                    activePath === 'grafana-observability' ? 'bg-[#ede0ff] text-[#630ed4]' : 'text-slate-700 hover:bg-slate-100'
-                  }`}
-                >
-                  <span className="material-symbols-outlined text-[18px]">query_stats</span>
-                  <span>Grafana Observabilité</span>
-                </button>
-
-                <button
-                  onClick={() => handleNavClick('pricing')}
-                  className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-left font-['Space_Grotesk'] text-sm font-semibold transition-all ${
-                    activePath === 'pricing' ? 'bg-[#ede0ff] text-[#630ed4]' : 'text-slate-700 hover:bg-slate-100'
-                  }`}
-                >
-                  <span className="flex items-center gap-3">
-                    <span className="material-symbols-outlined text-[18px]">payments</span>
-                    <span>Tarifs &amp; Abonnements</span>
-                  </span>
-                  <span className="px-1.5 py-0.5 rounded text-[9px] bg-purple-100 text-purple-700 font-bold uppercase">PAYPAL</span>
-                </button>
-
-                <div className="pt-2 border-t border-slate-200">
-                  <div className="text-[10px] uppercase font-mono text-slate-400 px-2 tracking-wider font-bold mb-1">Site Web &amp; Vitrine Complète (12 Pages)</div>
+                <div className="pt-2 border-t border-slate-200 dark:border-white/[0.08]">
+                  <div className="text-[10px] uppercase font-mono text-slate-400 dark:text-neutral-500 px-2 tracking-wider font-bold mb-1">Site Web &amp; Vitrine Complète (12 Pages)</div>
                   
                   <a
                     href="/site/index.html"
-                    className="w-full flex items-center justify-between px-3 py-2 rounded-xl text-left font-['Space_Grotesk'] text-sm text-[#630ed4] hover:bg-purple-50 font-bold"
+                    className="w-full flex items-center justify-between px-3 py-2 rounded-xl text-left font-['Space_Grotesk'] text-sm text-orange-600 dark:text-orange-400 hover:bg-orange-500/10 font-bold"
                   >
                     <span className="flex items-center gap-3">
                       <span className="material-symbols-outlined text-[18px]">home</span>
                       <span>Accueil Vitrine</span>
                     </span>
-                    <span className="text-[9px] px-1.5 py-0.5 bg-[#eaddff] text-[#25005a] rounded-full font-bold uppercase">12 PAGES</span>
+                    <span className="text-[9px] px-1.5 py-0.5 bg-orange-500/15 text-orange-600 dark:text-orange-400 rounded-full font-bold uppercase">12 PAGES</span>
                   </a>
 
-                  <a
-                    href="/site/solutions.html"
-                    className="w-full flex items-center justify-between px-3 py-2 rounded-xl text-left font-['Space_Grotesk'] text-sm text-slate-700 hover:bg-slate-100 font-medium"
-                  >
-                    <span className="flex items-center gap-3">
-                      <span className="material-symbols-outlined text-[18px]">domain</span>
-                      <span>Solutions Métiers</span>
-                    </span>
-                  </a>
-
-                  <a
-                    href="/site/benefices_roi.html"
-                    className="w-full flex items-center justify-between px-3 py-2 rounded-xl text-left font-['Space_Grotesk'] text-sm text-slate-700 hover:bg-slate-100 font-medium"
-                  >
-                    <span className="flex items-center gap-3">
-                      <span className="material-symbols-outlined text-[18px]">trending_up</span>
-                      <span>Bénéfices &amp; ROI</span>
-                    </span>
-                    <span className="text-[9px] px-1 py-0.2 bg-emerald-100 text-emerald-800 rounded font-bold uppercase">ROI</span>
-                  </a>
-
-                  <a
-                    href="/site/piliers_industriels.html"
-                    className="w-full flex items-center justify-between px-3 py-2 rounded-xl text-left font-['Space_Grotesk'] text-sm text-slate-700 hover:bg-slate-100 font-medium"
-                  >
-                    <span className="flex items-center gap-3">
-                      <span className="material-symbols-outlined text-[18px]">factory</span>
-                      <span>Piliers Industriels</span>
-                    </span>
-                  </a>
-
-                  <a
-                    href="/site/jumeau_numerique_3d.html"
-                    className="w-full flex items-center justify-between px-3 py-2 rounded-xl text-left font-['Space_Grotesk'] text-sm text-slate-700 hover:bg-slate-100 font-medium"
-                  >
-                    <span className="flex items-center gap-3">
-                      <span className="material-symbols-outlined text-[18px]">view_in_ar</span>
-                      <span>Jumeau Numérique 3D</span>
-                    </span>
-                  </a>
-
-                  <a
-                    href="/site/esg_carbon.html"
-                    className="w-full flex items-center justify-between px-3 py-2 rounded-xl text-left font-['Space_Grotesk'] text-sm text-slate-700 hover:bg-slate-100 font-medium"
-                  >
-                    <span className="flex items-center gap-3">
-                      <span className="material-symbols-outlined text-[18px]">eco</span>
-                      <span>ESG &amp; Carbone</span>
-                    </span>
-                  </a>
-
-                  <a
-                    href="/site/temoignages.html"
-                    className="w-full flex items-center justify-between px-3 py-2 rounded-xl text-left font-['Space_Grotesk'] text-sm text-slate-700 hover:bg-slate-100 font-medium"
-                  >
-                    <span className="flex items-center gap-3">
-                      <span className="material-symbols-outlined text-[18px]">reviews</span>
-                      <span>Témoignages Clients</span>
-                    </span>
-                  </a>
-
-                  <a
-                    href="/site/tarifs.html"
-                    className="w-full flex items-center justify-between px-3 py-2 rounded-xl text-left font-['Space_Grotesk'] text-sm text-slate-700 hover:bg-slate-100 font-medium"
-                  >
-                    <span className="flex items-center gap-3">
-                      <span className="material-symbols-outlined text-[18px]">sell</span>
-                      <span>Grille Tarifaire Vitrine</span>
-                    </span>
-                  </a>
-
-                  <a
-                    href="/site/demo.html"
-                    className="w-full flex items-center justify-between px-3 py-2 rounded-xl text-left font-['Space_Grotesk'] text-sm text-slate-700 hover:bg-slate-100 font-medium"
-                  >
-                    <span className="flex items-center gap-3">
-                      <span className="material-symbols-outlined text-[18px]">play_circle</span>
-                      <span>Démo Interactives</span>
-                    </span>
-                  </a>
+                  {[
+                    { href: '/site/solutions.html', label: 'Solutions Métiers', icon: 'domain' },
+                    { href: '/site/benefices_roi.html', label: 'Bénéfices & ROI', icon: 'trending_up', badge: 'ROI' },
+                    { href: '/site/piliers_industriels.html', label: 'Piliers Industriels', icon: 'factory' },
+                    { href: '/site/jumeau_numerique_3d.html', label: 'Jumeau Numérique 3D', icon: 'view_in_ar' },
+                    { href: '/site/esg_carbon.html', label: 'ESG & Carbone', icon: 'eco' },
+                    { href: '/site/temoignages.html', label: 'Témoignages Clients', icon: 'reviews' },
+                    { href: '/site/tarifs.html', label: 'Grille Tarifaire Vitrine', icon: 'sell' },
+                    { href: '/site/demo.html', label: 'Démo Interactives', icon: 'play_circle' },
+                  ].map(siteLink => (
+                    <a
+                      key={siteLink.href}
+                      href={siteLink.href}
+                      className="w-full flex items-center justify-between px-3 py-2 rounded-xl text-left font-['Space_Grotesk'] text-sm text-slate-700 dark:text-neutral-300 hover:bg-slate-100 dark:hover:bg-white/[0.04] font-medium"
+                    >
+                      <span className="flex items-center gap-3">
+                        <span className="material-symbols-outlined text-[18px]">{siteLink.icon}</span>
+                        <span>{siteLink.label}</span>
+                      </span>
+                      {siteLink.badge && (
+                        <span className="text-[9px] px-1 py-0.2 bg-emerald-100 dark:bg-emerald-950/40 text-emerald-800 dark:text-emerald-400 rounded font-bold uppercase">{siteLink.badge}</span>
+                      )}
+                    </a>
+                  ))}
                 </div>
               </div>
             </div>
 
             {/* Drawer Bottom Action: Launch Application Console */}
-            <div className="pt-4 border-t border-slate-200 space-y-2.5">
+            <div className="pt-4 border-t border-slate-200 dark:border-white/[0.08] space-y-2.5">
               {onLaunchDashboard && (
                 <button
                   onClick={() => {
                     setIsMobileMenuOpen(false);
                     onLaunchDashboard();
                   }}
-                  className="w-full py-3 px-4 rounded-xl font-['Space_Grotesk'] text-sm font-bold text-white shadow-lg flex items-center justify-center gap-2 cursor-pointer transition-all active:scale-95"
-                  style={{
-                    background: 'linear-gradient(135deg, #7c3aed 0%, #4f46e5 60%, #2563eb 100%)',
-                  }}
+                  className="w-full py-3 px-4 rounded-xl font-['Space_Grotesk'] text-sm font-bold text-white shadow-md bg-orange-500 hover:bg-orange-600 flex items-center justify-center gap-2 cursor-pointer transition-all active:scale-95"
                 >
-                  <span className="material-symbols-outlined text-[18px] text-yellow-300">workspace_premium</span>
+                  <span className="material-symbols-outlined text-[18px] text-amber-200">workspace_premium</span>
                   <span>Console SENSORIUM (COCKPIT)</span>
                 </button>
               )}
 
-              <div className="flex items-center justify-between text-xs text-slate-500 font-mono pt-1">
+              <div className="flex items-center justify-between text-xs text-slate-500 dark:text-neutral-400 font-mono pt-1">
                 <span className="flex items-center gap-1.5">
                   <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
                   <span>14,890 Edge Nodes Live</span>
                 </span>
-                <span className="text-[#630ed4] font-semibold">Tier-4 Sovereign</span>
+                <span className="text-orange-600 dark:text-orange-400 font-semibold">Tier-4 Sovereign</span>
               </div>
             </div>
 

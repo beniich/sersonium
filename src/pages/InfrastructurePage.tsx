@@ -240,7 +240,7 @@ export default function InfrastructurePage({ state, isDark, activeItemId = "inf-
               Mesh Telemetry
             </span>
           </div>
-          <p className="text-sm text-neutral-500 dark:text-neutral-400 mt-1">enterprise.jeton.com / Physical POP Datacenter Operations & CAFM</p>
+          <p className="text-sm text-neutral-500 dark:text-neutral-400 mt-1">enterprise.sensorium.cloud / Physical POP Datacenter Operations & CAFM</p>
         </div>
         <div className="flex items-center gap-2">
           <button 

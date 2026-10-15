@@ -154,7 +154,7 @@ export default function PublicPortal({
   };
 
   return (
-    <div className={`min-h-screen bg-[#fbf8ff] text-[#1b1b20] flex flex-col font-['Inter'] selection:bg-[#630ed4] selection:text-white ${isEmbedded ? 'rounded-2xl overflow-hidden' : ''}`}>
+    <div className={`min-h-screen bg-slate-50 dark:bg-[#070709] text-slate-900 dark:text-neutral-100 flex flex-col font-['Inter'] selection:bg-orange-500/30 selection:text-orange-300 ${isEmbedded ? 'rounded-2xl overflow-hidden' : ''}`}>
 
       {/* Top Tactile Header (shared across all views) */}
       {currentView !== 'cockpit' && (
@@ -176,7 +176,7 @@ export default function PublicPortal({
 
       <Suspense fallback={
         <div className="min-h-[60vh] flex items-center justify-center">
-          <div className="w-8 h-8 rounded-full border-2 border-violet-500 border-t-transparent animate-spin" />
+          <div className="w-8 h-8 rounded-full border-2 border-orange-500 border-t-transparent animate-spin" />
         </div>
       }>
         {/* VIEW 1 — COCKPIT CONSOLE & 3D DIGITAL TWIN */}
