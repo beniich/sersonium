@@ -23,13 +23,17 @@ export const db = getFirestore(app, (firebaseConfig as any).firestoreDatabaseId 
 export const auth = getAuth(app);
 const provider = new GoogleAuthProvider();
 
-// We only need basic email/profile for standard authentication.
-// Removing the 40+ Workspace scopes to prevent OAuth consent screen crashes.
-// provider.addScope('email');
-// provider.addScope('profile');
+// Scopes Google Workspace requis pour la consultation de messagerie et documents
+provider.addScope('https://www.googleapis.com/auth/gmail.readonly');
+provider.addScope('https://www.googleapis.com/auth/calendar.readonly');
+provider.addScope('https://www.googleapis.com/auth/drive.readonly');
+provider.setCustomParameters({
+  prompt: 'select_account'
+});
 
+const TOKEN_STORAGE_KEY = 'sensorium_google_access_token';
 let isSigningIn = false;
-let cachedAccessToken: string | null = null;
+let cachedAccessToken: string | null = (typeof window !== 'undefined' ? sessionStorage.getItem(TOKEN_STORAGE_KEY) : null);
 
 export const initAuth = (
   onAuthSuccess?: (user: User, token?: string) => void,
@@ -37,9 +41,15 @@ export const initAuth = (
 ) => {
   return onAuthStateChanged(auth, async (user: User | null) => {
     if (user) {
+      if (!cachedAccessToken && typeof window !== 'undefined') {
+        cachedAccessToken = sessionStorage.getItem(TOKEN_STORAGE_KEY);
+      }
       if (onAuthSuccess) onAuthSuccess(user, cachedAccessToken || undefined);
     } else {
       cachedAccessToken = null;
+      if (typeof window !== 'undefined') {
+        sessionStorage.removeItem(TOKEN_STORAGE_KEY);
+      }
       if (onAuthFailure) onAuthFailure();
     }
   });
@@ -51,6 +61,9 @@ export const googleSignIn = async (): Promise<{ user: User; accessToken: string 
     const result = await signInWithPopup(auth, provider);
     const credential = GoogleAuthProvider.credentialFromResult(result);
     cachedAccessToken = credential?.accessToken || null;
+    if (typeof window !== 'undefined' && cachedAccessToken) {
+      sessionStorage.setItem(TOKEN_STORAGE_KEY, cachedAccessToken);
+    }
     return { user: result.user, accessToken: cachedAccessToken || '' };
   } catch (error: any) {
     console.error('Sign in error:', error);
@@ -61,10 +74,16 @@ export const googleSignIn = async (): Promise<{ user: User; accessToken: string 
 };
 
 export const getAccessToken = async (): Promise<string | null> => {
+  if (!cachedAccessToken && typeof window !== 'undefined') {
+    cachedAccessToken = sessionStorage.getItem(TOKEN_STORAGE_KEY);
+  }
   return cachedAccessToken;
 };
 
 export const logout = async () => {
   await auth.signOut();
   cachedAccessToken = null;
+  if (typeof window !== 'undefined') {
+    sessionStorage.removeItem(TOKEN_STORAGE_KEY);
+  }
 };
