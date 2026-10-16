@@ -9,21 +9,34 @@ import { fileURLToPath } from 'url';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// Initialize Firebase Admin (requires serviceAccountKey.json or equivalent env vars)
+// Initialize Firebase Admin (requires serviceAccountKey.json or FIREBASE_* env vars)
+let firebaseAdminReady = false;
 try {
-  if (!admin.apps.length) {
+  const existingApps = admin.apps ?? [];
+  if (existingApps.length === 0) {
     const serviceAccountPath = path.resolve(__dirname, '../../config/firebase-service-account.json');
     if (fs.existsSync(serviceAccountPath)) {
       admin.initializeApp({
         credential: admin.credential.cert(serviceAccountPath),
       });
+      firebaseAdminReady = true;
+    } else if (process.env.FIREBASE_PROJECT_ID && process.env.FIREBASE_PRIVATE_KEY && process.env.FIREBASE_CLIENT_EMAIL) {
+      admin.initializeApp({
+        credential: admin.credential.cert({
+          projectId: process.env.FIREBASE_PROJECT_ID,
+          privateKey: process.env.FIREBASE_PRIVATE_KEY.replace(/\\n/g, '\n'),
+          clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
+        }),
+      });
+      firebaseAdminReady = true;
     } else {
-      console.warn("Firebase Admin SDK: 'firebase-service-account.json' not found. Using default application credentials if available.");
-      admin.initializeApp();
+      console.warn("[Firebase Admin] No credentials found (serviceAccount.json or FIREBASE_* env vars). Firebase login disabled — fallback to email/password only.");
     }
+  } else {
+    firebaseAdminReady = true;
   }
 } catch (error) {
-  console.error("Firebase Admin initialization failed", error);
+  console.warn("[Firebase Admin] Initialization skipped:", (error as Error).message);
 }
 
 export class AuthService {
@@ -34,6 +47,9 @@ export class AuthService {
    * 3. Generate internal JWT session tokens
    */
   async loginWithFirebase(firebaseToken: string) {
+    if (!firebaseAdminReady) {
+      throw new Error("Firebase Admin SDK non configuré. Utilisez la connexion email/mot de passe.");
+    }
     try {
       // 1. Verify identity via Firebase
       const decodedToken = await admin.auth().verifyIdToken(firebaseToken);

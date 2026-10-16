@@ -300,6 +300,34 @@ sensorium_system_uptime_seconds ${snapshot.uptimeSeconds}
     });
   });
 
+  // Dedicated clean URL routing for /site showcase and legal pages
+  const publicSitePath = path.join(process.cwd(), "public", "site");
+
+  // Page d'accueil de l'application /site/
+  app.get(["/site", "/site/"], (_req: express.Request, res: express.Response) => {
+    res.sendFile(path.join(publicSitePath, "index.html"));
+  });
+
+  // Règles de confidentialité (supporte /site/règles, /site/regles et URL encodée %C3%A8)
+  app.get(["/site/règles", "/site/regles", "/site/r%C3%A8gles", "/privacy"], (_req: express.Request, res: express.Response) => {
+    res.sendFile(path.join(publicSitePath, "regles.html"));
+  });
+
+  // Conditions d'utilisation de l'application
+  app.get(["/site/conditions", "/site/cgu", "/terms"], (_req: express.Request, res: express.Response) => {
+    res.sendFile(path.join(publicSitePath, "conditions.html"));
+  });
+
+  // Mentions Légales
+  app.get(["/site/mentions-legales", "/site/mentions_legales", "/legal"], (_req: express.Request, res: express.Response) => {
+    res.sendFile(path.join(publicSitePath, "mentions-legales.html"));
+  });
+
+  // Sécurité & Souveraineté
+  app.get(["/site/securite", "/site/security"], (_req: express.Request, res: express.Response) => {
+    res.sendFile(path.join(publicSitePath, "securite.html"));
+  });
+
   // Vite middleware for development or fallback if dist not built
   const distPath = path.join(process.cwd(), "dist");
   const distIndexHtml = path.join(distPath, "index.html");
