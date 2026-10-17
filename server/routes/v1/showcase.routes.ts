@@ -209,6 +209,81 @@ router.post("/developers/auth/token", (req, res) => {
   });
 });
 
+// 1b. Simulation Live Télémétrie CVC & Calcul d'Impact Financier
+router.post("/developers/telemetry/scenario-drift", (req, res) => {
+  const { scenario = "cvc_chiller_drift", buildingCount = 1, company = "Client Mandataire" } = req.body;
+  const count = Math.max(1, Number(buildingCount) || 1);
+  const baseCost = 18400;
+  const baseKwh = 42.3;
+
+  res.json({
+    success: true,
+    data: {
+      scenario,
+      company,
+      buildingCount: count,
+      timestamp: new Date().toISOString(),
+      telemetry: {
+        chillerTempC: 68.4,
+        copNominal: 2.84,
+        linePressureBar: 5.8,
+        chillerLoadPercent: 98,
+        acousticCavitationIndex: 0.88,
+        alarmStatus: "CRITICAL_OVERHEAT_INHIBIT"
+      },
+      financialImpact: {
+        costPerBuildingEurYear: baseCost,
+        totalLossEurYear: baseCost * count,
+        formattedTotalEur: (baseCost * count).toLocaleString("fr-FR") + " € / an",
+        hourlyKwhWaste: Number((baseKwh * count).toFixed(1)),
+        serverRoomOverheatRisk: "HIGH_CRITICAL_8.7/10"
+      },
+      auditOrigin: "EDGE-SENSORIUM-FRANKFURT-01"
+    }
+  });
+});
+
+// 1c. Résolution Autonome AIOps Gemini (Boucle Fermée)
+router.post("/developers/ai/rebalance", (req, res) => {
+  const { scenario = "cvc_chiller_drift", buildingCount = 1, company = "Client Mandataire" } = req.body;
+  const count = Math.max(1, Number(buildingCount) || 1);
+  const baseCost = 18400;
+  const baseKwh = 42.3;
+
+  res.json({
+    success: true,
+    data: {
+      remediationId: `AIOPS-${Date.now().toString().slice(-8)}`,
+      scenario,
+      company,
+      buildingCount: count,
+      timestamp: new Date().toISOString(),
+      executionDurationMs: 1400,
+      remediationStatus: "SUCCESS_CLOSED_LOOP",
+      telemetryAfter: {
+        chillerTempC: 7.4,
+        copNominal: 6.22,
+        linePressureBar: 4.2,
+        chillerLoadPercent: 88,
+        acousticCavitationIndex: 0.04,
+        alarmStatus: "NOMINAL_OPTIMIZED"
+      },
+      actionsExecuted: [
+        "VAV_DYNAMIC_PRESSURE_TRIM_-18%",
+        "CENTRAVAC_CHILLER_CHILLED_SETPOINT_RESET_7.4C",
+        "CIRCADIAN_PUMP_VFD_MODULATED_3450_RPM"
+      ],
+      securedSavings: {
+        totalLossPreventedEurYear: baseCost * count,
+        formattedSavingsEur: (baseCost * count).toLocaleString("fr-FR") + " € / an",
+        totalKwhPreservedHourly: Number((baseKwh * count).toFixed(1)),
+        doraArticle24Logged: true,
+        doraArticle26ResilienceGuaranteed: true
+      }
+    }
+  });
+});
+
 // 2. Ingestion Télémétrie Haute Fréquence (BACnet / Modbus / MQTT)
 router.post("/developers/telemetry/ingest", (req, res) => {
   const { assetId = "CHILLER-B02", sensorType = "hvac_chiller", value = 7.4, unit = "°C", timestamp } = req.body;
