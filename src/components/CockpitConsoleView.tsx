@@ -33,6 +33,10 @@ export const CockpitConsoleView: React.FC<CockpitConsoleViewProps> = ({ onNaviga
   const [doraDocCache, setDoraDocCache] = useState<any>(null);
   const [doraJsonCache, setDoraJsonCache] = useState<string | null>(null);
 
+  // Personnalisation en direct pour le rendez-vous commercial
+  const [clientOrg, setClientOrg] = useState<string>('Crédit Agricole S.A.');
+  const [buildingCount, setBuildingCount] = useState<number>(1);
+
   const [logs, setLogs] = useState([
     { time: '13:30:02', channel: 'BIM_SYNC', msg: 'Mesh nodes 14,890 verified without drift.' },
     { time: '13:31:14', channel: 'CHILLER_B2', msg: 'COP calibrated to 6.22, chilled water setpoint locked.' },
@@ -54,14 +58,60 @@ export const CockpitConsoleView: React.FC<CockpitConsoleViewProps> = ({ onNaviga
     setLogs((prev) => [{ time: timeStr, channel, msg }, ...prev.slice(0, 19)]);
   };
 
-  // Logiques Démo Scénarisée
-  const startDemo = () => {
+  // URL Auto-Bootstrap : Lancement instantané si ?demo=dsi ou #demo-dsi dans l'URL
+  useEffect(() => {
+    try {
+      const search = window.location.search;
+      const hash = window.location.hash;
+      const params = new URLSearchParams(search);
+      const isDemo = params.get('demo') === 'dsi' || params.get('scenario') === 'cvc' || hash.includes('demo');
+      const companyParam = params.get('company') || params.get('client');
+      const bldgParam = parseInt(params.get('buildings') || params.get('sites') || '1', 10);
+
+      let targetOrg = clientOrg;
+      let targetCount = buildingCount;
+
+      if (companyParam) {
+        targetOrg = decodeURIComponent(companyParam);
+        setClientOrg(targetOrg);
+      }
+      if (bldgParam && bldgParam > 0) {
+        targetCount = bldgParam;
+        setBuildingCount(bldgParam);
+      }
+      if (isDemo) {
+        startDemo(targetOrg, targetCount);
+      }
+    } catch (e) {
+      console.warn('[Cockpit] Query param auto-bootstrap notice:', e);
+    }
+  }, []);
+
+  // Logiques Démo Scénarisée avec VRAIES requêtes réseau (inspectable dans DevTools Network)
+  const startDemo = async (customOrg?: string, customCount?: number) => {
+    const org = customOrg || clientOrg;
+    const count = customCount || buildingCount;
     setDemoActive(true);
     setDemoStep(1);
     setDemoResolved(false);
     setDemoAIOpsExecuting(false);
-    appendLog('DEMO_PITCH', '▶ Démo Scénarisée DSI (8 min) activée : Panne CVC -> Impact Financier -> Auto-Remédiation -> Audit DORA.');
+    appendLog('DEMO_PITCH', `▶ Démo Scénarisée DSI initialisée pour : ${org} (${count} bâtiment(s)).`);
     appendLog('HVAC_ALERT', 'ALERTE CRITIQUE : Dérive thermique Chiller B-02 (68.4°C). Risque de surpression sur vanne V-14.');
+
+    // Appel réseau réel au backend pour trace Network tab
+    try {
+      const res = await fetch('/api/v1/showcase/developers/telemetry/scenario-drift', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ scenario: 'cvc_chiller_drift', buildingCount: count, company: org })
+      });
+      if (res.ok) {
+        const data = await res.json();
+        appendLog('API_GATEWAY', `POST /api/v1/telemetry/scenario-drift (200 OK • ${res.statusText})`);
+      }
+    } catch {
+      // Offline fallback
+    }
   };
 
   const stopDemo = () => {
@@ -72,33 +122,90 @@ export const CockpitConsoleView: React.FC<CockpitConsoleViewProps> = ({ onNaviga
     appendLog('DEMO_PITCH', '⏹ Démo Scénarisée désactivée. Télémétrie nominale restaurée.');
   };
 
+  const handleUpdateBuildingCount = async (newCount: number) => {
+    const validCount = Math.max(1, Math.min(50, newCount));
+    setBuildingCount(validCount);
+    appendLog('PORTFOLIO_SCALE', `Périmètre d'audit ajusté en direct à : ${validCount} bâtiment(s) (${(18400 * validCount).toLocaleString('fr-FR')} €/an d'enjeu).`);
+    
+    // Invalider le cache DORA pour forcer la régénération nominative
+    setDoraCertHash(null);
+    setDoraDocCache(null);
+    setDoraJsonCache(null);
+
+    try {
+      await fetch('/api/v1/showcase/developers/telemetry/scenario-drift', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ scenario: 'cvc_chiller_drift', buildingCount: validCount, company: clientOrg })
+      });
+    } catch {
+      // Offline
+    }
+  };
+
+  const handleUpdateClientOrg = (newOrg: string) => {
+    setClientOrg(newOrg);
+    setDoraCertHash(null);
+    setDoraDocCache(null);
+    setDoraJsonCache(null);
+  };
+
   const ensureDoraCertGenerated = async () => {
     if (doraCertHash && doraDocCache) return;
     try {
       const nowIso = new Date().toISOString();
+      const annualSavingsFormatted = `${(18400 * buildingCount).toLocaleString('fr-FR')} €`;
+      const hourlyEnergySaved = (42.3 * buildingCount).toFixed(1);
+
+      // Appel réseau réel au endpoint de conformité
+      let serverSeal: string | null = null;
+      try {
+        const netRes = await fetch('/api/v1/showcase/developers/compliance/dora/stamp', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            incidentId: `DORA-INC-${Date.now().toString().slice(-6)}`,
+            severity: 'CRITICAL',
+            resolutionLatencyMs: 1400,
+            actionsTaken: ['VAV_BALANCED', 'COP_RESTORED', 'CAMPUS_PORTFOLIO_OPTIMIZED']
+          })
+        });
+        if (netRes.ok) {
+          const json = await netRes.json();
+          serverSeal = json?.data?.immutableSealSha256;
+          appendLog('API_GATEWAY', `POST /api/v1/compliance/dora/stamp (200 OK • Sceau serveur validé)`);
+        }
+      } catch {
+        // Fallback
+      }
+
       const res = await generateDoraAuditCertificate({
         incidentId: `DORA-INC-${Date.now().toString().slice(-6)}`,
+        clientOrganization: clientOrg,
+        buildingCount: buildingCount,
         campusName: "Frankfurt West Campus",
         facilityNode: "Node-01 / Core Automation Bay FL04",
         timestamp: nowIso,
-        triggerEvent: "Chiller B-02 High Discharge Temp (68.4°C) & HydroSync V-14 Cavitation",
+        triggerEvent: `Chiller B-02 High Discharge Temp (68.4°C) & Valve V-14 Cavitation across ${buildingCount} site(s)`,
         initialTemp: 68.4,
         initialCop: 2.84,
         initialPressure: 5.8,
         remediatedTemp: 7.4,
         remediatedCop: 6.22,
         remediatedPressure: 4.2,
-        financialSavingsPerYear: "18 400 €",
-        energySavedKwhPerHour: "42.3",
+        financialSavingsPerYear: annualSavingsFormatted,
+        energySavedKwhPerHour: hourlyEnergySaved,
         aiRemediationType: "Gemini Closed-Loop Hydraulic Dynamic Balancing",
         remediationLatencyMs: 1400,
         operatorId: "Dr. A. Mercer (Facility SuperAdmin)",
         doraArticles: ["Article 24 (Incident Management)", "Article 26 (Digital Resilience)", "ISO 50001 (Energy Audit)"],
       });
-      setDoraCertHash(res.hash);
+
+      const effectiveHash = serverSeal || res.hash;
+      setDoraCertHash(effectiveHash);
       setDoraDocCache(res.doc);
       setDoraJsonCache(res.jsonPayload);
-      appendLog('DORA_AUDIT', `Sceau d'intégrité SHA-256 certifié : ${res.hash.substring(0, 18)}...`);
+      appendLog('DORA_AUDIT', `Sceau d'intégrité SHA-256 certifié pour ${clientOrg} : ${effectiveHash.substring(0, 18)}...`);
     } catch (e) {
       console.error(e);
     }
@@ -110,11 +217,11 @@ export const CockpitConsoleView: React.FC<CockpitConsoleViewProps> = ({ onNaviga
       setDemoResolved(false);
       appendLog('DEMO_STEP', 'Étape 1/4 : Alerte CVC physique — Surchauffe groupe froid B-02 (68.4°C) et déséquilibre hydraulique.');
     } else if (step === 2) {
-      appendLog('DEMO_STEP', 'Étape 2/4 : Chiffrage exécutif — Perte d\'inaction calculée : +18 400 €/an (+42.3 kWh/h).');
+      appendLog('DEMO_STEP', `Étape 2/4 : Chiffrage exécutif — Perte d'inaction calculée : ${(18400 * buildingCount).toLocaleString('fr-FR')} €/an pour ${buildingCount} bâtiment(s).`);
     } else if (step === 3) {
       appendLog('DEMO_STEP', 'Étape 3/4 : Auto-remédiation AIOps — Algorithme de boucle fermée prêt à rééquilibrer la vanne V-14.');
     } else if (step === 4) {
-      appendLog('DEMO_STEP', 'Étape 4/4 : Conformité DORA — Sceau cryptographique SHA-256 et rapport certifié téléchargeable.');
+      appendLog('DEMO_STEP', `Étape 4/4 : Conformité DORA — Sceau cryptographique SHA-256 émis pour ${clientOrg}.`);
       ensureDoraCertGenerated();
     }
   };
@@ -122,12 +229,26 @@ export const CockpitConsoleView: React.FC<CockpitConsoleViewProps> = ({ onNaviga
   const handleDemoAIOpsRemediate = async () => {
     setDemoAIOpsExecuting(true);
     appendLog('AIOPS_EXEC', 'Gemini Neural Rebalancing : Calcul de compensation thermique et ré-étalonnage vanne V-14...');
+
+    try {
+      const res = await fetch('/api/v1/showcase/developers/ai/rebalance', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ scenario: 'cvc_chiller_drift', buildingCount, company: clientOrg })
+      });
+      if (res.ok) {
+        appendLog('API_GATEWAY', `POST /api/v1/ai/rebalance (200 OK • Latence AIOps 1.4s)`);
+      }
+    } catch {
+      // Offline
+    }
+
     setTimeout(() => {
       setDemoAIOpsExecuting(false);
       setDemoResolved(true);
       appendLog('AIOPS_SUCCESS', '✔ Vanne HydroSync V-14 ré-étalonnée (-18%). Pression stabilisée à 4.2 Bar nominal.');
       appendLog('AIOPS_SUCCESS', '✔ Groupe Froid B-02 stabilisé : Température 7.4°C, COP restauré à 6.22 nominal.');
-      appendLog('FINANCIAL_ROI', '✔ Dérive stoppée : 18 400 €/an d\'économies verrouillées (42.3 kWh/h préservés).');
+      appendLog('FINANCIAL_ROI', `✔ Dérive stoppée : ${(18400 * buildingCount).toLocaleString('fr-FR')} €/an d'économies verrouillées pour ${clientOrg}.`);
       setDemoStep(4);
       ensureDoraCertGenerated();
     }, 1400);
@@ -138,8 +259,9 @@ export const CockpitConsoleView: React.FC<CockpitConsoleViewProps> = ({ onNaviga
     try {
       await ensureDoraCertGenerated();
       if (doraDocCache) {
-        doraDocCache.save(`Certificat_DORA_SENSORIUM_${doraCertHash?.substring(0, 8) || 'AUDIT'}.pdf`);
-        appendLog('EXPORT', 'Certificat PDF DORA / ISO 50001 téléchargé avec succès.');
+        const cleanName = clientOrg.replace(/[^a-zA-Z0-9]/g, '_') || 'CLIENT';
+        doraDocCache.save(`Certificat_DORA_${cleanName}_${doraCertHash?.substring(0, 8) || 'AUDIT'}.pdf`);
+        appendLog('EXPORT', `Certificat PDF DORA / ISO 50001 nominatif [${clientOrg}] téléchargé.`);
       }
     } finally {
       setDoraPdfLoading(false);
@@ -149,8 +271,9 @@ export const CockpitConsoleView: React.FC<CockpitConsoleViewProps> = ({ onNaviga
   const handleDownloadDoraJson = async () => {
     await ensureDoraCertGenerated();
     if (doraJsonCache) {
-      triggerFileDownload(doraJsonCache, `dora_audit_fingerprint_${doraCertHash?.substring(0, 8) || 'seal'}.json`);
-      appendLog('EXPORT', 'Preuve d\'intégrité JSON immuable exportée.');
+      const cleanName = clientOrg.replace(/[^a-zA-Z0-9]/g, '_') || 'CLIENT';
+      triggerFileDownload(doraJsonCache, `dora_audit_fingerprint_${cleanName}_${doraCertHash?.substring(0, 8) || 'seal'}.json`);
+      appendLog('EXPORT', `Preuve d'intégrité JSON immuable nominative [${clientOrg}] exportée.`);
     }
   };
 
@@ -471,21 +594,46 @@ export const CockpitConsoleView: React.FC<CockpitConsoleViewProps> = ({ onNaviga
                 )}
 
                 {demoStep === 2 && (
-                  <div className="flex items-center gap-3">
-                    <span className="material-symbols-outlined text-amber-400 text-[26px]">trending_up</span>
-                    <div className="flex flex-col">
-                      <span className="font-['Space_Grotesk'] text-sm font-bold text-amber-400">
-                        COÛT D'INACTION : +18 400 € / AN (+42.3 kWh/h) • RISQUE SALLE SERVEURS ÉLEVÉ
+                  <div className="flex flex-col lg:flex-row items-center justify-between gap-4 w-full">
+                    <div className="flex items-center gap-3">
+                      <span className="material-symbols-outlined text-amber-400 text-[26px]">trending_up</span>
+                      <div className="flex flex-col">
+                        <span className="font-['Space_Grotesk'] text-sm font-bold text-amber-400">
+                          COÛT D'INACTION : +{(18400 * buildingCount).toLocaleString('fr-FR')} € / AN (+{(42.3 * buildingCount).toFixed(1)} kWh/h) • RISQUE SERVEURS ÉLEVÉ
+                        </span>
+                        <span className="text-xs text-slate-300">
+                          Projection financière en direct sur un parc de <strong className="text-amber-300 font-bold">{buildingCount} bâtiment{buildingCount > 1 ? 's' : ''}</strong> pour <strong className="text-white font-bold">{clientOrg}</strong>.
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* Interactive Portfolio Multiplier Controls */}
+                    <div className="flex items-center gap-2 bg-white/10 px-3 py-1.5 rounded-xl border border-amber-500/30 shrink-0">
+                      <span className="text-[11px] font-mono text-slate-300 shrink-0">Parc Bâtiments :</span>
+                      <button
+                        onClick={() => handleUpdateBuildingCount(buildingCount - 1)}
+                        className="w-6 h-6 rounded bg-white/20 hover:bg-white/30 text-white font-bold text-xs flex items-center justify-center cursor-pointer transition-colors"
+                        title="Diminuer le nombre de bâtiments"
+                      >
+                        -
+                      </button>
+                      <span className="font-mono font-bold text-amber-300 text-xs px-2 min-w-[28px] text-center">
+                        {buildingCount}
                       </span>
-                      <span className="text-xs text-slate-300">
-                        Chaque heure d'inaction coûte 51 € directs et menace la conformité ISO 50001.
-                      </span>
+                      <button
+                        onClick={() => handleUpdateBuildingCount(buildingCount + 1)}
+                        className="w-6 h-6 rounded bg-white/20 hover:bg-white/30 text-white font-bold text-xs flex items-center justify-center cursor-pointer transition-colors"
+                        title="Augmenter le nombre de bâtiments"
+                      >
+                        +
+                      </button>
+                      <span className="text-[10px] text-slate-400">site(s)</span>
                     </div>
                   </div>
                 )}
 
                 {demoStep === 3 && (
-                  <div className="flex items-center gap-3">
+                  <div className="flex items-center gap-3 w-full">
                     <span className={`material-symbols-outlined text-[26px] ${demoResolved ? 'text-emerald-400' : 'text-orange-400'}`}>
                       {demoResolved ? 'check_circle' : 'psychology'}
                     </span>
@@ -497,7 +645,7 @@ export const CockpitConsoleView: React.FC<CockpitConsoleViewProps> = ({ onNaviga
                       </span>
                       <span className="text-xs text-slate-300">
                         {demoResolved
-                          ? 'Économies annuelles de 18 400 € verrouillées. Zéro intervention humaine sur site.'
+                          ? `Économies annuelles de ${(18400 * buildingCount).toLocaleString('fr-FR')} € verrouillées pour ${clientOrg}. Zéro technicien sur site.`
                           : 'Cliquez ci-contre pour exécuter la compensation hydraulique en 1.4s.'}
                       </span>
                     </div>
@@ -505,15 +653,30 @@ export const CockpitConsoleView: React.FC<CockpitConsoleViewProps> = ({ onNaviga
                 )}
 
                 {demoStep === 4 && (
-                  <div className="flex items-center gap-3">
-                    <span className="material-symbols-outlined text-cyan-400 text-[26px]">verified</span>
-                    <div className="flex flex-col">
-                      <span className="font-['Space_Grotesk'] text-sm font-bold text-cyan-300">
-                        CONFORMITÉ DORA & ISO 50001 VALIDÉE • SCEAU CRYPTOGRAPHIQUE ÉMIS
-                      </span>
-                      <span className="text-xs text-slate-300 font-mono">
-                        SHA-256 : {doraCertHash ? `${doraCertHash.substring(0, 28)}...` : 'Génération en cours...'}
-                      </span>
+                  <div className="flex flex-col lg:flex-row items-center justify-between gap-4 w-full">
+                    <div className="flex items-center gap-3">
+                      <span className="material-symbols-outlined text-cyan-400 text-[26px]">verified</span>
+                      <div className="flex flex-col">
+                        <span className="font-['Space_Grotesk'] text-sm font-bold text-cyan-300">
+                          CONFORMITÉ DORA & ISO 50001 VALIDÉE • SCEAU CRYPTOGRAPHIQUE ÉMIS
+                        </span>
+                        <span className="text-xs text-slate-300 font-mono">
+                          SHA-256 : {doraCertHash ? `${doraCertHash.substring(0, 28)}...` : 'Génération en cours...'}
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* Editable Prospect Organization */}
+                    <div className="flex items-center gap-2 bg-white/10 px-3 py-1.5 rounded-xl border border-cyan-500/30 shrink-0">
+                      <span className="text-[11px] font-mono text-slate-300 shrink-0">Bénéficiaire :</span>
+                      <input
+                        type="text"
+                        value={clientOrg}
+                        onChange={(e) => handleUpdateClientOrg(e.target.value)}
+                        placeholder="Nom de l'entreprise..."
+                        className="bg-black/50 border border-white/20 rounded px-2.5 py-1 text-xs text-cyan-200 font-bold focus:outline-none focus:border-cyan-400 min-w-[170px]"
+                        title="Ce nom sera imprimé en or sur le certificat PDF officiel"
+                      />
                     </div>
                   </div>
                 )}
@@ -559,7 +722,7 @@ export const CockpitConsoleView: React.FC<CockpitConsoleViewProps> = ({ onNaviga
                         className="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 font-['Space_Grotesk'] text-xs font-bold text-white flex items-center gap-1.5 transition-all shadow-md cursor-pointer"
                       >
                         <span className="material-symbols-outlined text-[16px]">picture_as_pdf</span>
-                        <span>{doraPdfLoading ? 'Génération...' : 'Télécharger Certificat DORA (PDF)'}</span>
+                        <span>{doraPdfLoading ? 'Génération...' : `Télécharger Certificat DORA (${clientOrg.split(' ')[0]})`}</span>
                       </button>
                       <button
                         onClick={handleDownloadDoraJson}
@@ -585,13 +748,13 @@ export const CockpitConsoleView: React.FC<CockpitConsoleViewProps> = ({ onNaviga
                   </div>
                   <p className="text-xs leading-relaxed text-slate-200 italic pl-6">
                     {demoStep === 1 &&
-                      "« Monsieur le DSI, les outils IT classiques ne voient rien venir quand un compresseur dérive. Ici, SENSORIUM capte la dérive physique en direct à 68.4°C. Voyez sur notre jumeau 3D le point chaud clignoter en rouge sur le nœud Chiller-01. »"}
+                      `« Monsieur le DSI, les outils IT classiques ne voient rien venir quand un compresseur dérive. Ici, SENSORIUM capte la dérive physique en direct à 68.4°C sur ${clientOrg}. Voyez sur notre jumeau 3D le point chaud clignoter en rouge sur le nœud Chiller-01. »`}
                     {demoStep === 2 &&
-                      "« Nous ne parlons pas de technique au Comex, nous parlons d'argent : SENSORIUM convertit instantanément la dérive thermique en euros. 18 400 € de perte annuelle et un risque direct de surchauffe de vos baies serveurs si personne n'agit. »"}
+                      `« Nous ne parlons pas de technique au Comex, nous parlons d'argent : SENSORIUM convertit instantanément la dérive thermique en euros. Pour vos ${buildingCount} bâtiment(s), c'est ${(18400 * buildingCount).toLocaleString('fr-FR')} € de perte annuelle et un risque direct de surchauffe de vos baies serveurs si personne n'agit. »`}
                     {demoStep === 3 &&
-                      "« Au lieu d'attendre 48h le passage d'un technicien GTB, notre IA Gemini calcule la contre-mesure dynamique. En un clic — ou en pilotage 100% autonome — la vanne V-14 est ré-équilibrée et le COP revient à 6.22 en 1.4 seconde. »"}
+                      `« Au lieu d'attendre 48h le passage d'un technicien GTB, notre IA Gemini calcule la contre-mesure dynamique. En un clic — ou en pilotage 100% autonome — la vanne V-14 est ré-équilibrée et le COP revient à 6.22 en 1.4 seconde. »`}
                     {demoStep === 4 &&
-                      "« Enfin, voici l'argument ultime pour votre DSI et vos auditeurs DORA : chaque intervention est scellée par une empreinte SHA-256 infalsifiable. Vous téléchargez le rapport d'audit opposable en un clic pour les régulateurs européens. »"}
+                      `« Enfin, voici l'argument ultime pour le RSSI et les régulateurs de ${clientOrg} : chaque intervention est scellée par une empreinte SHA-256 infalsifiable. Vous téléchargez le rapport d'audit nominatif opposable en un clic pour vos audits DORA européens. »`}
                   </p>
                 </div>
               )}

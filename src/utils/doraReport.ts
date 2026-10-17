@@ -3,6 +3,8 @@ import { computeSha256 } from "./crypto";
 
 export interface DoraAuditData {
   incidentId: string;
+  clientOrganization?: string;
+  buildingCount?: number;
   campusName: string;
   facilityNode: string;
   timestamp: string;
@@ -22,11 +24,16 @@ export interface DoraAuditData {
 }
 
 export async function generateDoraAuditCertificate(data: DoraAuditData): Promise<{ doc: jsPDF; hash: string; jsonPayload: string }> {
+  const clientOrg = data.clientOrganization?.trim() || "Organisation Cliente Mandataire";
+  const bldgCount = data.buildingCount || 1;
+
   // 1. Generate canonical JSON for cryptographic hashing
   const canonicalPayload = JSON.stringify({
     standard: "EU-DORA-REGULATION-2022/2554",
     iso: "ISO-50001-ENERGY-MANAGEMENT",
     incidentId: data.incidentId,
+    clientOrganization: clientOrg,
+    auditedBuildingCount: bldgCount,
     campus: data.campusName,
     node: data.facilityNode,
     timestampUtc: data.timestamp,
@@ -43,6 +50,7 @@ export async function generateDoraAuditCertificate(data: DoraAuditData): Promise
     impactQuantification: {
       financialLossAvertedEurYear: data.financialSavingsPerYear,
       energyConservedKwhHour: data.energySavedKwhPerHour,
+      portfolioMultiplier: `${bldgCount} bâtiment(s)`,
     },
     remediationAction: data.aiRemediationType,
     latencyMs: data.remediationLatencyMs,
@@ -70,39 +78,52 @@ export async function generateDoraAuditCertificate(data: DoraAuditData): Promise
 
   // Background Header Block (Deep Obsidian Slate)
   doc.setFillColor(11, 15, 25);
-  doc.rect(0, 0, pageW, 45, "F");
+  doc.rect(0, 0, pageW, 46, "F");
 
   // Orange Accent Bar
   doc.setFillColor(249, 115, 22);
-  doc.rect(0, 44, pageW, 2.5, "F");
+  doc.rect(0, 45, pageW, 2.5, "F");
 
   // Header Title
   doc.setFont("helvetica", "bold");
-  doc.setFontSize(16);
+  doc.setFontSize(15);
   doc.setTextColor(255, 255, 255);
-  doc.text("SENSORIUM — DORA & ISO 50001 AUDIT CERTIFICATE", 14, 18);
+  doc.text("SENSORIUM — DORA & ISO 50001 AUDIT CERTIFICATE", 14, 16);
 
-  doc.setFontSize(9);
+  doc.setFontSize(8.5);
   doc.setFont("helvetica", "normal");
   doc.setTextColor(203, 213, 225);
-  doc.text("REGULATION (EU) 2022/2554 • DIGITAL OPERATIONAL RESILIENCE ACT • ARTICLE 24 & 26", 14, 25);
-  doc.text("CRITICAL ENERGY INFRASTRUCTURE & AUTONOMOUS INDUSTRIAL TWIN ASSURANCE", 14, 31);
-  doc.setTextColor(249, 115, 22);
-  doc.text("CONFIDENTIAL • OFFICIAL COMPLIANCE PASSPORT", 14, 38);
+  doc.text("REGULATION (EU) 2022/2554 • DIGITAL OPERATIONAL RESILIENCE ACT • ARTICLE 24 & 26", 14, 22);
+  doc.text("CRITICAL ENERGY INFRASTRUCTURE & AUTONOMOUS INDUSTRIAL TWIN ASSURANCE", 14, 28);
+
+  // Personalized Client Organization Banner
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(9);
+  doc.setTextColor(253, 186, 116);
+  doc.text(`DESTINATAIRE OFFICIEL : ${clientOrg.toUpperCase()} • PÉRIMÈTRE : ${bldgCount} BÂTIMENT(S)`, 14, 35);
+
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(7.5);
+  doc.setTextColor(148, 163, 184);
+  doc.text("CONFIDENTIAL • EXECUTIVE AUDIT PASSPORT FOR CIO / CISO / REGULATORS", 14, 41);
 
   // Metadata Box (Right aligned badge)
   doc.setFillColor(24, 32, 47);
-  doc.roundedRect(138, 10, 58, 26, 2, 2, "F");
+  doc.roundedRect(138, 9, 58, 28, 2, 2, "F");
   doc.setFontSize(8);
   doc.setFont("helvetica", "bold");
   doc.setTextColor(249, 115, 22);
-  doc.text("PASSPORT ID", 142, 16);
+  doc.text("PASSPORT ID", 142, 15);
   doc.setFont("helvetica", "normal");
   doc.setTextColor(255, 255, 255);
-  doc.text(data.incidentId, 142, 22);
+  doc.text(data.incidentId, 142, 21);
   doc.setFont("helvetica", "bold");
   doc.setTextColor(16, 185, 129);
-  doc.text("STATUS: AUDIT VERIFIED", 142, 31);
+  doc.text("STATUS: AUDIT VERIFIED", 142, 29);
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(7);
+  doc.setTextColor(203, 213, 225);
+  doc.text(`${bldgCount} Site(s) Certifié(s)`, 142, 34);
 
   // Section 1: Sovereign Cryptographic Stamp Box
   let yPos = 56;
@@ -123,7 +144,7 @@ export async function generateDoraAuditCertificate(data: DoraAuditData): Promise
   doc.setFont("helvetica", "normal");
   doc.setFontSize(7.5);
   doc.setTextColor(100, 116, 139);
-  doc.text(`Timestamp: ${data.timestamp} UTC  |  Zero-Trust Root: SPH-DE-FFM-HSM-01  |  Alg: FIPS 180-4`, 20, yPos + 23);
+  doc.text(`Timestamp: ${data.timestamp} UTC  |  Target: ${clientOrg}  |  Alg: FIPS 180-4 / RFC 6234`, 20, yPos + 23);
 
   // Section 2: Executive Incident & Auto-Remediation Summary
   yPos += 36;
@@ -142,6 +163,7 @@ export async function generateDoraAuditCertificate(data: DoraAuditData): Promise
   doc.setTextColor(51, 65, 85);
 
   const leftLabels = [
+    ["Entité Bénéficiaire:", `${clientOrg} (${bldgCount} bâtiment(s) modélisé(s))`],
     ["Facility Node:", `${data.facilityNode} (${data.campusName})`],
     ["Trigger Event:", data.triggerEvent],
     ["AIOps Engine:", `${data.aiRemediationType} (Autonomous Closed Loop)`],
