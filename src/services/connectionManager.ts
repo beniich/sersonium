@@ -31,6 +31,7 @@ export interface ConnectionState {
   mode: ConnectionMode;
   lastSync: Date | null;
   pendingSyncCount: number;
+  latencyMs?: number;
 }
 
 export interface QueuedAction {
@@ -151,6 +152,7 @@ export class ConnectionManager {
   }
 
   public async checkHealth(): Promise<boolean> {
+    const startTime = typeof performance !== "undefined" ? performance.now() : Date.now();
     try {
       const controller = new AbortController();
       const timeout = setTimeout(() => controller.abort(), 4000);
@@ -164,20 +166,26 @@ export class ConnectionManager {
       
       clearTimeout(timeout);
 
+      const elapsed = Math.round((typeof performance !== "undefined" ? performance.now() : Date.now()) - startTime);
+
       if (res && res.ok) {
+        this.state.latencyMs = elapsed;
         this.handleNetworkChange(true);
         return true;
       } else {
         // Fallback test endpoint racine / Vite Dev Server
         const ping = await fetch("/healthcheck", { method: "GET", cache: "no-store", credentials: "include" }).catch(() => null);
         if (ping && ping.ok) {
+          this.state.latencyMs = Math.round((typeof performance !== "undefined" ? performance.now() : Date.now()) - startTime);
           this.handleNetworkChange(true);
           return true;
         }
       }
+      this.state.latencyMs = undefined;
       this.handleNetworkChange(false);
       return false;
     } catch {
+      this.state.latencyMs = undefined;
       this.handleNetworkChange(false);
       return false;
     }

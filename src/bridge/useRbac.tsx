@@ -1,4 +1,4 @@
-﻿/**
+/**
  * useRbac — React Context + Hook pour le RBAC multi-tenant SENSORIUM
  * Fournit la session, les helpers de permission, et les mutations.
  */
@@ -13,9 +13,19 @@ export type { RbacRole, Permission, Tenant, TenantMember, RbacSession };
 
 // ─── Context ──────────────────────────────────────────────────────────────────
 
+export interface RbacUser {
+  id: string;
+  name: string;
+  email: string;
+  role: RbacRole;
+  photoUrl?: string;
+}
+
 interface RbacContextType {
   session: RbacSession | null;
   isAuthenticated: boolean;
+  currentUser: RbacUser | null;
+  currentTenant: Tenant | null;
   // Auth actions
   loginWithEmail: (email: string, password: string) => Promise<{ success: boolean; error?: string }>;
   loginWithGoogle: (email: string, name: string, photoUrl?: string) => Promise<{ success: boolean; error?: string }>;
@@ -95,9 +105,42 @@ export function RbacProvider({ children }: { children: ReactNode }) {
     return r;
   }, [refreshSession]);
 
+  const currentUser: RbacUser | null = useMemo(() => {
+    if (session) {
+      return {
+        id: session.userId,
+        name: session.displayName || "Admin User",
+        email: session.email,
+        role: session.role,
+        photoUrl: session.photoUrl,
+      };
+    }
+    const s = rbacService.getSession();
+    if (s) {
+      return {
+        id: s.userId,
+        name: s.displayName || "Admin User",
+        email: s.email,
+        role: s.role,
+        photoUrl: s.photoUrl,
+      };
+    }
+    return {
+      id: "usr-admin",
+      name: "Admin User",
+      email: "admin@sensorium.ai",
+      role: "SUPER_ADMIN" as RbacRole,
+    };
+  }, [session]);
+
+  const currentTenant = useMemo(() => {
+    return session?.tenant ?? rbacService.getCurrentTenant();
+  }, [session]);
+
   return (
     <RbacContext.Provider value={{
       session, isAuthenticated: !!session,
+      currentUser, currentTenant,
       loginWithEmail, loginWithGoogle, loginAsMock, logout,
       can, canAll, canAny, hasRole, hasMinRole,
       tenantMembers, allTenants,

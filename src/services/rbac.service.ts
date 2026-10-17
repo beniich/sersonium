@@ -516,6 +516,10 @@ class RbacService {
 
   // ── Tenant & member management ─────────────────────────────────────────────
 
+  getCurrentTenant(): Tenant | null {
+    return this.session?.tenant ?? (MOCK_TENANTS[0] || null);
+  }
+
   getTenantMembers(tenantId?: string): TenantMember[] {
     const id = tenantId ?? this.session?.tenantId;
     if (!id) return [];

@@ -91,13 +91,32 @@ export default function App() {
 
   // Map URL path → page key
   const pageFromPath = (pathname: string): string => {
-    const seg = pathname.replace(/^\//, "").split("/")[0].toLowerCase();
+    const lower = pathname.toLowerCase();
+    const seg = lower.replace(/^\//, "").split("/")[0];
     // Default root "/" or "/portal" or "/website" or "/vitrine" is the Website
     if (!seg || seg === "portal" || seg === "website" || seg === "site" || seg === "vitrine") {
       return "portal";
     }
-    if (seg === "dashboard") {
+    if (seg === "dashboard" || seg === "cafm") {
       return "overview";
+    }
+    if (seg === "twin") {
+      return "cockpit";
+    }
+    if (seg === "admin") {
+      return "iam";
+    }
+    if (seg === "audit") {
+      return "compliance";
+    }
+    if (seg === "manage") {
+      return "master-control";
+    }
+    if (lower.includes("/compliance/esg")) {
+      return "esg-carbon";
+    }
+    if (lower.includes("/compliance/dora")) {
+      return "compliance";
     }
     return seg;
   };
@@ -387,11 +406,17 @@ export default function App() {
     if (newPage !== activePage) {
       setActivePage(newPage);
       if (newPage === "overview") {
-        setActiveItemId("ov-general");
+        setActiveItemId(location.pathname.includes("/cafm") ? "ov-cafm" : "ov-general");
       } else if (newPage === "cockpit") {
         setActiveItemId("spider-cockpit");
       } else if (newPage === "portal") {
         setActiveItemId("spider-portal");
+      } else if (newPage === "iam") {
+        setActiveItemId("iam-admin");
+      } else if (newPage === "master-control") {
+        setActiveItemId("ov-master");
+      } else if (newPage === "esg-carbon") {
+        setActiveItemId("spider-esg");
       }
     }
   }, [location.pathname]);
