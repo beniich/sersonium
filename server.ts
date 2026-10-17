@@ -328,6 +328,16 @@ sensorium_system_uptime_seconds ${snapshot.uptimeSeconds}
     res.sendFile(path.join(publicSitePath, "securite.html"));
   });
 
+  // Portail Développeur & Documentation API (Broadcom-Grade Developer Hub)
+  app.get(["/site/developers", "/site/developers.html", "/developers", "/api-docs"], (_req: express.Request, res: express.Response) => {
+    res.sendFile(path.join(publicSitePath, "developers.html"));
+  });
+
+  // Spécification OpenAPI 3.1 publique
+  app.get(["/api/v1/openapi.json", "/openapi.json"], (_req: express.Request, res: express.Response) => {
+    res.redirect("/api/v1/showcase/developers/openapi.json");
+  });
+
   // Vite middleware for development or fallback if dist not built
   const distPath = path.join(process.cwd(), "dist");
   const distIndexHtml = path.join(distPath, "index.html");

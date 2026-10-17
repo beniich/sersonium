@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { generateDoraAuditCertificate, triggerFileDownload } from '../utils/doraReport';
 
 interface CockpitConsoleViewProps {
   onNavigate: (path: any) => void;
@@ -21,6 +22,17 @@ export const CockpitConsoleView: React.FC<CockpitConsoleViewProps> = ({ onNaviga
   const [pressureVal, setPressureVal] = useState(4.2);
   const [, setSelectedHotspot] = useState<string | null>(null);
 
+  // --- DÉMO SCÉNARISÉE DSI (8 MIN) ---
+  const [demoActive, setDemoActive] = useState(false);
+  const [demoStep, setDemoStep] = useState<1 | 2 | 3 | 4>(1);
+  const [demoAIOpsExecuting, setDemoAIOpsExecuting] = useState(false);
+  const [demoResolved, setDemoResolved] = useState(false);
+  const [showPrompter, setShowPrompter] = useState(true);
+  const [doraCertHash, setDoraCertHash] = useState<string | null>(null);
+  const [doraPdfLoading, setDoraPdfLoading] = useState(false);
+  const [doraDocCache, setDoraDocCache] = useState<any>(null);
+  const [doraJsonCache, setDoraJsonCache] = useState<string | null>(null);
+
   const [logs, setLogs] = useState([
     { time: '13:30:02', channel: 'BIM_SYNC', msg: 'Mesh nodes 14,890 verified without drift.' },
     { time: '13:31:14', channel: 'CHILLER_B2', msg: 'COP calibrated to 6.22, chilled water setpoint locked.' },
@@ -41,6 +53,113 @@ export const CockpitConsoleView: React.FC<CockpitConsoleViewProps> = ({ onNaviga
     const timeStr = now.toTimeString().split(' ')[0];
     setLogs((prev) => [{ time: timeStr, channel, msg }, ...prev.slice(0, 19)]);
   };
+
+  // Logiques Démo Scénarisée
+  const startDemo = () => {
+    setDemoActive(true);
+    setDemoStep(1);
+    setDemoResolved(false);
+    setDemoAIOpsExecuting(false);
+    appendLog('DEMO_PITCH', '▶ Démo Scénarisée DSI (8 min) activée : Panne CVC -> Impact Financier -> Auto-Remédiation -> Audit DORA.');
+    appendLog('HVAC_ALERT', 'ALERTE CRITIQUE : Dérive thermique Chiller B-02 (68.4°C). Risque de surpression sur vanne V-14.');
+  };
+
+  const stopDemo = () => {
+    setDemoActive(false);
+    setDemoStep(1);
+    setDemoResolved(false);
+    setDemoAIOpsExecuting(false);
+    appendLog('DEMO_PITCH', '⏹ Démo Scénarisée désactivée. Télémétrie nominale restaurée.');
+  };
+
+  const ensureDoraCertGenerated = async () => {
+    if (doraCertHash && doraDocCache) return;
+    try {
+      const nowIso = new Date().toISOString();
+      const res = await generateDoraAuditCertificate({
+        incidentId: `DORA-INC-${Date.now().toString().slice(-6)}`,
+        campusName: "Frankfurt West Campus",
+        facilityNode: "Node-01 / Core Automation Bay FL04",
+        timestamp: nowIso,
+        triggerEvent: "Chiller B-02 High Discharge Temp (68.4°C) & HydroSync V-14 Cavitation",
+        initialTemp: 68.4,
+        initialCop: 2.84,
+        initialPressure: 5.8,
+        remediatedTemp: 7.4,
+        remediatedCop: 6.22,
+        remediatedPressure: 4.2,
+        financialSavingsPerYear: "18 400 €",
+        energySavedKwhPerHour: "42.3",
+        aiRemediationType: "Gemini Closed-Loop Hydraulic Dynamic Balancing",
+        remediationLatencyMs: 1400,
+        operatorId: "Dr. A. Mercer (Facility SuperAdmin)",
+        doraArticles: ["Article 24 (Incident Management)", "Article 26 (Digital Resilience)", "ISO 50001 (Energy Audit)"],
+      });
+      setDoraCertHash(res.hash);
+      setDoraDocCache(res.doc);
+      setDoraJsonCache(res.jsonPayload);
+      appendLog('DORA_AUDIT', `Sceau d'intégrité SHA-256 certifié : ${res.hash.substring(0, 18)}...`);
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
+  const handleDemoStepChange = (step: 1 | 2 | 3 | 4) => {
+    setDemoStep(step);
+    if (step === 1) {
+      setDemoResolved(false);
+      appendLog('DEMO_STEP', 'Étape 1/4 : Alerte CVC physique — Surchauffe groupe froid B-02 (68.4°C) et déséquilibre hydraulique.');
+    } else if (step === 2) {
+      appendLog('DEMO_STEP', 'Étape 2/4 : Chiffrage exécutif — Perte d\'inaction calculée : +18 400 €/an (+42.3 kWh/h).');
+    } else if (step === 3) {
+      appendLog('DEMO_STEP', 'Étape 3/4 : Auto-remédiation AIOps — Algorithme de boucle fermée prêt à rééquilibrer la vanne V-14.');
+    } else if (step === 4) {
+      appendLog('DEMO_STEP', 'Étape 4/4 : Conformité DORA — Sceau cryptographique SHA-256 et rapport certifié téléchargeable.');
+      ensureDoraCertGenerated();
+    }
+  };
+
+  const handleDemoAIOpsRemediate = async () => {
+    setDemoAIOpsExecuting(true);
+    appendLog('AIOPS_EXEC', 'Gemini Neural Rebalancing : Calcul de compensation thermique et ré-étalonnage vanne V-14...');
+    setTimeout(() => {
+      setDemoAIOpsExecuting(false);
+      setDemoResolved(true);
+      appendLog('AIOPS_SUCCESS', '✔ Vanne HydroSync V-14 ré-étalonnée (-18%). Pression stabilisée à 4.2 Bar nominal.');
+      appendLog('AIOPS_SUCCESS', '✔ Groupe Froid B-02 stabilisé : Température 7.4°C, COP restauré à 6.22 nominal.');
+      appendLog('FINANCIAL_ROI', '✔ Dérive stoppée : 18 400 €/an d\'économies verrouillées (42.3 kWh/h préservés).');
+      setDemoStep(4);
+      ensureDoraCertGenerated();
+    }, 1400);
+  };
+
+  const handleDownloadDoraPdf = async () => {
+    setDoraPdfLoading(true);
+    try {
+      await ensureDoraCertGenerated();
+      if (doraDocCache) {
+        doraDocCache.save(`Certificat_DORA_SENSORIUM_${doraCertHash?.substring(0, 8) || 'AUDIT'}.pdf`);
+        appendLog('EXPORT', 'Certificat PDF DORA / ISO 50001 téléchargé avec succès.');
+      }
+    } finally {
+      setDoraPdfLoading(false);
+    }
+  };
+
+  const handleDownloadDoraJson = async () => {
+    await ensureDoraCertGenerated();
+    if (doraJsonCache) {
+      triggerFileDownload(doraJsonCache, `dora_audit_fingerprint_${doraCertHash?.substring(0, 8) || 'seal'}.json`);
+      appendLog('EXPORT', 'Preuve d\'intégrité JSON immuable exportée.');
+    }
+  };
+
+  // Variables télémétriques dynamiques selon la démo
+  const isAnomaly = demoActive && !demoResolved && (demoStep === 1 || demoStep === 2);
+  const displayChillerTemp = isAnomaly ? 68.4 : 7.4;
+  const displayCop = isAnomaly ? 2.84 : 6.22;
+  const displayPressure = isAnomaly ? 5.8 : pressureVal;
+  const displayChillerLoad = isAnomaly ? 98 : 88;
 
   const handleSelectFloor = (key: string, label: string) => {
     setActiveFloorKey(key);
@@ -187,6 +306,26 @@ export const CockpitConsoleView: React.FC<CockpitConsoleViewProps> = ({ onNaviga
               </span>
             </div>
             <button
+              onClick={() => {
+                if (demoActive) {
+                  stopDemo();
+                } else {
+                  startDemo();
+                }
+              }}
+              className={`px-3 py-2 rounded-xl font-['Space_Grotesk'] text-[11px] font-bold flex items-center gap-1.5 transition-all cursor-pointer shadow-sm ${
+                demoActive
+                  ? 'bg-gradient-to-r from-amber-500 via-orange-600 to-rose-600 text-white ring-2 ring-orange-400/50 shadow-[0_0_15px_rgba(249,115,22,0.5)]'
+                  : 'tactile-btn text-orange-600 dark:text-orange-400 hover:text-orange-500'
+              }`}
+              title="Lancer le simulateur de Démo DSI en 4 étapes clés (8 min)"
+            >
+              <span className={`material-symbols-outlined text-[16px] ${demoActive ? 'animate-spin' : ''}`}>
+                {demoActive ? 'sync' : 'slideshow'}
+              </span>
+              <span>{demoActive ? 'Démo DSI Active' : '🎬 Démo DSI (8 min)'}</span>
+            </button>
+            <button
               onClick={() => onNavigate('architecture')}
               className="tactile-btn px-3 py-2 rounded-xl text-slate-900 dark:text-white font-['Space_Grotesk'] text-[11px] font-bold hover:text-orange-600 dark:hover:text-orange-400 transition-colors"
             >
@@ -223,6 +362,242 @@ export const CockpitConsoleView: React.FC<CockpitConsoleViewProps> = ({ onNaviga
 
         {/* Cockpit Canvas Body */}
         <main className={`${isEmbedded ? 'pt-4' : 'pt-24'} px-4 sm:px-6 py-4 flex flex-col gap-6 select-none max-w-7xl w-full mx-auto`}>
+          {/* SIMULATEUR DE DÉMO DSI EN 4 ÉTAPES (VISIBLE EN MODE DÉMO) */}
+          {demoActive && (
+            <section className="bg-gradient-to-b from-slate-900 to-[#0e1320] border-2 border-orange-500/40 rounded-2xl p-5 shadow-2xl flex flex-col gap-4 text-white relative overflow-hidden animate-fadeIn">
+              {/* Top Bar of Demo Deck */}
+              <div className="flex flex-wrap items-center justify-between gap-3 border-b border-white/10 pb-3">
+                <div className="flex items-center gap-2.5">
+                  <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-orange-600 to-amber-500 flex items-center justify-center text-white shadow-lg shadow-orange-500/30">
+                    <span className="material-symbols-outlined text-[20px]">movie_edit</span>
+                  </div>
+                  <div className="flex flex-col">
+                    <div className="flex items-center gap-2">
+                      <span className="font-['Space_Grotesk'] text-sm font-bold tracking-wide text-white uppercase">
+                        Simulateur Démo Pitch DSI (8 min)
+                      </span>
+                      <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-orange-500/20 text-orange-400 border border-orange-500/30">
+                        BROADCOM-GRADE ENTERPRISE SHOWCASE
+                      </span>
+                    </div>
+                    <span className="text-[11px] text-slate-400 font-medium">
+                      Scénario : Défaillance CVC & Surpression → Calcul Coût d'Inaction → Auto-Remédiation AIOps → Sceau DORA SHA-256
+                    </span>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => setShowPrompter(!showPrompter)}
+                    className="px-3 py-1.5 rounded-lg text-[11px] font-bold bg-white/10 hover:bg-white/20 text-slate-200 flex items-center gap-1.5 transition-colors cursor-pointer"
+                  >
+                    <span className="material-symbols-outlined text-[16px] text-amber-400">psychology_alt</span>
+                    <span>{showPrompter ? 'Masquer Guide Pitch' : 'Afficher Guide Pitch'}</span>
+                  </button>
+                  <button
+                    onClick={stopDemo}
+                    className="px-3 py-1.5 rounded-lg text-[11px] font-bold bg-rose-500/20 hover:bg-rose-500/30 text-rose-300 border border-rose-500/30 transition-colors cursor-pointer"
+                  >
+                    Quitter Démo
+                  </button>
+                </div>
+              </div>
+
+              {/* 4 Interactive Step Pills */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+                {[
+                  {
+                    step: 1 as const,
+                    badge: 'ÉTAPE 1',
+                    title: 'Dérive CVC Critique',
+                    desc: 'Chiller B-02 à 68.4°C & vanne en surpression',
+                    icon: 'warning',
+                    color: demoStep === 1 ? 'border-rose-500 bg-rose-500/15' : 'border-white/10 bg-white/5 opacity-80',
+                  },
+                  {
+                    step: 2 as const,
+                    badge: 'ÉTAPE 2',
+                    title: 'Impact Financier',
+                    desc: '+18 400 € / an d\'inaction & dérive IT',
+                    icon: 'euro',
+                    color: demoStep === 2 ? 'border-amber-500 bg-amber-500/15' : 'border-white/10 bg-white/5 opacity-80',
+                  },
+                  {
+                    step: 3 as const,
+                    badge: 'ÉTAPE 3',
+                    title: 'Auto-Remédiation',
+                    desc: 'AIOps boucle fermée en 1.4s',
+                    icon: 'bolt',
+                    color: demoStep === 3 ? 'border-emerald-500 bg-emerald-500/15' : 'border-white/10 bg-white/5 opacity-80',
+                  },
+                  {
+                    step: 4 as const,
+                    badge: 'ÉTAPE 4',
+                    title: 'Audit DORA SHA-256',
+                    desc: 'Certificat immuable & preuve légale',
+                    icon: 'verified_user',
+                    color: demoStep === 4 ? 'border-cyan-500 bg-cyan-500/15' : 'border-white/10 bg-white/5 opacity-80',
+                  },
+                ].map((s) => (
+                  <button
+                    key={s.step}
+                    onClick={() => handleDemoStepChange(s.step)}
+                    className={`p-3 rounded-xl border text-left transition-all cursor-pointer flex flex-col gap-1.5 ${s.color} hover:brightness-110`}
+                  >
+                    <div className="flex items-center justify-between">
+                      <span className="text-[10px] font-bold text-orange-400 font-mono tracking-wider">{s.badge}</span>
+                      <span className="material-symbols-outlined text-[18px] text-slate-300">{s.icon}</span>
+                    </div>
+                    <span className="font-['Space_Grotesk'] text-xs font-bold text-white">{s.title}</span>
+                    <span className="text-[10px] text-slate-400 leading-tight">{s.desc}</span>
+                  </button>
+                ))}
+              </div>
+
+              {/* Step Live Banner & Action Triggers */}
+              <div className="bg-black/40 border border-white/10 rounded-xl p-4 flex flex-col md:flex-row items-center justify-between gap-4">
+                {demoStep === 1 && (
+                  <div className="flex items-center gap-3">
+                    <span className="w-3 h-3 rounded-full bg-rose-500 animate-ping" />
+                    <div className="flex flex-col">
+                      <span className="font-['Space_Grotesk'] text-sm font-bold text-rose-400">
+                        ANOMALIE CVC PHYSIQUE EN COURS : CHILLER 68.4°C • COP EFFONDRÉ À 2.84
+                      </span>
+                      <span className="text-xs text-slate-300">
+                        La GTB standard n'a généré qu'un log obscur. SENSORIUM a localisé le nœud sur le jumeau 3D.
+                      </span>
+                    </div>
+                  </div>
+                )}
+
+                {demoStep === 2 && (
+                  <div className="flex items-center gap-3">
+                    <span className="material-symbols-outlined text-amber-400 text-[26px]">trending_up</span>
+                    <div className="flex flex-col">
+                      <span className="font-['Space_Grotesk'] text-sm font-bold text-amber-400">
+                        COÛT D'INACTION : +18 400 € / AN (+42.3 kWh/h) • RISQUE SALLE SERVEURS ÉLEVÉ
+                      </span>
+                      <span className="text-xs text-slate-300">
+                        Chaque heure d'inaction coûte 51 € directs et menace la conformité ISO 50001.
+                      </span>
+                    </div>
+                  </div>
+                )}
+
+                {demoStep === 3 && (
+                  <div className="flex items-center gap-3">
+                    <span className={`material-symbols-outlined text-[26px] ${demoResolved ? 'text-emerald-400' : 'text-orange-400'}`}>
+                      {demoResolved ? 'check_circle' : 'psychology'}
+                    </span>
+                    <div className="flex flex-col">
+                      <span className="font-['Space_Grotesk'] text-sm font-bold text-white">
+                        {demoResolved
+                          ? '✔ CONTRE-MESURE APPLIQUÉE : VANNE V-14 ÉQUILIBRÉE • COP 6.22 RESTAURÉ'
+                          : 'PRESCRIPTION AIOPS GEMINI : RÉÉQUILIBRAGE IMMÉDIAT EN BOUCLE FERMÉE'}
+                      </span>
+                      <span className="text-xs text-slate-300">
+                        {demoResolved
+                          ? 'Économies annuelles de 18 400 € verrouillées. Zéro intervention humaine sur site.'
+                          : 'Cliquez ci-contre pour exécuter la compensation hydraulique en 1.4s.'}
+                      </span>
+                    </div>
+                  </div>
+                )}
+
+                {demoStep === 4 && (
+                  <div className="flex items-center gap-3">
+                    <span className="material-symbols-outlined text-cyan-400 text-[26px]">verified</span>
+                    <div className="flex flex-col">
+                      <span className="font-['Space_Grotesk'] text-sm font-bold text-cyan-300">
+                        CONFORMITÉ DORA & ISO 50001 VALIDÉE • SCEAU CRYPTOGRAPHIQUE ÉMIS
+                      </span>
+                      <span className="text-xs text-slate-300 font-mono">
+                        SHA-256 : {doraCertHash ? `${doraCertHash.substring(0, 28)}...` : 'Génération en cours...'}
+                      </span>
+                    </div>
+                  </div>
+                )}
+
+                {/* Right Interactive CTAs depending on Step */}
+                <div className="flex items-center gap-2 w-full md:w-auto shrink-0">
+                  {demoStep < 3 && (
+                    <button
+                      onClick={() => handleDemoStepChange((demoStep + 1) as any)}
+                      className="px-4 py-2 rounded-xl bg-orange-600 hover:bg-orange-500 font-['Space_Grotesk'] text-xs font-bold text-white flex items-center gap-1.5 transition-all shadow-md cursor-pointer"
+                    >
+                      <span>Passer à l'Étape {demoStep + 1}</span>
+                      <span className="material-symbols-outlined text-[16px]">arrow_forward</span>
+                    </button>
+                  )}
+
+                  {demoStep === 3 && (
+                    <button
+                      onClick={handleDemoAIOpsRemediate}
+                      disabled={demoAIOpsExecuting || demoResolved}
+                      className={`px-5 py-2.5 rounded-xl font-['Space_Grotesk'] text-xs font-bold text-white flex items-center gap-2 transition-all shadow-lg cursor-pointer ${
+                        demoResolved
+                          ? 'bg-emerald-600 cursor-default'
+                          : demoAIOpsExecuting
+                          ? 'bg-orange-700 animate-pulse'
+                          : 'bg-gradient-to-r from-orange-500 to-emerald-600 hover:brightness-110 active:scale-95'
+                      }`}
+                    >
+                      <span className={`material-symbols-outlined text-[18px] ${demoAIOpsExecuting ? 'animate-spin' : ''}`}>
+                        {demoResolved ? 'task_alt' : demoAIOpsExecuting ? 'refresh' : 'bolt'}
+                      </span>
+                      <span>
+                        {demoResolved ? 'Correction Validée' : demoAIOpsExecuting ? 'Auto-Remédiation...' : '⚡ Appliquer Correction AIOps'}
+                      </span>
+                    </button>
+                  )}
+
+                  {demoStep === 4 && (
+                    <div className="flex items-center gap-2">
+                      <button
+                        onClick={handleDownloadDoraPdf}
+                        disabled={doraPdfLoading}
+                        className="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 font-['Space_Grotesk'] text-xs font-bold text-white flex items-center gap-1.5 transition-all shadow-md cursor-pointer"
+                      >
+                        <span className="material-symbols-outlined text-[16px]">picture_as_pdf</span>
+                        <span>{doraPdfLoading ? 'Génération...' : 'Télécharger Certificat DORA (PDF)'}</span>
+                      </button>
+                      <button
+                        onClick={handleDownloadDoraJson}
+                        className="px-3 py-2 rounded-xl bg-white/10 hover:bg-white/20 font-['Space_Grotesk'] text-xs font-bold text-slate-200 flex items-center gap-1.5 transition-all cursor-pointer"
+                        title="Exporter l'empreinte JSON SHA-256"
+                      >
+                        <span className="material-symbols-outlined text-[16px]">fingerprint</span>
+                        <span>JSON</span>
+                      </button>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Presenter Prompter / Pitch Cues (Collapsible) */}
+              {showPrompter && (
+                <div className="bg-slate-800/80 border border-amber-500/30 rounded-xl p-3.5 flex flex-col gap-1.5 text-slate-300">
+                  <div className="flex items-center gap-2">
+                    <span className="material-symbols-outlined text-amber-400 text-[18px]">mic</span>
+                    <span className="font-['Space_Grotesk'] text-xs font-bold text-amber-300 uppercase">
+                      Guide Pitch Démo DSI — Ce qu'il faut dire à cette étape :
+                    </span>
+                  </div>
+                  <p className="text-xs leading-relaxed text-slate-200 italic pl-6">
+                    {demoStep === 1 &&
+                      "« Monsieur le DSI, les outils IT classiques ne voient rien venir quand un compresseur dérive. Ici, SENSORIUM capte la dérive physique en direct à 68.4°C. Voyez sur notre jumeau 3D le point chaud clignoter en rouge sur le nœud Chiller-01. »"}
+                    {demoStep === 2 &&
+                      "« Nous ne parlons pas de technique au Comex, nous parlons d'argent : SENSORIUM convertit instantanément la dérive thermique en euros. 18 400 € de perte annuelle et un risque direct de surchauffe de vos baies serveurs si personne n'agit. »"}
+                    {demoStep === 3 &&
+                      "« Au lieu d'attendre 48h le passage d'un technicien GTB, notre IA Gemini calcule la contre-mesure dynamique. En un clic — ou en pilotage 100% autonome — la vanne V-14 est ré-équilibrée et le COP revient à 6.22 en 1.4 seconde. »"}
+                    {demoStep === 4 &&
+                      "« Enfin, voici l'argument ultime pour votre DSI et vos auditeurs DORA : chaque intervention est scellée par une empreinte SHA-256 infalsifiable. Vous téléchargez le rapport d'audit opposable en un clic pour les régulateurs européens. »"}
+                  </p>
+                </div>
+              )}
+            </section>
+          )}
+
           {/* Top Hardware Deck HUD: BIM Level Selector & Actuator Knobs */}
           <section className="tactile-plate rounded-xl p-4 flex flex-col gap-4">
             <div className="flex flex-wrap items-center justify-between gap-2">
@@ -422,22 +797,22 @@ export const CockpitConsoleView: React.FC<CockpitConsoleViewProps> = ({ onNaviga
                     className="cursor-pointer group"
                     onClick={() => {
                       setSelectedHotspot('Chiller-01');
-                      appendLog('TELEMETRY_PIN', 'Focused node telemetry socket: [Chiller-01 7.4°C]');
+                      appendLog('TELEMETRY_PIN', `Focused node telemetry socket: [Chiller-01 ${displayChillerTemp}°C]`);
                     }}
                   >
-                    <circle className="animate-ping" cx="210" cy="245" fill="#f97316" fillOpacity="0.2" r="16" />
-                    <circle cx="210" cy="245" fill="#ffffff" r="8" stroke="#ea580c" strokeWidth="3" />
-                    <circle cx="210" cy="245" fill="#ea580c" r="3" />
+                    <circle className={isAnomaly ? "animate-ping" : "animate-pulse"} cx="210" cy="245" fill={isAnomaly ? "#ef4444" : "#f97316"} fillOpacity={isAnomaly ? 0.45 : 0.2} r={isAnomaly ? 20 : 16} />
+                    <circle cx="210" cy="245" fill="#ffffff" r="8" stroke={isAnomaly ? "#dc2626" : "#ea580c"} strokeWidth="3" />
+                    <circle cx="210" cy="245" fill={isAnomaly ? "#dc2626" : "#ea580c"} r="3" />
                     <rect
-                      className="fill-white dark:fill-[#14141c] stroke-slate-200 dark:stroke-white/10"
+                      className={isAnomaly ? "fill-rose-50 dark:fill-rose-950/90 stroke-rose-500 shadow-lg" : "fill-white dark:fill-[#14141c] stroke-slate-200 dark:stroke-white/10"}
                       height="28"
                       rx="6"
-                      width="110"
-                      x="155"
+                      width="120"
+                      x="150"
                       y="195"
                     />
-                    <text className="fill-slate-900 dark:fill-white font-mono text-[10px] font-bold" x="165" y="213">
-                      CHILLER 7.4°C
+                    <text className={`${isAnomaly ? 'fill-rose-600 dark:fill-rose-400 font-black' : 'fill-slate-900 dark:fill-white font-bold'} font-mono text-[10px]`} x="156" y="213">
+                      {isAnomaly ? `CRIT ${displayChillerTemp}°C` : `CHILLER ${displayChillerTemp}°C`}
                     </text>
                   </g>
 
@@ -574,10 +949,12 @@ export const CockpitConsoleView: React.FC<CockpitConsoleViewProps> = ({ onNaviga
               <div className="tactile-plate rounded-xl p-4 flex flex-col gap-2">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
-                    <div className="w-3 h-3 rounded-full bg-orange-500 shadow-[0_0_8px_rgba(249,115,22,0.8)]" />
+                    <div className={`w-3 h-3 rounded-full ${isAnomaly ? 'bg-rose-500 shadow-[0_0_8px_rgba(239,68,68,0.9)] animate-ping' : 'bg-orange-500 shadow-[0_0_8px_rgba(249,115,22,0.8)]'}`} />
                     <span className="font-['Space_Grotesk'] text-sm font-bold text-slate-900 dark:text-white">Chiller Loop B-02</span>
                   </div>
-                  <span className="font-['Space_Grotesk'] text-[10px] text-slate-400 font-bold">NODE #429</span>
+                  <span className={`font-['Space_Grotesk'] text-[10px] font-bold ${isAnomaly ? 'text-rose-500' : 'text-slate-400'}`}>
+                    {isAnomaly ? 'CRITICAL THERMAL' : 'NODE #429'}
+                  </span>
                 </div>
 
                 <div className="tactile-debossed p-3 rounded-xl flex items-center justify-between">
@@ -585,8 +962,12 @@ export const CockpitConsoleView: React.FC<CockpitConsoleViewProps> = ({ onNaviga
                     <span className="font-['Space_Grotesk'] text-[10px] text-slate-500 dark:text-slate-400 uppercase font-semibold">
                       COEFFICIENT (COP)
                     </span>
-                    <span className="font-['Space_Grotesk'] text-2xl font-bold text-orange-600 dark:text-orange-400">6.22</span>
-                    <span className="text-xs text-emerald-600 dark:text-emerald-400 font-medium">Supply: 7.4°C Chilled</span>
+                    <span className={`font-['Space_Grotesk'] text-2xl font-bold ${isAnomaly ? 'text-rose-600 dark:text-rose-400' : 'text-orange-600 dark:text-orange-400'}`}>
+                      {displayCop}
+                    </span>
+                    <span className={`text-xs font-medium ${isAnomaly ? 'text-rose-600 dark:text-rose-400 font-bold' : 'text-emerald-600 dark:text-emerald-400'}`}>
+                      {isAnomaly ? `Discharge: ${displayChillerTemp}°C CRIT` : `Supply: ${displayChillerTemp}°C Chilled`}
+                    </span>
                   </div>
 
                   <div className="relative w-20 h-20 flex items-center justify-center">
@@ -597,23 +978,27 @@ export const CockpitConsoleView: React.FC<CockpitConsoleViewProps> = ({ onNaviga
                         cy="36"
                         fill="transparent"
                         r="28"
-                        stroke="#f97316"
+                        stroke={isAnomaly ? "#ef4444" : "#f97316"}
                         strokeDasharray="175.9"
-                        strokeDashoffset="48"
+                        strokeDashoffset={isAnomaly ? "10" : "48"}
                         strokeLinecap="round"
                         strokeWidth="6"
                       />
                     </svg>
                     <div className="absolute flex flex-col items-center">
-                      <span className="font-['Space_Grotesk'] text-[10px] text-slate-900 dark:text-white font-bold">88%</span>
+                      <span className={`font-['Space_Grotesk'] text-[10px] font-bold ${isAnomaly ? 'text-rose-500' : 'text-slate-900 dark:text-white'}`}>
+                        {displayChillerLoad}%
+                      </span>
                       <span className="font-['Space_Grotesk'] text-[8px] text-slate-400 font-medium">LOAD</span>
                     </div>
                   </div>
                 </div>
 
                 <div className="flex items-center justify-between text-slate-500 dark:text-slate-400 font-['Space_Grotesk'] text-[10px] px-1">
-                  <span>Compressor RPM: 3,450</span>
-                  <span className="text-emerald-600 dark:text-emerald-400 font-bold">VFD Synchronized</span>
+                  <span>Compressor RPM: {isAnomaly ? '4,890 (STRAIN)' : '3,450'}</span>
+                  <span className={`font-bold ${isAnomaly ? 'text-rose-600 dark:text-rose-400' : 'text-emerald-600 dark:text-emerald-400'}`}>
+                    {isAnomaly ? 'Overheat Inhibit' : 'VFD Synchronized'}
+                  </span>
                 </div>
               </div>
 
@@ -621,11 +1006,11 @@ export const CockpitConsoleView: React.FC<CockpitConsoleViewProps> = ({ onNaviga
               <div className="tactile-plate rounded-xl p-4 flex flex-col gap-2">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
-                    <div className="w-3 h-3 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.8)]" />
+                    <div className={`w-3 h-3 rounded-full ${isAnomaly ? 'bg-rose-500 shadow-[0_0_8px_rgba(239,68,68,0.9)] animate-pulse' : 'bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.8)]'}`} />
                     <span className="font-['Space_Grotesk'] text-sm font-bold text-slate-900 dark:text-white">HydroSync Valve V-14</span>
                   </div>
-                  <span className="tactile-debossed px-2 py-0.5 rounded font-['Space_Grotesk'] text-[10px] text-emerald-600 dark:text-emerald-400 font-bold">
-                    0 LEAKS
+                  <span className={`tactile-debossed px-2 py-0.5 rounded font-['Space_Grotesk'] text-[10px] font-bold ${isAnomaly ? 'text-rose-600 dark:text-rose-400' : 'text-emerald-600 dark:text-emerald-400'}`}>
+                    {isAnomaly ? 'CAVITATION WARN' : '0 LEAKS'}
                   </span>
                 </div>
 
@@ -634,15 +1019,17 @@ export const CockpitConsoleView: React.FC<CockpitConsoleViewProps> = ({ onNaviga
                     <span className="font-['Space_Grotesk'] text-[10px] text-slate-500 dark:text-slate-400 uppercase font-semibold">
                       LINE PRESSURE
                     </span>
-                    <span className="font-['Space_Grotesk'] text-sm font-bold text-slate-900 dark:text-white">
-                      {pressureVal} BAR
+                    <span className={`font-['Space_Grotesk'] text-sm font-bold ${isAnomaly ? 'text-rose-600 dark:text-rose-400' : 'text-slate-900 dark:text-white'}`}>
+                      {displayPressure} BAR
                     </span>
                   </div>
 
                   <div className="w-full h-4 rounded-full tactile-debossed p-0.5 flex items-center overflow-hidden">
                     <div
-                      className="h-full rounded-full bg-gradient-to-r from-emerald-500 to-orange-500 transition-all duration-500 shadow-sm"
-                      style={{ width: `${(pressureVal / 6.0) * 100}%` }}
+                      className={`h-full rounded-full transition-all duration-500 shadow-sm ${
+                        isAnomaly ? 'bg-gradient-to-r from-orange-500 to-rose-600' : 'bg-gradient-to-r from-emerald-500 to-orange-500'
+                      }`}
+                      style={{ width: `${Math.min((displayPressure / 6.0) * 100, 100)}%` }}
                     />
                   </div>
 
@@ -761,37 +1148,62 @@ export const CockpitConsoleView: React.FC<CockpitConsoleViewProps> = ({ onNaviga
               <div className="tactile-debossed p-4 rounded-xl flex flex-col md:flex-row items-center justify-between gap-4">
                 <div className="flex flex-col gap-1 max-w-md">
                   <div className="flex items-center gap-2">
-                    <span className="w-2 h-2 rounded-full bg-orange-500 animate-ping" />
-                    <span className="font-['Space_Grotesk'] text-[11px] text-orange-600 dark:text-orange-400 font-bold">
-                      RECOMMENDATION #R-882
+                    <span className={`w-2 h-2 rounded-full ${isAnomaly ? 'bg-rose-500 animate-ping' : 'bg-orange-500 animate-ping'}`} />
+                    <span className={`font-['Space_Grotesk'] text-[11px] font-bold ${isAnomaly ? 'text-rose-600 dark:text-rose-400' : 'text-orange-600 dark:text-orange-400'}`}>
+                      {isAnomaly ? 'RECOMMANDATION CRITIQUE #R-CRIT-911' : demoResolved ? 'RÉSOLUTION VALIDÉE #R-882-RESOLVED' : 'RECOMMENDATION #R-882'}
                     </span>
                   </div>
                   <p className="text-xs text-slate-800 dark:text-slate-200 font-medium leading-relaxed">
-                    Pre-cool Atrium Zone 02 by 1.2°C at 13:45 to shave peak load tariffs during Frankfurt grid bottleneck.
+                    {isAnomaly
+                      ? 'Déséquilibre hydraulique détecté : surpression vanne V-14 (5.8 Bar), surchauffe compresseur Chiller B-02 (68.4°C). Prescription : Ré-étalonnage dynamique vanne V-14 (-18%) et abaissement consigne.'
+                      : demoResolved
+                      ? 'Contre-mesure appliquée avec succès en boucle fermée. Vanne V-14 nominale (4.2 Bar), Chiller stabilisé (7.4°C). Économies sécurisées : 18 400 € / an.'
+                      : 'Pre-cool Atrium Zone 02 by 1.2°C at 13:45 to shave peak load tariffs during Frankfurt grid bottleneck.'}
                   </p>
                   <span className="text-[10px] text-slate-400">
-                    Confidence Score: 98.7% • Estimated ROI: €1,280 / day
+                    {isAnomaly
+                      ? 'Impact Financier d\'Inaction : +18 400 € / an • Confiance IA : 99.4% • Risque : Élevé'
+                      : demoResolved
+                      ? 'Temps de réponse AIOps : 1.4s • Sceau DORA : Conforme Art. 24 & 26'
+                      : 'Confidence Score: 98.7% • Estimated ROI: €1,280 / day'}
                   </span>
                 </div>
 
                 <div className="flex items-center gap-2 w-full md:w-auto">
-                  <button
-                    onClick={() => appendLog('PRESCRIPTION', 'Prescription #R-882 bypassed by operator.')}
-                    className="tactile-btn flex-1 md:flex-initial px-4 py-2.5 rounded-xl font-['Space_Grotesk'] text-[11px] font-bold text-slate-600 dark:text-slate-400 hover:text-rose-600 active:scale-95 transition-all cursor-pointer"
-                  >
-                    Dismiss
-                  </button>
-                  <button
-                    onClick={handleExecuteAI}
-                    className={`tactile-btn-primary flex-1 md:flex-initial px-5 py-2.5 rounded-xl font-['Space_Grotesk'] text-[11px] font-bold text-white flex items-center justify-center gap-2 active:scale-95 transition-all cursor-pointer ${
-                      aiDispatched ? 'bg-emerald-600' : ''
-                    }`}
-                  >
-                    <span className={`material-symbols-outlined text-[16px] ${aiDispatched ? 'animate-spin' : ''}`}>
-                      {aiDispatched ? 'refresh' : 'bolt'}
-                    </span>
-                    <span>{aiDispatched ? 'Executed' : 'Execute AI Flow'}</span>
-                  </button>
+                  {isAnomaly && (
+                    <button
+                      onClick={handleDemoAIOpsRemediate}
+                      disabled={demoAIOpsExecuting}
+                      className="tactile-btn-primary flex-1 md:flex-initial px-5 py-2.5 rounded-xl font-['Space_Grotesk'] text-[11px] font-bold text-white flex items-center justify-center gap-2 bg-gradient-to-r from-orange-500 to-emerald-600 hover:brightness-110 active:scale-95 transition-all cursor-pointer shadow-lg"
+                    >
+                      <span className={`material-symbols-outlined text-[16px] ${demoAIOpsExecuting ? 'animate-spin' : ''}`}>
+                        {demoAIOpsExecuting ? 'refresh' : 'bolt'}
+                      </span>
+                      <span>{demoAIOpsExecuting ? 'Exécution AIOps...' : '⚡ Appliquer Correction AIOps'}</span>
+                    </button>
+                  )}
+
+                  {!isAnomaly && (
+                    <>
+                      <button
+                        onClick={() => appendLog('PRESCRIPTION', 'Prescription #R-882 bypassed by operator.')}
+                        className="tactile-btn flex-1 md:flex-initial px-4 py-2.5 rounded-xl font-['Space_Grotesk'] text-[11px] font-bold text-slate-600 dark:text-slate-400 hover:text-rose-600 active:scale-95 transition-all cursor-pointer"
+                      >
+                        Dismiss
+                      </button>
+                      <button
+                        onClick={handleExecuteAI}
+                        className={`tactile-btn-primary flex-1 md:flex-initial px-5 py-2.5 rounded-xl font-['Space_Grotesk'] text-[11px] font-bold text-white flex items-center justify-center gap-2 active:scale-95 transition-all cursor-pointer ${
+                          aiDispatched ? 'bg-emerald-600' : ''
+                        }`}
+                      >
+                        <span className={`material-symbols-outlined text-[16px] ${aiDispatched ? 'animate-spin' : ''}`}>
+                          {aiDispatched ? 'refresh' : 'bolt'}
+                        </span>
+                        <span>{aiDispatched ? 'Executed' : 'Execute AI Flow'}</span>
+                      </button>
+                    </>
+                  )}
                 </div>
               </div>
 

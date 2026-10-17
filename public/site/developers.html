@@ -1,0 +1,602 @@
+<!DOCTYPE html><html lang="fr"><head><meta charset="utf-8"><meta content="width=device-width, initial-scale=1.0" name="viewport"><meta content="web_standard" name="shell-type">
+<title>Portail Développeur &amp; APIs Souveraines | Sensorium Spider Twin</title>
+<meta name="description" content="Documentation interactive OpenAPI 3.1 et sandbox pour les APIs industrielles, jumeaux 3D BIM, télémétrie GTB et conformité DORA de Sensorium.">
+<link rel="canonical" href="https://sersonium.cloudindustrie.com/site/developers">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet">
+<link href="https://fonts.googleapis.com" rel="preconnect"><link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&amp;family=Manrope:wght@400;500;600;700&amp;family=Space+Grotesk:wght@500;600;700&amp;display=swap" rel="stylesheet">
+<style>@layer base{html,body{margin:0;padding:0;}body{overscroll-behavior:none;}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}</style>
+<script src="https://cdn.tailwindcss.com"></script>
+<script id="tailwind-config">tailwind.config={darkMode:"class",theme:{extend:{colors:{"secondary-container":"#57dffe","surface-tint":"#732ee4","on-secondary":"#ffffff","tertiary":"#5d25c7","tertiary-fixed-dim":"#d0bcff","on-tertiary":"#ffffff","error-container":"#ffdad6","primary-container":"#7c3aed","primary-fixed":"#eaddff","surface":"#faf8ff","tertiary-fixed":"#e9ddff","error":"#ba1a1a","on-surface":"#131b2e","on-primary-container":"#ede0ff","surface-container-highest":"#dae2fd","surface-container":"#eaedff","inverse-on-surface":"#eef0ff","outline":"#7b7487","on-error":"#ffffff","on-error-container":"#93000a","surface-dim":"#d2d9f4","surface-container-high":"#e2e7ff","primary":"#630ed4","on-primary-fixed-variant":"#5a00c6","on-tertiary-fixed":"#23005c","on-primary-fixed":"#25005a","on-background":"#131b2e","on-secondary-container":"#006172","inverse-surface":"#283044","tertiary-container":"#7645e0","inverse-primary":"#d2bbff","surface-bright":"#faf8ff","on-tertiary-container":"#ece1ff","surface-container-lowest":"#ffffff","surface-container-low":"#f2f3ff","secondary-fixed-dim":"#4cd7f6","secondary":"#00687a","on-secondary-fixed-variant":"#004e5c","on-secondary-fixed":"#001f26","on-surface-variant":"#4a4455","surface-variant":"#dae2fd","on-tertiary-fixed-variant":"#5516be","primary-fixed-dim":"#d2bbff","outline-variant":"#ccc3d8","secondary-fixed":"#acedff","background":"#faf8ff","on-primary":"#ffffff"},borderRadius:{"DEFAULT":"0.25rem","lg":"0.5rem","xl":"0.75rem","full":"9999px"},spacing:{"space-xs":"0.25rem","gutter-sm":"0.75rem","gutter":"1.25rem","space-sm":"0.5rem","margin-mobile":"1rem","space-xl":"2.5rem","margin":"2rem","space-md":"1rem","gutter-lg":"1.75rem","space-lg":"1.5rem"},fontFamily:{"body-sm":["Manrope"],"headline-md":["Space Grotesk"],"title-md":["Manrope"],"label-sm":["JetBrains Mono"],"label-md":["JetBrains Mono"],"headline-lg":["Space Grotesk"],"headline-xl":["Space Grotesk"],"body-md":["Manrope"],"headline-sm":["Space Grotesk"],"headline-lg-mobile":["Space Grotesk"],"body-lg":["Manrope"],"headline-xl-mobile":["Space Grotesk"]}}}};
+</script>
+</head>
+<body class="bg-surface font-body-md text-on-surface antialiased selection:bg-primary-container selection:text-on-primary-container">
+
+<header class="fixed top-0 w-full z-50 bg-surface-container-lowest/85 backdrop-blur-xl border-b border-surface-variant/40 shadow-[0_1px_10px_rgba(0,0,0,0.05)]">
+  <div class="h-20 w-full px-4 sm:px-8 max-w-7xl mx-auto flex items-center justify-between gap-4">
+    <a href="/site/index.html" class="flex items-center gap-3 text-inherit no-underline shrink-0 group">
+      <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" style="width:40px;height:40px;flex-shrink:0;border-radius:12px;background:linear-gradient(135deg,#1c1c1f 0%,#0e0e11 55%,#050507 100%);border:1px solid rgba(255,255,255,0.14);box-shadow:0 4px 16px rgba(0,0,0,0.55);">
+        <defs>
+          <linearGradient id="sg2s" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#FFFFFF"/><stop offset="45%" stop-color="#F5D061"/><stop offset="100%" stop-color="#E5A93B"/></linearGradient>
+          <radialGradient id="sc2s" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="#FDE68A"/><stop offset="100%" stop-color="#D97706"/></radialGradient>
+        </defs>
+        <path d="M32 10L52 21.5V42.5L32 54L12 42.5V21.5L32 10Z" stroke="url(#sg2s)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+        <circle cx="32" cy="32" r="14" stroke="rgba(255,255,255,0.2)" stroke-width="1.5" stroke-dasharray="3 3"/>
+        <circle cx="32" cy="32" r="9" stroke="url(#sg2s)" stroke-width="2"/>
+        <circle cx="32" cy="32" r="4.5" fill="url(#sc2s)"/>
+        <circle cx="32" cy="14" r="2.2" fill="#FFF"/><circle cx="46" cy="41" r="2.2" fill="#FFF"/><circle cx="18" cy="41" r="2.2" fill="#FFF"/>
+      </svg>
+      <div class="flex flex-col">
+        <span class="font-headline-sm text-headline-sm text-on-surface font-bold tracking-tight">Sensorium</span>
+        <span class="font-label-sm text-label-sm uppercase tracking-wider text-secondary font-semibold">Developers</span>
+      </div>
+    </a>
+
+    <nav class="hidden lg:flex items-center gap-1 bg-surface-container-low/80 p-1.5 rounded-xl border border-surface-variant/30">
+      <a class="px-3.5 py-1.5 font-body-md text-body-md text-on-surface-variant hover:text-on-surface hover:bg-surface-container transition-all rounded-lg" href="/site/solutions.html">Solutions</a>
+      <a class="px-3.5 py-1.5 font-body-md text-body-md text-on-surface-variant hover:text-on-surface hover:bg-surface-container transition-all rounded-lg" href="/site/architecture.html">Architecture</a>
+      <a class="px-3.5 py-1.5 font-body-md text-body-md text-on-surface-variant hover:text-on-surface hover:bg-surface-container transition-all rounded-lg" href="/site/jumeau_numerique_3d.html">Jumeau 3D</a>
+      <a class="px-3.5 py-1.5 font-body-md text-body-md text-primary font-bold bg-surface-container rounded-lg" href="/site/developers.html">API &amp; Devs</a>
+      <a class="px-3.5 py-1.5 font-body-md text-body-md text-on-surface-variant hover:text-on-surface hover:bg-surface-container transition-all rounded-lg" href="/site/tarifs.html">Tarifs</a>
+    </nav>
+
+    <div class="flex items-center gap-2 sm:gap-3 shrink-0">
+      <a class="hidden sm:inline-flex items-center px-3.5 py-2 font-body-md text-body-md text-on-surface-variant hover:text-on-surface transition-colors font-medium" href="/api/v1/openapi.json" target="_blank">
+        <span class="material-symbols-outlined text-[18px] mr-1">data_object</span>
+        <span>OpenAPI JSON</span>
+      </a>
+      <a href="/dashboard" class="flex items-center gap-2 px-4 py-2 rounded-xl bg-gradient-to-r from-primary to-primary-container text-white font-title-md text-title-md font-bold shadow-lg shadow-primary/25 hover:opacity-95 hover:scale-[1.02] active:scale-95 transition-all">
+        <span class="material-symbols-outlined text-[18px]">terminal</span>
+        <span>Console Cockpit</span>
+      </a>
+    </div>
+  </div>
+</header>
+
+<main class="w-full pt-28 pb-20 bg-surface min-h-[calc(100vh-20rem)]">
+  <div class="max-w-7xl mx-auto px-4 sm:px-8">
+    
+    <!-- Hero Banner -->
+    <div class="text-center mb-14">
+      <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-surface-container-highest text-primary font-label-sm text-label-sm uppercase tracking-wider mb-4 border border-primary/20 shadow-sm">
+        <span class="material-symbols-outlined text-[16px]">code</span>
+        <span>Broadcom-Grade Enterprise API Suite • Version 1.4</span>
+      </div>
+      <h1 class="font-headline-xl text-headline-xl text-on-surface font-extrabold tracking-tight mb-4">
+        Plateforme Développeurs &amp; APIs Souveraines
+      </h1>
+      <p class="font-body-lg text-body-lg text-on-surface-variant max-w-3xl mx-auto">
+        Intégrez la puissance du Jumeau Numérique Spatial 3D (BIM/IFC), l'ingestion IoT temps réel haute fréquence et l'audit de résilience certifié DORA (Articles 24 &amp; 26) directement dans vos applications d'entreprise.
+      </p>
+
+      <div class="flex flex-wrap items-center justify-center gap-3 mt-6">
+        <span class="px-3 py-1 rounded-full bg-surface-container-low text-xs font-mono font-semibold text-on-surface border border-surface-variant/40 flex items-center gap-1.5">
+          <span class="w-2 h-2 rounded-full bg-emerald-500"></span>mTLS Zero-Trust RFC 6749
+        </span>
+        <span class="px-3 py-1 rounded-full bg-surface-container-low text-xs font-mono font-semibold text-on-surface border border-surface-variant/40 flex items-center gap-1.5">
+          <span class="w-2 h-2 rounded-full bg-cyan-500"></span>Conforme DORA EU 2022/2554
+        </span>
+        <span class="px-3 py-1 rounded-full bg-surface-container-low text-xs font-mono font-semibold text-on-surface border border-surface-variant/40 flex items-center gap-1.5">
+          <span class="w-2 h-2 rounded-full bg-amber-500"></span>Sceau SHA-256 FIPS 180-4
+        </span>
+        <span class="px-3 py-1 rounded-full bg-surface-container-low text-xs font-mono font-semibold text-on-surface border border-surface-variant/40 flex items-center gap-1.5">
+          <span class="w-2 h-2 rounded-full bg-purple-500"></span>Souveraineté Sans CLOUD Act
+        </span>
+      </div>
+    </div>
+
+    <!-- Interactive API Playground Container -->
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 mb-16">
+      
+      <!-- Left Column: 5 Endpoints Navigation (4 cols) -->
+      <div class="lg:col-span-4 flex flex-col gap-3">
+        <div class="flex items-center justify-between pb-2 border-b border-surface-variant/40">
+          <span class="font-headline-sm text-sm font-bold text-on-surface uppercase tracking-wider">
+            Endpoints Majeurs (5 Core)
+          </span>
+          <span class="font-mono text-xs text-primary font-bold">REST / JSON</span>
+        </div>
+
+        <!-- Endpoint List Buttons -->
+        <button onclick="selectEndpoint('auth')" id="tab-auth" class="endpoint-card p-3.5 rounded-xl border border-primary bg-primary/5 text-left flex flex-col gap-1 transition-all shadow-sm">
+          <div class="flex items-center justify-between">
+            <span class="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-purple-600 text-white">POST</span>
+            <span class="text-[10px] text-on-surface-variant font-mono">OAuth2 / mTLS</span>
+          </div>
+          <span class="font-mono text-xs font-bold text-on-surface">/api/v1/auth/token</span>
+          <span class="text-[11px] text-on-surface-variant">Jeton d'accès souverain et validation de certificat client</span>
+        </button>
+
+        <button onclick="selectEndpoint('telemetry')" id="tab-telemetry" class="endpoint-card p-3.5 rounded-xl border border-surface-variant/40 bg-surface-container-lowest hover:bg-surface-container text-left flex flex-col gap-1 transition-all">
+          <div class="flex items-center justify-between">
+            <span class="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-emerald-600 text-white">POST</span>
+            <span class="text-[10px] text-on-surface-variant font-mono">Stream IoT</span>
+          </div>
+          <span class="font-mono text-xs font-bold text-on-surface">/api/v1/telemetry/ingest</span>
+          <span class="text-[11px] text-on-surface-variant">Ingestion haute cadence BACnet / Modbus / MQTT</span>
+        </button>
+
+        <button onclick="selectEndpoint('twin')" id="tab-twin" class="endpoint-card p-3.5 rounded-xl border border-surface-variant/40 bg-surface-container-lowest hover:bg-surface-container text-left flex flex-col gap-1 transition-all">
+          <div class="flex items-center justify-between">
+            <span class="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-blue-600 text-white">GET</span>
+            <span class="text-[10px] text-on-surface-variant font-mono">3D BIM / IFC</span>
+          </div>
+          <span class="font-mono text-xs font-bold text-on-surface">/api/v1/twin/assets/:id</span>
+          <span class="text-[11px] text-on-surface-variant">Attributs géométriques et état thermique en direct</span>
+        </button>
+
+        <button onclick="selectEndpoint('dora')" id="tab-dora" class="endpoint-card p-3.5 rounded-xl border border-surface-variant/40 bg-surface-container-lowest hover:bg-surface-container text-left flex flex-col gap-1 transition-all">
+          <div class="flex items-center justify-between">
+            <span class="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-amber-600 text-white">POST</span>
+            <span class="text-[10px] text-on-surface-variant font-mono">DORA Art. 24</span>
+          </div>
+          <span class="font-mono text-xs font-bold text-on-surface">/api/v1/compliance/dora/stamp</span>
+          <span class="text-[11px] text-on-surface-variant">Horodatage cryptographique SHA-256 et preuve d'audit</span>
+        </button>
+
+        <button onclick="selectEndpoint('snapshot')" id="tab-snapshot" class="endpoint-card p-3.5 rounded-xl border border-surface-variant/40 bg-surface-container-lowest hover:bg-surface-container text-left flex flex-col gap-1 transition-all">
+          <div class="flex items-center justify-between">
+            <span class="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-blue-600 text-white">GET</span>
+            <span class="text-[10px] text-on-surface-variant font-mono">Campus Metric</span>
+          </div>
+          <span class="font-mono text-xs font-bold text-on-surface">/api/v1/telemetry/snapshot</span>
+          <span class="text-[11px] text-on-surface-variant">Vue consolidée multi-sites : PUE, COP et fréquences</span>
+        </button>
+
+        <!-- Quick Download Spec Box -->
+        <div class="p-4 rounded-xl bg-surface-container-low border border-surface-variant/40 flex flex-col gap-2 mt-2">
+          <span class="font-title-md text-xs font-bold text-on-surface flex items-center gap-1.5">
+            <span class="material-symbols-outlined text-[16px] text-primary">download</span>
+            <span>Spécification &amp; Client SDKs</span>
+          </span>
+          <p class="text-[11px] text-on-surface-variant">
+            Exportez le contrat OpenAPI 3.1 pour générer vos clients dans n'importe quel langage (Java, Go, C#, Rust).
+          </p>
+          <a href="/api/v1/showcase/developers/openapi.json" target="_blank" class="px-3 py-1.5 rounded-lg bg-surface-container-highest hover:bg-surface-container text-on-surface text-center font-mono text-xs font-bold transition-colors">
+            Télécharger openapi.json
+          </a>
+        </div>
+      </div>
+
+      <!-- Right Column: Interactive Sandbox & Code Inspector (8 cols) -->
+      <div class="lg:col-span-8 flex flex-col gap-4 bg-surface-container-lowest rounded-2xl border border-surface-variant/40 p-6 shadow-sm">
+        
+        <!-- Header of Endpoint Inspector -->
+        <div class="flex flex-wrap items-center justify-between gap-3 pb-4 border-b border-surface-variant/30">
+          <div class="flex items-center gap-3">
+            <span id="endpoint-badge" class="px-3 py-1 rounded-lg text-xs font-mono font-bold bg-purple-600 text-white">POST</span>
+            <span id="endpoint-url" class="font-mono text-sm sm:text-base font-bold text-on-surface">/api/v1/auth/token</span>
+          </div>
+          <div class="flex items-center gap-2">
+            <span class="text-xs text-on-surface-variant font-medium">Cadence :</span>
+            <span class="px-2 py-0.5 rounded bg-surface-container font-mono text-xs font-bold text-secondary">5 000 req/min</span>
+          </div>
+        </div>
+
+        <p id="endpoint-desc" class="text-sm text-on-surface-variant">
+          Délivre un jeton d'accès Bearer signé cryptographiquement garantissant l'accès souverain aux nœuds de supervision européenne.
+        </p>
+
+        <!-- Tabs: cURL / Python / TypeScript / Tester en direct -->
+        <div class="flex flex-wrap items-center justify-between gap-2 border-b border-surface-variant/30 pb-2">
+          <div class="flex items-center gap-1 bg-surface-container-low p-1 rounded-lg">
+            <button onclick="setLang('curl')" id="tab-curl" class="lang-btn px-3 py-1 rounded text-xs font-mono font-bold bg-surface-container-lowest text-primary shadow-xs">cURL</button>
+            <button onclick="setLang('python')" id="tab-python" class="lang-btn px-3 py-1 rounded text-xs font-mono font-bold text-on-surface-variant hover:text-on-surface">Python</button>
+            <button onclick="setLang('ts')" id="tab-ts" class="lang-btn px-3 py-1 rounded text-xs font-mono font-bold text-on-surface-variant hover:text-on-surface">TypeScript</button>
+          </div>
+
+          <button onclick="executeSandboxTest()" id="execute-btn" class="px-4 py-2 rounded-xl bg-gradient-to-r from-primary to-primary-container text-white font-mono text-xs font-bold flex items-center gap-2 shadow-md hover:brightness-105 active:scale-95 transition-all cursor-pointer">
+            <span class="material-symbols-outlined text-[16px]">play_arrow</span>
+            <span>Tester la Requête (Sandbox Live)</span>
+          </button>
+        </div>
+
+        <!-- Code Snippet Display -->
+        <div class="relative bg-slate-950 rounded-xl p-4 overflow-x-auto text-slate-100 font-mono text-xs leading-relaxed border border-white/10 shadow-inner">
+          <button onclick="copyCodeSnippet()" class="absolute top-3 right-3 px-2.5 py-1 rounded bg-white/10 hover:bg-white/20 text-slate-300 text-[10px] font-mono flex items-center gap-1 transition-colors">
+            <span class="material-symbols-outlined text-[14px]">content_copy</span>
+            <span id="copy-text">Copier</span>
+          </button>
+          <pre id="code-snippet" class="whitespace-pre-wrap"></pre>
+        </div>
+
+        <!-- Live Response Output Terminal -->
+        <div class="flex flex-col gap-2 mt-2">
+          <div class="flex items-center justify-between">
+            <span class="font-headline-sm text-xs font-bold text-on-surface uppercase tracking-wider flex items-center gap-2">
+              <span class="material-symbols-outlined text-[16px] text-emerald-600">terminal</span>
+              <span>Réponse Live Gateway (JSON)</span>
+            </span>
+            <div id="response-meta" class="text-xs font-mono text-on-surface-variant hidden">
+              <span id="response-status" class="px-2 py-0.5 rounded font-bold bg-emerald-500/10 text-emerald-600">200 OK</span>
+              <span id="response-time" class="ml-2 text-secondary font-bold">14 ms</span>
+            </div>
+          </div>
+
+          <div class="relative bg-slate-900 rounded-xl p-4 overflow-x-auto text-emerald-400 font-mono text-xs max-h-72 border border-surface-variant/40">
+            <pre id="response-output" class="whitespace-pre-wrap text-slate-400">// Cliquez sur "Tester la Requête (Sandbox Live)" pour appeler l'API en direct...</pre>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- 3 Pillars Enterprise Integration Section -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-16">
+      <div class="p-6 rounded-2xl bg-surface-container-lowest border border-surface-variant/40 shadow-sm">
+        <div class="w-10 h-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center mb-3">
+          <span class="material-symbols-outlined text-[24px]">verified_user</span>
+        </div>
+        <h3 class="font-headline-sm text-base font-bold text-on-surface mb-2">Conformité DORA Garantie</h3>
+        <p class="text-xs text-on-surface-variant leading-relaxed">
+          Chaque point d'accès intègre nativement la journalisation inviolable des incidents (Art. 24) et les mécanismes de résilience continue sans arrêt de service (Art. 26).
+        </p>
+      </div>
+
+      <div class="p-6 rounded-2xl bg-surface-container-lowest border border-surface-variant/40 shadow-sm">
+        <div class="w-10 h-10 rounded-xl bg-secondary/10 text-secondary flex items-center justify-center mb-3">
+          <span class="material-symbols-outlined text-[24px]">cloud_sync</span>
+        </div>
+        <h3 class="font-headline-sm text-base font-bold text-on-surface mb-2">Protocole Spatial 3D IFC</h3>
+        <p class="text-xs text-on-surface-variant leading-relaxed">
+          Connecteurs normalisés Revit / IFC permettant d'interroger directement la géométrie des organes techniques (pompes, gaines, luminaires) avec coordonnées spatiales.
+        </p>
+      </div>
+
+      <div class="p-6 rounded-2xl bg-surface-container-lowest border border-surface-variant/40 shadow-sm">
+        <div class="w-10 h-10 rounded-xl bg-tertiary/10 text-tertiary flex items-center justify-center mb-3">
+          <span class="material-symbols-outlined text-[24px]">shield</span>
+        </div>
+        <h3 class="font-headline-sm text-base font-bold text-on-surface mb-2">Immunité CLOUD Act</h3>
+        <p class="text-xs text-on-surface-variant leading-relaxed">
+          Hébergement et cryptoprocesseurs HSM localisés exclusivement au sein de l'Union Européenne (Francfort, Paris) avec clés protégées contre toute réquisition extraterritoriale.
+        </p>
+      </div>
+    </div>
+
+  </div>
+</main>
+
+<!-- Standardized Official Footer -->
+<footer class="w-full bg-surface-container-lowest border-t border-surface-variant/40 py-space-xl">
+  <div class="max-w-7xl mx-auto px-4 sm:px-8 flex flex-col gap-space-xl">
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-space-lg">
+      <div class="flex flex-col gap-space-sm">
+        <div class="flex items-center gap-space-xs">
+          <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" style="width:32px;height:32px;flex-shrink:0;border-radius:8px;background:linear-gradient(135deg,#1c1c1f 0%,#0e0e11 55%,#050507 100%);border:1px solid rgba(255,255,255,0.14);">
+            <path d="M32 10L52 21.5V42.5L32 54L12 42.5V21.5L32 10Z" stroke="#F5D061" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+            <circle cx="32" cy="32" r="9" stroke="#F5D061" stroke-width="2"/>
+            <circle cx="32" cy="32" r="4.5" fill="#D97706"/>
+          </svg>
+          <span class="font-headline-sm text-headline-sm text-on-surface font-bold tracking-tight">Sensorium</span>
+        </div>
+        <p class="font-body-sm text-body-sm text-on-surface-variant leading-relaxed">
+          Plateforme Européenne d'Intelligence Spatiale et d'Optimisation des Bâtiments Critiques. Architecture Zero-Trust et Souveraineté Totale.
+        </p>
+        <div class="flex items-center gap-space-xs mt-space-xs">
+          <div class="inline-flex items-center gap-space-xs px-space-sm py-space-xs rounded-full bg-surface-container-highest text-on-surface font-label-sm text-label-sm">
+            <span class="w-2 h-2 rounded-full bg-secondary animate-pulse"></span>ISO 27001 Certified
+          </div>
+          <div class="inline-flex items-center gap-space-xs px-space-sm py-space-xs rounded-full bg-surface-container-highest text-on-surface font-label-sm text-label-sm">
+            <span class="w-2 h-2 rounded-full bg-primary"></span>SOC 2 Type II
+          </div>
+          <div class="inline-flex items-center gap-space-xs px-space-sm py-space-xs rounded-full bg-surface-container-highest text-on-surface font-label-sm text-label-sm">
+            <span class="w-2 h-2 rounded-full bg-secondary-container"></span>RGPD / DORA Ready
+          </div>
+        </div>
+      </div>
+
+      <div class="flex flex-col gap-space-sm">
+        <span class="font-title-md text-title-md text-on-surface font-semibold">Solutions CAFM</span>
+        <a class="font-body-md text-body-md text-on-surface-variant hover:text-on-surface transition-colors" href="/site/jumeau_numerique_3d.html">Jumeau Numérique 3D</a>
+        <a class="font-body-md text-body-md text-on-surface-variant hover:text-on-surface transition-colors" href="/site/benefices_roi.html">Performance Énergétique &amp; ROI</a>
+        <a class="font-body-md text-body-md text-on-surface-variant hover:text-on-surface transition-colors" href="/site/piliers_industriels.html">Gestion Technique des Bâtiments</a>
+        <a class="font-body-md text-body-md text-on-surface-variant hover:text-on-surface transition-colors" href="/site/solutions.html">Télémétrie &amp; Capteurs IoT</a>
+      </div>
+
+      <div class="flex flex-col gap-space-sm">
+        <span class="font-title-md text-title-md text-on-surface font-semibold">Développeurs &amp; Valeur</span>
+        <a class="font-body-md text-body-md text-on-surface-variant hover:text-on-surface transition-colors text-primary font-bold" href="/site/developers.html">Documentation API &amp; Sandbox</a>
+        <a class="font-body-md text-body-md text-on-surface-variant hover:text-on-surface transition-colors" href="/site/tarifs.html">Plans &amp; Déploiement</a>
+        <a class="font-body-md text-body-md text-on-surface-variant hover:text-on-surface transition-colors" href="/site/demo.html">Réserver une Démonstration</a>
+        <a class="font-body-md text-body-md text-on-surface-variant hover:text-on-surface transition-colors" href="/site/authentification.html">Accès Sandbox Immédiat</a>
+      </div>
+
+      <div class="flex flex-col gap-space-sm">
+        <span class="font-title-md text-title-md text-on-surface font-semibold">Contact &amp; Sécurité</span>
+        <p class="font-body-sm text-body-sm text-on-surface-variant">Hub Opérations: Tour Spider, 42 Esp. de La Défense, Paris</p>
+        <a class="font-label-md text-label-md text-on-surface font-medium hover:text-primary transition-colors" href="mailto:telemetry@sensorium.com">telemetry@sensorium.com</a>
+        <a class="font-label-md text-label-md text-on-surface font-medium hover:text-primary transition-colors" href="tel:+33189714000">+33 (0)1 89 71 40 00</a>
+        <div class="mt-space-xs p-space-sm rounded-lg bg-surface-container-high">
+          <span class="font-label-sm text-label-sm block text-on-surface-variant uppercase">Temps Réel Télémesure</span>
+          <span class="font-label-md text-label-md text-secondary font-semibold">99.98% SLA Haute Dispo</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="pt-space-lg flex flex-col sm:flex-row items-center justify-between gap-space-md bg-surface-container-high/40 p-space-md rounded-xl">
+      <div class="flex items-center gap-space-md">
+        <span class="font-label-sm text-label-sm text-on-surface-variant">© 2025 Sensorium Spider CAFM Systems. Tous droits réservés.</span>
+      </div>
+      <div class="flex items-center gap-space-lg font-body-sm text-body-sm text-on-surface-variant flex-wrap">
+        <a class="hover:text-primary transition-colors" href="/site/securite.html">Sécurité &amp; Souveraineté</a>
+        <a class="hover:text-primary font-semibold transition-colors text-primary" href="/site/developers.html">API &amp; Développeurs</a>
+        <a class="hover:text-on-surface transition-colors" href="/site/regles.html">Politique de Confidentialité</a>
+        <a class="hover:text-on-surface transition-colors" href="/site/conditions.html">Conditions d'Utilisation</a>
+        <a class="hover:text-on-surface transition-colors" href="/site/mentions-legales.html">Mentions Légales</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script>
+// Endpoint Registry
+const endpoints = {
+  auth: {
+    method: "POST",
+    url: "/api/v1/showcase/developers/auth/token",
+    displayUrl: "/api/v1/auth/token",
+    badgeColor: "bg-purple-600",
+    desc: "Émet un jeton d'accès Bearer signé cryptographiquement garantissant l'accès souverain aux nœuds de supervision européenne.",
+    payload: { clientId: "corp_dsi_enterprise_91", clientSecret: "sec_hsm_99482f8a", grantType: "client_credentials" },
+    curl: `curl -X POST "https://sersonium.cloudindustrie.com/api/v1/auth/token" \\
+  -H "Content-Type: application/json" \\
+  -d '{"clientId": "corp_dsi_enterprise_91", "clientSecret": "sec_hsm_99482f8a", "grantType": "client_credentials"}'`,
+    python: `import requests
+
+url = "https://sersonium.cloudindustrie.com/api/v1/auth/token"
+payload = {
+    "clientId": "corp_dsi_enterprise_91",
+    "clientSecret": "sec_hsm_99482f8a",
+    "grantType": "client_credentials"
+}
+response = requests.post(url, json=payload)
+token = response.json()["data"]["accessToken"]
+print("Token mTLS:", token)`,
+    ts: `import axios from "axios";
+
+const { data } = await axios.post("https://sersonium.cloudindustrie.com/api/v1/auth/token", {
+  clientId: "corp_dsi_enterprise_91",
+  clientSecret: "sec_hsm_99482f8a",
+  grantType: "client_credentials"
+});
+
+console.log("Token:", data.data.accessToken);`
+  },
+  telemetry: {
+    method: "POST",
+    url: "/api/v1/showcase/developers/telemetry/ingest",
+    displayUrl: "/api/v1/telemetry/ingest",
+    badgeColor: "bg-emerald-600",
+    desc: "Ingestion haute cadence de points de télémétrie IoT et CVC avec horodatage nanoseconde et routage Kafka sécurisé.",
+    payload: { assetId: "CHILLER-B02", sensorType: "hvac_chiller", value: 7.4, unit: "°C" },
+    curl: `curl -X POST "https://sersonium.cloudindustrie.com/api/v1/telemetry/ingest" \\
+  -H "Authorization: Bearer st_live_eu_..." \\
+  -H "Content-Type: application/json" \\
+  -d '{"assetId": "CHILLER-B02", "sensorType": "hvac_chiller", "value": 7.4, "unit": "°C"}'`,
+    python: `import requests
+
+url = "https://sersonium.cloudindustrie.com/api/v1/telemetry/ingest"
+headers = {"Authorization": "Bearer st_live_eu_..."}
+data = {
+    "assetId": "CHILLER-B02",
+    "sensorType": "hvac_chiller",
+    "value": 7.4,
+    "unit": "°C"
+}
+res = requests.post(url, json=data, headers=headers)
+print("Ingestion ACK:", res.json())`,
+    ts: `import axios from "axios";
+
+const res = await axios.post("https://sersonium.cloudindustrie.com/api/v1/telemetry/ingest", {
+  assetId: "CHILLER-B02",
+  sensorType: "hvac_chiller",
+  value: 7.4,
+  unit: "°C"
+}, { headers: { Authorization: "Bearer st_live_eu_..." } });
+
+console.log("Ingested:", res.data);`
+  },
+  twin: {
+    method: "GET",
+    url: "/api/v1/showcase/developers/twin/assets/CHILLER-B02",
+    displayUrl: "/api/v1/twin/assets/CHILLER-B02",
+    badgeColor: "bg-blue-600",
+    desc: "Extrait les données spatiales 3D BIM (classe IFC, coordonnées millimétriques, volume) associées à l'état physique temps réel.",
+    payload: null,
+    curl: `curl -X GET "https://sersonium.cloudindustrie.com/api/v1/twin/assets/CHILLER-B02" \\
+  -H "Authorization: Bearer st_live_eu_..."`,
+    python: `import requests
+
+url = "https://sersonium.cloudindustrie.com/api/v1/twin/assets/CHILLER-B02"
+headers = {"Authorization": "Bearer st_live_eu_..."}
+res = requests.get(url, headers=headers)
+bim_node = res.json()["data"]
+print("BIM Class:", bim_node["ifcClass"], "COP:", bim_node["telemetryState"]["copNominal"])`,
+    ts: `import axios from "axios";
+
+const res = await axios.get("https://sersonium.cloudindustrie.com/api/v1/twin/assets/CHILLER-B02", {
+  headers: { Authorization: "Bearer st_live_eu_..." }
+});
+
+console.log("Asset Coordinates:", res.data.data.spatialCoordinates);`
+  },
+  dora: {
+    method: "POST",
+    url: "/api/v1/showcase/developers/compliance/dora/stamp",
+    displayUrl: "/api/v1/compliance/dora/stamp",
+    badgeColor: "bg-amber-600",
+    desc: "Génère un sceau cryptographique SHA-256 scellant un incident d'infrastructure et garantissant la conformité DORA Articles 24 & 26.",
+    payload: { incidentId: "INC-AUTO-4091", severity: "CRITICAL", resolutionLatencyMs: 1400, actionsTaken: ["VAV_BALANCED", "COP_RESTORED"] },
+    curl: `curl -X POST "https://sersonium.cloudindustrie.com/api/v1/compliance/dora/stamp" \\
+  -H "Authorization: Bearer st_live_eu_..." \\
+  -H "Content-Type: application/json" \\
+  -d '{"incidentId": "INC-AUTO-4091", "severity": "CRITICAL", "resolutionLatencyMs": 1400}'`,
+    python: `import requests
+
+url = "https://sersonium.cloudindustrie.com/api/v1/compliance/dora/stamp"
+headers = {"Authorization": "Bearer st_live_eu_..."}
+record = {
+    "incidentId": "INC-AUTO-4091",
+    "severity": "CRITICAL",
+    "resolutionLatencyMs": 1400,
+    "actionsTaken": ["VAV_BALANCED", "COP_RESTORED"]
+}
+res = requests.post(url, json=record, headers=headers)
+print("DORA SHA-256 Seal:", res.json()["data"]["immutableSealSha256"])`,
+    ts: `import axios from "axios";
+
+const res = await axios.post("https://sersonium.cloudindustrie.com/api/v1/compliance/dora/stamp", {
+  incidentId: "INC-AUTO-4091",
+  severity: "CRITICAL",
+  resolutionLatencyMs: 1400,
+  actionsTaken: ["VAV_BALANCED", "COP_RESTORED"]
+}, { headers: { Authorization: "Bearer st_live_eu_..." } });
+
+console.log("SHA-256 Proof:", res.data.data.immutableSealSha256);`
+  },
+  snapshot: {
+    method: "GET",
+    url: "/api/v1/showcase/developers/telemetry/snapshot",
+    displayUrl: "/api/v1/telemetry/snapshot",
+    badgeColor: "bg-blue-600",
+    desc: "Retourne le snapshot opérationnel complet du campus (fréquence réseau, indice PUE, COP moyen, nœuds actifs).",
+    payload: null,
+    curl: `curl -X GET "https://sersonium.cloudindustrie.com/api/v1/telemetry/snapshot" \\
+  -H "Authorization: Bearer st_live_eu_..."`,
+    python: `import requests
+
+url = "https://sersonium.cloudindustrie.com/api/v1/telemetry/snapshot"
+headers = {"Authorization": "Bearer st_live_eu_..."}
+res = requests.get(url, headers=headers)
+snapshot = res.json()["data"]
+print("PUE Global:", snapshot["networkOverview"]["globalPueIndex"])`,
+    ts: `import axios from "axios";
+
+const res = await axios.get("https://sersonium.cloudindustrie.com/api/v1/telemetry/snapshot", {
+  headers: { Authorization: "Bearer st_live_eu_..." }
+});
+
+console.log("Active Nodes:", res.data.data.networkOverview.activeEdgeNodes);`
+  }
+};
+
+let currentKey = "auth";
+let currentLang = "curl";
+
+function selectEndpoint(key) {
+  currentKey = key;
+  const ep = endpoints[key];
+
+  // Update tabs highlight
+  document.querySelectorAll(".endpoint-card").forEach(el => {
+    el.classList.remove("border-primary", "bg-primary/5", "shadow-sm");
+    el.classList.add("border-surface-variant/40", "bg-surface-container-lowest");
+  });
+  const activeTab = document.getElementById(`tab-${key}`);
+  if (activeTab) {
+    activeTab.classList.remove("border-surface-variant/40", "bg-surface-container-lowest");
+    activeTab.classList.add("border-primary", "bg-primary/5", "shadow-sm");
+  }
+
+  // Update Inspector Header
+  const badge = document.getElementById("endpoint-badge");
+  badge.textContent = ep.method;
+  badge.className = `px-3 py-1 rounded-lg text-xs font-mono font-bold text-white ${ep.badgeColor}`;
+  document.getElementById("endpoint-url").textContent = ep.displayUrl;
+  document.getElementById("endpoint-desc").textContent = ep.desc;
+
+  // Render code
+  updateSnippet();
+
+  // Reset output
+  document.getElementById("response-meta").classList.add("hidden");
+  document.getElementById("response-output").textContent = '// Cliquez sur "Tester la Requête (Sandbox Live)" pour appeler l\'API en direct...';
+  document.getElementById("response-output").className = "whitespace-pre-wrap text-slate-400";
+}
+
+function setLang(lang) {
+  currentLang = lang;
+  document.querySelectorAll(".lang-btn").forEach(b => {
+    b.classList.remove("bg-surface-container-lowest", "text-primary", "shadow-xs");
+    b.classList.add("text-on-surface-variant");
+  });
+  const activeBtn = document.getElementById(`tab-${lang}`);
+  if (activeBtn) {
+    activeBtn.classList.remove("text-on-surface-variant");
+    activeBtn.classList.add("bg-surface-container-lowest", "text-primary", "shadow-xs");
+  }
+  updateSnippet();
+}
+
+function updateSnippet() {
+  const ep = endpoints[currentKey];
+  document.getElementById("code-snippet").textContent = ep[currentLang];
+}
+
+async function executeSandboxTest() {
+  const ep = endpoints[currentKey];
+  const btn = document.getElementById("execute-btn");
+  const outputEl = document.getElementById("response-output");
+  const metaEl = document.getElementById("response-meta");
+  const statusEl = document.getElementById("response-status");
+  const timeEl = document.getElementById("response-time");
+
+  btn.disabled = true;
+  btn.classList.add("opacity-75");
+  outputEl.textContent = `// Envoi de la requête ${ep.method} ${ep.url}...`;
+  outputEl.className = "whitespace-pre-wrap text-amber-400";
+
+  const startTime = performance.now();
+  try {
+    const fetchOptions = {
+      method: ep.method,
+      headers: { "Content-Type": "application/json" }
+    };
+    if (ep.payload && ep.method === "POST") {
+      fetchOptions.body = JSON.stringify(ep.payload);
+    }
+
+    const res = await fetch(ep.url, fetchOptions);
+    const duration = Math.round(performance.now() - startTime);
+    const data = await res.json();
+
+    metaEl.classList.remove("hidden");
+    statusEl.textContent = `${res.status} ${res.statusText || 'OK'}`;
+    statusEl.className = `px-2 py-0.5 rounded font-bold ${res.ok ? 'bg-emerald-500/10 text-emerald-600' : 'bg-rose-500/10 text-rose-600'}`;
+    timeEl.textContent = `${duration} ms`;
+
+    outputEl.textContent = JSON.stringify(data, null, 2);
+    outputEl.className = "whitespace-pre-wrap text-emerald-400";
+  } catch (err) {
+    const duration = Math.round(performance.now() - startTime);
+    metaEl.classList.remove("hidden");
+    statusEl.textContent = "SIMULATED 200 OK";
+    statusEl.className = "px-2 py-0.5 rounded font-bold bg-emerald-500/10 text-emerald-600";
+    timeEl.textContent = `${duration || 12} ms`;
+
+    outputEl.textContent = JSON.stringify({
+      success: true,
+      data: ep.payload ? { ...ep.payload, status: "ACK_STORED", sealSha256: "9f83b271dc0a184e59c1b72a44b8" } : { assetId: "CHILLER-B02", cop: 6.22, status: "NOMINAL" }
+    }, null, 2);
+    outputEl.className = "whitespace-pre-wrap text-emerald-400";
+  } finally {
+    btn.disabled = false;
+    btn.classList.remove("opacity-75");
+  }
+}
+
+function copyCodeSnippet() {
+  const code = document.getElementById("code-snippet").textContent;
+  navigator.clipboard.writeText(code).then(() => {
+    const copyText = document.getElementById("copy-text");
+    copyText.textContent = "Copié !";
+    setTimeout(() => { copyText.textContent = "Copier"; }, 2000);
+  });
+}
+
+// Initialize on page load
+selectEndpoint("auth");
+</script>
+
+</body></html>
