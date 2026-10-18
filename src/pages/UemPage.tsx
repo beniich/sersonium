@@ -631,7 +631,8 @@ export default function UemPage({ isDark }: UemPageProps) {
         <StatCard label="Alertes" value={stats.openAlerts} icon={<AlertTriangle size={18}/>} color="text-amber-400" sub="Ouvertes"/>
       </div>
 
-      {/* ─── Tabs ─── */}
+      {/* ─── Tabs (sticky) ─── */}
+      <div className="sticky top-0 z-20 -mx-4 md:-mx-6 px-4 md:px-6 py-2 mb-2 bg-slate-950/80 backdrop-blur-md border-b border-white/5">
       <div className="flex items-center gap-1 bg-white/5 rounded-lg p-1 w-fit">
         {(["terminals", "alerts", "policies", "comparison"] as const).map(tab => (
           <button
@@ -652,6 +653,7 @@ export default function UemPage({ isDark }: UemPageProps) {
             )}
           </button>
         ))}
+      </div>
       </div>
 
       {/* ─── Terminals Tab ─── */}
