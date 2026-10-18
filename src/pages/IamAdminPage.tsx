@@ -1,4 +1,4 @@
-﻿import React, { useState } from "react";
+import React, { useState } from "react";
 import { useRbac, ROLE_LABELS, ROLE_COLORS, RbacRole, TenantMember, Tenant } from "../bridge/useRbac";
 import { MOCK_TENANTS, ROLE_PERMISSIONS } from "../services/rbac.service";
 import type { Permission } from "../services/rbac.service";
@@ -262,7 +262,8 @@ export function IamAdminPage({ isDark = true }: { isDark?: boolean }) {
       </div>
 
       {/* Tabs */}
-      <div style={{ display: "flex", gap: "8px", marginBottom: "20px", flexWrap: "wrap" }}>
+      <div className="sticky top-0 z-20 -mx-2.5 sm:-mx-4 lg:-mx-5 px-2.5 sm:px-4 lg:px-5 py-2 bg-slate-950/90 backdrop-blur-xl border-b border-white/10 shadow-xs">
+      <div style={{ display: "flex", gap: "8px", flexWrap: "wrap" }}>
         {[
           { id: "session", label: "🔑 Ma session" },
           { id: "members", label: "👥 Membres" },
@@ -271,6 +272,7 @@ export function IamAdminPage({ isDark = true }: { isDark?: boolean }) {
         ].map(({ id, label }) => (
           <button key={id} onClick={() => setActiveTab(id as any)} style={activeTab === id ? TAB_ACTIVE : TAB}>{label}</button>
         ))}
+      </div>
       </div>
 
       {/* Content */}

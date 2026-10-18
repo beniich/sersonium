@@ -92,7 +92,8 @@ export default function SecurityPage({ state, isDark, activeItemId = "sec-1", on
       </div>
 
       {/* Tabs */}
-      <div className="flex overflow-x-auto gap-1 border-b border-slate-200 dark:border-neutral-800 pb-px">
+      <div className="sticky top-0 z-20 -mx-2.5 sm:-mx-4 lg:-mx-5 px-2.5 sm:px-4 lg:px-5 py-2 bg-white/90 dark:bg-neutral-950/90 backdrop-blur-xl border-b border-slate-200/80 dark:border-neutral-800 shadow-xs">
+      <div className="flex overflow-x-auto gap-1 pb-px">
         {TABS.map(tab => (
           <button
             key={tab.id}
@@ -106,6 +107,7 @@ export default function SecurityPage({ state, isDark, activeItemId = "sec-1", on
             {tab.label}
           </button>
         ))}
+      </div>
       </div>
 
       {/* Security Summary Cards */}

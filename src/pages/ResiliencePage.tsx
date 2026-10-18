@@ -256,7 +256,8 @@ export default function ResiliencePage({ isDark = true, activeItemId }: Resilien
       )}
 
       {/* ── Tabs ── */}
-      <div className="flex gap-1 border-b border-slate-200 dark:border-neutral-800">
+      <div className="sticky top-0 z-20 -mx-2.5 sm:-mx-4 lg:-mx-5 px-2.5 sm:px-4 lg:px-5 py-2 bg-[#f8fafc]/90 dark:bg-[#070709]/90 backdrop-blur-xl border-b border-slate-200/80 dark:border-neutral-800 shadow-xs">
+      <div className="flex gap-1">
         {[
           { id: "dora", label: "Matrice DORA", icon: Shield },
           { id: "dns",  label: "Flotte DNS (1 571)", icon: Globe },
@@ -275,6 +276,7 @@ export default function ResiliencePage({ isDark = true, activeItemId }: Resilien
             {label}
           </button>
         ))}
+      </div>
       </div>
 
       {/* ── Tab Content ── */}
