@@ -268,8 +268,8 @@ export default function InfrastructurePage({ state, isDark, activeItemId = "inf-
         </div>
       </div>
 
-      {/* Glassmorphic Tabs Bar */}
-      <div className="flex overflow-x-auto gap-1.5 p-1.5 rounded-xl bg-slate-100 dark:bg-neutral-900/50 backdrop-blur-md border border-slate-200 dark:border-white/[0.06]">
+      {/* Glassmorphic Tabs Bar (Fixé en haut / Sticky Bar) */}
+      <div className="sticky top-0 z-20 flex overflow-x-auto gap-1.5 p-1.5 rounded-xl bg-slate-100/90 dark:bg-neutral-900/90 backdrop-blur-xl border border-slate-200/80 dark:border-white/[0.08] shadow-xs">
         {TABS.map(tab => (
           <button
             key={tab.id}

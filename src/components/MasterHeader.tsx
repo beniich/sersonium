@@ -10,8 +10,11 @@ import {
   LayoutDashboard, 
   Cpu, 
   Leaf,
-  Menu
+  Menu,
+  Sun,
+  Moon
 } from 'lucide-react';
+import { useTheme } from '../App';
 import { useRbac } from '@/hooks/useRbac';
 import { useConnectionHealth } from '@/hooks/useConnectionHealth';
 
@@ -29,6 +32,7 @@ export const MasterHeader: React.FC<MasterHeaderProps> = ({
   const navigate = useNavigate();
   const { currentUser, currentTenant } = useRbac();
   const { sla, latency, aiStatus } = useConnectionHealth();
+  const { theme, toggleTheme } = useTheme();
 
   const conductorActions = {
     operational: [
@@ -55,7 +59,7 @@ export const MasterHeader: React.FC<MasterHeaderProps> = ({
   return (
     <header className={`h-16 w-full bg-[#0f111a] border-b border-gray-800
                        flex items-center justify-between px-4 sm:px-6
-                       sticky top-0 z-50 backdrop-blur-md ${className}`}>
+                       sticky top-0 z-30 backdrop-blur-md ${className}`}>
 
       {/* ZONE 1 : IDENTITÉ & TENANT ACTIF */}
       <div className="flex items-center gap-2 sm:gap-4">
@@ -137,8 +141,22 @@ export const MasterHeader: React.FC<MasterHeaderProps> = ({
           ))}
         </div>
 
-        {/* ZONE 4 : PROFIL SOUVERAIN (AVATAR LOCAL SANS APPEL EXTERNE) */}
+        {/* ZONE 4 : TOGGLE THÈME CLAIR / SOMBRE & PROFIL SOUVERAIN */}
         <div className="flex items-center gap-2 sm:gap-3 ml-2 sm:ml-4 pl-2 sm:pl-4 border-l border-gray-800">
+          {/* Bouton de bascule Mode Clair / Sombre */}
+          <button
+            onClick={toggleTheme}
+            className="p-2 rounded-xl bg-gray-900/60 hover:bg-gray-800 border border-gray-700/60 text-amber-400 dark:text-amber-300 hover:text-white transition-all shadow-xs flex items-center justify-center cursor-pointer group"
+            title={theme === "dark" ? "Passer en Mode Clair" : "Passer en Mode Sombre"}
+            aria-label="Basculer le thème"
+          >
+            {theme === "dark" ? (
+              <Sun size={17} className="transition-transform group-hover:rotate-45 text-amber-400" />
+            ) : (
+              <Moon size={17} className="transition-transform group-hover:-rotate-12 text-indigo-400" />
+            )}
+          </button>
+
           <div className="text-right hidden sm:block">
             <p className="text-xs font-bold text-white leading-none truncate max-w-[110px]">
               {currentUser?.name ?? 'Admin'}

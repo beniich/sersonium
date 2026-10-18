@@ -135,8 +135,8 @@ export default function OverviewPage({
         }}
       />
 
-      {/* Flagship Capsule Tabs + Compact Mode Toggle */}
-      <div className="flex items-center justify-between gap-2 overflow-x-auto pb-0.5 no-scrollbar">
+      {/* Flagship Capsule Tabs + Compact Mode Toggle (Fixé en haut / Sticky Bar) */}
+      <div className="sticky top-0 z-20 -mx-2.5 sm:-mx-4 lg:-mx-5 px-2.5 sm:px-4 lg:px-5 py-2.5 bg-[#f8fafc]/90 dark:bg-[#070709]/90 backdrop-blur-xl border-b border-slate-200/80 dark:border-white/[0.08] flex items-center justify-between gap-2 overflow-x-auto shadow-xs no-scrollbar">
         <div className="flex items-center gap-1.5 shrink-0">
           {MODULE_TABS.map((tab) => {
             const Icon = tab.icon;

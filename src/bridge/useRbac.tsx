@@ -2,7 +2,7 @@
  * useRbac — React Context + Hook pour le RBAC multi-tenant SENSORIUM
  * Fournit la session, les helpers de permission, et les mutations.
  */
-import React, { createContext, useContext, useState, useCallback, useEffect, ReactNode } from "react";
+import React, { createContext, useContext, useState, useCallback, useEffect, useMemo, ReactNode } from "react";
 import rbacService, {
   RbacSession, RbacRole, Permission, Tenant, TenantMember,
   MOCK_TENANTS, ROLE_LABELS, ROLE_COLORS, ROLE_PERMISSIONS,

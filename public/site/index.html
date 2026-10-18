@@ -634,4 +634,57 @@
 })();
 </script>
 
+
+<script id="sensorium-theme-handler">
+(function() {
+  function applyTheme(isDark) {
+    if (isDark) {
+      document.documentElement.classList.add('dark');
+      document.documentElement.setAttribute('data-theme', 'dark');
+      document.body.setAttribute('data-theme', 'dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+      document.documentElement.setAttribute('data-theme', 'light');
+      document.body.setAttribute('data-theme', 'light');
+    }
+    var toggleBtn = document.getElementById('theme-toggle-btn');
+    if (toggleBtn) {
+      toggleBtn.innerHTML = isDark 
+        ? '<span class="material-symbols-outlined text-[20px] text-amber-400">light_mode</span>' 
+        : '<span class="material-symbols-outlined text-[20px] text-slate-700">dark_mode</span>';
+      toggleBtn.title = isDark ? 'Passer en Mode Clair' : 'Passer en Mode Sombre';
+    }
+  }
+
+  var savedTheme = localStorage.getItem('cafm_theme');
+  var isDark = savedTheme ? savedTheme === 'dark' : (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches);
+  applyTheme(isDark);
+
+  window.addEventListener('DOMContentLoaded', function() {
+    var headerActions = document.querySelector('header .flex.items-center.gap-2.sm\\:gap-3');
+    if (headerActions && !document.getElementById('theme-toggle-btn')) {
+      var btn = document.createElement('button');
+      btn.id = 'theme-toggle-btn';
+      btn.type = 'button';
+      btn.className = 'p-2 rounded-xl bg-surface-container hover:bg-surface-container-high transition-colors flex items-center justify-center cursor-pointer shadow-sm border border-surface-variant/40';
+      btn.setAttribute('aria-label', 'Basculer le thème');
+      btn.innerHTML = document.documentElement.classList.contains('dark')
+        ? '<span class="material-symbols-outlined text-[20px] text-amber-400">light_mode</span>' 
+        : '<span class="material-symbols-outlined text-[20px] text-slate-700">dark_mode</span>';
+      btn.title = document.documentElement.classList.contains('dark') ? 'Passer en Mode Clair' : 'Passer en Mode Sombre';
+      
+      btn.addEventListener('click', function() {
+        var currentIsDark = document.documentElement.classList.contains('dark');
+        var newIsDark = !currentIsDark;
+        localStorage.setItem('cafm_theme', newIsDark ? 'dark' : 'light');
+        localStorage.setItem('cafm_theme_mode', newIsDark ? 'dark' : 'light');
+        applyTheme(newIsDark);
+      });
+      
+      headerActions.insertBefore(btn, headerActions.firstChild);
+    }
+  });
+})();
+</script>
+
 </body></html>

@@ -150,6 +150,13 @@ export default function GeoAssetHeatMap({
     status: "active" as EdgeNode["status"]
   });
 
+  // État local des nœuds (enrichi immédiatement même si Firestore est en échec/mode démo)
+  const [localNodes, setLocalNodes] = useState<EdgeNode[]>(nodes);
+
+  useEffect(() => {
+    setLocalNodes(nodes);
+  }, [nodes]);
+
   // Catch Maps authentication / quota events gracefully
   useEffect(() => {
     const handleQuotaExceeded = () => {
@@ -170,8 +177,8 @@ export default function GeoAssetHeatMap({
     };
   }, []);
 
-  // Filtered nodes list
-  const filteredNodes = nodes.filter(node => {
+  // Filtered nodes list (basé sur localNodes)
+  const filteredNodes = localNodes.filter(node => {
     if (filterCategory === "all") return true;
     if (filterCategory === "cafm") return node.category === "cafm" || node.workOrderId;
     if (filterCategory === "stock") return node.category === "stock" || Boolean(node.stockUnits);
@@ -180,29 +187,51 @@ export default function GeoAssetHeatMap({
     return true;
   });
 
-  // Handle attaching a new site with linked metrics
+  // Handle attaching a new site with linked metrics (Supporte Démo & LocalStorage immédiat)
   const handleSaveAttachedSite = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSaving(true);
+
+    const generatedId = `site-${Date.now()}`;
+    const newSiteNode: EdgeNode = {
+      id: generatedId,
+      ...newSiteData,
+      ip: `192.168.1.${Math.floor(Math.random() * 200) + 10}`,
+      ramUsage: Math.floor(Math.random() * 40) + 30,
+      bandwidth: Math.floor(Math.random() * 3000) + 1000,
+      uptime: 99.98,
+      walletAddress: `cf_0x${Math.floor(Math.random() * 16777215).toString(16).toUpperCase()}`,
+      budget: 1500,
+    };
+
+    // 1. Mise à jour immédiate en local pour garantir le rendu visuel instantané
+    setLocalNodes(prev => [newSiteNode, ...prev]);
+
+    // 2. Persistance dans le cache local (mode démo offline-first)
+    try {
+      const cached = localStorage.getItem("cafm_mock_state");
+      if (cached) {
+        const parsed = JSON.parse(cached);
+        parsed.nodes = [newSiteNode, ...(parsed.nodes || [])];
+        localStorage.setItem("cafm_mock_state", JSON.stringify(parsed));
+      }
+    } catch {}
+
+    // 3. Tentative Firestore non bloquante
     try {
       const colRef = collection(db, "nodes");
       const docRef = await addDoc(colRef, {
-        ...newSiteData,
-        ip: `192.168.1.${Math.floor(Math.random() * 200) + 10}`,
-        ramUsage: Math.floor(Math.random() * 40) + 30,
-        bandwidth: Math.floor(Math.random() * 3000) + 1000,
-        uptime: 99.98,
-        walletAddress: `cf_0x${Math.floor(Math.random() * 16777215).toString(16).toUpperCase()}`,
-        budget: 1500,
+        ...newSiteNode,
         createdAt: new Date().toISOString()
       });
       await updateDoc(doc(db, "nodes", docRef.id), { id: docRef.id });
       await logAuditEvent("SITE_ATTACHED", `Attachement métrique pour ${newSiteData.name} (${newSiteData.location})`);
-      setIsAttachModalOpen(false);
     } catch (err) {
-      console.error("Erreur lors de l'enregistrement du site:", err);
+      console.warn("[Demo Mode] Firestore cloud sync skipped, local node retained:", err);
     } finally {
       setIsSaving(false);
+      setIsAttachModalOpen(false);
+      setSelectedNode(newSiteNode);
     }
   };
 
@@ -576,28 +605,32 @@ export default function GeoAssetHeatMap({
 
       {/* Interactive Modal: Attacher / Ajouter un Site & Associer les Métriques */}
       {isAttachModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-in fade-in">
-          <div className="w-full max-w-lg rounded-2xl bg-[#111114] border border-white/[0.12] p-6 shadow-2xl space-y-4 max-h-[90vh] overflow-y-auto">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/80 backdrop-blur-sm animate-in fade-in">
+          <div className="w-full max-w-lg rounded-2xl bg-[#111114] border border-white/[0.12] shadow-2xl flex flex-col max-h-[85vh] overflow-hidden">
             
-            <div className="flex justify-between items-center pb-3 border-b border-white/[0.08]">
+            {/* Header Fixe */}
+            <div className="flex justify-between items-center p-4 sm:p-5 border-b border-white/[0.08] bg-[#141418] shrink-0">
               <div>
                 <h3 className="text-base font-semibold text-white flex items-center gap-2">
                   <MapPin className="w-4 h-4 text-orange-500" />
                   Attacher un Site & Lier les Métriques ERP
                 </h3>
-                <p className="text-xs text-neutral-400">
+                <p className="text-xs text-neutral-400 mt-0.5">
                   Associez des données de Stock, de Maintenance CAFM et d'Équipe RH à ce point géographique.
                 </p>
               </div>
               <button
+                type="button"
                 onClick={() => setIsAttachModalOpen(false)}
-                className="p-1 rounded-lg text-neutral-400 hover:text-white hover:bg-white/[0.06] transition-colors cursor-pointer"
+                className="p-1.5 rounded-lg text-neutral-400 hover:text-white hover:bg-white/[0.06] transition-colors cursor-pointer shrink-0 ml-2"
               >
-                <X className="w-4 h-4" />
+                <X className="w-5 h-5" />
               </button>
             </div>
 
-            <form onSubmit={handleSaveAttachedSite} className="space-y-4 text-xs">
+            <form onSubmit={handleSaveAttachedSite} className="flex flex-col flex-1 overflow-hidden">
+              {/* Corps avec Défilement */}
+              <div className="flex-1 overflow-y-auto p-4 sm:p-5 space-y-4 text-xs custom-scrollbar">
               
               {/* Site Name & City */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -736,19 +769,21 @@ export default function GeoAssetHeatMap({
                 </div>
               </div>
 
-              {/* Submit Buttons */}
-              <div className="flex gap-2 pt-3 border-t border-white/[0.08]">
+              </div>
+
+              {/* Submit Buttons Fixés en bas (Toujours visibles sans scroll) */}
+              <div className="flex gap-2.5 p-4 border-t border-white/[0.08] bg-[#141418] shrink-0">
                 <button
                   type="button"
                   onClick={() => setIsAttachModalOpen(false)}
-                  className="flex-1 py-2.5 rounded-xl bg-white/[0.04] hover:bg-white/[0.08] text-neutral-300 font-medium transition-colors cursor-pointer"
+                  className="flex-1 py-2.5 rounded-xl bg-white/[0.06] hover:bg-white/[0.1] text-neutral-300 font-medium transition-colors cursor-pointer text-xs"
                 >
                   Annuler
                 </button>
                 <button
                   type="submit"
                   disabled={isSaving}
-                  className="flex-1 py-2.5 rounded-xl bg-orange-500 hover:bg-orange-600 text-white font-semibold transition-colors shadow-lg shadow-orange-500/25 flex items-center justify-center gap-1.5 cursor-pointer"
+                  className="flex-1 py-2.5 rounded-xl bg-gradient-to-r from-orange-500 to-amber-600 hover:from-orange-600 hover:to-amber-700 text-white font-semibold transition-all shadow-lg shadow-orange-500/25 flex items-center justify-center gap-1.5 cursor-pointer text-xs active:scale-98"
                 >
                   {isSaving ? "Enregistrement..." : "Attacher & Visualiser"}
                 </button>
