@@ -8,6 +8,7 @@ import GlobalCommandPalette from "./components/GlobalCommandPalette";
 import { Loader2 } from "lucide-react";
 import { RbacProvider } from "./bridge/useRbac";
 import EnterpriseLoginModal from "./components/EnterpriseLoginModal";
+import ModuleNavigationBar from "./components/ModuleNavigationBar";
 
 // Lazy-load dashboard pages to make initial website load ultra-fast and reduce main bundle
 const OverviewPage = lazy(() => import("./pages/OverviewPage"));
@@ -34,6 +35,7 @@ const MasterControlPanel = lazy(() => import("./components/MasterControlPanel").
 const CockpitConsoleView = lazy(() => import("./components/CockpitConsoleView").then(m => ({ default: m.CockpitConsoleView })));
 const VaultView = lazy(() => import("./components/VaultView").then(m => ({ default: m.VaultView })));
 const EsgGrafanaView = lazy(() => import("./components/EsgGrafanaView").then(m => ({ default: m.EsgGrafanaView })));
+const ArtifactsIdeStudio = lazy(() => import("./pages/ArtifactsIdeStudio"));
 import { useGlobalState } from "./hooks/useGlobalState";
 import { initAuth, googleSignIn, logout, db } from "./firebase";
 import { doc, setDoc } from "firebase/firestore";
@@ -123,6 +125,25 @@ export default function App() {
 
   const [activeItemId, setActiveItemId] = useState<string>("ov-general");
   const [activePage, setActivePage] = useState<string>(() => pageFromPath(location.pathname));
+
+  const [isCompactMode, setIsCompactMode] = useState<boolean>(() => {
+    if (typeof window !== "undefined") {
+      try {
+        return localStorage.getItem("sensorium_compact_mode") === "true";
+      } catch {}
+    }
+    return false;
+  });
+
+  const toggleCompactMode = () => {
+    setIsCompactMode(prev => {
+      const next = !prev;
+      try {
+        localStorage.setItem("sensorium_compact_mode", String(next));
+      } catch {}
+      return next;
+    });
+  };
   
   // Track operating system/browser preference in real-time
   const [systemIsDark, setSystemIsDark] = useState<boolean>(getSystemPreference);
@@ -303,17 +324,26 @@ export default function App() {
   }, []);
 
   useEffect(() => {
+    const timer = setTimeout(() => {
+      setAuthLoading(false);
+    }, 800);
+
     const unsubscribe = initAuth(
       (user) => {
+        clearTimeout(timer);
         setUser(user);
         setAuthLoading(false);
       },
       () => {
+        clearTimeout(timer);
         setUser(null);
         setAuthLoading(false);
       }
     );
-    return () => unsubscribe();
+    return () => {
+      clearTimeout(timer);
+      unsubscribe();
+    };
   }, []);
 
   // Production mode: always false – never use mock data
@@ -333,11 +363,6 @@ export default function App() {
   const toggleMockMode = () => {};
 
   const handleEnterDashboard = (targetPage: string = "overview") => {
-    if (!user) {
-      // User not signed in → trigger Google sign-in
-      handleSignIn();
-      return;
-    }
     setActivePage(targetPage);
     setActiveItemId(targetPage === "cockpit" ? "spider-cockpit" : "ov-general");
     navigate(targetPage === "overview" ? "/dashboard" : `/${targetPage}`);
@@ -422,10 +447,6 @@ export default function App() {
   }, [location.pathname]);
 
   const handleNavigateFromPortal = (page: string, itemId: string) => {
-    if (!user) {
-      handleSignIn();
-      return;
-    }
     setActivePage(page);
     setActiveItemId(itemId);
     navigate(page === "overview" ? "/dashboard" : `/${page}`);
@@ -440,6 +461,8 @@ export default function App() {
             onSignIn={handleSignIn}
             onSignOut={logout}
             onEnterMockMode={() => handleEnterDashboard("overview")}
+            onLaunchDashboard={() => handleEnterDashboard("overview")}
+            onLaunchCockpit={() => handleEnterDashboard("cockpit")}
             onNavigateToSection={handleNavigateFromPortal}
             isDark={isDark}
             toggleTheme={toggleTheme}
@@ -517,6 +540,9 @@ export default function App() {
       case "telemetry": return <KafkaMonitor {...commonProps} />;
       case "realtime": return <RealTimeDashboard initialConfig={{ mode: "simulation", siteProfile: "datacenter" }} />;
       case "iam": return <IamAdminPage isDark={isDark} />;
+      case "ai-studio":
+      case "artifacts-ide":
+        return <ArtifactsIdeStudio isDark={isDark} state={state} onNavigate={(p) => setActivePage(p as any)} />;
       case "cockpit":
       case "digital-twin":
         return (
@@ -667,24 +693,45 @@ export default function App() {
           simulateNodeAlert={simulateNodeAlert}
           resetMockData={resetMockData}
         >
-          <AnimatePresence mode="wait">
-            <motion.div
-              key={activePage}
-              initial={{ opacity: 0, y: 15 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -15 }}
-              transition={{ duration: 0.3, ease: "easeInOut" }}
-              className="h-full w-full"
-            >
-              <Suspense fallback={
-                <div className="min-h-[50vh] flex items-center justify-center">
-                  <Loader2 className="w-7 h-7 animate-spin text-[#F38020]" />
-                </div>
-              }>
-                {renderPage()}
-              </Suspense>
-            </motion.div>
-          </AnimatePresence>
+          {/* ─── Global Module Navigation Bar — sticky top-0 du scroll container, présent sur toutes les pages dashboard ─── */}
+          {activePage !== "portal" && activePage !== "architecture" && activePage !== "pricing" && (
+            <ModuleNavigationBar
+              activeTab={activeItemId}
+              activePage={activePage}
+              onSelectTab={(id) => {
+                setActiveItemId(id);
+                setActivePage("overview");
+              }}
+              onOpenAiStudio={() => {
+                setActiveItemId("ai-studio");
+                setActivePage("ai-studio" as any);
+              }}
+              isCompactMode={isCompactMode}
+              onToggleCompactMode={toggleCompactMode}
+            />
+          )}
+
+          {/* ─── Contenu de la page avec padding normal ─── */}
+          <div className="flex-1 max-w-[1440px] w-full mx-auto px-2.5 sm:px-4 lg:px-5 pt-2.5 sm:pt-4 lg:pt-5 space-y-3 sm:space-y-3.5 pb-12">
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={activePage}
+                initial={{ opacity: 0, y: 15 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -15 }}
+                transition={{ duration: 0.3, ease: "easeInOut" }}
+                className="w-full"
+              >
+                <Suspense fallback={
+                  <div className="min-h-[50vh] flex items-center justify-center">
+                    <Loader2 className="w-7 h-7 animate-spin text-[#F38020]" />
+                  </div>
+                }>
+                  {renderPage()}
+                </Suspense>
+              </motion.div>
+            </AnimatePresence>
+          </div>
         </DashboardLayout>
 
         {/* Global Command Palette (Cmd+K / Ctrl+K) Omniprésente */}

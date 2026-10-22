@@ -50,17 +50,21 @@ export function useSubscriptionGate(user: User | null | undefined) {
     const hasValidLocalTier = savedTier === 'STARTER' || savedTier === 'PRO' || savedTier === 'ENTERPRISE';
 
     if (!user) {
-      if (hasValidLocalTier) {
+      // En environnement de développement local ou si l'utilisateur teste sans compte,
+      // on active un accès Démo/Pro automatique afin de pouvoir visiter toutes les pages et onglets
+      const isLocalDev = typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1');
+      if (hasValidLocalTier || isLocalDev) {
+        const demoTier = (hasValidLocalTier ? savedTier : 'PRO') as SubscriptionTier;
         setSubState({
           status: 'active',
-          tier: savedTier,
-          planName: savedTier === 'ENTERPRISE' ? 'Sovereign Fleet (Essai/Abonnement)' : savedTier === 'PRO' ? 'Hypervision Twin (Essai/Abonnement)' : 'BIM Foundation (Essai/Abonnement)',
+          tier: demoTier,
+          planName: 'Mode Démo Local (Cockpit Full Access)',
           hasAccessToCockpit: true,
           has3dDigitalTwin: true,
           hasRealtimeKafka: true,
-          hasZtnaHardware: savedTier === 'ENTERPRISE',
-          tokenBalance: 5000,
-          expiresAt: new Date(Date.now() + 14 * 24 * 3600 * 1000).toISOString(),
+          hasZtnaHardware: true,
+          tokenBalance: 9999,
+          expiresAt: new Date(Date.now() + 30 * 24 * 3600 * 1000).toISOString(),
           isLoading: false,
         });
         return;

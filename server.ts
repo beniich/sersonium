@@ -276,6 +276,18 @@ sensorium_system_uptime_seconds ${snapshot.uptimeSeconds}
     apiRouterV1(req, res, next);
   });
 
+  // Action Layer: Déploiement direct d'artefacts (avec fallback direct sans blocage CSRF)
+  app.post(["/api/ai/execute", "/api/v1/ai/execute", "/api/v1/showcase/execute-artifact"], async (req, res) => {
+    const { executeArtifact } = await import("./server/controllers/ai.execution.controller.js");
+    executeArtifact(req, res);
+  });
+
+  // Neural Core Enclave: Remédiation calculée et signature HSM cryptographique
+  app.all(["/api/ai/remediation", "/api/ai/remediation/:rackId", "/api/v1/ai/remediation", "/api/v1/ai/remediation/:rackId"], async (req, res) => {
+    const { getSignedRemediation } = await import("./server/controllers/neural.core.controller.js");
+    getSignedRemediation(req, res);
+  });
+
   // Service direct des pages HTML statiques du site vitrine Jumeau Numérique (/site/*)
   app.use("/site", express.static(path.join(process.cwd(), "public", "site")));
 
@@ -364,10 +376,11 @@ sensorium_system_uptime_seconds ${snapshot.uptimeSeconds}
 
   const httpServer = http.createServer(app);
 
-  // Initialisation Socket.IO pour le Jumeau Numérique 3D
+  // Initialisation Socket.IO pour le Jumeau Numérique 3D & Telemetry Bridge
   const io = new SocketIOServer(httpServer, {
     cors: { origin: "*", methods: ["GET", "POST"] },
   });
+  app.set("io", io);
 
   io.on("connection", (socket) => {
     console.log(`🔌 [Socket.IO] Client connecté au Jumeau Numérique 3D: ${socket.id}`);
@@ -402,10 +415,95 @@ sensorium_system_uptime_seconds ${snapshot.uptimeSeconds}
       console.log(`📢 [Workspace] Alerte Flash diffusée: ${alert.message}`);
     });
 
+    // Événements d'Abonnement Télémétrie Kafka -> Socket.IO (Artifacts IDE Studio)
+    socket.on("subscribe_telemetry", (topic: string) => {
+      socket.join(topic);
+      console.log(`📡 [Kafka Telemetry Bridge] Client ${socket.id} abonné au topic: ${topic}`);
+    });
+
+    socket.on("unsubscribe_telemetry", (topic: string) => {
+      socket.leave(topic);
+      console.log(`📡 [Kafka Telemetry Bridge] Client ${socket.id} désabonné du topic: ${topic}`);
+    });
+
     socket.on("disconnect", () => {
       console.log(`🔌 [Socket.IO] Client déconnecté: ${socket.id}`);
     });
   });
+
+  // Bridge de diffusion continue Kafka -> Socket.IO pour les salons de topics actifs
+  let telemetryStreamSeq = 0;
+  setInterval(() => {
+    telemetryStreamSeq++;
+    const nowIso = new Date().toISOString().replace("T", " ").slice(0, 19);
+
+    // 1. Topic: telemetry.rackB.thermal
+    const tempB = +(68 + Math.random() * 20).toFixed(1);
+    const rackBPayload = {
+      sensor_id: `SNS-${String((telemetryStreamSeq % 8) + 1).padStart(3, "0")}`,
+      rack: `Rack-B${(telemetryStreamSeq % 4) + 1}`,
+      temp_C: tempB,
+      fan_rpm: Math.round(4200 + Math.random() * 1800),
+      "cpu_load_%": +(55 + Math.random() * 40).toFixed(1),
+      status: tempB > 85 ? "CRITICAL" : tempB > 78 ? "WARNING" : "NOMINAL"
+    };
+    io.to("telemetry.rackB.thermal").emit("telemetry_stream", {
+      topic: "telemetry.rackB.thermal",
+      data: rackBPayload,
+      timestamp: nowIso
+    });
+    io.to("telemetry.rackB.thermal").emit("telemetry_update", {
+      topic: "telemetry.rackB.thermal",
+      data: rackBPayload,
+      timestamp: nowIso
+    });
+
+    // 2. Topic: telemetry.dc.power
+    const pue = +(1.09 + Math.random() * 0.15).toFixed(3);
+    const dcPowerPayload = {
+      dc_id: `DC-${["PAR", "FRA", "AMS", "STO"][telemetryStreamSeq % 4]}-0${(telemetryStreamSeq % 4) + 1}`,
+      pue: parseFloat(pue),
+      load_kw: +(780 + Math.random() * 460).toFixed(1),
+      "ups_soc_%": +(88 + Math.random() * 11).toFixed(1),
+      delta_kwh: +(Math.random() * 12 - 3).toFixed(2),
+      phase: ["A", "B", "C"][telemetryStreamSeq % 3]
+    };
+    io.to("telemetry.dc.power").emit("telemetry_stream", {
+      topic: "telemetry.dc.power",
+      data: dcPowerPayload,
+      timestamp: nowIso
+    });
+
+    // 3. Topic: telemetry.edge.network
+    const edgeNetPayload = {
+      node_id: `NODE-${String((telemetryStreamSeq % 16) + 1).padStart(2, "0")}`,
+      rx_mbps: +(1200 + Math.random() * 8800).toFixed(1),
+      tx_mbps: +(800 + Math.random() * 7200).toFixed(1),
+      latency_ms: +(0.2 + Math.random() * 1.5).toFixed(2),
+      "packet_loss_%": +(Math.random() * 0.04).toFixed(4),
+      bgp_state: Math.random() > 0.03 ? "ESTABLISHED" : "IDLE"
+    };
+    io.to("telemetry.edge.network").emit("telemetry_stream", {
+      topic: "telemetry.edge.network",
+      data: edgeNetPayload,
+      timestamp: nowIso
+    });
+
+    // 4. Topic: telemetry.hvac.zones
+    const hvacPayload = {
+      zone_id: `ZONE-${["ATR", "OFF", "PLT", "PKG"][telemetryStreamSeq % 4]}`,
+      supply_temp_C: +(14 + Math.random() * 3).toFixed(1),
+      return_temp_C: +(19 + Math.random() * 4).toFixed(1),
+      flow_lpm: +(120 + Math.random() * 60).toFixed(1),
+      "valve_%": +(40 + Math.random() * 55).toFixed(1),
+      mode: ["AUTO", "ECO", "BOOST"][telemetryStreamSeq % 3]
+    };
+    io.to("telemetry.hvac.zones").emit("telemetry_stream", {
+      topic: "telemetry.hvac.zones",
+      data: hvacPayload,
+      timestamp: nowIso
+    });
+  }, 2000);
 
   // Diffusion périodique de télémétrie IoT pour les maquettes 3D
   setInterval(() => {

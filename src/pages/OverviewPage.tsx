@@ -31,6 +31,7 @@ import AssetManagementDashboard from "../components/AssetManagementDashboard";
 import PerformanceMetricsChart from "../components/PerformanceMetricsChart";
 import ModularPortletsDashboard from "../components/ModularPortletsDashboard";
 import UnifiedAssetFile from "../components/UnifiedAssetFile";
+import { MODULE_TABS } from "../components/ModuleNavigationBar";
 import { User } from "firebase/auth";
 
 interface OverviewPageProps {
@@ -43,20 +44,10 @@ interface OverviewPageProps {
   onSelectNode?: (node: EdgeNode) => void;
   onCreateWorkOrderForNode?: (nodeId: string) => void;
   onOpenReportModal?: () => void;
+  isCompactMode?: boolean;
+  onToggleCompactMode?: () => void;
 }
 
-const MODULE_TABS = [
-  { id: "ov-erp-portlets", label: "⚡ Command Center (Portlets ERP)", icon: LayoutDashboard },
-  { id: "ov-asset-hub", label: "🏢 Fiche Asset Unifiée 360°", icon: Building2 },
-  { id: "ov-general", label: "Chart.js Cockpit", icon: Layers },
-  { id: "ov-perf", label: "Performance Metrics", icon: TrendingUp },
-  { id: "ov-hybrid", label: "Convergence View", icon: Layers },
-  { id: "ov-floorplan", label: "2D Building Floorplan", icon: Compass },
-  { id: "ov-map", label: "POP Cartography", icon: Globe },
-  { id: "ov-cafm", label: "Maintenance & CMMS", icon: Building2 },
-  { id: "ov-stock", label: "Inventory & Hardware", icon: Package },
-  { id: "ov-hr", label: "Staff & On-Call Shifts", icon: Users },
-];
 
 export default function OverviewPage({ 
   state, 
@@ -67,7 +58,9 @@ export default function OverviewPage({
   onSelectTab,
   onSelectNode,
   onCreateWorkOrderForNode,
-  onOpenReportModal
+  onOpenReportModal,
+  isCompactMode: isCompactModeProp,
+  onToggleCompactMode: onToggleCompactModeProp
 }: OverviewPageProps) {
   const activeTab = MODULE_TABS.some(t => t.id === activeItemId) ? activeItemId : "ov-general";
 
@@ -116,9 +109,11 @@ export default function OverviewPage({
       return next;
     });
   };
+  const effectiveCompactMode = isCompactModeProp !== undefined ? isCompactModeProp : isCompactMode;
+  const effectiveToggleCompactMode = onToggleCompactModeProp || toggleCompactMode;
 
   return (
-    <div className={`space-y-3 sm:space-y-3.5 animate-in fade-in duration-200 ${isCompactMode ? "compact-erp-mode text-xs" : ""}`}>
+    <div className={`space-y-3 sm:space-y-3.5 animate-in fade-in duration-200 ${effectiveCompactMode ? "compact-erp-mode text-xs" : ""}`}>
       
       {/* Personalized Greeting Header with Firebase Profile & Daily Tasks */}
       <DashboardGreetingHeader 
@@ -134,43 +129,6 @@ export default function OverviewPage({
           }
         }}
       />
-
-      {/* Flagship Capsule Tabs + Compact Mode Toggle (Fixé en haut / Sticky Bar) */}
-      <div className="sticky top-0 z-20 -mx-2.5 sm:-mx-4 lg:-mx-5 px-2.5 sm:px-4 lg:px-5 py-2.5 bg-[#f8fafc]/90 dark:bg-[#070709]/90 backdrop-blur-xl border-b border-slate-200/80 dark:border-white/[0.08] flex items-center justify-between gap-2 overflow-x-auto shadow-xs no-scrollbar">
-        <div className="flex items-center gap-1.5 shrink-0">
-          {MODULE_TABS.map((tab) => {
-            const Icon = tab.icon;
-            const isSelected = activeTab === tab.id;
-            return (
-              <button
-                key={tab.id}
-                onClick={() => handleTabChange(tab.id)}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs transition-all whitespace-nowrap cursor-pointer min-h-[32px] ${
-                  isSelected
-                    ? "bg-slate-900 text-white dark:bg-white dark:text-black font-semibold shadow-xs"
-                    : "bg-slate-100 dark:bg-white/[0.04] border border-slate-200 dark:border-white/[0.06] text-slate-600 dark:text-neutral-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-200 dark:hover:bg-white/[0.08]"
-                }`}
-              >
-                <Icon className={`w-3.5 h-3.5 ${isSelected ? "text-orange-500 dark:text-orange-600" : "text-current"}`} />
-                <span>{tab.label}</span>
-              </button>
-            );
-          })}
-        </div>
-
-        {/* Compact ERP Mode Toggle (Feature #4) */}
-        <button
-          onClick={toggleCompactMode}
-          className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-mono shrink-0 transition-all cursor-pointer border ${
-            isCompactMode 
-              ? "bg-orange-500 text-white border-orange-600 font-bold" 
-              : "bg-slate-100 dark:bg-white/[0.04] text-slate-600 dark:text-neutral-400 border-slate-200 dark:border-white/10 hover:text-slate-900 dark:hover:text-white"
-          }`}
-          title="Bascule entre le mode Standard espacé et le mode Opérationnel Compact NetSuite"
-        >
-          <span>{isCompactMode ? "⚡ Mode Compact ERP (Actif)" : "📐 Mode Standard (Espacé)"}</span>
-        </button>
-      </div>
 
       {/* 🚀 Feature #1 NetSuite : Portlets Modulaires Command Center */}
       {activeTab === "ov-erp-portlets" && (

@@ -51,6 +51,7 @@ import TerminalStatusBadge from "./TerminalStatusBadge";
 import { useRbac, ROLE_LABELS, ROLE_COLORS, RbacRole } from "../bridge/useRbac";
 import EnterpriseLoginModal from "./EnterpriseLoginModal";
 import MasterHeader from "./MasterHeader";
+import DashboardFooter from "./DashboardFooter";
 
 export interface SidebarServiceItem {
   id: string;
@@ -102,6 +103,7 @@ export const SENSORIUM_SERVICE_SUITE: SidebarServiceGroup[] = [
     icon: Cpu,
     items: [
       { id: "com-mon", label: "Silicon CPU / RAM Monitoring", page: "compute", badge: "Live", badgeType: "live", keywords: "cpu memory load processors thermal hardware" },
+      { id: "ai-studio", label: "🤖 AI Artifacts IDE & Copilot", page: "ai-studio", badge: "IDE", badgeType: "ia", keywords: "ai artifacts ide code documents sheet editor copilote claude sonnet split-screen" },
       { id: "com-grnd", label: "Grounded AI Assistant (Gemini)", page: "compute", badge: "AI", badgeType: "ia", keywords: "artificial intelligence assistant grounded gemini ai" },
       { id: "com-1", label: "Edge Workers (V8 Isolates)", page: "compute", keywords: "serverless v8 isolate functions microservices workers" },
       { id: "com-2", label: "KV Storage (Key-Value)", page: "compute", keywords: "key value ultra fast storage distributed cache kv" },
@@ -217,6 +219,7 @@ export const SENSORIUM_SERVICE_SUITE: SidebarServiceGroup[] = [
     icon: Users,
     items: [
       { id: "ws-1", label: "Workspace Collaborative Hub", page: "workspace", keywords: "hub collaboration team suite" },
+      { id: "ws-ide", label: "🤖 Studio d'Artefacts (IDE IA)", page: "ai-studio", badge: "Studio", badgeType: "ia", keywords: "ai documents code studio ide artifacts split-screen" },
       { id: "ws-2", label: "Gmail & Communications", page: "workspace", keywords: "email gmail alerts messages" },
       { id: "ws-3", label: "Calendar & On-Call Schedule", page: "workspace", keywords: "schedule on call calendar shifts appointments" },
       { id: "ws-4", label: "Meet Video Conferences", page: "workspace", keywords: "meet video conference calls crisis" },
@@ -762,10 +765,9 @@ export default function DashboardLayout(props: any) {
         )}
 
         {/* Responsive Main Content Viewport with compact padding & optimal density */}
-        <main className="flex-1 overflow-y-auto p-2.5 sm:p-4 lg:p-5 transition-colors duration-300">
-          <div className="max-w-[1440px] mx-auto space-y-3 sm:space-y-3.5 pb-12">
-            {children}
-          </div>
+        <main className="flex-1 overflow-y-auto transition-colors duration-300 relative flex flex-col">
+          {children}
+          <DashboardFooter />
         </main>
       </div>
 

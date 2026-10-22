@@ -1,0 +1,33 @@
+﻿{
+  "datacenter": "DC-01",
+  "room": "Room-3",
+  "racks": {
+    "rack_a": {
+      "anycastWeight": 0,
+      "maxCapacityCpu": 100,
+      "currentLoadCpu": 55,
+      "currentTemperature": 68.5,
+      "maxThermalLimit": 88.0,
+      "thermalDissipationFactor": 0.85,
+      "adjacentRacks": ["rack_b"]
+    },
+    "rack_b": {
+      "anycastWeight": 100,
+      "maxCapacityCpu": 100,
+      "currentLoadCpu": 92,
+      "currentTemperature": 92.4,
+      "maxThermalLimit": 90.0,
+      "thermalDissipationFactor": 0.60,
+      "adjacentRacks": ["rack_a", "rack_c"]
+    },
+    "rack_c": {
+      "anycastWeight": 0,
+      "maxCapacityCpu": 100,
+      "currentLoadCpu": 88,
+      "currentTemperature": 82.1,
+      "maxThermalLimit": 88.0,
+      "thermalDissipationFactor": 0.70,
+      "adjacentRacks": ["rack_b"]
+    }
+  }
+}

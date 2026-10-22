@@ -1,11 +1,15 @@
 import { Router } from "express";
 import { analyzeLogs, analyzeTelemetry } from "../../controllers/ai.controller.js";
+import { executeArtifact } from "../../controllers/ai.execution.controller.js";
 import { authenticateToken, requireSubscriptionTier } from "../../middlewares/auth.middleware.js";
 import { requireTenant } from "../../middlewares/tenant.middleware.js";
 import { validateRequest } from "../../middlewares/validate.middleware.js";
 import { analyzeLogsSchema } from "../../schemas/ai.schema.js";
 
 const router = Router();
+
+// Action Layer: Déploiement One-Click d'artefacts IaC & Scripts
+router.post("/execute", executeArtifact);
 
 router.use(authenticateToken, requireTenant);
 
