@@ -40,6 +40,7 @@ import {
 } from "lucide-react";
 import ClientRegistrationModal from "../components/ClientRegistrationModal";
 import ComparisonPage from "./ComparisonPage";
+import FeatureGate from "../components/FeatureGate";
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -577,7 +578,13 @@ export default function UemPage({ isDark }: UemPageProps) {
   };
 
   return (
-    <div className="min-h-screen p-4 md:p-6 space-y-6"
+    <FeatureGate
+      requiredTier="PRO"
+      featureTitle="🛡️ SENSORIUM UEM Fleet Manager & Control"
+      featureDescription="La supervision de flotte de terminaux, l'injection de commandes OTA et l'enforcement de politiques DLP nécessitent un abonnement Pro actif."
+      isDark={isDark}
+    >
+      <div className="min-h-screen p-4 md:p-6 space-y-6"
       style={{ background: isDark ? "transparent" : "transparent" }}>
 
       {/* ─── Header ─── */}
@@ -985,5 +992,6 @@ export default function UemPage({ isDark }: UemPageProps) {
         }}
       />
     </div>
+    </FeatureGate>
   );
 }

@@ -1,5 +1,6 @@
 import crypto from "crypto";
 import { TenantPrismaClient } from "../db/tenantPrisma.js";
+import { WafService } from "./waf.service.js";
 
 // ─── Pilier 1: RBAC — Définition des rôles Zero-Trust ─────────────────────────
 /**
@@ -373,4 +374,230 @@ export class ZeroTrustService {
     }
     return Buffer.from(raw.slice(0, 32));
   }
+
+  // ─── Pilier 5: Impossible Travel State & Méthodes ──────────────────────────
+  private static lastUserLocations = new Map<string, UserLocationSession>();
+  private static travelAlerts: TravelAlert[] = [];
+
+  /**
+   * Évalue si la tentative de connexion ou requête constitue un déplacement physiquement impossible.
+   * "Impossible Travel" : deux accès pour le même utilisateur depuis des positions géographiques
+   * incompatibles avec le temps écoulé (ex. vitesse > 900 km/h ou pays différents en < 60 min).
+   */
+  static evaluateImpossibleTravel(
+    userId: string,
+    currentIp: string,
+    currentCountry?: string,
+    coordinates?: { lat: number; lon: number }
+  ): ImpossibleTravelEvaluation {
+    const now = Date.now();
+    const previous = this.lastUserLocations.get(userId);
+
+    // Déterminer coordonnées actuelles
+    let curLat = coordinates?.lat;
+    let curLon = coordinates?.lon;
+    if ((curLat === undefined || curLon === undefined) && currentCountry && COUNTRY_COORDINATES[currentCountry.toUpperCase()]) {
+      curLat = COUNTRY_COORDINATES[currentCountry.toUpperCase()].lat;
+      curLon = COUNTRY_COORDINATES[currentCountry.toUpperCase()].lon;
+    }
+
+    const currentSession: UserLocationSession = {
+      userId,
+      ip: currentIp,
+      country: currentCountry,
+      lat: curLat,
+      lon: curLon,
+      timestamp: now
+    };
+
+    // Mémoriser pour la prochaine évaluation
+    this.lastUserLocations.set(userId, currentSession);
+
+    if (!previous) {
+      return {
+        isImpossible: false,
+        riskScore: 0,
+        currentLocation: { ip: currentIp, country: currentCountry, timestamp: now }
+      };
+    }
+
+    // Même IP : aucun déplacement
+    if (previous.ip === currentIp) {
+      return {
+        isImpossible: false,
+        riskScore: 0,
+        currentLocation: { ip: currentIp, country: currentCountry, timestamp: now },
+        previousLocation: { ip: previous.ip, country: previous.country, timestamp: previous.timestamp },
+        timeDeltaMinutes: Math.round((now - previous.timestamp) / 60000)
+      };
+    }
+
+    const timeDeltaMs = now - previous.timestamp;
+    const timeDeltaHours = timeDeltaMs / (1000 * 60 * 60);
+    const timeDeltaMinutes = Math.max(1, Math.round(timeDeltaMs / 60000));
+
+    let prevLat = previous.lat;
+    let prevLon = previous.lon;
+    if ((prevLat === undefined || prevLon === undefined) && previous.country && COUNTRY_COORDINATES[previous.country.toUpperCase()]) {
+      prevLat = COUNTRY_COORDINATES[previous.country.toUpperCase()].lat;
+      prevLon = COUNTRY_COORDINATES[previous.country.toUpperCase()].lon;
+    }
+
+    let distanceKm = 0;
+    let speedKmh = 0;
+
+    if (curLat !== undefined && curLon !== undefined && prevLat !== undefined && prevLon !== undefined) {
+      distanceKm = calculateHaversineDistanceKm(prevLat, prevLon, curLat, curLon);
+      speedKmh = timeDeltaHours > 0 ? Math.round(distanceKm / timeDeltaHours) : 999999;
+    }
+
+    // Heuristiques d'anomalie :
+    const isDifferentCountry = !!(previous.country && currentCountry && previous.country.toUpperCase() !== currentCountry.toUpperCase());
+    const countryImpossible = isDifferentCountry && timeDeltaMinutes < 60;
+    const speedImpossible = distanceKm > 100 && speedKmh > 900;
+    const instantSubnetHop = isDifferentCountry && timeDeltaMinutes < 2;
+
+    if (countryImpossible || speedImpossible || instantSubnetHop) {
+      const riskScore = Math.min(100, Math.max(85, Math.round(speedKmh / 20)));
+      const reason = countryImpossible
+        ? `Déplacement impossible détecté : passage de ${previous.country} à ${currentCountry} en ${timeDeltaMinutes} minute(s).`
+        : `Vitesse de transit suspecte : ${speedKmh} km/h (${Math.round(distanceKm)} km en ${timeDeltaMinutes} min). Vitesse maximale humaine dépassée.`;
+
+      const alert: TravelAlert = {
+        id: crypto.randomUUID(),
+        userId,
+        timestamp: now,
+        severity: riskScore >= 90 ? "CRITICAL" : "HIGH",
+        details: {
+          isImpossible: true,
+          riskScore,
+          reason,
+          currentLocation: { ip: currentIp, country: currentCountry, timestamp: now },
+          previousLocation: { ip: previous.ip, country: previous.country, timestamp: previous.timestamp },
+          calculatedSpeedKmh: speedKmh,
+          timeDeltaMinutes
+        }
+      };
+
+      this.travelAlerts.unshift(alert);
+      if (this.travelAlerts.length > 200) {
+        this.travelAlerts.pop();
+      }
+
+      // Alerte WAF pour pénaliser l'IP suspecte
+      try {
+        WafService.updateThreatScore(currentIp, 40, `ZeroTrust: Impossible Travel (${countryImpossible ? 'Pays divergent rapide' : 'Vitesse anormale'})`);
+      } catch {}
+
+      return alert.details;
+    }
+
+    return {
+      isImpossible: false,
+      riskScore: 0,
+      currentLocation: { ip: currentIp, country: currentCountry, timestamp: now },
+      previousLocation: { ip: previous.ip, country: previous.country, timestamp: previous.timestamp },
+      calculatedSpeedKmh: speedKmh,
+      timeDeltaMinutes
+    };
+  }
+
+  /**
+   * Retourne l'historique des alertes de déplacement impossible
+   */
+  static getTravelAlerts(): TravelAlert[] {
+    return [...this.travelAlerts];
+  }
+
+  /**
+   * Retourne les dernières sessions de géolocalisation enregistrées
+   */
+  static getRecentSessions(): UserLocationSession[] {
+    return Array.from(this.lastUserLocations.values());
+  }
+
+  /**
+   * Réinitialise l'historique des sessions géographiques (utile pour les tests ou reset admin)
+   */
+  static resetTravelTracking(userId?: string): void {
+    if (userId) {
+      this.lastUserLocations.delete(userId);
+    } else {
+      this.lastUserLocations.clear();
+      this.travelAlerts = [];
+    }
+  }
+}
+
+// ─── Interfaces & Utilitaires Géographiques Pilier 5 ─────────────────────────
+export interface UserLocationSession {
+  userId: string;
+  ip: string;
+  country?: string;
+  city?: string;
+  lat?: number;
+  lon?: number;
+  timestamp: number;
+}
+
+export interface ImpossibleTravelEvaluation {
+  isImpossible: boolean;
+  riskScore: number;
+  reason?: string;
+  currentLocation: {
+    ip: string;
+    country?: string;
+    timestamp: number;
+  };
+  previousLocation?: {
+    ip: string;
+    country?: string;
+    timestamp: number;
+  };
+  calculatedSpeedKmh?: number;
+  timeDeltaMinutes?: number;
+}
+
+export interface TravelAlert {
+  id: string;
+  userId: string;
+  timestamp: number;
+  severity: "CRITICAL" | "HIGH" | "MEDIUM";
+  details: ImpossibleTravelEvaluation;
+}
+
+const COUNTRY_COORDINATES: Record<string, { lat: number; lon: number }> = {
+  FR: { lat: 46.2276, lon: 2.2137 },
+  US: { lat: 37.0902, lon: -95.7129 },
+  GB: { lat: 55.3781, lon: -3.4360 },
+  DE: { lat: 51.1657, lon: 10.4515 },
+  CN: { lat: 35.8617, lon: 104.1954 },
+  JP: { lat: 36.2048, lon: 138.2529 },
+  CA: { lat: 56.1304, lon: -106.3468 },
+  AU: { lat: -25.2744, lon: 133.7751 },
+  BR: { lat: -14.2350, lon: -51.9253 },
+  IN: { lat: 20.5937, lon: 78.9629 },
+  RU: { lat: 61.5240, lon: 105.3188 },
+  ES: { lat: 40.4637, lon: -3.7492 },
+  IT: { lat: 41.8719, lon: 12.5674 },
+  CH: { lat: 46.8182, lon: 8.2275 },
+  NL: { lat: 52.1326, lon: 5.2913 },
+  SG: { lat: 1.3521, lon: 103.8198 },
+  AE: { lat: 23.4241, lon: 53.8478 },
+  ZA: { lat: -30.5595, lon: 22.9375 },
+  MA: { lat: 31.7917, lon: -7.0926 },
+  SN: { lat: 14.4974, lon: -14.4524 },
+  CI: { lat: 7.5400, lon: -5.5471 }
+};
+
+function calculateHaversineDistanceKm(lat1: number, lon1: number, lat2: number, lon2: number): number {
+  const R = 6371; // Rayon de la Terre en km
+  const dLat = (lat2 - lat1) * Math.PI / 180;
+  const dLon = (lon2 - lon1) * Math.PI / 180;
+  const a =
+    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+    Math.sin(dLon / 2) * Math.sin(dLon / 2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  return R * c;
 }

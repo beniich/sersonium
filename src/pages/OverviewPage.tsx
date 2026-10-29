@@ -31,6 +31,7 @@ import AssetManagementDashboard from "../components/AssetManagementDashboard";
 import PerformanceMetricsChart from "../components/PerformanceMetricsChart";
 import ModularPortletsDashboard from "../components/ModularPortletsDashboard";
 import UnifiedAssetFile from "../components/UnifiedAssetFile";
+import TelemetryChart from "../components/TelemetryChart";
 import { MODULE_TABS } from "../components/ModuleNavigationBar";
 import { User } from "firebase/auth";
 
@@ -168,7 +169,9 @@ export default function OverviewPage({
           initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.25 }}
+          className="space-y-4"
         >
+          <TelemetryChart sensorId="sensor-cluster-main" isDark={isDark} />
           <PerformanceMetricsChart state={state} isDark={isDark} />
         </motion.div>
       )}

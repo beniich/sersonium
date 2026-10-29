@@ -144,15 +144,57 @@ export class PayPalSubscriptionService {
         case "BILLING.SUBSCRIPTION.CREATED":
         case "BILLING.SUBSCRIPTION.ACTIVATED":
         case "PAYMENT.CAPTURE.COMPLETED":
-          // Activation de la licence PRO — uniquement après signature vérifiée
+          // Activation de la licence PRO avec mise à jour du statut et plan
           await rawPrisma.organization.updateMany({
-            where: { tenantId },
-            data: { subscriptionTier: "pro" },
+            where: {
+              OR: [
+                { id: tenantId },
+                { slug: tenantId }
+              ]
+            },
+            data: { 
+              plan: "PRO",
+              subscriptionStatus: "active"
+            },
           });
-          console.log(`✅ [PayPal Webhook] Licence PRO activée pour le Tenant ${tenantId}`);
+
+          // Accord automatique des Entitlements Pro
+          const proFeatures = ["AI_OPS", "UEM_CONTROL", "ZERO_TRUST_ADVANCED", "MODULE_COCKPIT_3D"];
+          for (const featureKey of proFeatures) {
+            await rawPrisma.entitlement.upsert({
+              where: {
+                tenantId_featureKey: {
+                  tenantId,
+                  featureKey,
+                },
+              },
+              create: {
+                tenantId,
+                featureKey,
+                isGranted: true,
+                quotaLimit: 10000,
+                quotaUsed: 0,
+              },
+              update: {
+                isGranted: true,
+                quotaLimit: 10000,
+              },
+            }).catch(() => {});
+          }
+
+          console.log(`✅ [PayPal Webhook] Licence PRO & Entitlements activés pour le Tenant ${tenantId}`);
           break;
 
         case "BILLING.SUBSCRIPTION.PAYMENT.FAILED":
+          await rawPrisma.organization.updateMany({
+            where: {
+              OR: [
+                { id: tenantId },
+                { slug: tenantId }
+              ]
+            },
+            data: { subscriptionStatus: "past_due" },
+          });
           console.warn(`⚠️ [PayPal Webhook] Échec de prélèvement pour le Tenant ${tenantId}`);
           break;
 
@@ -160,8 +202,16 @@ export class PayPalSubscriptionService {
         case "BILLING.SUBSCRIPTION.EXPIRED":
           // Rétrogradation vers le plan gratuit
           await rawPrisma.organization.updateMany({
-            where: { tenantId },
-            data: { subscriptionTier: "free" },
+            where: {
+              OR: [
+                { id: tenantId },
+                { slug: tenantId }
+              ]
+            },
+            data: { 
+              plan: "FREE",
+              subscriptionStatus: "canceled"
+            },
           });
           console.log(`ℹ️ [PayPal Webhook] Rétrogradation vers FREE pour le Tenant ${tenantId}`);
           break;

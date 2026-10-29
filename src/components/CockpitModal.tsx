@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, lazy, Suspense } from 'react';
 import {
   X,
   Maximize2,
@@ -29,7 +29,9 @@ import {
   Layers,
   Send,
 } from 'lucide-react';
-import { DigitalTwinViewer3D, INITIAL_SPATIAL_NODES } from './DigitalTwinViewer3D';
+import { INITIAL_SPATIAL_NODES } from './DigitalTwinViewer3D';
+// Lazy-load Three.js 3D viewer — heavy dep (~530 KB), only loaded when Cockpit tab is opened (PERF-01)
+const DigitalTwinViewer3D = lazy(() => import('./DigitalTwinViewer3D').then(m => ({ default: m.DigitalTwinViewer3D })));
 import { SpatialNode, TelemetryMetrics, WorkOrder, GeminiDiagnosis, ValveState, LightingState, UserProfile } from '../types';
 
 interface CockpitModalProps {
@@ -339,10 +341,16 @@ export const CockpitModal: React.FC<CockpitModalProps> = ({
           {activeTab === 0 && (
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
               <div className="lg:col-span-2">
-                <DigitalTwinViewer3D
-                  onSelectNode={(node) => setSelectedNode(node)}
-                  selectedNodeId={selectedNode?.id}
-                />
+                <Suspense fallback={
+                  <div className="w-full h-64 flex items-center justify-center rounded-2xl bg-slate-900/50 border border-slate-700/50">
+                    <div className="text-sm text-slate-400 animate-pulse">⟳ Chargement du Jumeau Numérique 3D…</div>
+                  </div>
+                }>
+                  <DigitalTwinViewer3D
+                    onSelectNode={(node) => setSelectedNode(node)}
+                    selectedNodeId={selectedNode?.id}
+                  />
+                </Suspense>
               </div>
 
               {/* Spatial Node Inspector Panel */}

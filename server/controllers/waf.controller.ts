@@ -55,3 +55,63 @@ export const simulateSecurityChallenge = async (req: AuthenticatedRequest, res: 
     });
   }
 };
+
+export const getThreatIntelligence = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
+  try {
+    const intel = WafService.getThreatIntelligence();
+    const bannedIps = WafService.getBannedIps();
+
+    res.status(200).json({
+      success: true,
+      data: {
+        threatEntries: intel,
+        bannedCount: bannedIps.length,
+        totalTracked: intel.length,
+        bannedIps
+      },
+      meta: { tenantId: req.tenantId }
+    });
+  } catch (error: any) {
+    res.status(500).json({
+      success: false,
+      error: { code: "THREAT_INTEL_FETCH_FAILED", message: error.message }
+    });
+  }
+};
+
+export const getBannedIps = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
+  try {
+    const banned = WafService.getBannedIps();
+    res.status(200).json({
+      success: true,
+      data: banned,
+      meta: { count: banned.length }
+    });
+  } catch (error: any) {
+    res.status(500).json({
+      success: false,
+      error: { code: "BANNED_IPS_FETCH_FAILED", message: error.message }
+    });
+  }
+};
+
+export const unbanIp = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
+  try {
+    const { ip } = req.body;
+    if (!ip) {
+      res.status(400).json({ success: false, error: { message: "IP address is required" } });
+      return;
+    }
+    WafService.unblockIp(ip);
+    res.status(200).json({
+      success: true,
+      message: `IP ${ip} debannie avec succes.`
+    });
+  } catch (error: any) {
+    res.status(500).json({
+      success: false,
+      error: { code: "UNBAN_FAILED", message: error.message }
+    });
+  }
+};
+

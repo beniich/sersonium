@@ -45,6 +45,30 @@ export const MasterControlPanel: React.FC<MasterControlPanelProps> = ({ isDark =
   const [showClientModal, setShowClientModal] = useState(false);
   const [sortField, setSortField] = useState<keyof MasterControlRow>("tenantName");
   const [sortAsc, setSortAsc] = useState(true);
+  const [actionFeedback, setActionFeedback] = useState<string | null>(null);
+  const [isActionLoading, setIsActionLoading] = useState(false);
+
+  const handleResetCircuit = async () => {
+    setIsActionLoading(true);
+    try {
+      const res = await masterControlService.resetAiCircuit();
+      setActionFeedback(res.message);
+      setTimeout(() => setActionFeedback(null), 5000);
+    } finally {
+      setIsActionLoading(false);
+    }
+  };
+
+  const handleForceRollup = async () => {
+    setIsActionLoading(true);
+    try {
+      const res = await masterControlService.forceRollup("MINUTE");
+      setActionFeedback(res.message);
+      setTimeout(() => setActionFeedback(null), 5000);
+    } finally {
+      setIsActionLoading(false);
+    }
+  };
 
   const fetchData = async () => {
     try {
@@ -193,6 +217,26 @@ export const MasterControlPanel: React.FC<MasterControlPanelProps> = ({ isDark =
           </button>
 
           <button
+            onClick={handleResetCircuit}
+            disabled={isActionLoading}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-indigo-600/30 hover:bg-indigo-600/40 text-indigo-300 border border-indigo-500/30 text-xs font-medium transition cursor-pointer disabled:opacity-50"
+            title="Réinitialiser manuellement le Circuit Breaker IA en CLOSED"
+          >
+            <Zap size={13} className="text-yellow-400" />
+            <span>Reset Circuit IA</span>
+          </button>
+
+          <button
+            onClick={handleForceRollup}
+            disabled={isActionLoading}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-cyan-600/30 hover:bg-cyan-600/40 text-cyan-300 border border-cyan-500/30 text-xs font-medium transition cursor-pointer disabled:opacity-50"
+            title="Forcer une agrégation immédiate de télémétrie (Rollup Minute)"
+          >
+            <Database size={13} className="text-cyan-400" />
+            <span>Force Rollup</span>
+          </button>
+
+          <button
             onClick={() => setShowClientModal(true)}
             className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-gradient-to-r from-orange-500 to-amber-600 hover:from-orange-600 hover:to-amber-700 text-white text-xs font-semibold transition cursor-pointer shadow-md shadow-orange-500/20"
           >
@@ -201,6 +245,17 @@ export const MasterControlPanel: React.FC<MasterControlPanelProps> = ({ isDark =
           </button>
         </div>
       </div>
+
+      {/* ── Notification Feedback Action SRE ── */}
+      {actionFeedback && (
+        <div className="mb-4 px-4 py-2.5 rounded-xl bg-indigo-950/60 border border-indigo-500/40 text-indigo-200 text-xs flex items-center justify-between shadow-lg">
+          <div className="flex items-center gap-2">
+            <span className="h-2 w-2 rounded-full bg-indigo-400 animate-ping" />
+            <span className="font-medium">⚡ {actionFeedback}</span>
+          </div>
+          <button onClick={() => setActionFeedback(null)} className="text-slate-400 hover:text-white cursor-pointer">✕</button>
+        </div>
+      )}
 
       {/* ── KPI Widgets Exécutifs ── */}
       {data?.summary && (

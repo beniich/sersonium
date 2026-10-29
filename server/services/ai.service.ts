@@ -76,6 +76,13 @@ class AICircuitBreaker {
       lastFailureTime: this.lastFailureTime
     };
   }
+
+  reset(): void {
+    this.state = "CLOSED";
+    this.failureCount = 0;
+    this.lastFailureTime = 0;
+    console.log("[AICircuitBreaker] 🔄 Circuit breaker Gemini manuellement réinitialisé en CLOSED.");
+  }
 }
 
 const geminiCircuitBreaker = new AICircuitBreaker({
@@ -98,6 +105,17 @@ export class AIService {
    */
   static getCircuitStatus() {
     return geminiCircuitBreaker.getState();
+  }
+
+  /**
+   * Réinitialise manuellement le Circuit Breaker vers l'état CLOSED (Opération SRE / Cockpit)
+   */
+  static resetCircuit(): { state: CircuitState; message: string } {
+    geminiCircuitBreaker.reset();
+    return {
+      state: "CLOSED",
+      message: "Circuit Breaker Gemini réinitialisé avec succès en état opérationnel (CLOSED)."
+    };
   }
 
   /**

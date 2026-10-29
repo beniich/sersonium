@@ -39,7 +39,22 @@ export const initAuth = (
   onAuthSuccess?: (user: User, token?: string) => void,
   onAuthFailure?: () => void
 ) => {
+  let resolved = false;
+
+  // Circuit Breaker DORA Art. 24 : Timeout de 3s si Firebase est bloqué ou inaccessible
+  const timeoutId = setTimeout(() => {
+    if (!resolved) {
+      resolved = true;
+      console.warn('[Firebase Auth] ⏱️ Timeout 3s dépassé — Basculement sur le mode souverain local.');
+      if (onAuthFailure) onAuthFailure();
+    }
+  }, 3000);
+
   return onAuthStateChanged(auth, async (user: User | null) => {
+    if (!resolved) {
+      resolved = true;
+      clearTimeout(timeoutId);
+    }
     if (user) {
       if (!cachedAccessToken && typeof window !== 'undefined') {
         cachedAccessToken = sessionStorage.getItem(TOKEN_STORAGE_KEY);
@@ -58,7 +73,14 @@ export const initAuth = (
 export const googleSignIn = async (): Promise<{ user: User; accessToken: string } | null> => {
   try {
     isSigningIn = true;
-    const result = await signInWithPopup(auth, provider);
+
+    // Circuit Breaker : Timeout 3.5s sur signInWithPopup pour éviter le blocage SPOF
+    const signInPromise = signInWithPopup(auth, provider);
+    const timeoutPromise = new Promise<never>((_, reject) =>
+      setTimeout(() => reject(new Error('FIREBASE_TIMEOUT_EXCEEDED')), 3500)
+    );
+
+    const result = await Promise.race([signInPromise, timeoutPromise]);
     const credential = GoogleAuthProvider.credentialFromResult(result);
     cachedAccessToken = credential?.accessToken || null;
     if (typeof window !== 'undefined' && cachedAccessToken) {
@@ -66,7 +88,7 @@ export const googleSignIn = async (): Promise<{ user: User; accessToken: string 
     }
     return { user: result.user, accessToken: cachedAccessToken || '' };
   } catch (error: any) {
-    console.error('Sign in error:', error);
+    console.error('[Firebase Sign in Error]', error?.message || error);
     throw error;
   } finally {
     isSigningIn = false;

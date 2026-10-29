@@ -202,6 +202,83 @@ async function runTests() {
     );
   });
 
+  // ─── 6. Tests Circuit Breaker IA & Résilience Déterministe ──────────────────
+  console.log("\n⚡ [Suite 6] Circuit Breaker IA Gemini & Résilience");
+  const { AIService } = await import("../server/services/ai.service.js");
+
+  await test("getCircuitStatus() doit initialement rapporter un état CLOSED et sain", () => {
+    const status = AIService.getCircuitStatus();
+    assert.strictEqual(status.state, "CLOSED", "L'état initial du circuit doit être CLOSED");
+    assert.strictEqual(status.failureCount, 0, "Le nombre d'échecs initial doit être 0");
+  });
+
+  await test("resetCircuit() doit réinitialiser le circuit en CLOSED sans lever d'erreur", () => {
+    const res = AIService.resetCircuit();
+    assert.strictEqual(res.state, "CLOSED");
+    assert.ok(res.message.includes("CLOSED") || res.message.includes("succès"));
+    const status = AIService.getCircuitStatus();
+    assert.strictEqual(status.state, "CLOSED");
+    assert.strictEqual(status.failureCount, 0);
+  });
+
+  await test("runDeterministicLogChecks() doit détecter les pannes critiques sans IA", () => {
+    const check = AIService.runDeterministicLogChecks("Alerte surchauffe overtemp détectée sur rack 4", "CVC salle serveur");
+    assert.strictEqual(check.severity, "CRITICAL");
+    assert.ok(check.rootCause.includes("thermique") || check.rootCause.includes("surchauffe"));
+  });
+
+  // ─── 7. Tests WAF Adaptatif & Threat Scoring Dynamique ──────────────────────
+  console.log("\n🛡️ [Suite 7] WAF Adaptatif & Système de Score de Menace");
+  const { WafService } = await import("../server/services/waf.service.js");
+
+  await test("WafService doit incrémenter le score de menace et bannir après seuil", () => {
+    const testIp = "198.51.100.99";
+    const initialScore = WafService.getThreatScore(testIp);
+    assert.strictEqual(initialScore, 0, "Score initial doit être 0");
+
+    // Attaque SQL Injection (+35)
+    const score1 = WafService.updateThreatScore(testIp, 35, "SQL_INJECTION").score;
+    assert.strictEqual(score1, 35);
+    assert.strictEqual(WafService.isIpBanned(testIp), false, "Ne doit pas être banni sous 80");
+
+    // Attaque XSS (+30)
+    const score2 = WafService.updateThreatScore(testIp, 30, "XSS").score;
+    assert.strictEqual(score2, 65);
+    assert.strictEqual(WafService.isIpBanned(testIp), false);
+
+    // Attaque Path Traversal (+25) -> Dépasse 80 -> Auto-ban
+    const score3 = WafService.updateThreatScore(testIp, 25, "PATH_TRAVERSAL").score;
+    assert.ok(score3 >= 80, `Score doit être >= 80 (actuel: ${score3})`);
+    assert.strictEqual(WafService.isIpBanned(testIp), true, "L'IP doit être bannie automatiquement");
+  });
+
+  // ─── 8. Tests Zero Trust & Détection Impossible Travel ──────────────────────
+  console.log("\n🛰️ [Suite 8] Zero Trust & Impossible Travel Detection");
+  process.env.ENCRYPTION_KEY = process.env.ENCRYPTION_KEY || "sensorium_sovereign_encryption_key_32chars_ok";
+  const { ZeroTrustService } = await import("../server/services/zeroTrust.service.js");
+
+  await test("ZeroTrustService doit détecter un déplacement physiquement impossible (< 60 min entre 2 pays)", () => {
+    const userId = "agent-007-test";
+    ZeroTrustService.resetTravelTracking(userId);
+
+    // 1er accès à Paris, France
+    const eval1 = ZeroTrustService.evaluateImpossibleTravel(userId, "195.154.122.1", "FR");
+    assert.strictEqual(eval1.isImpossible, false);
+    assert.strictEqual(eval1.riskScore, 0);
+
+    // 2ème accès 1 seconde plus tard à New York, USA depuis une autre IP
+    const eval2 = ZeroTrustService.evaluateImpossibleTravel(userId, "198.51.100.42", "US");
+    assert.strictEqual(eval2.isImpossible, true, "Doit être marqué comme impossible travel");
+    assert.ok(eval2.riskScore >= 85, `Le score de risque doit être >= 85 (actuel: ${eval2.riskScore})`);
+    assert.ok(eval2.reason?.includes("Déplacement impossible"), "Le motif doit expliciter l'anomalie géographique");
+
+    // Vérifier l'enregistrement de l'alerte
+    const alerts = ZeroTrustService.getTravelAlerts();
+    const alert = alerts.find(a => a.userId === userId);
+    assert.ok(alert !== undefined, "L'alerte doit être enregistrée dans ZeroTrustService");
+    assert.strictEqual(alert?.details.isImpossible, true);
+  });
+
   // ─── Bilan Final ────────────────────────────────────────────────────────────
   console.log("\n" + "=".repeat(60));
   console.log(`📊 Résultat des tests : ${passedTests} réussis, ${failedTests} échoués`);

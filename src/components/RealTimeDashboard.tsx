@@ -126,7 +126,7 @@ function SourceConfigPanel({ onApply, currentMode }: SourceConfigPanelProps) {
   );
   const [wsToken, setWsToken] = useState("");
   const [restEndpoint, setRestEndpoint] = useState(
-    typeof window !== "undefined" ? `${window.location.origin}/api/telemetry/snapshot` : "/api/telemetry/snapshot"
+    typeof window !== "undefined" ? `${window.location.origin}/api/v1/iot/snapshot` : "/api/v1/iot/snapshot"
   );
   const [restApiKey, setRestApiKey] = useState("");
   const [restInterval, setRestInterval] = useState(3000);

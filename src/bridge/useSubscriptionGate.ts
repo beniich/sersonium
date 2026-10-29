@@ -5,6 +5,27 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import type { User } from 'firebase/auth';
+import axios from 'axios';
+
+// Intercepteur global Axios : détecte 402 PAYMENT_REQUIRED et émet l'événement modal
+if (typeof window !== 'undefined') {
+  axios.interceptors.response.use(
+    (response) => response,
+    (error) => {
+      if (error?.response?.status === 402) {
+        window.dispatchEvent(
+          new CustomEvent('sensorium:subscription_required', {
+            detail: error.response.data?.error || {
+              code: 'PAYMENT_REQUIRED',
+              message: 'Accès au Cockpit réservé aux abonnements actifs.'
+            }
+          })
+        );
+      }
+      return Promise.reject(error);
+    }
+  );
+}
 
 export type SubscriptionTier = 'FREE' | 'STARTER' | 'PRO' | 'ENTERPRISE';
 
@@ -43,6 +64,20 @@ export function useSubscriptionGate(user: User | null | undefined) {
     expiresAt: null,
     isLoading: true,
   });
+
+  const [isUpgradeModalOpen, setIsUpgradeModalOpen] = useState(false);
+  const [upgradeReason, setUpgradeReason] = useState<string | null>(null);
+
+  useEffect(() => {
+    const handlePaymentRequired = (e: any) => {
+      const msg = e.detail?.message || 'Accès restreint : niveau d\'abonnement supérieur requis.';
+      setUpgradeReason(msg);
+      setIsUpgradeModalOpen(true);
+    };
+
+    window.addEventListener('sensorium:subscription_required', handlePaymentRequired);
+    return () => window.removeEventListener('sensorium:subscription_required', handlePaymentRequired);
+  }, []);
 
   const checkSubscription = useCallback(async () => {
     // Vérifier si un abonnement ou un essai a été sélectionné localement
@@ -140,6 +175,9 @@ export function useSubscriptionGate(user: User | null | undefined) {
 
   return {
     ...subState,
+    isUpgradeModalOpen,
+    setIsUpgradeModalOpen,
+    upgradeReason,
     refreshSubscription: checkSubscription,
   };
 }

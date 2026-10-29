@@ -6,7 +6,9 @@ import {
   getProfile, 
   getCsrfToken,
   getGoogleAuthUrl,
-  handleGoogleCallback
+  getGoogleAuthUrl,
+  handleGoogleCallback,
+  deleteUserAccountGdpr
 } from "../../controllers/auth.controller.js";
 import { authenticateToken } from "../../middlewares/auth.middleware.js";
 import { requireTenant } from "../../middlewares/tenant.middleware.js";
@@ -30,5 +32,9 @@ router.post("/logout", logout);
 
 // Route protégée : chaîne complète auth -> tenant
 router.get("/me", authenticateToken, requireTenant, getProfile);
+
+// RGPD Article 17 : Droit à l'effacement / Droit à l'oubli
+router.delete("/me", authenticateToken, requireTenant, deleteUserAccountGdpr);
+router.delete("/users/:id", authenticateToken, requireTenant, deleteUserAccountGdpr);
 
 export default router;

@@ -105,3 +105,69 @@ export const evaluateAccess = async (req: AuthenticatedRequest, res: Response): 
     });
   }
 };
+
+/**
+ * Évalue si le voyage / déplacement d'un utilisateur est physiquement impossible (Axe 3 Zero Trust)
+ */
+export const evaluateTravel = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
+  try {
+    const userId = req.body.userId || req.user?.userId || "anonymous";
+    const ip = req.body.ip || (req.headers["x-forwarded-for"] as string)?.split(",")[0].trim() || req.socket.remoteAddress || "127.0.0.1";
+    const country = req.body.country || (req.headers["cf-ipcountry"] as string) || (req.headers["x-country"] as string);
+    const coordinates = req.body.coordinates; // { lat: number, lon: number }
+
+    const result = ZeroTrustService.evaluateImpossibleTravel(userId, ip, country, coordinates);
+
+    res.status(200).json({
+      success: true,
+      data: result,
+      meta: {
+        userId,
+        evaluatedAt: new Date().toISOString()
+      }
+    });
+  } catch (error: any) {
+    res.status(500).json({
+      success: false,
+      error: { code: "TRAVEL_EVALUATION_FAILED", message: error.message }
+    });
+  }
+};
+
+/**
+ * Récupère les alertes actives de déplacement impossible
+ */
+export const getTravelAlerts = async (_req: AuthenticatedRequest, res: Response): Promise<void> => {
+  try {
+    const alerts = ZeroTrustService.getTravelAlerts();
+    res.status(200).json({
+      success: true,
+      data: alerts,
+      count: alerts.length
+    });
+  } catch (error: any) {
+    res.status(500).json({
+      success: false,
+      error: { code: "FETCH_TRAVEL_ALERTS_FAILED", message: error.message }
+    });
+  }
+};
+
+/**
+ * Récupère les sessions récentes de géolocalisation pour audit
+ */
+export const getTravelSessions = async (_req: AuthenticatedRequest, res: Response): Promise<void> => {
+  try {
+    const sessions = ZeroTrustService.getRecentSessions();
+    res.status(200).json({
+      success: true,
+      data: sessions,
+      count: sessions.length
+    });
+  } catch (error: any) {
+    res.status(500).json({
+      success: false,
+      error: { code: "FETCH_TRAVEL_SESSIONS_FAILED", message: error.message }
+    });
+  }
+};

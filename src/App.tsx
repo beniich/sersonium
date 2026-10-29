@@ -9,6 +9,8 @@ import { Loader2 } from "lucide-react";
 import { RbacProvider } from "./bridge/useRbac";
 import EnterpriseLoginModal from "./components/EnterpriseLoginModal";
 import ModuleNavigationBar from "./components/ModuleNavigationBar";
+import { AppProvider, useAppContext } from "./contexts/AppContext";
+import Breadcrumbs from "./components/navigation/Breadcrumbs";
 
 // Lazy-load dashboard pages to make initial website load ultra-fast and reduce main bundle
 const OverviewPage = lazy(() => import("./pages/OverviewPage"));
@@ -346,8 +348,19 @@ export default function App() {
     };
   }, []);
 
-  // Production mode: always false – never use mock data
-  const isMockMode = false;
+  // Bascule dynamique : Mode Production (Live) vs Mode Simulation (Sandbox)
+  const [isSimulationMode, setIsSimulationMode] = useState<boolean>(() => {
+    return typeof localStorage !== "undefined" && localStorage.getItem("sensorium_simulation_mode") === "true";
+  });
+  const isMockMode = isSimulationMode;
+
+  useEffect(() => {
+    const handleModeChange = (e: any) => {
+      setIsSimulationMode(!!e.detail?.isSimulation);
+    };
+    window.addEventListener("sensorium:mode_changed", handleModeChange);
+    return () => window.removeEventListener("sensorium:mode_changed", handleModeChange);
+  }, []);
 
   const { 
     state, 
@@ -357,10 +370,18 @@ export default function App() {
     simulateSecurityIncident, 
     simulateNodeAlert, 
     resetMockData 
-  } = useGlobalState(user?.uid || null, false);
+  } = useGlobalState(user?.uid || null, isSimulationMode);
 
-  // In production mode, toggling mock is a no-op (always live)
-  const toggleMockMode = () => {};
+  const toggleMockMode = () => {
+    const next = !isSimulationMode;
+    setIsSimulationMode(next);
+    if (typeof localStorage !== "undefined") {
+      localStorage.setItem("sensorium_simulation_mode", String(next));
+    }
+    if (typeof window !== "undefined") {
+      window.dispatchEvent(new CustomEvent("sensorium:mode_changed", { detail: { isSimulation: next } }));
+    }
+  };
 
   const handleEnterDashboard = (targetPage: string = "overview") => {
     setActivePage(targetPage);
@@ -672,8 +693,10 @@ export default function App() {
 
   return (
     <RbacProvider>
-    <ThemeContext.Provider value={themeContextValue}>
-      <LanguageContext.Provider value={languageContextValue}>
+      <AppProvider>
+        <ThemeContext.Provider value={themeContextValue}>
+          <LanguageContext.Provider value={languageContextValue}>
+            <NavigationContextBridge setActivePage={setActivePage} setActiveItemId={setActiveItemId} />
         <DashboardLayout 
           activeItemId={activeItemId} 
           setActiveItemId={setActiveItemId}
@@ -693,22 +716,25 @@ export default function App() {
           simulateNodeAlert={simulateNodeAlert}
           resetMockData={resetMockData}
         >
-          {/* ─── Global Module Navigation Bar — sticky top-0 du scroll container, présent sur toutes les pages dashboard ─── */}
+          {/* ─── Global Module Navigation Bar & Contextual Breadcrumbs ─── */}
           {activePage !== "portal" && activePage !== "architecture" && activePage !== "pricing" && (
-            <ModuleNavigationBar
-              activeTab={activeItemId}
-              activePage={activePage}
-              onSelectTab={(id) => {
-                setActiveItemId(id);
-                setActivePage("overview");
-              }}
-              onOpenAiStudio={() => {
-                setActiveItemId("ai-studio");
-                setActivePage("ai-studio" as any);
-              }}
-              isCompactMode={isCompactMode}
-              onToggleCompactMode={toggleCompactMode}
-            />
+            <>
+              <ModuleNavigationBar
+                activeTab={activeItemId}
+                activePage={activePage}
+                onSelectTab={(id) => {
+                  setActiveItemId(id);
+                  setActivePage("overview");
+                }}
+                onOpenAiStudio={() => {
+                  setActiveItemId("ai-studio");
+                  setActivePage("ai-studio" as any);
+                }}
+                isCompactMode={isCompactMode}
+                onToggleCompactMode={toggleCompactMode}
+              />
+              <Breadcrumbs />
+            </>
           )}
 
           {/* ─── Contenu de la page avec padding normal ─── */}
@@ -750,6 +776,21 @@ export default function App() {
         />
       </LanguageContext.Provider>
     </ThemeContext.Provider>
+    </AppProvider>
     </RbacProvider>
   );
 }
+
+const NavigationContextBridge: React.FC<{
+  setActivePage: (p: any) => void;
+  setActiveItemId: (id: string) => void;
+}> = ({ setActivePage, setActiveItemId }) => {
+  const { setOnNavigateSection } = useAppContext();
+  useEffect(() => {
+    setOnNavigateSection((page: string, tabId?: string) => {
+      setActivePage(page as any);
+      if (tabId) setActiveItemId(tabId);
+    });
+  }, [setActivePage, setActiveItemId, setOnNavigateSection]);
+  return null;
+};

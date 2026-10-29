@@ -19,6 +19,7 @@ import {
   Sparkles
 } from "lucide-react";
 import { GlobalState, EdgeNode } from "../types";
+import { useAppContext } from "../contexts/AppContext";
 
 export interface CustomField {
   id: string;
@@ -40,9 +41,10 @@ export const UnifiedAssetFile: React.FC<UnifiedAssetFileProps> = ({
   isCompactMode = false,
   onNavigateTab
 }) => {
+  const { activeAssetId, activeAssetTab, setActiveAsset, setActiveAssetTab } = useAppContext();
   const nodes = state?.nodes || [];
-  const [selectedNodeId, setSelectedNodeId] = useState<string>(nodes[0]?.id || "node-paris-01");
-  const [activeTab, setActiveTab] = useState<"technique" | "telemetrie" | "maintenance" | "conformite" | "custom">("technique");
+  const selectedNodeId = activeAssetId || nodes[0]?.id || "node-paris-01";
+  const activeTab = activeAssetTab || "telemetrie";
   
   // Custom user-defined fields (Feature #5 NetSuite Malléabilité)
   const [customFields, setCustomFields] = useState<CustomField[]>(() => {
@@ -147,8 +149,8 @@ export const UnifiedAssetFile: React.FC<UnifiedAssetFileProps> = ({
             <label className="text-xs text-slate-400 font-mono">Changer d'équipement :</label>
             <select
               value={selectedNodeId}
-              onChange={(e) => setSelectedNodeId(e.target.value)}
-              className="px-3 py-1.5 rounded-lg text-xs font-mono bg-slate-100 dark:bg-white/[0.06] border border-slate-200 dark:border-white/10 text-slate-900 dark:text-white outline-none focus:border-orange-500"
+              onChange={(e) => setActiveAsset(e.target.value)}
+              className="px-3 py-1.5 rounded-lg text-xs font-mono bg-slate-100 dark:bg-white/[0.06] border border-slate-200 dark:border-white/10 text-slate-900 dark:text-white outline-none focus:border-indigo-500"
             >
               {nodes.map(n => (
                 <option key={n.id} value={n.id} className="dark:bg-[#0b0d13]">
@@ -160,23 +162,23 @@ export const UnifiedAssetFile: React.FC<UnifiedAssetFileProps> = ({
         </div>
 
         {/* Master Navigation Tabs */}
-        <div className="flex items-center gap-1 mt-4 pt-3 border-t border-slate-200 dark:border-white/10 overflow-x-auto no-scrollbar">
+        <div className="flex items-center gap-1 mt-3 pt-3 border-t border-slate-200 dark:border-white/10 overflow-x-auto no-scrollbar">
           {[
-            { id: "technique", label: "Onglet 1 : Specs & Dossier Technique", icon: Cpu },
-            { id: "telemetrie", label: "Onglet 2 : Télémétrie Sub-seconde", icon: Zap },
-            { id: "maintenance", label: "Onglet 3 : Historique GMAO & Travaux", icon: Wrench },
-            { id: "conformite", label: "Onglet 4 : Conformité DORA & Carbone", icon: ShieldCheck },
-            { id: "custom", label: `Onglet 5 : Champs Personnalisés (${customFields.length})`, icon: Sparkles },
+            { id: "technique", label: "Specs & Dossier", icon: Cpu },
+            { id: "telemetrie", label: "Télémétrie Live", icon: Zap },
+            { id: "maintenance", label: "GMAO & Travaux", icon: Wrench },
+            { id: "conformite", label: "Conformité DORA", icon: ShieldCheck },
+            { id: "custom", label: `Champs Métier (${customFields.length})`, icon: Sparkles },
           ].map(tab => {
             const Icon = tab.icon;
             const isTabActive = activeTab === tab.id;
             return (
               <button
                 key={tab.id}
-                onClick={() => setActiveTab(tab.id as any)}
-                className={`flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-medium transition-all whitespace-nowrap cursor-pointer ${
+                onClick={() => setActiveAssetTab(tab.id as any)}
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all whitespace-nowrap cursor-pointer ${
                   isTabActive
-                    ? "bg-orange-500 text-white font-semibold shadow-xs"
+                    ? "bg-indigo-600 text-white font-semibold shadow-xs"
                     : "text-slate-600 dark:text-neutral-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/[0.04]"
                 }`}
               >

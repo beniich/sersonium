@@ -21,6 +21,7 @@ import WorkOrderExecutionModal from "../components/WorkOrderExecutionModal";
 import MobileFieldTechnician from "../components/MobileFieldTechnician";
 import PreventiveMaintenanceScheduler from "../components/PreventiveMaintenanceScheduler";
 import { CockpitConsoleView } from "../components/CockpitConsoleView";
+import TelemetryChart from "../components/TelemetryChart";
 
 interface InfrastructurePageProps {
   state: GlobalState;
@@ -74,7 +75,7 @@ export default function InfrastructurePage({ state, isDark, activeItemId = "inf-
     scheduledDate: new Date().toISOString().split('T')[0]
   });
 
-  const [telemetrySubTab, setTelemetrySubTab] = useState<"iot" | "nodes">("iot");
+  const [telemetrySubTab, setTelemetrySubTab] = useState<"iot" | "nodes" | "rollups">("iot");
   const [isPricingModalOpen, setIsPricingModalOpen] = useState(false);
   const [executingWorkOrder, setExecutingWorkOrder] = useState<CAFMWorkOrder | null>(null);
 
@@ -558,11 +559,24 @@ export default function InfrastructurePage({ state, isDark, activeItemId = "inf-
                 <Server className="w-3.5 h-3.5" />
                 Edge Compute Heatmap ({state.nodes?.length || 0})
               </button>
+              <button
+                onClick={() => setTelemetrySubTab("rollups")}
+                className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer flex items-center gap-1.5 ${
+                  telemetrySubTab === "rollups"
+                    ? "bg-cyan-500 text-white shadow-xs"
+                    : "text-slate-600 dark:text-neutral-400 hover:text-slate-900 dark:hover:text-white"
+                }`}
+              >
+                <Activity className="w-3.5 h-3.5" />
+                Rollups Télémétriques (1h - 1 an)
+              </button>
             </div>
           </div>
 
           {/* IoT Telemetry View */}
-          {telemetrySubTab === "iot" ? (
+          {telemetrySubTab === "rollups" ? (
+            <TelemetryChart sensorId="sensor-cluster-main" isDark={isDark} />
+          ) : telemetrySubTab === "iot" ? (
             <IoTSensorTelemetryMonitor
               state={state}
               isDark={isDark}

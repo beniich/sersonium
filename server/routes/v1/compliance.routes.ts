@@ -10,6 +10,7 @@ import {
   ComplianceController,
   getDoraMetrics,
   getServiceHealth,
+  getDoraTpspRegister,
 } from "../../controllers/compliance.controller.js";
 import { authenticateToken, requireRole } from "../../middlewares/auth.middleware.js";
 
@@ -18,6 +19,7 @@ const router = Router();
 // ── DORA Resilience Endpoints (public-read, authenticated) ────────────────────
 router.get("/dora-metrics", authenticateToken, getDoraMetrics);
 router.get("/service-health", authenticateToken, getServiceHealth);
+router.get("/dora/tpsp", authenticateToken, getDoraTpspRegister);
 
 // 1. Récupération globale (par défaut ou par orgId)
 router.get("/", authenticateToken, getComplianceOverview);

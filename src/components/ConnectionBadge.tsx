@@ -7,9 +7,11 @@ export const ConnectionBadge: React.FC<{ className?: string }> = ({ className = 
   const [isSyncing, setIsSyncing] = useState(false);
 
   useEffect(() => {
-    connectionManager.onStateChange = (newState) => {
+    // subscribe() retourne une fonction de nettoyage (unsubscribe)
+    const unsubscribe = connectionManager.subscribe((newState) => {
       setState(newState);
-    };
+    });
+    return unsubscribe;
   }, []);
 
   const handleManualSync = async () => {
@@ -20,13 +22,23 @@ export const ConnectionBadge: React.FC<{ className?: string }> = ({ className = 
     }
   };
 
+  const handleToggleMode = () => {
+    const newSim = connectionManager.toggleSimulationMode();
+    if (typeof window !== "undefined") {
+      window.dispatchEvent(new CustomEvent("sensorium:mode_changed", { detail: { isSimulation: newSim } }));
+    }
+  };
+
   const isLive = state.mode === "LIVE";
 
   return (
-    <div className={`inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-mono font-medium transition-all ${
+    <div 
+      onClick={handleToggleMode}
+      title={`Mode actuel : ${isLive ? "LIVE CLOUD" : "MODE SIMULATION"} — Cliquer pour basculer`}
+      className={`inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-mono font-medium transition-all cursor-pointer select-none hover:opacity-90 active:scale-95 ${
       isLive 
-        ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/30" 
-        : "bg-rose-500/10 text-rose-400 border border-rose-500/30 animate-pulse"
+        ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 hover:border-emerald-500/60" 
+        : "bg-rose-500/10 text-rose-400 border border-rose-500/30 hover:border-rose-500/60 animate-pulse"
     } ${className}`}>
       <span className="relative flex h-2 w-2">
         {isLive && (
@@ -49,7 +61,10 @@ export const ConnectionBadge: React.FC<{ className?: string }> = ({ className = 
 
       {state.pendingSyncCount > 0 && (
         <button
-          onClick={handleManualSync}
+          onClick={(e) => {
+            e.stopPropagation();
+            handleManualSync();
+          }}
           disabled={!isLive || isSyncing}
           className="ml-1 px-1.5 py-0.5 rounded text-[10px] bg-amber-500/20 text-amber-300 border border-amber-500/30 flex items-center gap-1 cursor-pointer hover:bg-amber-500/30"
           title={`${state.pendingSyncCount} action(s) stockée(s) hors-ligne en attente de synchronisation`}

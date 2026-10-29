@@ -3,6 +3,7 @@ import { GlobalState, SecurityEvent } from "../types";
 import { Shield, Filter, Search, Plus, X, Lock, AlertTriangle, ShieldCheck, Cpu, Terminal, CheckCircle2 } from "lucide-react";
 import { logAuditEvent } from "../hooks/useGlobalState";
 import SecurityComplianceAudit from "../components/SecurityComplianceAudit";
+import ThreatMapWidget from "../components/ThreatMapWidget";
 
 interface SecurityPageProps {
   state: GlobalState;
@@ -13,6 +14,7 @@ interface SecurityPageProps {
 
 const TABS = [
   { id: "sec-1", label: "WAF Events" },
+  { id: "sec-threat-intel", label: "Threat Intelligence & Auto-Ban" },
   { id: "sec-2", label: "Firewall Rules" },
   { id: "sec-3", label: "Bot Management" },
   { id: "sec-4", label: "DDoS Protection" },
@@ -204,6 +206,11 @@ export default function SecurityPage({ state, isDark, activeItemId = "sec-1", on
             </div>
           </div>
         </div>
+      )}
+
+      {/* Sub-View: Threat Intelligence & Auto-Ban (sec-threat-intel) */}
+      {currentTab === "sec-threat-intel" && (
+        <ThreatMapWidget isDark={isDark} />
       )}
 
       {/* Sub-View: Firewall Rules (sec-2) */}

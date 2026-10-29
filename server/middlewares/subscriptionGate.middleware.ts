@@ -111,3 +111,118 @@ export const requireActiveSubscription = (minimumTier: "STARTER" | "PRO" | "ENTE
     }
   };
 };
+
+/**
+ * Middleware vérifiant si le tenant possède le droit d'usage (Entitlement)
+ * pour une fonctionnalité spécifique (Axe 6 : Monétisation & Subscription Guard).
+ */
+export const requireEntitlement = (featureKey: string) => {
+  return async (req: AuthenticatedRequest, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const tenantId = req.tenantId || req.user?.tenantId;
+
+      if (!tenantId) {
+        res.status(401).json({
+          success: false,
+          error: {
+            code: "TENANT_REQUIRED",
+            message: "Accès refusé : Aucun tenant identifié.",
+          },
+        });
+        return;
+      }
+
+      // 1. Recherche du forfait global de l'organisation
+      const org = await rawPrisma.organization.findUnique({
+        where: { id: tenantId },
+        select: { id: true, plan: true, subscriptionStatus: true },
+      });
+
+      const currentPlan = (org?.plan || "FREE").toUpperCase();
+
+      // Palier ENTERPRISE : accès VIP illimité à tous les entitlements
+      if (currentPlan === "ENTERPRISE") {
+        next();
+        return;
+      }
+
+      // 2. Recherche du droit spécifique dans la table Entitlement
+      const entitlement = await rawPrisma.entitlement.findUnique({
+        where: {
+          tenantId_featureKey: {
+            tenantId,
+            featureKey,
+          },
+        },
+      });
+
+      // Si l'entitlement n'est pas accordé
+      if (!entitlement || !entitlement.isGranted) {
+        // Journalisation de l'accès refusé dans AccessGateLog
+        rawPrisma.accessGateLog.create({
+          data: {
+            tenantId,
+            userId: req.user?.userId,
+            requestedUri: req.originalUrl,
+            action: "DENIED_UNPAID",
+            reason: `Droit manquant pour la fonctionnalité : ${featureKey}`,
+            ipAddress: req.ip,
+          },
+        }).catch(() => {});
+
+        res.status(403).json({
+          success: false,
+          error: {
+            code: "ENTITLEMENT_REQUIRED",
+            feature: featureKey,
+            message: `Cette opération nécessite le module '${featureKey}' qui n'est pas inclus dans votre abonnement (${currentPlan}).`,
+            upgradeUrl: "/site/tarifs.html",
+            plan: currentPlan,
+          },
+        });
+        return;
+      }
+
+      // 3. Vérification des quotas d'utilisation (si définis)
+      if (entitlement.quotaLimit !== null && entitlement.quotaLimit !== -1) {
+        if (entitlement.quotaUsed >= entitlement.quotaLimit) {
+          rawPrisma.accessGateLog.create({
+            data: {
+              tenantId,
+              userId: req.user?.userId,
+              requestedUri: req.originalUrl,
+              action: "DENIED_QUOTA_EXCEEDED",
+              reason: `Quota dépassé pour ${featureKey} (${entitlement.quotaUsed}/${entitlement.quotaLimit})`,
+              ipAddress: req.ip,
+            },
+          }).catch(() => {});
+
+          res.status(429).json({
+            success: false,
+            error: {
+              code: "QUOTA_EXCEEDED",
+              feature: featureKey,
+              message: `Le quota alloué pour le module '${featureKey}' a été atteint (${entitlement.quotaUsed}/${entitlement.quotaLimit}).`,
+              upgradeUrl: "/site/tarifs.html",
+            },
+          });
+          return;
+        }
+
+        // Incrémentation asynchrone de l'usage
+        rawPrisma.entitlement.update({
+          where: { id: entitlement.id },
+          data: { quotaUsed: { increment: 1 } },
+        }).catch(() => {});
+      }
+
+      // Droit validé avec succès
+      next();
+    } catch (err: any) {
+      console.error("[requireEntitlement] Error:", err);
+      // Fail-open contrôlé en développement
+      next();
+    }
+  };
+};
+

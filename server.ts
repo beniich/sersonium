@@ -13,6 +13,7 @@ import apiRouterV1 from "./server/routes/v1/index.js";
 import { seedDatabase } from "./server/db/seed.js";
 import { kafkaService } from "./server/services/kafka.service.js";
 import { WafService } from "./server/services/waf.service.js";
+import { startRollupWorker } from "./server/workers/rollupWorker.js";
 import { 
   securityHeaders, 
   payloadSanitizer,
@@ -30,31 +31,47 @@ async function startServer() {
   // Initialize Kafka Producer (Event Streaming)
   kafkaService.connect().catch(err => console.error("[Server] Kafka init error:", err));
 
+  // Initialize Rollup Worker (Agrégation Télémétriques MINUTE/HOUR/DAY)
+  try {
+    startRollupWorker();
+  } catch (err) {
+    console.error("[Server] RollupWorker init error:", err);
+  }
+
   const app = express();
 
   const PORT = Number(process.env.PORT) || 3000;
 
   // 1. Chaîne de Middlewares de Défense & Zone Tampon
   // Configuration CORS stricte avec liste blanche et support des credentials
-  const defaultAllowedOrigins = [
-    "http://localhost:3000",
-    "http://127.0.0.1:3000",
-    "http://sensorium.local:3000",
+  // Les origines de production ne doivent JAMAIS contenir localhost (VULN-06 résolue)
+  const isDev = process.env.NODE_ENV !== "production";
+
+  const productionAllowedOrigins = [
     "https://app.sensorium.cloud",
     "https://sensorium.cloud",
     "https://api.sensorium.cloud"
+  ];
+
+  const localDevOrigins = [
+    "http://localhost:3000",
+    "http://127.0.0.1:3000",
+    "http://sensorium.local:3000"
   ];
 
   const configuredOrigins = process.env.CORS_ALLOWED_ORIGINS
     ? process.env.CORS_ALLOWED_ORIGINS.split(",").map(o => o.trim()).filter(Boolean)
     : [];
 
-  const allowedOriginsSet = new Set([...defaultAllowedOrigins, ...configuredOrigins]);
+  const allowedOriginsSet = new Set([
+    ...productionAllowedOrigins,
+    ...(isDev ? localDevOrigins : []),
+    ...configuredOrigins
+  ]);
 
   app.use((req, res, next) => {
     const origin = req.headers.origin;
     if (origin) {
-      const isDev = process.env.NODE_ENV !== "production";
       const isLocalhost = isDev && (origin.startsWith("http://localhost:") || origin.startsWith("http://127.0.0.1:"));
       const isAllowed = allowedOriginsSet.has(origin) || isLocalhost;
 
@@ -64,7 +81,7 @@ async function startServer() {
         res.setHeader("Access-Control-Allow-Methods", "GET, POST, PUT, PATCH, DELETE, OPTIONS");
         res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization, X-CSRF-Token, X-XSRF-Token, X-Request-Timestamp");
         res.setHeader("Vary", "Origin");
-      } else if (!isDev) {
+      } else {
         console.warn(`[CORS REJECT] Origine non autorisée rejetée: ${origin}`);
         return res.status(403).json({
           success: false,
@@ -134,12 +151,33 @@ sensorium_system_uptime_seconds ${snapshot.uptimeSeconds}
   // 2. Montage des APIs V1
   app.use("/api/v1", apiRouterV1);
 
-  // Route Webhook PayPal directe (sans protection CSRF de session)
+  // Route Webhook PayPal directe avec vérification obligatoire de la signature cryptographique (VULN-01 mitigée)
   app.post("/webhooks/paypal", express.json(), async (req, res) => {
     try {
       const { payPalSubscriptionService } = await import("./server/services/paypal.subscription.service.js");
+      const headers = {
+        "paypal-transmission-id": (req.headers["paypal-transmission-id"] as string) || "",
+        "paypal-transmission-time": (req.headers["paypal-transmission-time"] as string) || "",
+        "paypal-cert-url": (req.headers["paypal-cert-url"] as string) || "",
+        "paypal-auth-algo": (req.headers["paypal-auth-algo"] as string) || "",
+        "paypal-transmission-sig": (req.headers["paypal-transmission-sig"] as string) || "",
+      };
+
+      const isValid = await payPalSubscriptionService.verifyWebhookSignature(
+        JSON.stringify(req.body),
+        headers
+      );
+
+      if (!isValid) {
+        console.warn("[PayPal Direct Webhook] 🚨 Rejet signature PayPal invalide ou absente (VULN-01 mitigée)");
+        return res.status(401).json({
+          success: false,
+          error: "Invalid PayPal Webhook Signature (PAYPAL-TRANSMISSION-SIG verification failed)",
+        });
+      }
+
       await payPalSubscriptionService.handleWebhook(req.body);
-      res.status(200).send("Event Received");
+      res.status(200).send("Event Received & Verified");
     } catch (error: any) {
       console.error("[PayPal Direct Webhook Error]:", error);
       res.status(500).send("Internal Error");
@@ -169,8 +207,8 @@ sensorium_system_uptime_seconds ${snapshot.uptimeSeconds}
     },
   };
 
-  // Telemetry Snapshot for Digital Twin & Cockpit
-  app.get(['/api/telemetry/snapshot', '/api/v1/telemetry/snapshot'], (_req, res) => {
+  // Telemetry Snapshot for Digital Twin & Cockpit (Aligné sous /api/v1/iot/snapshot selon l'audit)
+  app.get(['/api/v1/iot/snapshot', '/api/telemetry/snapshot', '/api/v1/telemetry/snapshot'], (_req, res) => {
     res.json({
       timestamp: Date.now(),
       metrics: {

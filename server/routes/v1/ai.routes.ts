@@ -5,6 +5,8 @@ import { authenticateToken, requireSubscriptionTier } from "../../middlewares/au
 import { requireTenant } from "../../middlewares/tenant.middleware.js";
 import { validateRequest } from "../../middlewares/validate.middleware.js";
 import { analyzeLogsSchema } from "../../schemas/ai.schema.js";
+import { aiRateLimiter } from "../../middlewares/aiRateLimiter.middleware.js";
+import { requireEntitlement } from "../../middlewares/subscriptionGate.middleware.js";
 
 const router = Router();
 
@@ -13,18 +15,22 @@ router.post("/execute", executeArtifact);
 
 router.use(authenticateToken, requireTenant);
 
-// Analyse de logs d'infrastructure via Gemini (Nécessite Tier Pro minimum)
+// Analyse de logs d'infrastructure via Gemini (Nécessite Entitlement AI_OPS + Rate limiter par tenant)
 router.post(
   "/analyze-logs", 
   requireSubscriptionTier("pro"), 
+  requireEntitlement("AI_OPS"),
+  aiRateLimiter(600),
   validateRequest({ body: analyzeLogsSchema }), 
   analyzeLogs
 );
 
-// Analyse de télémétrie rapide (Nécessite Tier Silver / Edge Explorer minimum)
+// Analyse de télémétrie rapide (Nécessite Entitlement AI_OPS + Rate limiter par tenant)
 router.post(
   "/analyze", 
   requireSubscriptionTier("silver"), 
+  requireEntitlement("AI_OPS"),
+  aiRateLimiter(250),
   analyzeTelemetry
 );
 

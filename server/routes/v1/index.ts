@@ -13,6 +13,8 @@ import aiRoutes from "./ai.routes.js";
 import strategyRoutes from "./strategy.routes.js";
 import groundingRoutes from "./grounding.routes.js";
 import showcaseRoutes from "./showcase.routes.js";
+import demoRoutes from "./demo.routes.js";
+import developerHubRoutes from "./developer-hub.routes.js";
 import paypalRoutes from "./paypal.routes.js";
 import terminalRoutes from "./terminal.routes.js";
 import bridgeRoutes from "./bridge.routes.js";
@@ -42,6 +44,8 @@ router.use("/auth", authRoutes);
 
 // Public Showcase Sandbox Endpoints (AI Inference & Worker Execution)
 router.use("/showcase", showcaseRoutes);
+router.use("/demo", demoRoutes);
+router.use("/developer-hub", developerHubRoutes);
 
 // Passerelle d'Accès et d'Abonnement (Bridge Gateway: Plans, License Keys, Subscription Status)
 router.use("/bridge", bridgeRoutes);
@@ -104,8 +108,8 @@ router.use("/compliance", cockpitAccess, complianceRoutes);
 // Grounding (Google Search & Maps)
 router.use("/grounding", cockpitAccess, groundingRoutes);
 
-// IoT Telemetry Stream (Kafka)
-router.use("/iot", cockpitAccess, iotRoutes);
+// IoT Telemetry Stream (Télémétrie unifiée & Ingestion Kafka protégée)
+router.use("/iot", iotRoutes);
 
 // Master Control Panel (Tableau de Bord Exécutif CEO/CTO)
 router.use("/master-control", cockpitAccess, masterControlRoutes);

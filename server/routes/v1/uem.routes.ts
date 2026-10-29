@@ -22,6 +22,7 @@ import {
   getAgentSource,
   registerClient,
 } from "../../controllers/uem.controller.js";
+import { requireEntitlement } from "../../middlewares/subscriptionGate.middleware.js";
 
 // ─── 1. Routes Agent & Bootstrap (Pas de CSRF, pas de JWT navigateur) ─────────
 export const uemAgentRoutes = Router();
@@ -53,9 +54,9 @@ uemCockpitRoutes.get("/installer/download", downloadAgentInstaller);
 // Données du tableau de bord
 uemCockpitRoutes.get("/stats", getUemStats);
 uemCockpitRoutes.get("/terminals", getTerminals);
-uemCockpitRoutes.post("/commands", sendCommand);
+uemCockpitRoutes.post("/commands", requireEntitlement("UEM_CONTROL"), sendCommand);
 uemCockpitRoutes.get("/commands/:terminalId", getCommandHistory);
-uemCockpitRoutes.post("/policies", setSecurityPolicy);
+uemCockpitRoutes.post("/policies", requireEntitlement("UEM_CONTROL"), setSecurityPolicy);
 uemCockpitRoutes.get("/alerts", getAlerts);
 uemCockpitRoutes.patch("/alerts/:alertId/ack", acknowledgeAlert);
 

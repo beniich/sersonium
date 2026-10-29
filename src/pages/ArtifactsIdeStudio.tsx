@@ -33,6 +33,7 @@ import {
 import LiveStreamRenderer from "../components/renderers/LiveStreamRenderer";
 import SelfHealingModal, { SelfHealingIncident, DEFAULT_INCIDENT } from "../components/SelfHealingModal";
 import RollbackWatchdogStatus from "../components/RollbackWatchdogStatus";
+import FeatureGate from "../components/FeatureGate";
 
 export interface ArtifactData {
   id: string;
@@ -728,7 +729,13 @@ spec:
   };
 
   return (
-    <div className={`space-y-4 animate-in fade-in duration-300 ${isFullScreen ? "fixed inset-0 z-50 bg-[#f8fafc] dark:bg-[#070709] p-4 overflow-hidden" : ""}`}>
+    <FeatureGate
+      requiredTier="PRO"
+      featureTitle="🤖 SENSORIUM AI Artifacts IDE & Copilot"
+      featureDescription="La génération d'artefacts IaC, le copilote Gemini en direct et la boucle d'auto-remédiation SRE requièrent un abonnement Pro actif."
+      isDark={isDark}
+    >
+      <div className={`space-y-4 animate-in fade-in duration-300 ${isFullScreen ? "fixed inset-0 z-50 bg-[#f8fafc] dark:bg-[#070709] p-4 overflow-hidden" : ""}`}>
       
       {/* En-tête de la fonctionnalité */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 pb-3 border-b border-slate-200 dark:border-white/[0.08]">
@@ -1211,5 +1218,6 @@ spec:
         onReject={handleRejectSelfHealing}
       />
     </div>
+    </FeatureGate>
   );
 }

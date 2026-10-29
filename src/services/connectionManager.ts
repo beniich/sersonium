@@ -60,6 +60,7 @@ export class ConnectionManager {
   private queuedActions: QueuedAction[] = [];
   private listeners = new Set<(state: ConnectionState) => void>();
   private heartbeatInterval: any = null;
+  private forceSimulation: boolean = typeof localStorage !== "undefined" && localStorage.getItem("sensorium_simulation_mode") === "true";
 
   private constructor() {
     this.loadQueuedActions();
@@ -152,6 +153,11 @@ export class ConnectionManager {
   }
 
   public async checkHealth(): Promise<boolean> {
+    if (this.forceSimulation) {
+      this.handleNetworkChange(false);
+      return false;
+    }
+
     const startTime = typeof performance !== "undefined" ? performance.now() : Date.now();
     try {
       const controller = new AbortController();
@@ -191,24 +197,44 @@ export class ConnectionManager {
     }
   }
 
-  private handleNetworkChange(online: boolean) {
+  public handleNetworkChange(online: boolean) {
+    const effectiveOnline = this.forceSimulation ? false : online;
     const oldMode = this.state.mode;
-    const newMode: ConnectionMode = online ? "LIVE" : "SIMULATION";
-    this.state.isOnline = online;
+    const newMode: ConnectionMode = effectiveOnline ? "LIVE" : "SIMULATION";
+    this.state.isOnline = effectiveOnline;
+    this.state.mode = newMode;
 
-    if (online) {
-      this.state.mode = "LIVE";
+    if (effectiveOnline) {
       this.state.lastSync = new Date();
       // Synchronisation différée dès le rétablissement
       this.flushQueuedActions();
-    } else {
-      this.state.mode = "SIMULATION";
     }
 
     if (oldMode !== newMode) {
       console.log(`📡 [Sensorium Resilience] Connection Mode: ${this.state.mode}`);
       this.notifyListeners();
     }
+  }
+
+  /**
+   * Active ou désactive explicitement le mode simulation (Mock / Offline Sandbox)
+   */
+  public setSimulationMode(enabled: boolean): void {
+    this.forceSimulation = enabled;
+    if (typeof localStorage !== "undefined") {
+      localStorage.setItem("sensorium_simulation_mode", String(enabled));
+    }
+    this.handleNetworkChange(!enabled && (typeof navigator !== "undefined" ? navigator.onLine : true));
+  }
+
+  public isSimulationMode(): boolean {
+    return this.forceSimulation || this.state.mode === "SIMULATION";
+  }
+
+  public toggleSimulationMode(): boolean {
+    const next = !this.isSimulationMode();
+    this.setSimulationMode(next);
+    return next;
   }
 
   public getState(): ConnectionState {

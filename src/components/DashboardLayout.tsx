@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { 
   Activity, 
   Shield, 
@@ -304,7 +304,16 @@ export default function DashboardLayout(props: any) {
   });
   const [isNavExportOpen, setIsNavExportOpen] = useState(false);
   const [isEnterpriseLoginOpen, setIsEnterpriseLoginOpen] = useState(false);
+  const [circuitAlert, setCircuitAlert] = useState<string | null>(null);
   const { session: rbacSession } = useRbac();
+
+  useEffect(() => {
+    const handleCircuitAlert = (e: any) => {
+      setCircuitAlert(e.detail?.message || "⚡ Mode secours activé — Analyse déterministe SRE en service");
+    };
+    window.addEventListener("sensorium:circuit_alert", handleCircuitAlert);
+    return () => window.removeEventListener("sensorium:circuit_alert", handleCircuitAlert);
+  }, []);
 
   const toggleSidebarCollapse = () => {
     setIsSidebarCollapsed(prev => {
@@ -418,6 +427,25 @@ export default function DashboardLayout(props: any) {
         onOpenEnterpriseLogin={() => setIsEnterpriseLoginOpen(true)}
       />
 
+      {/* Circuit Breaker Fallback Mode SRE Toast Banner */}
+      {circuitAlert && (
+        <div className="bg-rose-500/20 border-b border-rose-500/40 text-rose-300 px-4 py-2 text-xs sm:text-sm flex items-center justify-between gap-3 shadow-md z-40 backdrop-blur-md animate-in slide-in-from-top-2 duration-300">
+          <div className="flex items-center gap-2.5 max-w-4xl mx-auto">
+            <Zap className="w-4 h-4 text-amber-400 flex-shrink-0 animate-pulse" />
+            <span className="font-mono">
+              <strong>Résilience IA :</strong> {circuitAlert}
+            </span>
+          </div>
+          <button
+            onClick={() => setCircuitAlert(null)}
+            className="p-1 rounded hover:bg-rose-500/30 text-rose-300 hover:text-white transition-colors cursor-pointer"
+            title="Masquer"
+          >
+            <X className="w-4 h-4" />
+          </button>
+        </div>
+      )}
+
       {/* Offline Mode PWA Notification Banner */}
       {!isOnline && (
         <div className="bg-amber-500/15 dark:bg-amber-500/20 border-b border-amber-500/30 dark:border-amber-500/40 text-amber-900 dark:text-amber-200 px-4 py-2.5 text-xs sm:text-sm flex items-center justify-between gap-3 shadow-sm z-40">
@@ -494,10 +522,10 @@ export default function DashboardLayout(props: any) {
                 <div className="p-2 w-full flex justify-center border-t border-slate-200/80 dark:border-white/[0.07]">
                   <button
                     onClick={onReturnToPortal}
-                    className="p-2 rounded-lg text-slate-500 dark:text-neutral-400 hover:text-violet-600 dark:hover:text-violet-400 hover:bg-slate-100 dark:hover:bg-white/[0.06] transition-colors"
-                    title="Site Web (Vitrine BeeCarbonat)"
+                    className="p-2 rounded-lg text-slate-500 dark:text-neutral-400 hover:text-indigo-400 hover:bg-slate-100 dark:hover:bg-white/[0.06] transition-colors"
+                    title="Portail Public SENSORIUM"
                   >
-                    <Globe className="w-4 h-4 text-violet-500" />
+                    <Globe className="w-4 h-4 text-indigo-400" />
                   </button>
                 </div>
               )}
@@ -645,8 +673,8 @@ export default function DashboardLayout(props: any) {
                     onClick={onReturnToPortal}
                     className="w-full py-2 px-3 rounded-lg bg-white dark:bg-white/[0.04] hover:bg-slate-100 dark:hover:bg-white/[0.08] border border-slate-200 dark:border-white/[0.07] text-slate-700 dark:text-neutral-300 hover:text-slate-900 dark:hover:text-white text-xs font-medium flex items-center justify-center gap-2 transition-all cursor-pointer group shadow-2xs"
                   >
-                    <Globe className="w-3.5 h-3.5 text-violet-500 group-hover:scale-110 transition-transform" />
-                    <span>Site Web (Vitrine BeeCarbonat)</span>
+                    <Globe className="w-3.5 h-3.5 text-indigo-400 group-hover:scale-110 transition-transform" />
+                    <span>Portail Public SENSORIUM</span>
                   </button>
                 </div>
               )}
@@ -755,8 +783,8 @@ export default function DashboardLayout(props: any) {
                     }}
                     className="w-full py-2.5 px-3 bg-slate-100 dark:bg-white/[0.04] hover:bg-slate-200 dark:hover:bg-white/[0.08] text-slate-700 dark:text-neutral-300 rounded-xl text-xs font-medium flex items-center justify-center gap-2 min-h-[44px] cursor-pointer transition-colors"
                   >
-                    <Globe className="w-4 h-4 text-violet-500" />
-                    <span>Site Web (Vitrine BeeCarbonat)</span>
+                    <Globe className="w-4 h-4 text-indigo-400" />
+                    <span>Portail Public SENSORIUM</span>
                   </button>
                 )}
               </div>

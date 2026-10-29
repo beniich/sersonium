@@ -25,6 +25,7 @@ import { User } from "firebase/auth";
 import { db } from "../firebase";
 import { collection, addDoc, doc, updateDoc } from "firebase/firestore";
 import InteractiveDashboardCard, { QuickActionItem } from "./InteractiveDashboardCard";
+import { useAppContext } from "../contexts/AppContext";
 
 interface DashboardGreetingHeaderProps {
   user?: User | null;
@@ -45,6 +46,7 @@ export default function DashboardGreetingHeader({
   onSelectNode,
   onCreateWorkOrder
 }: DashboardGreetingHeaderProps) {
+  const { jumpToAsset } = useAppContext();
   const [tasksDrawerOpen, setTasksDrawerOpen] = useState(false);
   const [isQuickAddOpen, setIsQuickAddOpen] = useState(false);
   const [currentTime, setCurrentTime] = useState<string>("");
@@ -235,20 +237,16 @@ export default function DashboardGreetingHeader({
                   {greeting}, <span className="text-transparent bg-clip-text bg-gradient-to-r from-white via-neutral-200 to-orange-200">{displayName}</span>
                 </h1>
                 
-                {/* Firebase Authentication Status Badge */}
                 {user ? (
                   <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-mono bg-emerald-500/10 border border-emerald-500/25 text-emerald-400">
                     <UserCheck className="w-3 h-3" />
                     <span>Firebase Auth</span>
                   </span>
                 ) : (
-                  <button
-                    onClick={onSignIn}
-                    className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-mono bg-orange-500/10 hover:bg-orange-500/20 border border-orange-500/30 text-orange-400 transition-colors cursor-pointer"
-                  >
-                    <LogIn className="w-3 h-3" />
-                    <span>Google Sign-In</span>
-                  </button>
+                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-mono bg-indigo-500/10 border border-indigo-500/25 text-indigo-400">
+                    <UserCheck className="w-3 h-3" />
+                    <span>Sovereign Session</span>
+                  </span>
                 )}
               </div>
 
@@ -683,6 +681,17 @@ export default function DashboardGreetingHeader({
 
                         {/* Action buttons */}
                         <div className="flex items-center gap-2 self-end md:self-center flex-shrink-0">
+                          {task.nodeId && (
+                            <button
+                              onClick={() => jumpToAsset(task.nodeId, "maintenance")}
+                              className="px-2.5 py-1 rounded-lg bg-indigo-500/10 hover:bg-indigo-500/20 border border-indigo-500/30 text-indigo-300 hover:text-white text-[11px] font-mono flex items-center gap-1 transition-colors cursor-pointer"
+                              title="Saut contextuel direct vers la fiche de cet équipement & onglet GMAO"
+                            >
+                              <Wrench className="w-3 h-3 text-indigo-400" />
+                              <span>Fiche GMAO</span>
+                            </button>
+                          )}
+
                           {matchedNode && onSelectNode && (
                             <button
                               onClick={() => onSelectNode(matchedNode)}

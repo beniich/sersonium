@@ -31,6 +31,7 @@ interface PublicPortalProps {
   onSignIn: () => void;
   onSignOut?: () => void;
   onEnterMockMode?: () => void;
+  onLaunchDashboard?: () => void;
   onLaunchCockpit?: () => void;
   onNavigateToSection?: (page: string, itemId: string) => void;
   isDark: boolean;
@@ -97,7 +98,7 @@ export default function PublicPortal({
   useEffect(() => {
     const fetchTelemetry = async () => {
       try {
-        const res = await fetch('/api/telemetry/snapshot');
+        const res = await fetch('/api/v1/iot/snapshot');
         if (res.ok) {
           const data = await res.json();
           if (data.metrics) {

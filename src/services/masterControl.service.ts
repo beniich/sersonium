@@ -208,4 +208,50 @@ export const masterControlService = {
       ],
     };
   },
+
+  /**
+   * Réinitialise le Circuit Breaker IA Gemini en CLOSED
+   */
+  async resetAiCircuit(): Promise<{ success: boolean; message: string }> {
+    try {
+      const token = localStorage.getItem("sensorium_token");
+      const res = await axios.post(
+        "/api/v1/observability/circuit-reset",
+        {},
+        {
+          headers: {
+            "Content-Type": "application/json",
+            ...(token ? { Authorization: `Bearer ${token}` } : {})
+          },
+          withCredentials: true
+        }
+      );
+      return { success: true, message: res.data?.data?.message || "Circuit Breaker réinitialisé avec succès." };
+    } catch (err: any) {
+      return { success: false, message: err?.response?.data?.error?.message || err.message };
+    }
+  },
+
+  /**
+   * Déclenche un calcul d'agrégation Rollup immédiat (Axe 2 & 4 Résilience)
+   */
+  async forceRollup(interval: "MINUTE" | "HOUR" | "DAY" = "MINUTE"): Promise<{ success: boolean; message: string }> {
+    try {
+      const token = localStorage.getItem("sensorium_token");
+      const res = await axios.post(
+        "/api/v1/observability/rollup-force",
+        { interval },
+        {
+          headers: {
+            "Content-Type": "application/json",
+            ...(token ? { Authorization: `Bearer ${token}` } : {})
+          },
+          withCredentials: true
+        }
+      );
+      return { success: true, message: res.data?.message || `Rollup ${interval} forcé avec succès.` };
+    } catch (err: any) {
+      return { success: false, message: err?.response?.data?.error?.message || err.message };
+    }
+  },
 };
