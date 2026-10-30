@@ -32,6 +32,7 @@ import PerformanceMetricsChart from "../components/PerformanceMetricsChart";
 import ModularPortletsDashboard from "../components/ModularPortletsDashboard";
 import UnifiedAssetFile from "../components/UnifiedAssetFile";
 import TelemetryChart from "../components/TelemetryChart";
+import ServicesShowcaseRibbon from "../components/ServicesShowcaseRibbon";
 import { MODULE_TABS } from "../components/ModuleNavigationBar";
 import { User } from "firebase/auth";
 
@@ -155,13 +156,16 @@ export default function OverviewPage({
 
       {/* Main Content Area based on Tab */}
       {activeTab === "ov-general" && (
-        <DetailedChartJSDashboard
-          state={state}
-          isDark={isDark}
-          onSelectNode={onSelectNode}
-          onCreateWorkOrderForNode={onCreateWorkOrderForNode}
-          onNavigateToTab={handleTabChange}
-        />
+        <>
+          <ServicesShowcaseRibbon onNavigateToTab={handleTabChange} isDark={isDark} />
+          <DetailedChartJSDashboard
+            state={state}
+            isDark={isDark}
+            onSelectNode={onSelectNode}
+            onCreateWorkOrderForNode={onCreateWorkOrderForNode}
+            onNavigateToTab={handleTabChange}
+          />
+        </>
       )}
 
       {activeTab === "ov-perf" && (

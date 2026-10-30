@@ -23,6 +23,8 @@ interface InteractiveDashboardCardProps {
   id?: string;
   badge?: string;
   badgeColor?: string;
+  bannerImage?: string;
+  bannerAlt?: string;
 }
 
 export default function InteractiveDashboardCard({
@@ -36,7 +38,9 @@ export default function InteractiveDashboardCard({
   delay = 0,
   id,
   badge,
-  badgeColor = "bg-white/10 text-white"
+  badgeColor = "bg-white/10 text-white",
+  bannerImage,
+  bannerAlt = "Service preview banner"
 }: InteractiveDashboardCardProps) {
   const [isHovered, setIsHovered] = useState(false);
 
@@ -91,6 +95,22 @@ export default function InteractiveDashboardCard({
           <span className={`px-2 py-0.5 rounded-full text-[10px] font-mono ${badgeColor}`}>
             {badge}
           </span>
+        </div>
+      )}
+
+      {/* Optional Top Banner Visual (16:9 Enterprise Poster) */}
+      {bannerImage && (
+        <div className="relative w-full h-28 sm:h-32 overflow-hidden border-b border-white/[0.08] bg-black/40">
+          <picture>
+            <source srcSet={bannerImage.replace(/\.png$/, ".webp")} type="image/webp" />
+            <img 
+              src={bannerImage} 
+              alt={bannerAlt}
+              className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-500" 
+              loading="lazy"
+            />
+          </picture>
+          <div className="absolute inset-0 bg-gradient-to-t from-[#0c0c0e] via-[#0c0c0e]/30 to-transparent" />
         </div>
       )}
 

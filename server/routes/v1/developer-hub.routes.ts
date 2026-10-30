@@ -94,7 +94,46 @@ router.post("/compliance/dora/stamp", (req, res) => {
   });
 });
 
-// 5. Snapshot Consolidé de Télémétrie Campus Multi-Sites
+// 5. Scénario Dérive Thermique & Portefeuille Bâtiment (Cockpit Pitch)
+router.post("/telemetry/scenario-drift", (req, res) => {
+  const { scenario = "cvc_chiller_drift", buildingCount = 1, company = "Enterprise Partner" } = req.body;
+  const annualLoss = 18400 * Number(buildingCount);
+  res.json({
+    success: true,
+    data: {
+      scenario,
+      company,
+      buildingCount: Number(buildingCount),
+      annualLossEstimatedEur: annualLoss,
+      alert: "ALERTE CRITIQUE : Dérive thermique Chiller B-02 (68.4°C). Risque de surpression sur vanne V-14.",
+      status: "DRIFT_REGISTERED",
+      timestamp: new Date().toISOString()
+    }
+  });
+});
+
+// 6. Rééquilibrage IA AIOps Automatisé (Cockpit Pitch)
+router.post("/ai/rebalance", (req, res) => {
+  const { scenario = "cvc_chiller_drift", buildingCount = 1, company = "Enterprise Partner" } = req.body;
+  res.json({
+    success: true,
+    data: {
+      scenario,
+      company,
+      buildingCount: Number(buildingCount),
+      actionsExecuted: [
+        "Vanne HydroSync V-14 ré-étalonnée (-18%)",
+        "Pression stabilisée à 4.2 Bar nominal",
+        "Groupe Froid B-02 stabilisé : 7.4°C, COP restauré à 6.22"
+      ],
+      aiOpsLatencyMs: 1400,
+      status: "RESOLVED",
+      timestamp: new Date().toISOString()
+    }
+  });
+});
+
+// 7. Snapshot Consolidé de Télémétrie Campus Multi-Sites
 router.get("/telemetry/snapshot", (_req, res) => {
   res.json({
     success: true,
@@ -122,7 +161,7 @@ router.get("/telemetry/snapshot", (_req, res) => {
   });
 });
 
-// 6. Spécification OpenAPI 3.1
+// 8. Spécification OpenAPI 3.1
 router.get("/openapi.json", (_req, res) => {
   res.json({
     openapi: "3.1.0",

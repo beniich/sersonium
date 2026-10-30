@@ -63,8 +63,16 @@ export const csrfProtection = (req: Request, res: Response, next: NextFunction):
     return;
   }
 
-  // Exempt Stripe/PayPal Webhooks or raw server-to-server endpoints
-  if (req.path.startsWith("/api/v1/webhooks") || req.path.includes("/payments/webhook") || req.path.includes("/paypal/webhook")) {
+  // Exempt Stripe/PayPal Webhooks or raw server-to-server endpoints & public developer sandbox
+  const fullUrl = req.originalUrl || req.path || "";
+  if (
+    fullUrl.includes("/webhooks") || 
+    fullUrl.includes("/payments/webhook") || 
+    fullUrl.includes("/paypal/webhook") ||
+    fullUrl.includes("/showcase") ||
+    fullUrl.includes("/developer-hub") ||
+    fullUrl.includes("/ai/execute")
+  ) {
     next();
     return;
   }

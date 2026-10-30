@@ -96,8 +96,18 @@ router.use("/traffic", cockpitAccess, trafficRoutes);
 // Sprint 3: Security & WAF
 router.use("/security/waf", cockpitAccess, wafRoutes);
 
-// Sprint 4: Compute & AI (Gemini Log Analysis & Diagnostics)
-router.use("/ai", cockpitAccess, aiRoutes);
+// Sprint 4: Compute & AI (Gemini Log Analysis & Diagnostics - Protégé Cockpit)
+router.use("/ai", (req, res, next) => {
+  if (req.path === "/execute" && req.method === "POST") {
+    return next();
+  }
+  // All other AI endpoints require full Cockpit Auth + Subscription Gate
+  authenticateToken(req, res, () => {
+    requireTenant(req, res, () => {
+      requireActiveSubscription("STARTER")(req, res, next);
+    });
+  });
+}, aiRoutes);
 
 // Sprint 4: Strategy & OKRs
 router.use("/strategy", cockpitAccess, strategyRoutes);
