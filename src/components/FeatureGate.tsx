@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Lock, Crown, ArrowRight } from "lucide-react";
 import { FeatureUpgradeModal } from "./FeatureUpgradeModal";
 import { SubscriptionTier } from "../types";
@@ -10,6 +10,26 @@ export interface FeatureGateProps {
   featureDescription?: string;
   onUpgrade?: (tier: SubscriptionTier) => void;
   isDark?: boolean;
+  /** Passer le tier depuis le state global React pour une réactivité immédiate */
+  currentSubscriptionTier?: SubscriptionTier;
+}
+
+const TIER_RANK: Record<string, number> = {
+  FREE: 0,
+  STARTER: 1,
+  SILVER: 1,   // "silver" est un alias de STARTER dans l'UI
+  PRO: 2,
+  ENTERPRISE: 3,
+};
+
+/** Lit le tier depuis localStorage de façon sûre. Retourne "FREE" par défaut. */
+function readLocalTier(): string {
+  if (typeof localStorage === "undefined") return "FREE";
+  const stored =
+    localStorage.getItem("sensorium_subscription_tier") ||
+    localStorage.getItem("sensorium_user_tier") ||
+    "free";
+  return stored.toUpperCase();
 }
 
 export const FeatureGate: React.FC<FeatureGateProps> = ({
@@ -19,23 +39,36 @@ export const FeatureGate: React.FC<FeatureGateProps> = ({
   featureDescription = "Ce module est réservé aux abonnements actifs de niveau supérieur.",
   onUpgrade,
   isDark = true,
+  currentSubscriptionTier,
 }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  // Vérification locale du palier stocké
-  const currentTier = typeof localStorage !== "undefined"
-    ? (localStorage.getItem("sensorium_subscription_tier") || localStorage.getItem("sensorium_user_tier") || "starter").toUpperCase()
-    : "STARTER";
+  // État réactif du tier : priorité au prop React (mis à jour par onUpgradeTier),
+  // fallback sur localStorage pour la persistance entre pages.
+  const [localTierKey, setLocalTierKey] = useState<string>(readLocalTier);
 
-  const tierRank: Record<string, number> = {
-    FREE: 0,
-    STARTER: 1,
-    PRO: 2,
-    ENTERPRISE: 3,
-  };
+  // Synchronise si le localStorage est mis à jour depuis un autre composant
+  useEffect(() => {
+    const handleStorage = () => setLocalTierKey(readLocalTier());
+    window.addEventListener("storage", handleStorage);
 
-  const userRank = tierRank[currentTier] ?? 1;
-  const requiredRank = tierRank[requiredTier] ?? 2;
+    // Polling léger (500 ms) pour détecter les mutations localStorage locales
+    // (l'événement "storage" ne se déclenche pas sur l'onglet courant)
+    const interval = setInterval(() => setLocalTierKey(readLocalTier()), 500);
+
+    return () => {
+      window.removeEventListener("storage", handleStorage);
+      clearInterval(interval);
+    };
+  }, []);
+
+  // Détermine le rang effectif : le prop React est prioritaire
+  const effectiveTierKey = currentSubscriptionTier
+    ? currentSubscriptionTier.toUpperCase()
+    : localTierKey;
+
+  const userRank = TIER_RANK[effectiveTierKey] ?? 0;   // ← fallback 0 = FREE (pas 1)
+  const requiredRank = TIER_RANK[requiredTier] ?? 2;
 
   // Si le palier est suffisant, on affiche directement le contenu
   if (userRank >= requiredRank) {
