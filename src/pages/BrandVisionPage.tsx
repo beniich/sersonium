@@ -26,6 +26,7 @@ import {
   Server
 } from "lucide-react";
 import brandVisionHero from "../assets/images/cafm_brand_vision_1789522330075.jpg";
+import PageHeaderBanner from "../components/PageHeaderBanner";
 
 interface BrandVisionPageProps {
   isDark: boolean;
@@ -102,54 +103,42 @@ export default function BrandVisionPage({ isDark, onExplorePublic }: BrandVision
   return (
     <div className="space-y-10 animate-in fade-in slide-in-from-bottom-3 duration-500 pb-16">
       
-      {/* Header Banner with Custom Generated High-Tech Asset */}
-      <div className="relative rounded-3xl overflow-hidden border border-slate-200/80 dark:border-white/[0.08] shadow-lg shadow-orange-500/5 group">
-        <div className="absolute inset-0 z-0">
-          <img 
-            src={brandVisionHero} 
-            alt="CAFM Enterprise Network Vision" 
-            referrerPolicy="no-referrer"
-            className="w-full h-full object-cover object-center filter brightness-[0.9] dark:brightness-[0.75] contrast-[1.05] group-hover:scale-[1.02] transition-transform duration-700"
-          />
-          <div className="absolute inset-0 bg-gradient-to-t from-slate-900 via-slate-900/60 to-transparent dark:from-[#070709] dark:via-[#070709]/70 dark:to-transparent" />
-        </div>
-
-        <div className="relative z-10 p-8 md:p-12 text-white max-w-4xl space-y-4">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-orange-500/20 backdrop-blur-md border border-orange-500/30 text-orange-300 text-xs font-mono font-semibold tracking-wider uppercase">
-            <Sparkles className="w-3.5 h-3.5 text-orange-400" />
-            <span>Strategic Vision & Brand Universe • Horizon 2030</span>
-          </div>
-
-          <h1 className="text-3xl md:text-5xl font-black tracking-tight leading-tight">
-            Invisible Infrastructure, <br />
-            <span className="bg-gradient-to-r from-orange-400 via-amber-300 to-amber-100 bg-clip-text text-transparent">
-              Tangible Power.
-            </span>
-          </h1>
-
-          <p className="text-sm md:text-base text-slate-200 max-w-2xl leading-relaxed">
-            SENSORIUM reinvents technical facilities management, sensory orchestration, and distributed Edge compute. 
-            Explore our manifesto, visual grammar, design system, and the engineering ambition guiding every single Edge node.
-          </p>
-
-          <div className="pt-2 flex flex-wrap items-center gap-3">
+      {/* Header Banner */}
+      <PageHeaderBanner
+        bannerImage="/banners/banner_16.png"
+        bannerAlt="Brand Vision Souveraineté Numérique Européenne Banner"
+        badge="Brand Vision • Souveraineté Numérique Européenne 2030"
+        badgeIcon={Globe}
+        badgeColor="bg-orange-500/15 text-orange-400 border-orange-500/30"
+        status={{ label: "HORIZON 2030 • MANIFESTO ACTIF", color: "orange" }}
+        title="Brand Vision & Manifesto SENSORIUM"
+        subtitle="Strategic Vision & Brand Universe • Invisible Infrastructure, Tangible Power."
+        description="SENSORIUM réinvente la supervision CAFM, l'orchestration sensorielle et le calcul distribué Edge. Explorez notre manifeste, grammaire visuelle et ambition ingénieriale."
+        telemetry={[
+          { label: "Horizon Stratégique", value: "2030", isPositive: true },
+          { label: "Piliers Fondateurs", value: "6 Valeurs" },
+          { label: "Design System", value: "Lumina Pure" },
+          { label: "Certification DORA", value: "Niveau 5", isPositive: true }
+        ]}
+        actions={
+          <div className="flex items-center gap-2">
             <button
               onClick={() => setActiveSection("manifesto")}
-              className="px-5 py-2.5 bg-gradient-to-r from-[#F38020] to-[#FAAD3F] hover:from-[#e27218] text-white font-bold text-xs rounded-xl shadow-md flex items-center gap-2 cursor-pointer transition-transform hover:scale-105"
+              className="px-4 py-2 bg-gradient-to-r from-orange-500 to-amber-600 hover:from-orange-600 hover:to-amber-700 text-white font-bold text-xs rounded-xl shadow-lg flex items-center gap-2 cursor-pointer transition-all"
             >
               <Compass className="w-4 h-4" />
-              Read Manifesto
+              Manifesto
             </button>
             <button
               onClick={() => setActiveSection("identity")}
-              className="px-5 py-2.5 bg-white/10 hover:bg-white/20 backdrop-blur-md text-white font-medium text-xs rounded-xl border border-white/20 transition-colors flex items-center gap-2 cursor-pointer"
+              className="px-4 py-2 bg-white/10 hover:bg-white/15 backdrop-blur-md text-white font-medium text-xs rounded-xl border border-white/20 transition-all flex items-center gap-2 cursor-pointer"
             >
               <Sliders className="w-4 h-4" />
-              Explore Design System
+              Design System
             </button>
           </div>
-        </div>
-      </div>
+        }
+      />
 
       {/* Sub-navigation tabs */}
       <div className="flex items-center gap-2 overflow-x-auto pb-2 border-b border-slate-200 dark:border-white/[0.08]">

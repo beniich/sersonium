@@ -41,6 +41,7 @@ import {
 import ClientRegistrationModal from "../components/ClientRegistrationModal";
 import ComparisonPage from "./ComparisonPage";
 import FeatureGate from "../components/FeatureGate";
+import PageHeaderBanner from "../components/PageHeaderBanner";
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -587,46 +588,49 @@ export default function UemPage({ isDark }: UemPageProps) {
       <div className="min-h-screen p-4 md:p-6 space-y-6"
       style={{ background: isDark ? "transparent" : "transparent" }}>
 
-      {/* ─── Header ─── */}
-      <div className="flex items-center justify-between">
-        <div>
-          <div className="flex items-center gap-3 mb-1">
-            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-orange-500 to-amber-600 flex items-center justify-center">
-              <Shield size={16} className="text-white"/>
-            </div>
-            <h1 className="text-2xl font-bold text-slate-900 dark:text-white tracking-tight">UEM Cockpit</h1>
-            <span className="text-xs font-mono bg-orange-500/15 text-orange-400 border border-orange-500/30 px-2 py-0.5 rounded-full">
-              Unified Endpoint Management
-            </span>
+      {/* ─── Header Banner ─── */}
+      <PageHeaderBanner
+        bannerImage="/banners/banner_6.png"
+        bannerAlt="UEM Sovereign Fleet Manager Banner"
+        badge="Flotte & Terminaux • DLP Souverain"
+        badgeIcon={Shield}
+        badgeColor="bg-cyan-500/15 text-cyan-400 border-cyan-500/30"
+        status={{ label: "ZERO-TRUST • DLP ACTIF", color: "emerald" }}
+        title="UEM Sovereign Fleet Manager"
+        subtitle={`CMR Fleet · ${stats.totalTerminals} Terminaux Déployés · Agent v1.0.0`}
+        description="Supervision unifiée de terminaux Windows/Linux/Mac : télé-inventaire matériel, verrouillage ports USB et enforcement des politiques de sécurité."
+        telemetry={[
+          { label: "Total Flotte", value: stats.totalTerminals },
+          { label: "En Ligne", value: stats.onlineTerminals, isPositive: true },
+          { label: "Conformité", value: `${stats.complianceRate}%` },
+          { label: "Alertes", value: stats.openAlerts, change: stats.openAlerts > 0 ? "Critique" : undefined }
+        ]}
+        actions={
+          <div className="flex items-center gap-2 flex-wrap">
+            <button
+              onClick={() => setShowRegisterModal(true)}
+              className="flex items-center gap-2 px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 dark:bg-white/10 dark:hover:bg-white/15 border border-slate-700/60 dark:border-white/10 text-white font-medium text-xs transition-all shadow-sm cursor-pointer"
+            >
+              <Building2 size={14}/>
+              + Enregistrer Client &amp; Flotte
+            </button>
+            <button
+              onClick={() => setShowDeployModal(true)}
+              className="flex items-center gap-2 px-3.5 py-2 rounded-xl bg-gradient-to-r from-orange-500 to-amber-600 hover:from-orange-600 hover:to-amber-700 text-white font-medium text-xs transition-all shadow-lg shadow-orange-500/20 cursor-pointer"
+            >
+              <Package size={14}/>
+              Déployer Pack All-in-One
+            </button>
+            <button
+              onClick={handleRefresh}
+              className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-white/5 border border-white/10 text-slate-400 hover:text-white hover:bg-white/10 transition-all text-xs cursor-pointer"
+            >
+              <RefreshCw size={13} className={refreshing ? "animate-spin" : ""}/>
+              Actualiser
+            </button>
           </div>
-          <p className="text-sm text-slate-400 ml-11">
-            Gestion centralisée de {stats.totalTerminals} terminaux · CMR Fleet
-          </p>
-        </div>
-        <div className="flex items-center gap-2">
-          <button
-            onClick={() => setShowRegisterModal(true)}
-            className="flex items-center gap-2 px-3.5 py-2 rounded-lg bg-slate-800 hover:bg-slate-700 dark:bg-white/10 dark:hover:bg-white/15 border border-slate-700/60 dark:border-white/10 text-white font-medium text-sm transition-all shadow-sm"
-          >
-            <Building2 size={15}/>
-            + Enregistrer Client &amp; Flotte
-          </button>
-          <button
-            onClick={() => setShowDeployModal(true)}
-            className="flex items-center gap-2 px-3.5 py-2 rounded-lg bg-gradient-to-r from-orange-500 to-amber-600 hover:from-orange-600 hover:to-amber-700 text-white font-medium text-sm transition-all shadow-lg shadow-orange-500/20"
-          >
-            <Package size={15}/>
-            Déployer / Pack All-in-One
-          </button>
-          <button
-            onClick={handleRefresh}
-            className="flex items-center gap-2 px-3 py-2 rounded-lg bg-white/5 border border-white/10 text-slate-400 hover:text-white hover:bg-white/10 transition-all text-sm"
-          >
-            <RefreshCw size={14} className={refreshing ? "animate-spin" : ""}/>
-            Actualiser
-          </button>
-        </div>
-      </div>
+        }
+      />
 
       {/* ─── Stats KPIs ─── */}
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">

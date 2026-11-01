@@ -11,6 +11,15 @@ interface ShowcaseHubProps {
 
 const SHOWCASES = [
   {
+    id: 'vitrine-clair',
+    name: 'SENSORIUM CAFM PRO',
+    description: 'L\'intelligence opérationnelle unifiée · Supervision, gouvernance RBAC et traçabilité SHA-256',
+    icon: Building2,
+    color: 'from-amber-600 via-orange-600 to-amber-700',
+    bg: 'bg-amber-50/70 dark:bg-amber-950/20',
+    border: 'border-amber-300 dark:border-amber-700'
+  },
+  {
     id: 'architecture',
     name: 'Spider CAFM',
     description: 'Autonomous Digital Twin & Predictive Facility Intelligence',
@@ -100,9 +109,47 @@ export const ShowcaseHub: React.FC<ShowcaseHubProps> = ({
                 {showcase.name}
               </h3>
               
-              <p className="text-sm text-slate-600 dark:text-slate-400 mb-6">
+              <p className="text-sm text-slate-600 dark:text-slate-400 mb-4">
                 {showcase.description}
               </p>
+
+              {showcase.id === 'vitrine-clair' && (
+                <div className="w-full h-24 mb-4 rounded-xl overflow-hidden border border-amber-300/80 dark:border-amber-700/80 relative group-hover:scale-[1.02] transition-transform">
+                  <picture>
+                    <source srcSet="/assets/sensorium-audit.webp" type="image/webp" />
+                    <img
+                      src="/assets/sensorium-audit.png"
+                      alt="SENSORIUM CAFM Pro — Traçabilité et Audit SHA-256"
+                      className="w-full h-full object-cover object-center"
+                      loading="lazy"
+                    />
+                  </picture>
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent flex items-end p-1.5">
+                    <span className="text-[10px] font-mono text-amber-200 bg-black/60 px-1.5 py-0.5 rounded backdrop-blur-xs font-semibold">
+                      Audit Intégrité SHA-256
+                    </span>
+                  </div>
+                </div>
+              )}
+
+              {showcase.id === 'architecture' && (
+                <div className="w-full h-24 mb-4 rounded-xl overflow-hidden border border-indigo-200/60 dark:border-indigo-800/60 relative group-hover:scale-[1.02] transition-transform">
+                  <picture>
+                    <source srcSet="/sensorium-robot-cafm.webp" type="image/webp" />
+                    <img
+                      src="/sensorium-robot-cafm.jpg"
+                      alt="SENSORIUM CAFM Pro — Autonomous Robotics"
+                      className="w-full h-full object-cover object-center"
+                      loading="lazy"
+                    />
+                  </picture>
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent flex items-end p-1.5">
+                    <span className="text-[10px] font-mono text-white/90 bg-black/60 px-1.5 py-0.5 rounded backdrop-blur-xs">
+                      Autonomous LiDAR SLAM
+                    </span>
+                  </div>
+                </div>
+              )}
               
               <div className="flex items-center text-sm font-semibold mt-auto group-hover:text-blue-600 transition-colors">
                 <span>Explore</span>

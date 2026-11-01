@@ -5,6 +5,7 @@ import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContaine
 import { db } from "../firebase";
 import { collection, addDoc, doc, updateDoc, deleteDoc } from "firebase/firestore";
 import { logAuditEvent } from "../hooks/useGlobalState";
+import PageHeaderBanner from "../components/PageHeaderBanner";
 
 interface StoragePageProps {
   state: GlobalState;
@@ -96,21 +97,34 @@ export default function StoragePage({ state, isDark, activeItemId = "db-1", onSe
 
   return (
     <div className="space-y-6 animate-in fade-in duration-300 relative">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end border-b border-slate-200 dark:border-neutral-800 pb-4 gap-3">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">Storage & Edge Databases</h1>
-          <p className="text-sm text-slate-500 dark:text-neutral-400 mt-1">enterprise.sensorium.cloud / R2 Zero-Egress Storage & D1 SQLite</p>
-        </div>
-        {currentTab === "db-1" && (
-          <button 
-            onClick={() => setIsModalOpen(true)}
-            className="px-3.5 py-1.5 bg-orange-500 hover:bg-orange-600 text-white rounded-lg text-sm font-medium flex items-center gap-2 transition-colors cursor-pointer shadow-xs"
-          >
-            <Plus className="w-4 h-4" /> Create Bucket
-          </button>
-        )}
-      </div>
+      {/* Header Banner */}
+      <PageHeaderBanner
+        bannerImage="/banners/banner_10.png"
+        bannerAlt="Trust Storage Vault S3 R2 Banner"
+        badge="Trust Storage Vault • S3/R2 Chiffré AES-256"
+        badgeIcon={HardDrive}
+        badgeColor="bg-amber-500/15 text-amber-400 border-amber-500/30"
+        status={{ label: "VAULT SECURED • AES-256 GCM", color: "amber" }}
+        title="Storage, Objects & Vault"
+        subtitle="enterprise.sensorium.cloud / R2 Zero-Egress Storage & D1 SQLite"
+        description="Coffre-fort de stockage objet distribué compatible S3/R2, chiffrement au repos AES-256 GCM et réplication multi-régions sans frais d'egress."
+        telemetry={[
+          { label: "Volume Stocké", value: `${totalSize.toFixed(1)} GB` },
+          { label: "Objets Chiffrés", value: `${totalObjects.toLocaleString()} Objets` },
+          { label: "Buckets Actifs", value: `${(state.buckets || []).length} Actifs` },
+          { label: "Frais Egress", value: "0.00 € / Free", isPositive: true }
+        ]}
+        actions={
+          currentTab === "db-1" ? (
+            <button 
+              onClick={() => setIsModalOpen(true)}
+              className="px-4 py-2 bg-gradient-to-r from-orange-500 to-amber-600 hover:from-orange-600 hover:to-amber-700 text-white rounded-xl text-xs font-semibold flex items-center gap-2 transition-all cursor-pointer shadow-lg shadow-orange-500/20"
+            >
+              <Plus className="w-4 h-4" /> Create Bucket
+            </button>
+          ) : undefined
+        }
+      />
 
       {/* Tabs */}
       <div className="sticky top-0 z-20 -mx-2.5 sm:-mx-4 lg:-mx-5 px-2.5 sm:px-4 lg:px-5 py-2 bg-white/90 dark:bg-neutral-950/90 backdrop-blur-xl border-b border-slate-200/80 dark:border-neutral-800 shadow-xs">

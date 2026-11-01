@@ -18,6 +18,7 @@ import {
 import { StrategicObjective, Kpi } from '../types';
 import { exportScenariosToCSV, exportScenariosToPDF } from '../utils/exportUtils';
 import { computeScenarioComparisonMatrix, StrategicSimulationInputs } from '../config/roiConfig';
+import PageHeaderBanner from '../components/PageHeaderBanner';
 
 export default function StrategyPage({ state, isDark }: any) {
   const [isSyncing, setIsSyncing] = useState(false);
@@ -53,45 +54,49 @@ export default function StrategyPage({ state, isDark }: any) {
 
   return (
     <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
-      {/* HEADER SECTION WITH STRATEGIC ACTIONS */}
-      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 pb-6 border-b border-slate-200 dark:border-neutral-800">
-        <div>
-          <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-900 dark:text-white">
-            Pilotage Stratégique & Arbitrage ROI (CFO / CTO)
-          </h1>
-          <p className="text-slate-500 dark:text-neutral-400 text-sm mt-1 max-w-3xl">
-            Transformation de la télémétrie technique en indicateurs de gouvernance, simulation probabiliste de rentabilité et export certifiable.
-          </p>
-        </div>
-
-        <div className="flex flex-wrap items-center gap-3">
-          <button
-            onClick={handleSync}
-            className={`flex items-center gap-2 px-3.5 py-2.5 bg-slate-100 hover:bg-slate-200 dark:bg-neutral-800 dark:hover:bg-neutral-700 text-slate-700 dark:text-neutral-200 rounded-xl transition-all font-medium text-xs cursor-pointer ${isSyncing ? 'opacity-80 cursor-wait' : ''}`}
-          >
-            <RefreshCcw className={`w-3.5 h-3.5 ${isSyncing ? 'animate-spin' : ''}`} />
-            <span>Synchroniser KPIs</span>
-          </button>
-
-          <button
-            onClick={handleExportCSV}
-            className="group flex items-center gap-2 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white px-4 py-2.5 rounded-xl transition-all duration-300 shadow-md shadow-emerald-900/20 font-bold text-xs cursor-pointer"
-            title="Exporter l'analyse de sensibilité 3 scénarios sous format tableur CSV"
-          >
-            <FileSpreadsheet className="w-4 h-4 group-hover:scale-110 transition-transform" />
-            <span>Exporter Rapport Executive (CSV)</span>
-          </button>
-
-          <button
-            onClick={handleExportPDF}
-            className="flex items-center gap-2 bg-slate-900 hover:bg-slate-800 dark:bg-white dark:hover:bg-neutral-200 text-white dark:text-black px-4 py-2.5 rounded-xl transition-all font-bold text-xs cursor-pointer shadow-md"
-            title="Générer le rapport officiel A4 PDF pour signature"
-          >
-            <Download className="w-4 h-4" />
-            <span>Rapport Conseil (PDF)</span>
-          </button>
-        </div>
-      </div>
+      {/* HEADER BANNER */}
+      <PageHeaderBanner
+        bannerImage="/banners/banner_14.png"
+        bannerAlt="Pilotage Stratégique ROI CFO CTO Banner"
+        badge="CFO / CTO Dashboard • Arbitrage ROI & Gouvernance"
+        badgeIcon={Target}
+        badgeColor="bg-emerald-500/15 text-emerald-400 border-emerald-500/30"
+        status={{ label: "INDICATEURS TEMPS RÉEL • KPIs ACTIFS", color: "emerald" }}
+        title="Pilotage Stratégique & Arbitrage ROI"
+        subtitle="Transformation de la télémétrie technique en indicateurs de gouvernance certifiables"
+        description="Simulation probabiliste de rentabilité, matrice de scénarios Lite/Pro/Elite et export de rapports certifiés CSRD pour signature Conseil."
+        telemetry={[
+          { label: "Objectifs Actifs", value: `${objectives.length} OKRs` },
+          { label: "KPIs Trackés", value: `${kpis.length} Métriques` },
+          { label: "Scénarios ROI", value: "3 Niveaux" },
+          { label: "Économies Projetées", value: "+34% OPEX", isPositive: true }
+        ]}
+        actions={
+          <div className="flex flex-wrap items-center gap-2">
+            <button
+              onClick={handleSync}
+              className={`flex items-center gap-2 px-3.5 py-2 bg-white/10 hover:bg-white/15 text-white border border-white/10 rounded-xl text-xs font-medium cursor-pointer backdrop-blur-md transition-all ${isSyncing ? 'opacity-80 cursor-wait' : ''}`}
+            >
+              <RefreshCcw className={`w-3.5 h-3.5 ${isSyncing ? 'animate-spin' : ''}`} />
+              Synchroniser KPIs
+            </button>
+            <button
+              onClick={handleExportCSV}
+              className="flex items-center gap-2 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white px-3.5 py-2 rounded-xl text-xs font-bold cursor-pointer shadow-lg shadow-emerald-500/20 transition-all"
+            >
+              <FileSpreadsheet className="w-4 h-4" />
+              Export CSV Executive
+            </button>
+            <button
+              onClick={handleExportPDF}
+              className="flex items-center gap-2 bg-white/10 hover:bg-white/15 text-white border border-white/10 px-3.5 py-2 rounded-xl text-xs font-bold cursor-pointer backdrop-blur-md transition-all"
+            >
+              <Download className="w-4 h-4" />
+              Rapport PDF Conseil
+            </button>
+          </div>
+        }
+      />
 
       {/* EXECUTIVE SUMMARY BANNER (CFO HIGHLIGHT) */}
       <div className="p-6 rounded-2xl bg-gradient-to-r from-emerald-950/40 via-slate-900 to-slate-900 border border-emerald-500/30 shadow-xl space-y-4 text-left">

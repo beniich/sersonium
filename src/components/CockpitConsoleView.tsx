@@ -320,12 +320,12 @@ export const CockpitConsoleView: React.FC<CockpitConsoleViewProps> = ({ onNaviga
         <aside className="hidden lg:flex fixed left-0 top-0 h-full w-72 bg-white dark:bg-[#0b0b10] border-r border-slate-200 dark:border-white/[0.08] shadow-sm z-50 flex-col justify-between p-4">
           <div className="flex flex-col gap-6">
             <div className="tactile-plate p-3 rounded-xl flex items-center gap-3">
-              <div className="w-9 h-9 rounded-lg bg-orange-500 flex items-center justify-center text-white shadow-sm">
-                <span className="material-symbols-outlined text-[20px]">grid_view</span>
+              <div className="w-9 h-9 rounded-lg bg-white border border-slate-200 dark:border-white/20 p-1 flex items-center justify-center shadow-sm overflow-hidden">
+                <img src="/logo-icon.png" alt="SENSORIUM" className="w-full h-full object-contain" />
               </div>
               <div className="flex flex-col">
                 <span className="font-['Space_Grotesk'] text-sm font-bold text-slate-900 dark:text-white">Cockpit Console</span>
-                <span className="font-['Space_Grotesk'] text-[10px] text-slate-500 dark:text-slate-400 uppercase">SENSORIUM Twin Ops</span>
+                <span className="font-['Space_Grotesk'] text-[10px] text-slate-500 dark:text-slate-400 uppercase">SENSORIUM CAFM PRO</span>
               </div>
             </div>
 
@@ -412,7 +412,14 @@ export const CockpitConsoleView: React.FC<CockpitConsoleViewProps> = ({ onNaviga
       <div className={`flex-1 flex flex-col min-h-screen ${isEmbedded ? 'w-full' : 'lg:pl-72'}`}>
         {/* Top Header inside Cockpit */}
         <header className={`${isEmbedded ? 'sticky top-0 w-full' : 'fixed top-0 left-0 lg:left-72 right-0'} h-20 bg-white/95 dark:bg-[#070709]/95 backdrop-blur-md border-b border-slate-200 dark:border-white/[0.08] z-30 flex items-center justify-between px-4 sm:px-6`}>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-3">
+            <div 
+              onClick={() => onNavigate('architecture')}
+              className="w-9 h-9 rounded-xl bg-white border border-slate-200 dark:border-white/20 p-1 flex items-center justify-center shadow-xs cursor-pointer hover:scale-105 transition-transform"
+              title="Retour à l'accueil SENSORIUM"
+            >
+              <img src="/logo-icon.png" alt="SENSORIUM" className="w-full h-full object-contain" />
+            </div>
             <div className="tactile-debossed px-3 py-1.5 rounded-xl flex items-center gap-2">
               <span className="material-symbols-outlined text-orange-500 dark:text-orange-400 text-[18px]">domain</span>
               <span className="font-['Space_Grotesk'] text-[11px] text-slate-900 dark:text-white font-semibold">

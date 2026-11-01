@@ -2,6 +2,8 @@ import React, { useState } from "react";
 import { useRbac, ROLE_LABELS, ROLE_COLORS, RbacRole, TenantMember, Tenant } from "../bridge/useRbac";
 import { MOCK_TENANTS, ROLE_PERMISSIONS } from "../services/rbac.service";
 import type { Permission } from "../services/rbac.service";
+import PageHeaderBanner from "../components/PageHeaderBanner";
+import { ShieldCheck } from "lucide-react";
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -228,24 +230,29 @@ export function IamAdminPage({ isDark = true }: { isDark?: boolean }) {
     }}>
       <style>{`@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');`}</style>
 
-      {/* Header */}
-      <div style={{ marginBottom: "24px" }}>
-        <div style={{ display: "flex", alignItems: "center", gap: "14px", marginBottom: "8px" }}>
-          <div style={{ width: "42px", height: "42px", borderRadius: "12px", background: "linear-gradient(135deg, #6366f1, #8b5cf6)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "20px" }}>🔐</div>
-          <div>
-            <h1 style={{ margin: 0, fontSize: "20px", fontWeight: 700, background: "linear-gradient(135deg, #6366f1, #00e5a0)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>
-              IAM — Gestion des Identités & Accès
-            </h1>
-            <div style={{ fontSize: "12px", color: "#475569" }}>
-              Authentification entreprise multi-tenant · RBAC · SSO · Audit
-            </div>
-          </div>
-        </div>
+      {/* Header Banner */}
+      <PageHeaderBanner
+        bannerImage="/banners/banner_17.png"
+        bannerAlt="IAM Identités et Accès Multi-Tenant RBAC Banner"
+        badge="IAM • Identités & Accès Multi-Tenant RBAC"
+        badgeIcon={ShieldCheck}
+        badgeColor="bg-indigo-500/15 text-indigo-400 border-indigo-500/30"
+        status={{ label: `ROLE: ${ROLE_LABELS[session.role]}`, color: "purple" }}
+        title="IAM — Gestion des Identités & Accès"
+        subtitle="Authentification entreprise multi-tenant · RBAC · SSO · Audit cryptographique"
+        description="Panneau d'administration centralisé pour la gestion des membres, tenants, permissions granulaires et matrice de contrôle d'accès basé sur les rôles."
+        telemetry={[
+          { label: "Tenants Actifs", value: `${allTenants.length}` },
+          { label: "Membres Totaux", value: `${tenantMembers.length}` },
+          { label: "Session", value: session.displayName.split(" ")[0] },
+          { label: "Auth Method", value: session.authMethod.toUpperCase(), isPositive: true }
+        ]}
+      />
 
-        {/* Session badge */}
-        <div style={{
+      {/* Session badge */}
+      <div style={{
           display: "inline-flex", alignItems: "center", gap: "10px",
-          padding: "10px 14px", borderRadius: "10px",
+          padding: "10px 14px", borderRadius: "10px", marginBottom: "16px",
           background: `${ROLE_COLORS[session.role]}10`,
           border: `1px solid ${ROLE_COLORS[session.role]}30`,
         }}>
@@ -259,7 +266,6 @@ export function IamAdminPage({ isDark = true }: { isDark?: boolean }) {
             </div>
           </div>
         </div>
-      </div>
 
       {/* Tabs */}
       <div className="sticky top-0 z-20 -mx-2.5 sm:-mx-4 lg:-mx-5 px-2.5 sm:px-4 lg:px-5 py-2 bg-slate-950/90 backdrop-blur-xl border-b border-white/10 shadow-xs">

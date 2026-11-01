@@ -31,6 +31,7 @@ import quantumMonolithImg from "../assets/images/quantum_edge_core_1789568592988
 import planetaryMeshImg from "../assets/images/planetary_edge_mesh_1789568609265.jpg";
 import brandVisionImg from "../assets/images/cafm_brand_vision_1789522330075.jpg";
 import SocialAdSimulator from "../components/SocialAdSimulator";
+import PageHeaderBanner from "../components/PageHeaderBanner";
 
 interface AdCampaignsPageProps {
   isDark: boolean;
@@ -132,11 +133,31 @@ export default function AdCampaignsPage({ isDark, onExplorePublic }: AdCampaigns
   return (
     <div className="space-y-12 animate-in fade-in slide-in-from-bottom-3 duration-500 pb-20">
       
+      {/* Campaign Header Banner */}
+      <PageHeaderBanner
+        bannerImage="/banners/banner_19.png"
+        bannerAlt="Advertising Campaigns High-Impact Visual Universe Banner"
+        badge="Creative Studio • Advertising Campaigns & Visuals"
+        badgeIcon={Megaphone}
+        badgeColor="bg-orange-500/15 text-orange-400 border-orange-500/30"
+        status={{ label: "CAMPAGNES ACTIVES • STUDIO CRÉATIF", color: "orange" }}
+        title="Powerful Visuals for an Unforgettable Brand."
+        subtitle="Advertising Campaigns & High-Impact Visual Universe — Story, Reels, Billboards"
+        description="Simulateur de campagnes sociales 9:16 interactif, panneaux d'affichage urbains 8K et spots médias internationaux pour le déploiement de la marque SENSORIUM."
+        telemetry={[
+          { label: "Campagnes", value: `${campaigns.length} Actives` },
+          { label: "Canaux", value: "Social + OOH" },
+          { label: "Impressions", value: "14M+", isPositive: true },
+          { label: "CTR Moyen", value: "8.4%", isPositive: true }
+        ]}
+        className="mb-4"
+      />
+
       {/* Hero Header for Ads and Publicity */}
-      <div className="text-center space-y-4 max-w-4xl mx-auto pt-4">
+      <div className="text-center space-y-4 max-w-4xl mx-auto pt-2">
         <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-gradient-to-r from-orange-500/20 via-amber-500/20 to-orange-500/10 border border-orange-500/30 text-orange-600 dark:text-orange-400 text-xs font-mono font-bold tracking-wider uppercase backdrop-blur-md">
           <Megaphone className="w-3.5 h-3.5 text-orange-500 animate-bounce" />
-          <span>Advertising Campaigns & High-Impact Visual Universe</span>
+          <span>Advertising Campaigns &amp; High-Impact Visual Universe</span>
         </div>
 
         <h1 className="text-3xl md:text-5xl lg:text-6xl font-black tracking-tight leading-tight bg-gradient-to-br from-slate-900 via-slate-800 to-slate-600 dark:from-white dark:via-neutral-100 dark:to-neutral-400 bg-clip-text text-transparent">

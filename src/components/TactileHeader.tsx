@@ -6,6 +6,8 @@ export type ActiveNavPath =
   | 'lacaza'
   | 'sensorium'
   | 'nanobanana'
+  | 'vitrine-clair'
+  | 'posters'
   | 'architecture'
   | '6-core-pillars'
   | '3d-digital-twin'
@@ -28,6 +30,8 @@ interface TactileHeaderProps {
   onSignOut?: () => void;
   subscriptionTier?: string;
   onOpenPricing?: () => void;
+  isDark?: boolean;
+  toggleTheme?: () => void;
 }
 
 export const TactileHeader: React.FC<TactileHeaderProps> = ({
@@ -43,6 +47,8 @@ export const TactileHeader: React.FC<TactileHeaderProps> = ({
   onSignOut,
   subscriptionTier = 'pro',
   onOpenPricing,
+  isDark = true,
+  toggleTheme,
 }) => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
@@ -63,29 +69,10 @@ export const TactileHeader: React.FC<TactileHeaderProps> = ({
           <div className="flex items-center gap-2.5 sm:gap-4 shrink-0">
             <div
               onClick={() => handleNavClick('architecture')}
-              className="w-10 h-10 sm:w-11 sm:h-11 rounded-xl flex items-center justify-center cursor-pointer hover:scale-105 transition-transform overflow-hidden shrink-0 bg-slate-900 dark:bg-black border border-slate-700 dark:border-white/15 shadow-sm"
-              title="SENSORIUM Autonomous Platform"
+              className="w-10 h-10 sm:w-11 sm:h-11 rounded-xl flex items-center justify-center cursor-pointer hover:scale-105 transition-transform overflow-hidden shrink-0 bg-white dark:bg-white border border-slate-200 dark:border-white/20 shadow-sm p-1"
+              title="SENSORIUM CAFM PRO"
             >
-              <svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-6 h-6 sm:w-7 sm:h-7">
-                <defs>
-                  <linearGradient id="thGold" x1="0%" y1="0%" x2="100%" y2="100%">
-                    <stop offset="0%" stopColor="#FFFFFF" />
-                    <stop offset="45%" stopColor="#F97316" />
-                    <stop offset="100%" stopColor="#EA580C" />
-                  </linearGradient>
-                  <radialGradient id="thCore" cx="50%" cy="50%" r="50%">
-                    <stop offset="0%" stopColor="#FED7AA" />
-                    <stop offset="100%" stopColor="#F97316" />
-                  </radialGradient>
-                </defs>
-                <path d="M16 3L27.25 9.5V22.5L16 29L4.75 22.5V9.5L16 3Z" stroke="url(#thGold)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-                <circle cx="16" cy="16" r="7.5" stroke="rgba(255,255,255,0.2)" strokeWidth="1" strokeDasharray="2 2" />
-                <circle cx="16" cy="16" r="4.5" stroke="url(#thGold)" strokeWidth="1.2" />
-                <circle cx="16" cy="16" r="2.2" fill="url(#thCore)" />
-                <circle cx="16" cy="6.5" r="1.1" fill="#FFFFFF" />
-                <circle cx="24.2" cy="20.7" r="1.1" fill="#FFFFFF" />
-                <circle cx="7.8" cy="20.7" r="1.1" fill="#FFFFFF" />
-              </svg>
+              <img src="/logo-icon.png" alt="SENSORIUM Icon" className="w-full h-full object-contain" />
             </div>
             <div className="flex flex-col cursor-pointer" onClick={() => handleNavClick('architecture')}>
               <div className="flex items-center gap-1.5">
@@ -120,6 +107,7 @@ export const TactileHeader: React.FC<TactileHeaderProps> = ({
           {/* Center: Desktop Navigation links (PC >= 1280px) */}
           <nav className="hidden xl:flex items-center gap-1.5">
             {[
+              { id: 'vitrine-clair', label: 'Accueil' },
               { id: 'architecture', label: 'Architecture' },
               { id: '6-core-pillars', label: '6 Piliers' },
               { id: '3d-digital-twin', label: 'Jumeau 3D' },
@@ -139,13 +127,19 @@ export const TactileHeader: React.FC<TactileHeaderProps> = ({
                 {item.label}
               </button>
             ))}
-            <a
-              href="/site/index.html"
-              className="transition-all px-3 py-1.5 rounded-xl font-['Space_Grotesk'] text-[13px] sm:text-[14px] text-slate-600 dark:text-neutral-400 hover:text-orange-600 dark:hover:text-orange-400 flex items-center gap-1"
-              title="Site Web Vitrine Complet (12 pages)"
+            <button
+              onClick={() => handleNavClick('posters')}
+              className="transition-all px-3 py-1.5 rounded-xl font-['Space_Grotesk'] text-[13px] sm:text-[14px] text-orange-600 dark:text-orange-400 hover:bg-orange-500/10 flex items-center gap-1.5 font-bold cursor-pointer"
+              title="Galerie 28 Affiches & Écrans Industriels"
             >
-              <span>Site Web</span>
-              <span className="text-[9px] px-1.5 py-0.5 bg-orange-500/10 text-orange-600 dark:text-orange-400 border border-orange-500/20 rounded-full font-bold uppercase">12 PAGES</span>
+              <span>28 Affiches</span>
+            </button>
+            <a
+              href="/site/solutions.html"
+              className="transition-all px-3 py-1.5 rounded-xl font-['Space_Grotesk'] text-[13px] sm:text-[14px] text-slate-600 dark:text-neutral-400 hover:text-slate-900 dark:hover:text-white flex items-center gap-1"
+              title="Solutions Métiers Sectorielles"
+            >
+              <span>Solutions</span>
             </a>
             <a
               href="/site/benefices_roi.html"
@@ -157,7 +151,7 @@ export const TactileHeader: React.FC<TactileHeaderProps> = ({
             <a
               href="/site/demo.html"
               className="transition-all px-3 py-1.5 rounded-xl font-['Space_Grotesk'] text-[13px] sm:text-[14px] text-slate-600 dark:text-neutral-400 hover:text-slate-900 dark:hover:text-white flex items-center gap-1"
-              title="Demander une Démo"
+              title="Demander une Démo Interactive"
             >
               <span>Démo</span>
             </a>
@@ -165,6 +159,20 @@ export const TactileHeader: React.FC<TactileHeaderProps> = ({
 
           {/* Right action block */}
           <div className="flex items-center gap-1.5 sm:gap-2.5 shrink-0">
+
+            {/* Theme Switcher Button */}
+            {toggleTheme && (
+              <button
+                onClick={toggleTheme}
+                className="p-2 rounded-xl flex items-center justify-center text-slate-700 dark:text-neutral-200 bg-slate-100 dark:bg-white/[0.06] hover:bg-slate-200 dark:hover:bg-white/[0.1] border border-slate-200 dark:border-white/[0.08] cursor-pointer transition-all active:scale-95"
+                title={isDark ? "Passer en Mode Clair" : "Passer en Mode Sombre"}
+                aria-label="Basculer le mode clair / sombre"
+              >
+                <span className="material-symbols-outlined text-[18px] text-amber-500">
+                  {isDark ? 'light_mode' : 'dark_mode'}
+                </span>
+              </button>
+            )}
 
             {/* User Profile / Registration / Login Button */}
             {user ? (
@@ -327,13 +335,26 @@ export const TactileHeader: React.FC<TactileHeaderProps> = ({
                     <div className="text-[10px] text-orange-600 dark:text-orange-400 font-bold uppercase tracking-wider">Spatial Twin &amp; Hypervision</div>
                   </div>
                 </div>
-                <button
-                  onClick={() => setIsMobileMenuOpen(false)}
-                  className="p-1.5 rounded-lg text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/[0.06] cursor-pointer"
-                  aria-label="Fermer le menu"
-                >
-                  <span className="material-symbols-outlined text-[22px]">close</span>
-                </button>
+                <div className="flex items-center gap-1">
+                  {toggleTheme && (
+                    <button
+                      onClick={toggleTheme}
+                      className="p-1.5 rounded-lg text-slate-500 dark:text-neutral-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/[0.06] cursor-pointer"
+                      title={isDark ? "Mode Clair" : "Mode Sombre"}
+                    >
+                      <span className="material-symbols-outlined text-[20px] text-amber-500">
+                        {isDark ? 'light_mode' : 'dark_mode'}
+                      </span>
+                    </button>
+                  )}
+                  <button
+                    onClick={() => setIsMobileMenuOpen(false)}
+                    className="p-1.5 rounded-lg text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/[0.06] cursor-pointer"
+                    aria-label="Fermer le menu"
+                  >
+                    <span className="material-symbols-outlined text-[22px]">close</span>
+                  </button>
+                </div>
               </div>
 
               {/* User Account / Auth Card */}
@@ -392,6 +413,8 @@ export const TactileHeader: React.FC<TactileHeaderProps> = ({
                 <div className="text-[10px] uppercase font-mono text-slate-400 dark:text-neutral-500 px-2 tracking-wider font-bold">Navigation Principale</div>
                 
                 {[
+                  { id: 'vitrine-clair', label: 'Accueil Vitrine SENSORIUM', icon: 'home' },
+                  { id: 'posters', label: 'Galerie 28 Affiches & Écrans', icon: 'layers', badge: '28 VISUELS' },
                   { id: 'architecture', label: 'Architecture & Topologie', icon: 'account_tree' },
                   { id: '6-core-pillars', label: '6 Piliers SENSORIUM', icon: 'hub' },
                   { id: '3d-digital-twin', label: 'Jumeau Numérique 3D', icon: 'view_in_ar' },
@@ -419,17 +442,17 @@ export const TactileHeader: React.FC<TactileHeaderProps> = ({
                 ))}
 
                 <div className="pt-2 border-t border-slate-200 dark:border-white/[0.08]">
-                  <div className="text-[10px] uppercase font-mono text-slate-400 dark:text-neutral-500 px-2 tracking-wider font-bold mb-1">Site Web &amp; Vitrine Complète (12 Pages)</div>
+                  <div className="text-[10px] uppercase font-mono text-slate-400 dark:text-neutral-500 px-2 tracking-wider font-bold mb-1">Portail &amp; Pages Métiers (20 Pages)</div>
                   
                   <a
                     href="/site/index.html"
                     className="w-full flex items-center justify-between px-3 py-2 rounded-xl text-left font-['Space_Grotesk'] text-sm text-orange-600 dark:text-orange-400 hover:bg-orange-500/10 font-bold"
                   >
                     <span className="flex items-center gap-3">
-                      <span className="material-symbols-outlined text-[18px]">home</span>
-                      <span>Accueil Vitrine</span>
+                      <span className="material-symbols-outlined text-[18px]">public</span>
+                      <span>Portail HTML Statique</span>
                     </span>
-                    <span className="text-[9px] px-1.5 py-0.5 bg-orange-500/15 text-orange-600 dark:text-orange-400 rounded-full font-bold uppercase">12 PAGES</span>
+                    <span className="text-[9px] px-1.5 py-0.5 bg-orange-500/15 text-orange-600 dark:text-orange-400 rounded-full font-bold uppercase">20 PAGES</span>
                   </a>
 
                   {[

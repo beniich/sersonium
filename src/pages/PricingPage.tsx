@@ -41,6 +41,7 @@ import { useLanguage } from "../App";
 import { GlobalState, SubscriptionTier } from "../types";
 import { logAuditEvent } from "../hooks/useGlobalState";
 import PayPalSmartButton from "../components/PayPalSmartButton";
+import PageHeaderBanner from "../components/PageHeaderBanner";
 
 interface PricingPageProps {
   state: GlobalState;
@@ -352,6 +353,28 @@ export default function PricingPage({
 
       <div className="relative z-10 max-w-7xl mx-auto space-y-16">
         
+        {/* Header Banner */}
+        <PageHeaderBanner
+          bannerImage="/banners/banner_13.png"
+          bannerAlt="Grille Tarifaire Enterprise Pricing Banner"
+          badge="Tarification Souveraine B2B • Plans SENSORIUM"
+          badgeIcon={Crown}
+          badgeColor="bg-orange-500/15 text-orange-400 border-orange-500/30"
+          status={{ label: "14 JOURS ESSAI GRATUIT", color: "emerald" }}
+          title={language === "fr" ? "Grille Tarifaire & Quotas Entreprise" : "Enterprise Pricing & Quotas"}
+          subtitle={language === "fr" ? "Supervision SaaS souveraine pour PME, ETI et Grand Compte" : "Sovereign SaaS supervision for SME, Mid-Market & Enterprise"}
+          description={language === "fr"
+            ? "Jumeau 3D · IoT 1.4M req/s · Remédiation AIOps < 1.5s · Conformité DORA/CSRD opposable. Zéro ingress de frais réseau."
+            : "3D Twin · IoT 1.4M req/s · AIOps remediation < 1.5s · Certified DORA/CSRD audits. Zero network egress fees."}
+          telemetry={[
+            { label: "Plans Actifs", value: "3 Niveaux" },
+            { label: "Remise Annuelle", value: "-20%", isPositive: true },
+            { label: "Essai Gratuit", value: "14 Jours", isPositive: true },
+            { label: "Support SLA", value: "Inclus", isPositive: true }
+          ]}
+          className="mb-4"
+        />
+
         {/* Hero Section */}
         <div className="text-center max-w-3xl mx-auto pt-4 space-y-5 flex flex-col items-center">
           

@@ -22,6 +22,7 @@ import MobileFieldTechnician from "../components/MobileFieldTechnician";
 import PreventiveMaintenanceScheduler from "../components/PreventiveMaintenanceScheduler";
 import { CockpitConsoleView } from "../components/CockpitConsoleView";
 import TelemetryChart from "../components/TelemetryChart";
+import PageHeaderBanner from "../components/PageHeaderBanner";
 
 interface InfrastructurePageProps {
   state: GlobalState;
@@ -232,42 +233,50 @@ export default function InfrastructurePage({ state, isDark, activeItemId = "inf-
 
   return (
     <div className="space-y-6 animate-in fade-in duration-300 relative">
-      {/* Header with Glass Card Banner */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end p-5 rounded-2xl glass-panel gap-3">
-        <div>
-          <div className="flex items-center gap-2">
-            <h1 className="text-2xl font-bold tracking-tight">Infrastructure & CAFM</h1>
-            <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-orange-500/15 text-orange-600 dark:text-orange-400 border border-orange-500/30">
-              Mesh Telemetry
-            </span>
+      {/* Header Banner */}
+      <PageHeaderBanner
+        bannerImage="/banners/banner_7.png"
+        bannerAlt="Datacenter Infrastructure GTB CVC Banner"
+        badge="Datacenter & Énergie CVC • CSRD Scope 1-3"
+        badgeIcon={Server}
+        badgeColor="bg-teal-500/15 text-teal-400 border-teal-500/30"
+        status={{ label: "PUE 1.12 • OPTIMAL", color: "emerald" }}
+        title="Infrastructure Datacenter & GTB CVC"
+        subtitle="enterprise.sensorium.cloud / Physical POP Datacenter Operations & CAFM"
+        description="Supervision aéraulique et thermo-régulée des centrales de froid, calcul du PUE temps réel et projection des économies ESG Scope 1-3."
+        telemetry={[
+          { label: "Datacenters", value: `${(state.nodes || []).length} POPs` },
+          { label: "PUE Instantané", value: "1.12", isPositive: true },
+          { label: "Économie Énergie", value: "-24% MWh" },
+          { label: "Disponibilité", value: "99.99%", isPositive: true }
+        ]}
+        actions={
+          <div className="flex items-center gap-2 flex-wrap">
+            <button 
+              onClick={() => generateInfrastructureReport(state)}
+              className="px-3.5 py-2 bg-white/10 hover:bg-white/15 text-white border border-white/10 rounded-xl text-xs font-semibold flex items-center gap-2 shadow-xs transition-all cursor-pointer backdrop-blur-md"
+            >
+              <Download className="w-4 h-4" /> Export Report
+            </button>
+            {(currentTab === "inf-1" || currentTab === "inf-geo") && (
+              <button 
+                onClick={() => setIsModalOpen(true)}
+                className="px-3.5 py-2 bg-gradient-to-r from-orange-500 to-amber-600 hover:from-orange-600 hover:to-amber-700 text-white rounded-xl text-xs font-semibold flex items-center gap-2 shadow-lg shadow-orange-500/20 transition-all cursor-pointer"
+              >
+                <Plus className="w-4 h-4" /> Provision Node
+              </button>
+            )}
+            {currentTab === "inf-3" && (
+              <button 
+                onClick={() => setIsWorkOrderModalOpen(true)}
+                className="px-3.5 py-2 bg-gradient-to-r from-orange-500 to-amber-600 hover:from-orange-600 hover:to-amber-700 text-white rounded-xl text-xs font-semibold flex items-center gap-2 shadow-lg shadow-orange-500/20 transition-all cursor-pointer"
+              >
+                <Plus className="w-4 h-4" /> New Work Order
+              </button>
+            )}
           </div>
-          <p className="text-sm text-neutral-500 dark:text-neutral-400 mt-1">enterprise.sensorium.cloud / Physical POP Datacenter Operations & CAFM</p>
-        </div>
-        <div className="flex items-center gap-2">
-          <button 
-            onClick={() => generateInfrastructureReport(state)}
-            className="px-3.5 py-2 bg-white dark:bg-neutral-800 text-neutral-900 dark:text-white border border-slate-200 dark:border-white/[0.08] rounded-xl text-xs font-semibold flex items-center gap-2 shadow-xs hover:bg-slate-50 dark:hover:bg-neutral-700 transition-all cursor-pointer"
-          >
-            <Download className="w-4 h-4" /> Export Report
-          </button>
-          {(currentTab === "inf-1" || currentTab === "inf-geo") && (
-            <button 
-              onClick={() => setIsModalOpen(true)}
-              className="px-3.5 py-2 bg-gradient-to-r from-[#F38020] to-[#FAAD3F] text-white rounded-xl text-xs font-semibold flex items-center gap-2 shadow-xs shadow-orange-500/25 hover:brightness-105 transition-all cursor-pointer"
-            >
-              <Plus className="w-4 h-4" /> Provision Node
-            </button>
-          )}
-          {currentTab === "inf-3" && (
-            <button 
-              onClick={() => setIsWorkOrderModalOpen(true)}
-              className="px-3.5 py-2 bg-gradient-to-r from-[#F38020] to-[#FAAD3F] text-white rounded-xl text-xs font-semibold flex items-center gap-2 shadow-xs shadow-orange-500/25 hover:brightness-105 transition-all cursor-pointer"
-            >
-              <Plus className="w-4 h-4" /> New Work Order
-            </button>
-          )}
-        </div>
-      </div>
+        }
+      />
 
       {/* Glassmorphic Tabs Bar (Fixé en haut / Sticky Bar) */}
       <div className="sticky top-0 z-20 flex overflow-x-auto gap-1.5 p-1.5 rounded-xl bg-slate-100/90 dark:bg-neutral-900/90 backdrop-blur-xl border border-slate-200/80 dark:border-white/[0.08] shadow-xs">

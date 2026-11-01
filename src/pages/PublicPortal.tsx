@@ -19,6 +19,8 @@ import { TelemetryMetrics, SpatialNode, GlobalState } from '../types';
 import { ShowcaseHub } from '../components/ShowcaseHub';
 import { XiaomiLanding } from '../components/XiaomiLanding';
 import { SensoriumShowcase, NanoBananaShowcase } from '../components/SensoriumShowcase';
+import { AutonomousRobotics } from '../components/AutonomousRobotics';
+import { SensoriumVitrineClair } from '../components/SensoriumVitrineClair';
 import type { User } from 'firebase/auth';
 
 // Lazy-load heavier interactive sub-views on demand to make landing page load instant
@@ -53,7 +55,9 @@ export default function PublicPortal({
   onNavigateToSection: _onNavigateToSection,
   state: _globalState,
   user,
-  initialView = 'architecture',
+  isDark = true,
+  toggleTheme,
+  initialView = 'vitrine-clair',
   isEmbedded = false,
   onUpgradeTier,
 }: PublicPortalProps) {
@@ -155,10 +159,10 @@ export default function PublicPortal({
   };
 
   return (
-    <div className={`min-h-screen bg-slate-50 dark:bg-[#070709] text-slate-900 dark:text-neutral-100 flex flex-col font-['Inter'] selection:bg-orange-500/30 selection:text-orange-300 ${isEmbedded ? 'rounded-2xl overflow-hidden' : ''}`}>
+    <div className={`min-h-screen bg-slate-50 dark:bg-[#070709] text-slate-900 dark:text-slate-100 flex flex-col font-['Inter'] selection:bg-orange-500/30 selection:text-orange-600 transition-colors duration-200 ${isEmbedded ? 'rounded-2xl overflow-hidden' : ''}`}>
 
-      {/* Top Tactile Header (shared across all views) */}
-      {currentView !== 'cockpit' && (
+      {/* Top Tactile Header (shown for technical views, hidden on vitrine-clair & cockpit) */}
+      {currentView !== 'cockpit' && currentView !== 'vitrine-clair' && (
         <TactileHeader
           activePath={currentView}
           onNavigate={handleNavigate}
@@ -172,6 +176,8 @@ export default function PublicPortal({
           onSignOut={onSignOut}
           subscriptionTier={_globalState?.subscriptionTier || 'free'}
           onOpenPricing={() => handleNavigate('pricing')}
+          isDark={isDark}
+          toggleTheme={toggleTheme}
         />
       )}
 
@@ -263,6 +269,20 @@ export default function PublicPortal({
         />
       )}
 
+      {/* SENSORIUM CAFM PRO VITRINE CLAIRE & POSTERS GALLERY */}
+      {(currentView === 'vitrine-clair' || currentView === 'posters') && (
+        <SensoriumVitrineClair
+          onSignIn={onSignIn}
+          onEnterDashboard={handleEnterDashboard}
+          onNavigate={handleNavigate}
+          onLaunchCockpit={() => onLaunchCockpit ? onLaunchCockpit() : handleNavigate('cockpit')}
+          onOpenPricing={() => handleNavigate('pricing')}
+          user={user}
+          isDark={isDark}
+          toggleTheme={toggleTheme}
+        />
+      )}
+
       {/* VIEW 5 — ARCHITECTURE & SYSTEM TOPOLOGY / 6 PILLARS (nat---spider-cafm design) */}
       {(currentView === 'architecture' || currentView === '6-core-pillars') && (
         <div className={isEmbedded ? "pt-4" : "pt-20"}>
@@ -280,6 +300,9 @@ export default function PublicPortal({
 
             {/* The 6 Pillars of Spider CAFM */}
             <SixPillars onOpenPillar={handleOpenPillar} />
+
+            {/* Autonomous Cleaning & Robotics Showcase */}
+            <AutonomousRobotics onExploreRobotics={() => handleNavigate('3d-digital-twin')} />
 
             {/* Pipeline Architecture & TypeScript Schema */}
             <PipelineArchitecture />

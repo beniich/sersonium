@@ -31,6 +31,8 @@ import {
   MessageSquareQuote
 } from "lucide-react";
 
+import PageHeaderBanner from "../components/PageHeaderBanner";
+
 interface ComparisonPageProps {
   isDark?: boolean;
   onNavigate?: (page: string) => void;
@@ -164,6 +166,25 @@ SENSORIUM, en revanche, est une plateforme de Résilience. Nous ne nous contento
   return (
     <div className={`min-h-screen p-4 sm:p-6 lg:p-8 ${isDark ? "bg-[#0b0f17] text-white" : "bg-slate-50 text-slate-900"} font-sans space-y-8`}>
       
+      {/* ─── Header Banner ─── */}
+      <PageHeaderBanner
+        bannerImage="/banners/banner_15.png"
+        bannerAlt="Matrice Comparative ManageEngine vs SENSORIUM Banner"
+        badge="Benchmark Stratégique • ManageEngine vs SENSORIUM"
+        badgeIcon={Sparkles}
+        badgeColor="bg-amber-500/15 text-amber-400 border-amber-500/30"
+        status={{ label: "ANALYSE NEXT-GEN • COMPARATIF C-LEVEL", color: "amber" }}
+        title="Matrice Comparative : ManageEngine vs SENSORIUM"
+        subtitle="Benchmark Technologique & Stratégique : UEM Traditionnel vs Résilience Globale"
+        description="Analyse comparative des fonctionnalités, de la conformité DORA, de la visibilité 360° et du retour sur investissement pour les DSI et RSSI."
+        telemetry={[
+          { label: "Critères Comparés", value: "40+ Axes" },
+          { label: "Score SENSORIUM", value: "98.4%", isPositive: true },
+          { label: "Avantages Clés", value: "Zero-Trust Natif" },
+          { label: "Conformité DORA", value: "Certifié", isPositive: true }
+        ]}
+      />
+
       {/* ─── Hero Section ─── */}
       <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-slate-900 via-slate-900 to-slate-950 border border-orange-500/20 p-6 sm:p-10 shadow-2xl">
         <div className="absolute top-0 right-0 w-96 h-96 bg-orange-500/10 rounded-full blur-3xl pointer-events-none" />

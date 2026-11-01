@@ -4,6 +4,7 @@ import { Shield, Filter, Search, Plus, X, Lock, AlertTriangle, ShieldCheck, Cpu,
 import { logAuditEvent } from "../hooks/useGlobalState";
 import SecurityComplianceAudit from "../components/SecurityComplianceAudit";
 import ThreatMapWidget from "../components/ThreatMapWidget";
+import PageHeaderBanner from "../components/PageHeaderBanner";
 
 interface SecurityPageProps {
   state: GlobalState;
@@ -77,21 +78,34 @@ export default function SecurityPage({ state, isDark, activeItemId = "sec-1", on
 
   return (
     <div className="space-y-6 animate-in fade-in duration-300 relative">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end border-b border-slate-200 dark:border-neutral-800 pb-4 gap-3">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">Security & WAF</h1>
-          <p className="text-sm text-slate-500 dark:text-neutral-400 mt-1">enterprise.sensorium.cloud / Web Application Firewall & Zero-Day Defense</p>
-        </div>
-        {currentTab === "sec-1" && (
-          <button 
-            onClick={() => setIsModalOpen(true)}
-            className="px-3.5 py-1.5 bg-orange-500 hover:bg-orange-600 text-white rounded-lg text-sm font-medium transition-colors flex items-center gap-2 cursor-pointer shadow-xs"
-          >
-            <Plus className="w-4 h-4" /> Block Specific IP
-          </button>
-        )}
-      </div>
+      {/* Header Banner */}
+      <PageHeaderBanner
+        bannerImage="/banners/banner_3.png"
+        bannerAlt="Security WAF Enterprise Visual Banner"
+        badge="Cyberdéfense Adaptative • Layer 7"
+        badgeIcon={Shield}
+        badgeColor="bg-red-500/15 text-red-400 border-red-500/30"
+        status={{ label: "PROTECTED • OWASP CRS 3.3", color: "rose" }}
+        title="Security & WAF Adaptatif"
+        subtitle="enterprise.sensorium.cloud / Web Application Firewall & Zero-Day Defense"
+        description="Pare-feu applicatif distribué à scoring dynamique de menaces, auto-ban déterministe et partage inter-tenants des vecteurs d'attaque."
+        telemetry={[
+          { label: "WAF Events", value: (state.securityEvents || []).length },
+          { label: "OWASP Mode", value: "Paranoia L2" },
+          { label: "Auto-Ban", value: "15 min" },
+          { label: "Bot Shield", value: botModeEnabled ? "Active" : "Off", isPositive: botModeEnabled }
+        ]}
+        actions={
+          currentTab === "sec-1" ? (
+            <button 
+              onClick={() => setIsModalOpen(true)}
+              className="px-4 py-2 bg-gradient-to-r from-orange-500 to-amber-600 hover:from-orange-600 hover:to-amber-700 text-white rounded-xl text-xs font-semibold transition-all flex items-center gap-2 cursor-pointer shadow-lg shadow-orange-500/20"
+            >
+              <Plus className="w-4 h-4" /> Bloquer une IP
+            </button>
+          ) : undefined
+        }
+      />
 
       {/* Tabs */}
       <div className="sticky top-0 z-20 -mx-2.5 sm:-mx-4 lg:-mx-5 px-2.5 sm:px-4 lg:px-5 py-2 bg-white/90 dark:bg-neutral-950/90 backdrop-blur-xl border-b border-slate-200/80 dark:border-neutral-800 shadow-xs">

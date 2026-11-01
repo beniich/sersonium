@@ -5,6 +5,7 @@ import { db } from "../firebase";
 import { collection, addDoc, doc, updateDoc, deleteDoc } from "firebase/firestore";
 import { logAuditEvent } from "../hooks/useGlobalState";
 import { VaultView } from "../components/VaultView";
+import PageHeaderBanner from "../components/PageHeaderBanner";
 
 interface ZeroTrustPageProps {
   state: GlobalState;
@@ -67,21 +68,34 @@ export default function ZeroTrustPage({ state, isDark, activeItemId = "zt-1", on
 
   return (
     <div className="space-y-6 animate-in fade-in duration-300 relative">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end border-b border-slate-200 dark:border-neutral-800 pb-4 gap-3">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">Zero Trust & Identity</h1>
-          <p className="text-sm text-slate-500 dark:text-neutral-400 mt-1">enterprise.sensorium.cloud / Identity-Aware Proxy & Secure Web Gateway</p>
-        </div>
-        {currentTab === "zt-1" && (
-          <button 
-            onClick={() => setIsModalOpen(true)}
-            className="px-3.5 py-1.5 bg-orange-500 hover:bg-orange-600 text-white rounded-lg text-sm font-medium flex items-center gap-2 transition-colors cursor-pointer shadow-xs"
-          >
-            <Plus className="w-4 h-4" /> Add Policy
-          </button>
-        )}
-      </div>
+      {/* Header Banner */}
+      <PageHeaderBanner
+        bannerImage="/banners/banner_11.png"
+        bannerAlt="Zero Trust Architecture Enclave Banner"
+        badge="Zero-Trust Architecture • Enclave mTLS & ZTNA"
+        badgeIcon={Lock}
+        badgeColor="bg-indigo-500/15 text-indigo-400 border-indigo-500/30"
+        status={{ label: "ENCLAVE mTLS • ZERO BREACH", color: "purple" }}
+        title="Zero Trust Architecture & Access"
+        subtitle="enterprise.sensorium.cloud / Context-Aware Access Policies & Identity-Aware Proxy"
+        description="Périmètre de sécurité Zero-Trust avec validation continue de contexte, chiffrement de bout en bout mTLS et isolation des micro-services."
+        telemetry={[
+          { label: "Politiques ZT", value: `${(state.ztPolicies || []).length} Actives` },
+          { label: "IdP Synchronisé", value: "Okta / Azure AD", isPositive: true },
+          { label: "Isolation Nav.", value: "Active", isPositive: true },
+          { label: "Score Posture", value: "100 / 100", isPositive: true }
+        ]}
+        actions={
+          currentTab === "zt-1" ? (
+            <button 
+              onClick={() => setIsModalOpen(true)}
+              className="px-4 py-2 bg-gradient-to-r from-orange-500 to-amber-600 hover:from-orange-600 hover:to-amber-700 text-white rounded-xl text-xs font-semibold flex items-center gap-2 transition-all cursor-pointer shadow-lg shadow-orange-500/20"
+            >
+              <Plus className="w-4 h-4" /> Add Policy
+            </button>
+          ) : undefined
+        }
+      />
 
       {/* Tabs */}
       <div className="sticky top-0 z-20 -mx-2.5 sm:-mx-4 lg:-mx-5 px-2.5 sm:px-4 lg:px-5 py-2 bg-white/90 dark:bg-neutral-950/90 backdrop-blur-xl border-b border-slate-200/80 dark:border-neutral-800 shadow-xs">

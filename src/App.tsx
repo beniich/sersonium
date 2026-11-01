@@ -653,7 +653,7 @@ export default function App() {
             authError={authError}
             state={state}
             user={user}
-            initialView={activePage === "architecture" ? "hub" : "hub"}
+            initialView={activePage === "architecture" ? "architecture" : "vitrine-clair"}
             isEmbedded={true}
             onUpgradeTier={handleUpgradeTier}
           />

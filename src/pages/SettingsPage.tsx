@@ -19,6 +19,7 @@ import PayPalManager from "../components/PayPalManager";
 import AuthorizationsManager from "../components/AuthorizationsManager";
 import GoogleAuthManager from "../components/GoogleAuthManager";
 import { useLanguage } from "../App";
+import PageHeaderBanner from "../components/PageHeaderBanner";
 
 interface SettingsPageProps {
   state: GlobalState;
@@ -315,53 +316,67 @@ export default function SettingsPage({ state, isDark, activeItemId = "set-1", on
         </div>
       )}
 
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end border-b border-neutral-200 dark:border-neutral-800 pb-4 gap-3">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight">Organization & Settings</h1>
-          <p className="text-sm text-neutral-500 mt-1">enterprise.sensorium.cloud / Account Governance, Subscriptions & Granular RBAC Permissions</p>
-        </div>
-        {currentTab === "set-1" && (
-          <div className="flex items-center gap-2">
-            <button 
-              onClick={() => setIsCardModalOpen(true)}
-              className="px-3.5 py-1.5 border border-slate-200 dark:border-neutral-800 text-slate-700 dark:text-neutral-200 bg-white dark:bg-neutral-800 rounded-lg text-sm font-medium flex items-center gap-2 hover:bg-slate-50 dark:hover:bg-neutral-700 cursor-pointer shadow-xs"
-            >
-              <CreditCard className="w-4 h-4 text-orange-500" /> Add Card
-            </button>
-            <button 
-              onClick={() => setIsTopUpOpen(true)}
-              className="px-3.5 py-1.5 bg-orange-500 hover:bg-orange-600 text-white rounded-lg text-sm font-bold flex items-center gap-2 transition-colors cursor-pointer shadow-xs"
-            >
-              <Plus className="w-4 h-4" /> Top-Up Sovereign Wallet
-            </button>
+      {/* Header Banner */}
+      <PageHeaderBanner
+        bannerImage="/banners/banner_12.png"
+        bannerAlt="Organization Settings Billing RBAC Banner"
+        badge="Organisation & Gouvernance • RBAC Granulaire"
+        badgeIcon={Settings}
+        badgeColor="bg-slate-500/15 text-slate-300 border-slate-500/30"
+        status={{ label: "TENANT ACTIF • RBAC COMPLET", color: "emerald" }}
+        title="Organization & Settings"
+        subtitle="enterprise.sensorium.cloud / Account Governance, Subscriptions & Granular RBAC Permissions"
+        description="Gestion centralisée des accréditations, politiques de facturation et contrôle d'accès granulaire par rôle et service."
+        telemetry={[
+          { label: "Membres Équipe", value: `${(state.teamMembers || []).length || 8} Actifs` },
+          { label: "Rôles RBAC", value: `${(state.rolesAndPermissions || []).length || 5} Rôles` },
+          { label: "Logs Audit", value: `${(state.auditLogs || []).length} Événements` }
+        ]}
+        actions={
+          <div className="flex items-center gap-2 flex-wrap">
+            {currentTab === "set-1" && (
+              <>
+                <button 
+                  onClick={() => setIsCardModalOpen(true)}
+                  className="px-3.5 py-2 bg-white/10 hover:bg-white/15 text-white border border-white/10 rounded-xl text-xs font-medium flex items-center gap-2 cursor-pointer backdrop-blur-md transition-all"
+                >
+                  <CreditCard className="w-4 h-4" /> Add Card
+                </button>
+                <button 
+                  onClick={() => setIsTopUpOpen(true)}
+                  className="px-3.5 py-2 bg-gradient-to-r from-orange-500 to-amber-600 hover:from-orange-600 hover:to-amber-700 text-white rounded-xl text-xs font-bold flex items-center gap-2 transition-all cursor-pointer shadow-lg shadow-orange-500/20"
+                >
+                  <Plus className="w-4 h-4" /> Top-Up Sovereign Wallet
+                </button>
+              </>
+            )}
+            {currentTab === "set-2" && (
+              <button 
+                onClick={() => setIsInviteOpen(true)}
+                className="px-3.5 py-2 bg-gradient-to-r from-orange-500 to-amber-600 hover:from-orange-600 hover:to-amber-700 text-white rounded-xl text-xs font-bold flex items-center gap-2 transition-all cursor-pointer shadow-lg shadow-orange-500/20"
+              >
+                <Plus className="w-4 h-4" /> Invite Member
+              </button>
+            )}
+            {currentTab === "set-3" && (
+              <button 
+                onClick={handleExportAuditCsv}
+                className="px-3.5 py-2 bg-white/10 hover:bg-white/15 text-white border border-white/10 rounded-xl text-xs font-medium flex items-center gap-2 cursor-pointer backdrop-blur-md transition-all"
+              >
+                <Download className="w-4 h-4" /> Export CSV
+              </button>
+            )}
+            {currentTab === "set-4" && (
+              <button 
+                onClick={() => setIsTokenModalOpen(true)}
+                className="px-3.5 py-2 bg-gradient-to-r from-orange-500 to-amber-600 hover:from-orange-600 hover:to-amber-700 text-white rounded-xl text-xs font-medium flex items-center gap-2 transition-all cursor-pointer shadow-lg shadow-orange-500/20"
+              >
+                <Plus className="w-4 h-4" /> Create API Token
+              </button>
+            )}
           </div>
-        )}
-        {currentTab === "set-2" && (
-          <button 
-            onClick={() => setIsInviteOpen(true)}
-            className="px-3.5 py-1.5 bg-orange-500 hover:bg-orange-600 text-white rounded-lg text-sm font-bold flex items-center gap-2 transition-colors cursor-pointer shadow-xs"
-          >
-            <Plus className="w-4 h-4" /> Invite Member
-          </button>
-        )}
-        {currentTab === "set-3" && (
-          <button 
-            onClick={handleExportAuditCsv}
-            className="px-3.5 py-1.5 bg-orange-500 hover:bg-orange-600 text-white rounded-lg text-sm font-medium flex items-center gap-2 transition-colors cursor-pointer shadow-xs"
-          >
-            <Download className="w-4 h-4" /> Export CSV
-          </button>
-        )}
-        {currentTab === "set-4" && (
-          <button 
-            onClick={() => setIsTokenModalOpen(true)}
-            className="px-3.5 py-1.5 bg-orange-500 hover:bg-orange-600 text-white rounded-lg text-sm font-medium flex items-center gap-2 transition-colors cursor-pointer shadow-xs"
-          >
-            <Plus className="w-4 h-4" /> Create API Token
-          </button>
-        )}
-      </div>
+        }
+      />
 
       {/* Tabs */}
       <div className="sticky top-0 z-20 -mx-2.5 sm:-mx-4 lg:-mx-5 px-2.5 sm:px-4 lg:px-5 py-2 bg-white/90 dark:bg-neutral-950/90 backdrop-blur-xl border-b border-neutral-200/80 dark:border-neutral-800 shadow-xs">

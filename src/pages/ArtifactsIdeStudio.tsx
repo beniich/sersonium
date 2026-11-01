@@ -34,6 +34,7 @@ import LiveStreamRenderer from "../components/renderers/LiveStreamRenderer";
 import SelfHealingModal, { SelfHealingIncident, DEFAULT_INCIDENT } from "../components/SelfHealingModal";
 import RollbackWatchdogStatus from "../components/RollbackWatchdogStatus";
 import FeatureGate from "../components/FeatureGate";
+import PageHeaderBanner from "../components/PageHeaderBanner";
 
 export interface ArtifactData {
   id: string;
@@ -738,49 +739,57 @@ spec:
       <div className={`space-y-4 animate-in fade-in duration-300 ${isFullScreen ? "fixed inset-0 z-50 bg-[#f8fafc] dark:bg-[#070709] p-4 overflow-hidden" : ""}`}>
       
       {/* En-tête de la fonctionnalité */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 pb-3 border-b border-slate-200 dark:border-white/[0.08]">
-        <div>
-          <div className="flex items-center gap-2.5">
-            <div className="p-2 rounded-xl bg-orange-500/10 text-orange-600 dark:text-orange-400 border border-orange-500/30">
-              <Bot className="w-5 h-5" />
+      {!isFullScreen && (
+        <PageHeaderBanner
+          bannerImage="/banners/banner_8.png"
+          bannerAlt="Studio Artifacts IDE & Action Layer Banner"
+          badge="OpenAPI 3.1 • Studio IDE & Action Layer"
+          badgeIcon={Sparkles}
+          badgeColor="bg-amber-500/15 text-amber-400 border-amber-500/30"
+          status={{ label: "IDE LIVE • GEMINI COPILOT", color: "amber" }}
+          title="Studio Artifacts IDE & Action Layer"
+          subtitle="Séparation stricte : Flux de raisonnement (gauche) & Espace de rendu multi-formats interactif (droite)"
+          description="Environnement d'ingénierie IaC Terraform/Kubernetes avec copilote Gemini en temps réel et déploiement One-Click sur cluster souverain."
+          telemetry={[
+            { label: "Artefacts", value: `${Object.keys(artifacts).length} Générés` },
+            { label: "Spécification", value: "OpenAPI 3.1", isPositive: true },
+            { label: "Pipeline Action", value: "5 Étapes" },
+            { label: "Cluster Cible", value: "cluster-apex-01", isPositive: true }
+          ]}
+          actions={
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => setIsSelfHealingOpen(true)}
+                className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold bg-red-500/15 hover:bg-red-500/25 text-red-400 border border-red-500/40 transition-all cursor-pointer animate-pulse shadow-sm shadow-red-500/20"
+                title="Déclencher la Remédiation Autonome (Self-Healing Loop)"
+              >
+                <Flame className="w-3.5 h-3.5 text-red-500" />
+                <span className="hidden sm:inline">Remédiation Autonome</span>
+                <span className="sm:hidden">Auto-Guérison</span>
+              </button>
+              <button
+                onClick={() => setIsFullScreen(!isFullScreen)}
+                className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-medium bg-white/10 hover:bg-white/15 text-white border border-white/10 transition-all cursor-pointer backdrop-blur-md"
+                title="Mode Plein Écran IDE"
+              >
+                <Maximize2 className="w-3.5 h-3.5" />
+                <span className="hidden sm:inline">Plein Écran</span>
+              </button>
             </div>
-            <div>
-              <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-slate-900 dark:text-white flex items-center gap-2">
-                SENSORIUM Artifacts IDE
-                <span className="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase bg-orange-500/10 text-orange-600 dark:text-orange-400 border border-orange-500/30">
-                  Hybride Split-Screen
-                </span>
-              </h1>
-              <p className="text-xs text-slate-500 dark:text-neutral-400">
-                Séparation stricte : Flux de raisonnement (gauche) &amp; Espace de rendu multi-formats interactif (droite)
-              </p>
-            </div>
-          </div>
-        </div>
-
-        {/* Action Pills & Fullscreen Toggle */}
-        <div className="flex items-center gap-2 self-end sm:self-center">
-          {/* Bouton Trigger Démo Auto-Guérison */}
+          }
+        />
+      )}
+      {isFullScreen && (
+        <div className="flex items-center justify-between pb-2 border-b border-white/[0.08]">
+          <span className="text-xs font-bold text-white uppercase tracking-wider">Studio IDE — Mode Plein Écran</span>
           <button
-            onClick={() => setIsSelfHealingOpen(true)}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold bg-red-500/15 hover:bg-red-500/25 text-red-400 border border-red-500/40 transition-all cursor-pointer animate-pulse shadow-sm shadow-red-500/20"
-            title="Déclencher la Remédiation Autonome (Self-Healing Loop)"
+            onClick={() => setIsFullScreen(false)}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-white/[0.05] hover:bg-white/[0.08] text-neutral-300 border border-white/[0.08] transition-colors cursor-pointer"
           >
-            <Flame className="w-3.5 h-3.5 text-red-500" />
-            <span className="hidden sm:inline">Remédiation Autonome (Rack B)</span>
-            <span className="sm:hidden">Auto-Guérison</span>
-          </button>
-
-          <button
-            onClick={() => setIsFullScreen(!isFullScreen)}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-slate-100 dark:bg-white/[0.05] hover:bg-slate-200 dark:hover:bg-white/[0.08] text-slate-700 dark:text-neutral-300 border border-slate-200 dark:border-white/[0.08] transition-colors cursor-pointer"
-            title={isFullScreen ? "Quitter le plein écran" : "Mode Plein Écran IDE"}
-          >
-            {isFullScreen ? <Minimize2 className="w-3.5 h-3.5" /> : <Maximize2 className="w-3.5 h-3.5" />}
-            <span className="hidden sm:inline">{isFullScreen ? "Réduire" : "Plein Écran"}</span>
+            <Minimize2 className="w-3.5 h-3.5" /> Réduire
           </button>
         </div>
-      </div>
+      )}
 
       {/* Conteneur Principal Split-Screen */}
       <div className={`grid grid-cols-1 lg:grid-cols-12 gap-4 ${isFullScreen ? "h-[calc(100vh-100px)]" : "min-h-[720px] h-[calc(100vh-220px)]"}`}>

@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from "react";
 import { 
   FileText, Mail, Calendar, Video, LayoutTemplate, 
-  LogIn, LogOut, CheckCircle, RefreshCcw, LayoutDashboard, Search, ShieldAlert, FileSpreadsheet
+  LogIn, LogOut, CheckCircle, RefreshCcw, LayoutDashboard, Search, ShieldAlert, FileSpreadsheet, Layers
 } from "lucide-react";
 import { GlobalState } from "../types";
 import { initAuth, googleSignIn, logout, getAccessToken } from "../firebase";
 import { User } from "firebase/auth";
+import PageHeaderBanner from "../components/PageHeaderBanner";
 
 interface WorkspacePageProps {
   state: GlobalState;
@@ -174,28 +175,37 @@ export default function WorkspacePage({ isDark, activeItemId = "ws-1", onSelectT
 
   return (
     <div className="p-6 md:p-10 space-y-8 animate-in fade-in duration-500">
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">Workspace Integrations</h1>
-          <p className="text-neutral-500 mt-1">Connect your Google Workspace accounts to manage data.</p>
-        </div>
-        <div className="flex items-center gap-4">
-          {!needsAuth && user ? (
-            <div className="flex items-center gap-3 bg-white dark:bg-[#15151a] border border-neutral-200 dark:border-white/10 px-4 py-2 rounded-xl">
-              {user.photoURL && <img src={user.photoURL} alt="Profile" className="w-8 h-8 rounded-full" />}
-              <div className="text-sm">
-                <p className="font-medium">{user.displayName}</p>
-                <p className="text-neutral-500 text-xs">{user.email}</p>
+      <PageHeaderBanner
+        bannerImage="/banners/banner_18.png"
+        bannerAlt="Google Workspace Integrations Suite Banner"
+        badge="Workspace Integrations • Google Suite Connect"
+        badgeIcon={Layers}
+        badgeColor="bg-blue-500/15 text-blue-400 border-blue-500/30"
+        status={{ label: needsAuth ? "AUTHENTIFICATION REQUISE" : `CONNECTÉ : ${user?.displayName?.split(" ")[0] ?? "User"}`, color: needsAuth ? "orange" : "emerald" }}
+        title="Workspace Integrations"
+        subtitle="Connect your Google Workspace accounts to manage data across Gmail, Calendar, Drive and Meet."
+        description="Suite unifiée d'intégration Google Workspace : consultation d'emails, gestion d'événements, partage de fichiers et réunions vidéo directement depuis SENSORIUM."
+        telemetry={[
+          { label: "Emails", value: `${emails.length} Lus` },
+          { label: "Events", value: `${events.length} Cal.` },
+          { label: "Drive", value: `${driveFiles.length} Fichiers` },
+          { label: "Session OAuth", value: user ? "Active" : "--", isPositive: !!user }
+        ]}
+        actions={
+          !needsAuth && user ? (
+            <div className="flex items-center gap-3 bg-white/10 border border-white/10 px-4 py-2 rounded-xl backdrop-blur-md">
+              {user.photoURL && <img src={user.photoURL} alt="Profile" className="w-7 h-7 rounded-full" />}
+              <div className="text-xs">
+                <p className="font-medium text-white">{user.displayName}</p>
+                <p className="text-white/60 text-[10px]">{user.email}</p>
               </div>
-              <button onClick={logout} className="ml-2 text-neutral-400 hover:text-red-500 transition-colors">
+              <button onClick={logout} className="ml-1 text-white/50 hover:text-red-400 transition-colors cursor-pointer">
                 <LogOut className="w-4 h-4" />
               </button>
             </div>
-          ) : (
-            <GoogleSignInButton />
-          )}
-        </div>
-      </div>
+          ) : undefined
+        }
+      />
 
       <div className="sticky top-0 z-20 -mx-2.5 sm:-mx-4 lg:-mx-5 px-2.5 sm:px-4 lg:px-5 py-2 bg-white/90 dark:bg-neutral-950/90 backdrop-blur-xl border-b border-neutral-200/80 dark:border-white/10 shadow-xs">
       <div className="flex gap-2 overflow-x-auto pb-2">

@@ -47,8 +47,8 @@ export const MasterHeader: React.FC<MasterHeaderProps> = ({
           className="flex items-center gap-2 cursor-pointer group"
           title="Portail Souverain SENSORIUM"
         >
-          <div className="w-6 h-6 bg-indigo-600 rounded flex items-center justify-center shadow-sm group-hover:scale-105 transition-transform">
-            <span className="text-white font-bold text-xs">S</span>
+          <div className="w-7 h-7 bg-white rounded-lg flex items-center justify-center shadow-sm group-hover:scale-105 transition-transform overflow-hidden p-0.5 border border-white/20">
+            <img src="/logo-icon.png" alt="SENSORIUM" className="w-full h-full object-contain" />
           </div>
           <span className="text-white font-bold tracking-tight text-sm uppercase">Sensorium</span>
         </div>

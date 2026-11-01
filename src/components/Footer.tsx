@@ -12,11 +12,13 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
           {/* Col 1 */}
           <div className="flex flex-col gap-2">
             <div className="flex items-center gap-2.5">
-              <img 
-                src="/apple-touch-icon.png" 
-                alt="SENSORIUM Logo" 
-                className="w-7 h-7 rounded-lg shadow-xs object-contain border border-orange-500/30" 
-              />
+              <div className="w-8 h-8 rounded-lg bg-white p-1 border border-slate-200 dark:border-white/10 shadow-xs flex items-center justify-center overflow-hidden">
+                <img 
+                  src="/logo-icon.png" 
+                  alt="SENSORIUM Logo" 
+                  className="w-full h-full object-contain" 
+                />
+              </div>
               <span className="font-['Space_Grotesk'] text-sm font-bold text-slate-900 dark:text-white tracking-wide">
                 SENSORIUM Platform
               </span>

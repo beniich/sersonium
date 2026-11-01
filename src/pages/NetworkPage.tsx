@@ -5,6 +5,7 @@ import { db } from "../firebase";
 import { collection, addDoc, doc, updateDoc, deleteDoc } from "firebase/firestore";
 import { logAuditEvent, initialUrlRedirects } from "../hooks/useGlobalState";
 import LacazaUrlRedirections from "../components/LacazaUrlRedirections";
+import PageHeaderBanner from "../components/PageHeaderBanner";
 
 interface NetworkPageProps {
   state: GlobalState;
@@ -88,21 +89,34 @@ export default function NetworkPage({ state, isDark, activeItemId = "net-1", onS
 
   return (
     <div className="space-y-6 animate-in fade-in duration-300 relative">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end border-b border-slate-200 dark:border-neutral-800 pb-4 gap-3">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">Edge Network & Routing</h1>
-          <p className="text-sm text-slate-500 dark:text-neutral-400 mt-1">enterprise.sensorium.cloud / Network Infrastructure & Global Anycast</p>
-        </div>
-        {currentTab === "net-1" && (
-          <button 
-            onClick={() => setIsModalOpen(true)}
-            className="px-3.5 py-1.5 bg-orange-500 hover:bg-orange-600 text-white rounded-lg text-sm font-medium transition-colors flex items-center gap-2 cursor-pointer shadow-xs"
-          >
-            <Plus className="w-4 h-4" /> Add Record
-          </button>
-        )}
-      </div>
+      {/* Header Banner */}
+      <PageHeaderBanner
+        bannerImage="/banners/banner_9.png"
+        bannerAlt="Edge Network Anycast Routing Banner"
+        badge="Edge Network • BGP Routing & Global Anycast"
+        badgeIcon={Globe}
+        badgeColor="bg-blue-500/15 text-blue-400 border-blue-500/30"
+        status={{ label: "ANYCAST MESH • 100% ROUTED", color: "blue" }}
+        title="Edge Network & DNS Routing"
+        subtitle="enterprise.sensorium.cloud / Network Infrastructure & Global Anycast"
+        description="Infrastructure réseau Anycast multi-continents à convergence BGP instantanée, gestion DNSSEC et équilibrage dynamique de charge."
+        telemetry={[
+          { label: "Enregistrements", value: `${(state.dnsRecords || []).length} Actifs` },
+          { label: "Routage BGP", value: "Anycast Any-Tier", isPositive: true },
+          { label: "Latence Edge", value: "4.8 ms" },
+          { label: "Cache Hit Rate", value: "94.2%", isPositive: true }
+        ]}
+        actions={
+          currentTab === "net-1" ? (
+            <button 
+              onClick={() => setIsModalOpen(true)}
+              className="px-4 py-2 bg-gradient-to-r from-orange-500 to-amber-600 hover:from-orange-600 hover:to-amber-700 text-white rounded-xl text-xs font-semibold transition-all flex items-center gap-2 cursor-pointer shadow-lg shadow-orange-500/20"
+            >
+              <Plus className="w-4 h-4" /> Add DNS Record
+            </button>
+          ) : undefined
+        }
+      />
 
       {/* Tabs */}
       <div className="sticky top-0 z-20 -mx-2.5 sm:-mx-4 lg:-mx-5 px-2.5 sm:px-4 lg:px-5 py-2 bg-white/90 dark:bg-neutral-950/90 backdrop-blur-xl border-b border-slate-200/80 dark:border-neutral-800 shadow-xs">
