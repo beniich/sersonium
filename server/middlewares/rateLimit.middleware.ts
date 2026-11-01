@@ -48,17 +48,30 @@ export const createRateLimiter = (options: RateLimiterOptions) => {
     if (req.user?.userId) {
       identifier = `user:${req.user.userId}`;
       if (tierMultiplier) {
-        // Boost quotas for enterprise accounts / admins
-        if (req.user.role === "admin") {
-          limit = maxRequests * 5;
-        } else if (req.user.role === "operator" || req.user.role === "technician") {
-          limit = maxRequests * 2;
+        const tier = ((req.user?.subscriptionTier || (req as any).subscriptionTier || (req.user as any)?.tier || "free") as string).toLowerCase();
+        let multiplier = 1;
+        if (tier === "enterprise") {
+          multiplier = 10;
+        } else if (tier === "pro") {
+          multiplier = 5;
+        } else if (tier === "silver" || tier === "starter") {
+          multiplier = 2;
         }
+
+        // Boost quotas pour rôles privilégiés
+        if (req.user.role === "admin") {
+          multiplier = Math.max(multiplier, 5);
+        } else if (req.user.role === "operator" || req.user.role === "technician") {
+          multiplier = Math.max(multiplier, 2);
+        }
+        limit = maxRequests * multiplier;
       }
     } else if (req.tenantId) {
       identifier = `tenant:${req.tenantId}`;
       if (tierMultiplier) {
-        limit = maxRequests * 3;
+        const tier = (((req as any).subscriptionTier || "free") as string).toLowerCase();
+        const multiplier = tier === "enterprise" ? 10 : tier === "pro" ? 5 : tier === "silver" ? 2 : 1;
+        limit = maxRequests * multiplier;
       }
     }
 

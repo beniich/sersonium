@@ -35,39 +35,58 @@ export interface InvoiceRecord {
 }
 
 export class ManageService {
-  /**
-   * 1. Gestion et statut de l'Abonnement
-   */
   async getSubscriptionDetails(): Promise<SubscriptionDetails> {
+    const activeTier = (typeof window !== "undefined" ? (localStorage.getItem("sensorium_subscription_tier") || "free") : "free").toUpperCase();
+    const costs: Record<string, number> = { FREE: 0, SILVER: 49, STARTER: 49, PRO: 99, ENTERPRISE: 299 };
+
     try {
       const response = await axios.get(`${API_BASE_URL}/manage/billing/summary`);
       const data = response.data?.data;
+      const plan = (data?.plan?.toUpperCase() || activeTier) as any;
       return {
-        plan: (data?.plan?.toUpperCase() || "PRO") as any,
-        status: "ACTIVE",
+        plan,
+        status: plan === "FREE" ? "CANCELED" : "ACTIVE",
         renewalDate: "2026-11-01",
         currency: "EUR",
-        monthlyCost: 49.0,
+        monthlyCost: costs[plan] ?? 0,
       };
     } catch {
       return {
-        plan: "PRO",
-        status: "ACTIVE",
+        plan: activeTier as any,
+        status: activeTier === "FREE" ? "CANCELED" : "ACTIVE",
         renewalDate: "2026-11-01",
         currency: "EUR",
-        monthlyCost: 49.0,
+        monthlyCost: costs[activeTier] ?? 0,
       };
     }
   }
 
   /**
    * 2. Suivi de consommation des Quotas IA (Tokens Gemini)
+   * Aligné sur le forfait réel : FREE 10K, SILVER 100K, PRO 1M, ENTERPRISE 100M
    */
   async getTokenUsage(): Promise<TokenUsageDetails> {
+    const activeTier = (typeof window !== "undefined" ? (localStorage.getItem("sensorium_subscription_tier") || "free") : "free").toUpperCase();
+    const limits: Record<string, number> = {
+      FREE: 10_000,
+      SILVER: 100_000,
+      STARTER: 100_000,
+      PRO: 1_000_000,
+      ENTERPRISE: 100_000_000,
+    };
+    const defaultConsumed: Record<string, number> = {
+      FREE: 1_500,
+      SILVER: 28_000,
+      STARTER: 28_000,
+      PRO: 450_000,
+      ENTERPRISE: 12_500_000,
+    };
+
+    const limit = limits[activeTier] || limits.FREE;
+
     try {
       const response = await axios.get(`${API_BASE_URL}/manage/billing/summary`);
-      const balance = response.data?.data?.balance ?? 750000;
-      const limit = 1000000;
+      const balance = response.data?.data?.balance ?? (limit - (defaultConsumed[activeTier] || 1_500));
       const consumed = Math.max(0, limit - balance);
       const percentage = Math.min(100, Math.round((consumed / limit) * 100));
 
@@ -79,10 +98,12 @@ export class ManageService {
         model: "Gemini 3.8 Flash & Grounded IA",
       };
     } catch {
+      const consumed = defaultConsumed[activeTier] || 1_500;
+      const percentage = Math.min(100, Math.round((consumed / limit) * 100));
       return {
-        consumed: 450000,
-        limit: 1000000,
-        percentage: 45,
+        consumed,
+        limit,
+        percentage,
         resetDate: "2026-11-01",
         model: "Gemini 3.8 Flash & Grounded IA",
       };

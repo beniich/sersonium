@@ -28,6 +28,7 @@ export interface AiTierLimits {
 
 const TIER_LIMITS: Record<string, AiTierLimits> = {
   free: { requestsPerMinute: 10, tokensPerDay: 5000 },
+  starter: { requestsPerMinute: 30, tokensPerDay: 30000 },
   silver: { requestsPerMinute: 30, tokensPerDay: 30000 },
   pro: { requestsPerMinute: 100, tokensPerDay: 150000 },
   enterprise: { requestsPerMinute: 300, tokensPerDay: 1000000 },
@@ -41,8 +42,9 @@ export const aiRateLimiter = (estimatedTokensPerCall = 350) => {
   return async (req: AuthenticatedRequest, res: Response, next: NextFunction): Promise<void> => {
     const clientIp = (req.headers["x-forwarded-for"] as string)?.split(",")[0]?.trim() || req.socket.remoteAddress || "127.0.0.1";
     const tenantId = req.tenantId || req.user?.tenantId || `anon_${clientIp.replace(/[^a-zA-Z0-9]/g, "_")}`;
-    const userTier = req.user?.subscriptionTier || (req as any).subscriptionTier || "pro";
-    const limits = TIER_LIMITS[userTier] || TIER_LIMITS.pro;
+    const rawTier = (req.user?.subscriptionTier || (req as any).subscriptionTier || (req.user as any)?.tier || "free").toString().toLowerCase();
+    const userTier = rawTier in TIER_LIMITS ? rawTier : "free";
+    const limits = TIER_LIMITS[userTier] || TIER_LIMITS.free;
 
     const now = Date.now();
     let entry = tenantStore.get(tenantId);

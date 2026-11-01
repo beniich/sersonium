@@ -166,6 +166,23 @@ export default function PricingPage({
       isHighlight: true
     },
     {
+      name: language === "fr" ? "Quota Mensuel Tokens IA Gemini" : "Gemini AI Monthly Token Quota",
+      description: language === "fr" ? "Volume d'inférences neuronales et copilote inclus par mois" : "Monthly neural inference & copilot volume included",
+      category: "ai",
+      lite: "100 000 jetons",
+      pro: "1 000 000 jetons",
+      enterprise: "100 000 000 jetons",
+      isHighlight: true
+    },
+    {
+      name: language === "fr" ? "Débit & Quota Requêtes API" : "API Requests & Rate Limit Quota",
+      description: language === "fr" ? "Plafond d'ingestion télémétrie et appels API par minute" : "Telemetry ingestion & API calls ceiling per minute",
+      category: "telemetry",
+      lite: "240 req/min (2x)",
+      pro: "600 req/min (5x)",
+      enterprise: "1 200 req/min (10x)"
+    },
+    {
       name: language === "fr" ? "Conformité DORA & Registre NIS2" : "DORA Compliance & NIS2 Register",
       description: language === "fr" ? "Score de résilience opérationnelle, tests ICT et journal d'audit" : "Operational resilience score, ICT tests & audit trails",
       category: "governance",

@@ -695,7 +695,7 @@ export function getDefaultMockState(): GlobalState {
     rolesAndPermissions: initialRolesAndPermissions,
     teamMembers: initialTeamMembers,
     googleAuthConfig: initialGoogleAuthConfig,
-    subscriptionTier: (typeof window !== "undefined" && localStorage.getItem("sensorium_subscription_tier") as any) || "pro",
+    subscriptionTier: (typeof window !== "undefined" && localStorage.getItem("sensorium_subscription_tier") as any) || "free",
   };
 }
 

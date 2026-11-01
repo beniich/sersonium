@@ -143,8 +143,16 @@ export class PayPalSubscriptionService {
       switch (eventType) {
         case "BILLING.SUBSCRIPTION.CREATED":
         case "BILLING.SUBSCRIPTION.ACTIVATED":
-        case "PAYMENT.CAPTURE.COMPLETED":
-          // Activation de la licence PRO avec mise à jour du statut et plan
+        case "PAYMENT.CAPTURE.COMPLETED": {
+          const planId = resource.plan_id || "";
+          const resolvedPlan: "SILVER" | "PRO" | "ENTERPRISE" =
+            planId === "P-2PN232575Y225210YNKY3QZQ" || planId.toLowerCase().includes("enterprise") ? "ENTERPRISE"
+            : planId === "P-44Y462991D576054FNKY3PKI" || planId.toLowerCase().includes("pro") ? "PRO"
+            : "SILVER";
+
+          const quotaLimit = resolvedPlan === "ENTERPRISE" ? -1 : resolvedPlan === "PRO" ? 10000 : 2000;
+
+          // Activation de la licence avec mise à jour du statut et plan réel
           await rawPrisma.organization.updateMany({
             where: {
               OR: [
@@ -153,14 +161,19 @@ export class PayPalSubscriptionService {
               ]
             },
             data: { 
-              plan: "PRO",
+              plan: resolvedPlan,
               subscriptionStatus: "active"
             },
           });
 
-          // Accord automatique des Entitlements Pro
-          const proFeatures = ["AI_OPS", "UEM_CONTROL", "ZERO_TRUST_ADVANCED", "MODULE_COCKPIT_3D"];
-          for (const featureKey of proFeatures) {
+          // Accord automatique des Entitlements selon le forfait
+          const features = resolvedPlan === "ENTERPRISE"
+            ? ["AI_OPS", "UEM_CONTROL", "ZERO_TRUST_ADVANCED", "MODULE_COCKPIT_3D", "CUSTOM_SSO", "SLA_DEDICATED"]
+            : resolvedPlan === "PRO"
+            ? ["AI_OPS", "UEM_CONTROL", "ZERO_TRUST_ADVANCED", "MODULE_COCKPIT_3D"]
+            : ["UEM_CONTROL", "AI_OPS_BASIC"];
+
+          for (const featureKey of features) {
             await rawPrisma.entitlement.upsert({
               where: {
                 tenantId_featureKey: {
@@ -172,18 +185,19 @@ export class PayPalSubscriptionService {
                 tenantId,
                 featureKey,
                 isGranted: true,
-                quotaLimit: 10000,
+                quotaLimit,
                 quotaUsed: 0,
               },
               update: {
                 isGranted: true,
-                quotaLimit: 10000,
+                quotaLimit,
               },
             }).catch(() => {});
           }
 
-          console.log(`✅ [PayPal Webhook] Licence PRO & Entitlements activés pour le Tenant ${tenantId}`);
+          console.log(`✅ [PayPal Webhook] Licence ${resolvedPlan} (Quota API: ${quotaLimit === -1 ? 'Illimité' : quotaLimit}) activée pour le Tenant ${tenantId}`);
           break;
+        }
 
         case "BILLING.SUBSCRIPTION.PAYMENT.FAILED":
           await rawPrisma.organization.updateMany({
@@ -199,8 +213,8 @@ export class PayPalSubscriptionService {
           break;
 
         case "BILLING.SUBSCRIPTION.CANCELLED":
-        case "BILLING.SUBSCRIPTION.EXPIRED":
-          // Rétrogradation vers le plan gratuit
+        case "BILLING.SUBSCRIPTION.EXPIRED": {
+          // Rétrogradation vers le plan gratuit et réduction stricte des quotas
           await rawPrisma.organization.updateMany({
             where: {
               OR: [
@@ -213,8 +227,16 @@ export class PayPalSubscriptionService {
               subscriptionStatus: "canceled"
             },
           });
-          console.log(`ℹ️ [PayPal Webhook] Rétrogradation vers FREE pour le Tenant ${tenantId}`);
+
+          // Réduire le quota des entitlements à 100 requêtes max
+          await rawPrisma.entitlement.updateMany({
+            where: { tenantId },
+            data: { quotaLimit: 100 },
+          }).catch(() => {});
+
+          console.log(`ℹ️ [PayPal Webhook] Rétrogradation vers FREE & quota réduit à 100 pour le Tenant ${tenantId}`);
           break;
+        }
 
         default:
           console.log(`ℹ️ [PayPal Webhook] Type d'événement non traité: ${eventType}`);

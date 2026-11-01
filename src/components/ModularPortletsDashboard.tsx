@@ -194,28 +194,42 @@ export const ModularPortletsDashboard: React.FC<ModularPortletsDashboardProps> =
                 )}
 
                 {/* 2. Consommation IA & Tokens Portlet */}
-                {portletId === "tokens" && (
-                  <div className="space-y-3 font-mono text-xs">
-                    <div className="flex justify-between text-slate-500">
-                      <span>Quota Utilisé (Mois en cours) :</span>
-                      <strong className="text-slate-800 dark:text-white">14 250 / 50 000 Tokens IA</strong>
-                    </div>
-                    {/* Progress Bar */}
-                    <div className="w-full h-2 rounded-full bg-slate-200 dark:bg-white/10 overflow-hidden">
-                      <div className="h-full bg-gradient-to-r from-orange-500 to-amber-500 rounded-full" style={{ width: "28.5%" }} />
-                    </div>
-                    <div className="grid grid-cols-2 gap-2 pt-1">
-                      <div className="p-2 rounded bg-slate-50 dark:bg-white/[0.02] border border-slate-200 dark:border-white/[0.06]">
-                        <span className="text-[10px] text-slate-400 uppercase">Prédictions Pannes</span>
-                        <div className="text-sm font-bold text-slate-800 dark:text-white">9 420 req</div>
+                {portletId === "tokens" && (() => {
+                  const tier = (state?.subscriptionTier || "free").toLowerCase();
+                  const quotaData = tier === "enterprise"
+                    ? { limit: "100M", used: "12.5M", percent: "12.5%", label: "ENTERPRISE", reqPannes: "142 800 req", reqCvc: "89 400 req" }
+                    : tier === "pro"
+                    ? { limit: "1M", used: "450 000", percent: "45%", label: "PRO", reqPannes: "9 420 req", reqCvc: "4 830 req" }
+                    : tier === "silver"
+                    ? { limit: "100 000", used: "28 000", percent: "28%", label: "SILVER", reqPannes: "1 250 req", reqCvc: "890 req" }
+                    : { limit: "10 000", used: "1 500", percent: "15%", label: "FREE", reqPannes: "120 req", reqCvc: "60 req" };
+
+                  return (
+                    <div className="space-y-3 font-mono text-xs">
+                      <div className="flex justify-between items-center text-slate-500">
+                        <span className="flex items-center gap-1.5">
+                          <span>Quota Utilisé (Mois) :</span>
+                          <span className="px-1.5 py-0.5 rounded text-[9px] bg-orange-500/10 text-orange-400 border border-orange-500/20 font-bold uppercase">{quotaData.label}</span>
+                        </span>
+                        <strong className="text-slate-800 dark:text-white">{quotaData.used} / {quotaData.limit} Tokens IA</strong>
                       </div>
-                      <div className="p-2 rounded bg-slate-50 dark:bg-white/[0.02] border border-slate-200 dark:border-white/[0.06]">
-                        <span className="text-[10px] text-slate-400 uppercase">Optimisations CVC</span>
-                        <div className="text-sm font-bold text-slate-800 dark:text-white">4 830 req</div>
+                      {/* Progress Bar */}
+                      <div className="w-full h-2 rounded-full bg-slate-200 dark:bg-white/10 overflow-hidden">
+                        <div className="h-full bg-gradient-to-r from-orange-500 to-amber-500 rounded-full" style={{ width: quotaData.percent }} />
+                      </div>
+                      <div className="grid grid-cols-2 gap-2 pt-1">
+                        <div className="p-2 rounded bg-slate-50 dark:bg-white/[0.02] border border-slate-200 dark:border-white/[0.06]">
+                          <span className="text-[10px] text-slate-400 uppercase">Prédictions Pannes</span>
+                          <div className="text-sm font-bold text-slate-800 dark:text-white">{quotaData.reqPannes}</div>
+                        </div>
+                        <div className="p-2 rounded bg-slate-50 dark:bg-white/[0.02] border border-slate-200 dark:border-white/[0.06]">
+                          <span className="text-[10px] text-slate-400 uppercase">Optimisations CVC</span>
+                          <div className="text-sm font-bold text-slate-800 dark:text-white">{quotaData.reqCvc}</div>
+                        </div>
                       </div>
                     </div>
-                  </div>
-                )}
+                  );
+                })()}
 
                 {/* 3. Souveraineté & Nœuds Edge */}
                 {portletId === "sovereignty" && (
