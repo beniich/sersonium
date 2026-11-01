@@ -42,6 +42,7 @@ import { GlobalState, SubscriptionTier } from "../types";
 import { logAuditEvent } from "../hooks/useGlobalState";
 import PayPalSmartButton from "../components/PayPalSmartButton";
 import PageHeaderBanner from "../components/PageHeaderBanner";
+import SubscriptionQuotaCounter from "../components/SubscriptionQuotaCounter";
 
 interface PricingPageProps {
   state: GlobalState;
@@ -451,6 +452,16 @@ export default function PricingPage({
               />
             </div>
           </div>
+        </div>
+
+        {/* Live Subscription Quota Counter Widget */}
+        <div className="max-w-4xl mx-auto w-full">
+          <SubscriptionQuotaCounter 
+            variant="card" 
+            state={state} 
+            showSimulateButtons={true}
+            className="w-full shadow-2xl border-orange-500/30"
+          />
         </div>
 
         {/* 3 Core SaaS Tiers Grid */}
