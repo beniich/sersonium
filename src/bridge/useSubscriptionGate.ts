@@ -27,7 +27,7 @@ if (typeof window !== 'undefined') {
   );
 }
 
-export type SubscriptionTier = 'FREE' | 'STARTER' | 'PRO' | 'ENTERPRISE';
+export type SubscriptionTier = 'FREE' | 'STARTER' | 'SILVER' | 'PRO' | 'ENTERPRISE';
 
 export type SubscriptionStatus = 
   | 'loading'
@@ -80,26 +80,30 @@ export function useSubscriptionGate(user: User | null | undefined) {
   }, []);
 
   const checkSubscription = useCallback(async () => {
-    // Vérifier si un abonnement ou un essai a été sélectionné localement
-    const savedTier = (localStorage.getItem('sensorium_user_tier') || localStorage.getItem('sensorium_subscription_tier') || '').toUpperCase() as SubscriptionTier;
-    const hasValidLocalTier = savedTier === 'STARTER' || savedTier === 'PRO' || savedTier === 'ENTERPRISE';
+    // Clé localStorage unifiée : sensorium_subscription_tier (BUG #7 corrigé)
+    const savedTier = (localStorage.getItem('sensorium_subscription_tier') || '').toUpperCase() as SubscriptionTier;
+    const hasValidLocalTier = savedTier === 'STARTER' || savedTier === 'SILVER' || savedTier === 'PRO' || savedTier === 'ENTERPRISE';
+
+    // Vérifier si un essai est toujours valide
+    const trialExpires = localStorage.getItem('sensorium_trial_expires_at');
+    const isTrialActive = trialExpires ? Date.now() < new Date(trialExpires).getTime() : false;
+    const hasTrialAccess = isTrialActive;
 
     if (!user) {
-      // En environnement de développement local ou si l'utilisateur teste sans compte,
-      // on active un accès Démo/Pro automatique afin de pouvoir visiter toutes les pages et onglets
-      const isLocalDev = typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1');
-      if (hasValidLocalTier || isLocalDev) {
-        const demoTier = (hasValidLocalTier ? savedTier : 'PRO') as SubscriptionTier;
+      // BUG #2 CORRIGÉ : suppression du bypass localhost automatique
+      // Seul un tier explicitement choisi ET non expiré donne accès
+      if (hasValidLocalTier || hasTrialAccess) {
+        const demoTier = (hasValidLocalTier ? savedTier : 'STARTER') as SubscriptionTier;
         setSubState({
           status: 'active',
           tier: demoTier,
-          planName: 'Mode Démo Local (Cockpit Full Access)',
+          planName: isTrialActive ? 'Essai Démo (14 jours)' : 'Accès Local Configuré',
           hasAccessToCockpit: true,
-          has3dDigitalTwin: true,
-          hasRealtimeKafka: true,
-          hasZtnaHardware: true,
-          tokenBalance: 9999,
-          expiresAt: new Date(Date.now() + 30 * 24 * 3600 * 1000).toISOString(),
+          has3dDigitalTwin: demoTier === 'PRO' || demoTier === 'ENTERPRISE',
+          hasRealtimeKafka: demoTier === 'PRO' || demoTier === 'ENTERPRISE',
+          hasZtnaHardware: demoTier === 'ENTERPRISE',
+          tokenBalance: demoTier === 'ENTERPRISE' ? 9999 : demoTier === 'PRO' ? 5000 : 1000,
+          expiresAt: trialExpires || null,
           isLoading: false,
         });
         return;
@@ -147,19 +151,19 @@ export function useSubscriptionGate(user: User | null | undefined) {
           isLoading: false,
         });
       } else {
-        // Mode fallback local (ex: développement ou simulation hors ligne)
-        // Vérification par attribut ou stockage local
-        const localTier = (localStorage.getItem('sensorium_user_tier') || 'pro').toUpperCase() as SubscriptionTier;
+        // BUG #3 CORRIGÉ : fallback API en échec → accès REFUSÉ (free) et non plus pro
+        const localTier = (localStorage.getItem('sensorium_subscription_tier') || 'free').toUpperCase() as SubscriptionTier;
+        const hasAccess = localTier !== 'FREE';
         setSubState({
-          status: 'active',
-          tier: localTier,
-          planName: localTier === 'ENTERPRISE' ? 'Sovereign Fleet' : localTier === 'PRO' ? 'Hypervision Twin' : 'BIM Foundation',
-          hasAccessToCockpit: true,
-          has3dDigitalTwin: true,
-          hasRealtimeKafka: true,
+          status: hasAccess ? 'active' : 'none',
+          tier: localTier as SubscriptionTier,
+          planName: localTier === 'ENTERPRISE' ? 'Sovereign Fleet' : localTier === 'PRO' ? 'Hypervision Twin' : localTier === 'STARTER' || localTier === 'SILVER' ? 'BIM Foundation' : 'Offre Découverte',
+          hasAccessToCockpit: hasAccess,
+          has3dDigitalTwin: localTier === 'PRO' || localTier === 'ENTERPRISE',
+          hasRealtimeKafka: localTier === 'PRO' || localTier === 'ENTERPRISE',
           hasZtnaHardware: localTier === 'ENTERPRISE',
-          tokenBalance: 5000,
-          expiresAt: new Date(Date.now() + 30 * 24 * 3600 * 1000).toISOString(),
+          tokenBalance: hasAccess ? 1000 : 0,
+          expiresAt: null,
           isLoading: false,
         });
       }

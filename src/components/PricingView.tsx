@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+﻿import React, { useState } from 'react';
 import type { User } from 'firebase/auth';
 
 interface PricingViewProps {
@@ -47,17 +47,19 @@ export const PricingView: React.FC<PricingViewProps> = ({ onUnlockCockpit, user,
       setTimeout(() => { if (onSignIn) onSignIn(); }, 800);
       return;
     }
-    showNotification(actionTitle, desc);
+    // BUG #4 CORRIGÉ : avertissement clair — le paiement est simulé, pas traité réellement
+    showNotification("⚠️ Mode Démo", "Paiement simulé. Aucune transaction réelle.");
     const tierMap: Record<string, 'free' | 'silver' | 'pro' | 'enterprise'> = {
       'Starter - Smart Facility': 'silver',
       'Pro - Hypervision Twin': 'pro',
       'Enterprise - Sovereign Fleet': 'enterprise',
     };
     const tier = tierMap[selectedTier.name] || 'pro';
-    if (onUpgradeTier) onUpgradeTier(tier);
+    // Ne déverrouille qu'après confirmation (simulation)
     setTimeout(() => {
+      if (onUpgradeTier) onUpgradeTier(tier);
       onUnlockCockpit();
-    }, 1800);
+    }, 2500);
   };
 
   return (
@@ -555,11 +557,11 @@ export const PricingView: React.FC<PricingViewProps> = ({ onUnlockCockpit, user,
                   <div className="tactile-debossed px-3.5 py-2.5 rounded-xl flex items-center justify-between">
                     <input
                       type="text"
+                      placeholder="XXXX XXXX XXXX XXXX"
                       readOnly
-                      value="4532 9012 8841 8920"
-                      className="bg-transparent font-['Space_Grotesk'] text-sm text-slate-900 dark:text-white outline-none w-full tracking-wider"
+                      className="bg-transparent font-['Space_Grotesk'] text-sm text-slate-500 dark:text-slate-400 outline-none w-full tracking-wider cursor-not-allowed"
                     />
-                    <span className="font-['Space_Grotesk'] text-[10px] font-bold text-orange-600 dark:text-orange-400">VISA/CB</span>
+                    <span className="font-['Space_Grotesk'] text-[10px] font-bold text-slate-400">VISA/CB</span>
                   </div>
                 </div>
 
@@ -584,29 +586,19 @@ export const PricingView: React.FC<PricingViewProps> = ({ onUnlockCockpit, user,
                     </label>
                     <div className="tactile-debossed px-3 py-2 rounded-xl flex items-center justify-between">
                       <input
-                        type="password"
+                        type="text"
                         readOnly
-                        value="884"
-                        className="bg-transparent font-['Space_Grotesk'] text-sm text-slate-900 dark:text-white outline-none w-full text-center tracking-widest"
+                        placeholder="***"
+                        className="bg-transparent font-['Space_Grotesk'] text-sm text-slate-500 dark:text-slate-400 outline-none w-full text-center tracking-widest cursor-not-allowed"
                       />
-                      <span className="material-symbols-outlined text-[16px] text-emerald-600">lock</span>
+                      <span className="material-symbols-outlined text-[16px] text-slate-400">lock</span>
                     </div>
                   </div>
                 </div>
 
-                <button
-                  type="button"
-                  onClick={() =>
-                    handlePaypalAction(
-                      'Débit Carte Enregistré',
-                      'Tokenisation mTLS validée pour ' + selectedTier.name
-                    )
-                  }
-                  className="tactile-btn-primary w-full mt-2 py-3 rounded-xl font-['Space_Grotesk'] text-sm font-bold text-white flex items-center justify-center gap-2 active:scale-95 transition-all cursor-pointer"
-                >
-                  <span className="material-symbols-outlined text-[18px]">verified</span>
-                  <span>Confirmer le Débit Via Passerelle PayPal</span>
-                </button>
+                <div className="mt-3 px-3 py-2 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-600 dark:text-amber-400 text-[11px] text-center font-['Space_Grotesk']">
+                  ⚠️ Mode démo — Aucune transaction réelle. Intégration PayPal officielle à venir.
+                </div>
               </div>
 
               {/* Status badges */}

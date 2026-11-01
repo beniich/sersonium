@@ -133,7 +133,7 @@ export const SubscriptionGuard: React.FC<SubscriptionGuardProps> = ({
             </div>
             <button
               onClick={() => {
-                localStorage.setItem('sensorium_user_tier', 'starter');
+                localStorage.setItem('sensorium_subscription_tier', 'silver');
                 if (onSelectPlan) onSelectPlan('STARTER');
                 refreshSubscription();
               }}
@@ -164,7 +164,7 @@ export const SubscriptionGuard: React.FC<SubscriptionGuardProps> = ({
             </div>
             <button
               onClick={() => {
-                localStorage.setItem('sensorium_user_tier', 'pro');
+                localStorage.setItem('sensorium_subscription_tier', 'pro');
                 if (onSelectPlan) onSelectPlan('PRO');
                 refreshSubscription();
               }}
@@ -191,7 +191,7 @@ export const SubscriptionGuard: React.FC<SubscriptionGuardProps> = ({
             </div>
             <button
               onClick={() => {
-                localStorage.setItem('sensorium_user_tier', 'enterprise');
+                localStorage.setItem('sensorium_subscription_tier', 'enterprise');
                 if (onSelectPlan) onSelectPlan('ENTERPRISE');
                 refreshSubscription();
               }}
@@ -229,17 +229,31 @@ export const SubscriptionGuard: React.FC<SubscriptionGuardProps> = ({
           )}
         </div>
 
-        {/* Accès Découverte Immédiat / Essai 14 jours */}
+        {/* Accès Découverte Immédiat / Essai 14 jours — BUG #6 CORRIGÉ : expiration réelle */}
         <div className="flex items-center gap-3">
           <button
             onClick={() => {
-              localStorage.setItem('sensorium_user_tier', 'pro');
-              if (onSelectPlan) onSelectPlan('PRO');
+              const trialAlreadyUsed = localStorage.getItem('sensorium_trial_expires_at');
+              if (trialAlreadyUsed && Date.now() < new Date(trialAlreadyUsed).getTime()) {
+                // Essai encore actif : recharger
+                refreshSubscription();
+                return;
+              }
+              if (trialAlreadyUsed && Date.now() >= new Date(trialAlreadyUsed).getTime()) {
+                // Essai expiré
+                alert('Votre essai de 14 jours a expiré. Veuillez souscrire à un plan payant.');
+                return;
+              }
+              // Premier essai : stocker la date d’expiration (14 jours)
+              const expiresAt = new Date(Date.now() + 14 * 24 * 3600 * 1000).toISOString();
+              localStorage.setItem('sensorium_trial_expires_at', expiresAt);
+              localStorage.setItem('sensorium_subscription_tier', 'starter');
+              if (onSelectPlan) onSelectPlan('STARTER');
               refreshSubscription();
             }}
             className="text-xs text-indigo-400 hover:text-indigo-300 underline underline-offset-4 flex items-center gap-1 font-['Space_Grotesk'] transition-colors"
           >
-            <span>✨ Activer un essai Démo 14 jours (Accès immédiat sans carte bancaire)</span>
+            <span>✨ Activer un essai Démo 14 jours (Accès Starter — 1 utilisation par appareil)</span>
           </button>
         </div>
 
