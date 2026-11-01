@@ -33,6 +33,7 @@ import ModularPortletsDashboard from "../components/ModularPortletsDashboard";
 import UnifiedAssetFile from "../components/UnifiedAssetFile";
 import TelemetryChart from "../components/TelemetryChart";
 import ServicesShowcaseRibbon from "../components/ServicesShowcaseRibbon";
+import SubscriptionQuotaCounter from "../components/SubscriptionQuotaCounter";
 import { MODULE_TABS } from "../components/ModuleNavigationBar";
 import { User } from "firebase/auth";
 
@@ -130,6 +131,14 @@ export default function OverviewPage({
             onCreateWorkOrderForNode(order.nodeId);
           }
         }}
+      />
+
+      {/* ⚡ Widget Officiel : Compteur de Quotas d'Abonnement, IA Gemini & API */}
+      <SubscriptionQuotaCounter
+        variant="card"
+        state={state}
+        onOpenPricing={() => handleTabChange("pricing")}
+        className="w-full"
       />
 
       {/* 🚀 Feature #1 NetSuite : Portlets Modulaires Command Center */}

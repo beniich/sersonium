@@ -5,6 +5,7 @@ import { useRbac } from '@/hooks/useRbac';
 import { useConnectionHealth } from '@/hooks/useConnectionHealth';
 import { useTheme } from '../App';
 import ConnectionBadge from './ConnectionBadge';
+import SubscriptionQuotaCounter from './SubscriptionQuotaCounter';
 
 export interface MasterHeaderProps {
   onOpenMenu?: () => void;
@@ -91,10 +92,17 @@ export const MasterHeader: React.FC<MasterHeaderProps> = ({
         />
       </div>
 
-      {/* ZONE 3 : THÈME, PROFIL & SESSION */}
-      <div className="flex items-center gap-2.5">
+      {/* ZONE 3 : THÈME, PROFIL, QUOTAS & SESSION */}
+      <div className="flex items-center gap-2 sm:gap-2.5">
+        {/* Compteur interactif de quotas d'abonnement & Tokens IA */}
+        <SubscriptionQuotaCounter 
+          variant="pill" 
+          onOpenPricing={() => navigate('/pricing')} 
+          className="hidden sm:inline-flex"
+        />
+
         {/* Badge Interactif Mode Live Cloud vs Mode Simulation */}
-        <ConnectionBadge className="hidden sm:inline-flex" />
+        <ConnectionBadge className="hidden md:inline-flex" />
 
         {/* Theme Toggle Button */}
         <button

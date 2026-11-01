@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import type { User } from 'firebase/auth';
+import SubscriptionQuotaCounter from './SubscriptionQuotaCounter';
 
 export type ActiveNavPath =
   | 'hub'
@@ -159,6 +160,12 @@ export const TactileHeader: React.FC<TactileHeaderProps> = ({
 
           {/* Right action block */}
           <div className="flex items-center gap-1.5 sm:gap-2.5 shrink-0">
+            {/* Live Interactive Subscription Quota Counter Pill */}
+            <SubscriptionQuotaCounter 
+              variant="pill" 
+              onOpenPricing={onOpenPricing}
+              className="hidden sm:inline-flex"
+            />
 
             {/* Theme Switcher Button */}
             {toggleTheme && (
