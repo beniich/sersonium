@@ -34,6 +34,7 @@ import UnifiedAssetFile from "../components/UnifiedAssetFile";
 import TelemetryChart from "../components/TelemetryChart";
 import ServicesShowcaseRibbon from "../components/ServicesShowcaseRibbon";
 import SubscriptionQuotaCounter from "../components/SubscriptionQuotaCounter";
+import ExecutiveGlassDashboard from "../components/ExecutiveGlassDashboard";
 import { MODULE_TABS } from "../components/ModuleNavigationBar";
 import { User } from "firebase/auth";
 
@@ -160,6 +161,17 @@ export default function OverviewPage({
           isDark={isDark}
           isCompactMode={isCompactMode}
           onNavigateTab={handleTabChange}
+        />
+      )}
+
+      {/* 🌟 NOUVEAU : Executive Glass Dashboard Haute Fidélité (Mockup Référence) */}
+      {activeTab === "ov-glass" && (
+        <ExecutiveGlassDashboard
+          state={state}
+          isDark={isDark}
+          onNavigateToTab={handleTabChange}
+          onOpenReportModal={onOpenReportModal}
+          onOpenTicketModal={() => onCreateWorkOrderForNode?.("global-system")}
         />
       )}
 

@@ -105,6 +105,9 @@ export default function App() {
     if (seg === "dashboard" || seg === "cafm") {
       return "overview";
     }
+    if (seg === "executive" || seg === "glass") {
+      return "overview";
+    }
     if (seg === "twin") {
       return "cockpit";
     }
@@ -126,7 +129,13 @@ export default function App() {
     return seg;
   };
 
-  const [activeItemId, setActiveItemId] = useState<string>("ov-general");
+  const [activeItemId, setActiveItemId] = useState<string>(() => {
+    if (typeof window !== "undefined") {
+      const p = window.location.pathname.toLowerCase();
+      if (p.includes("executive") || p.includes("glass")) return "ov-glass";
+    }
+    return "ov-general";
+  });
   const [activePage, setActivePage] = useState<string>(() => pageFromPath(location.pathname));
 
   const [isCompactMode, setIsCompactMode] = useState<boolean>(() => {
