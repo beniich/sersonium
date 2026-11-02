@@ -47,18 +47,17 @@ export const FeatureGate: React.FC<FeatureGateProps> = ({
   // fallback sur localStorage pour la persistance entre pages.
   const [localTierKey, setLocalTierKey] = useState<string>(readLocalTier);
 
-  // Synchronise si le localStorage est mis à jour depuis un autre composant
+  // BUG-03 CORRIGÉ : Écoute des événements SENSORIUM + storage (cross-tab)
+  // Suppression du polling setInterval — les events custom sont instantanés
   useEffect(() => {
-    const handleStorage = () => setLocalTierKey(readLocalTier());
-    window.addEventListener("storage", handleStorage);
-
-    // Polling léger (500 ms) pour détecter les mutations localStorage locales
-    // (l'événement "storage" ne se déclenche pas sur l'onglet courant)
-    const interval = setInterval(() => setLocalTierKey(readLocalTier()), 500);
-
+    const sync = () => setLocalTierKey(readLocalTier());
+    window.addEventListener("storage", sync);
+    window.addEventListener("sensorium:quota_updated", sync);
+    window.addEventListener("sensorium:subscription_changed", sync);
     return () => {
-      window.removeEventListener("storage", handleStorage);
-      clearInterval(interval);
+      window.removeEventListener("storage", sync);
+      window.removeEventListener("sensorium:quota_updated", sync);
+      window.removeEventListener("sensorium:subscription_changed", sync);
     };
   }, []);
 

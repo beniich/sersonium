@@ -11,6 +11,7 @@ import EnterpriseLoginModal from "./components/EnterpriseLoginModal";
 import ModuleNavigationBar from "./components/ModuleNavigationBar";
 import { AppProvider, useAppContext } from "./contexts/AppContext";
 import Breadcrumbs from "./components/navigation/Breadcrumbs";
+import { ToastProvider } from "./components/ToastNotification";
 
 // Lazy-load dashboard pages to make initial website load ultra-fast and reduce main bundle
 const OverviewPage = lazy(() => import("./pages/OverviewPage"));
@@ -314,9 +315,14 @@ export default function App() {
   const [isCommandPaletteOpen, setIsCommandPaletteOpen] = useState(false);
 
   // Global Omniprésence Keyboard Shortcut (Cmd+K / Ctrl+K)
+  // BUG-06 CORRIGÉ : ignore l'event si le focus est dans un input/textarea/select/contenteditable
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if ((e.metaKey || e.ctrlKey) && e.key === "k") {
+        const target = e.target as HTMLElement;
+        const tag = target?.tagName?.toLowerCase();
+        const isEditable = tag === "input" || tag === "textarea" || tag === "select" || target?.isContentEditable;
+        if (isEditable) return; // Laisser le raccourci au contrôle natif
         e.preventDefault();
         setIsCommandPaletteOpen(prev => !prev);
       }
@@ -394,6 +400,7 @@ export default function App() {
   };
 
   // Persist subscription tier to Firestore when user upgrades
+  // FEAT-01 : dispatch sensorium:subscription_changed pour déclencher le toast
   const handleUpgradeTier = async (tier: SubscriptionTier) => {
     try {
       localStorage.setItem("sensorium_subscription_tier", tier);
@@ -401,6 +408,14 @@ export default function App() {
       if (user?.uid) {
         await setDoc(doc(db, `users/${user.uid}/profile`, "subscription"), { tier, updatedAt: new Date().toISOString() }, { merge: true });
       }
+      // Notifier tous les composants (QuotaCounter, ToastProvider, FeatureGate...)
+      const PLAN_NAMES: Record<string, string> = {
+        free: "Free Trial", silver: "BIM Foundation", pro: "Hypervision Twin", enterprise: "Sovereign Fleet"
+      };
+      window.dispatchEvent(new CustomEvent("sensorium:subscription_changed", {
+        detail: { tier, planName: PLAN_NAMES[tier] ?? tier }
+      }));
+      window.dispatchEvent(new CustomEvent("sensorium:quota_updated", { detail: { tier } }));
     } catch (err) {
       console.warn("Failed to persist subscription tier:", err);
     }
@@ -694,6 +709,7 @@ export default function App() {
   return (
     <RbacProvider>
       <AppProvider>
+        <ToastProvider>
         <ThemeContext.Provider value={themeContextValue}>
           <LanguageContext.Provider value={languageContextValue}>
             <NavigationContextBridge setActivePage={setActivePage} setActiveItemId={setActiveItemId} />
@@ -776,6 +792,7 @@ export default function App() {
         />
       </LanguageContext.Provider>
     </ThemeContext.Provider>
+        </ToastProvider>
     </AppProvider>
     </RbacProvider>
   );

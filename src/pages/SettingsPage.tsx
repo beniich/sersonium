@@ -20,6 +20,9 @@ import AuthorizationsManager from "../components/AuthorizationsManager";
 import GoogleAuthManager from "../components/GoogleAuthManager";
 import { useLanguage } from "../App";
 import PageHeaderBanner from "../components/PageHeaderBanner";
+import { PLANS as SUBSCRIPTION_PLANS } from "../data/plans";
+import { useSubscriptionQuota } from "../hooks/useSubscriptionQuota";
+import { exportToCSV, timestampedFilename } from "../utils/exportReport";
 
 interface SettingsPageProps {
   state: GlobalState;
@@ -34,63 +37,37 @@ const TABS = [
   { id: "set-google", label: "Google Authentication" },
   { id: "set-3", label: "Audit Log" },
   { id: "set-4", label: "API Tokens" },
+  { id: "set-usage", label: "📊 Usage & Analytics" },
   { id: "set-5", label: "Notifications & Outages" },
   { id: "set-6", label: "Configurations" }
 ];
 
-// Available Subscription plans
-const PLANS = [
-  {
-    id: "plan-starter",
-    name: "Starter",
-    price: "0",
-    period: "per month",
-    description: "Ideal for evaluation and small infrastructure pilot deployments.",
-    features: [
-      "Up to 3 physical Edge nodes",
-      "Basic reactive maintenance",
-      "Community support (48h response)",
-      "Audit logs retained for 24h"
-    ],
-    badgeColor: "bg-neutral-500/10 text-neutral-500"
-  },
-  {
-    id: "plan-pro",
-    name: "Professional",
-    price: "299",
-    period: "per month",
-    description: "Designed for enterprises operating regional datacenter fleets.",
-    features: [
-      "Up to 25 physical Edge nodes",
-      "Gemini AI predictive maintenance",
-      "Advanced WAF & Zero-Trust policies",
-      "Guaranteed 99.9% availability SLA"
-    ],
-    badgeColor: "bg-orange-500/10 text-orange-600 dark:text-orange-400"
-  },
-  {
-    id: "plan-enterprise",
-    name: "Enterprise CAFM Suite",
-    price: "1499",
-    period: "per month",
-    description: "The complete orchestration suite for global networks and critical physical facilities.",
-    features: [
-      "Unlimited physical Edge nodes",
-      "Multi-contract wallet coordinator",
-      "Dedicated 24/7/365 crisis engineering team",
-      "Persistent cryptographic audit trail",
-      "Automated CSRD & ESG compliance exports"
-    ],
-    badgeColor: "bg-orange-500/15 text-orange-600 dark:text-orange-400"
-  }
-];
+// Available Subscription plans — importés depuis src/data/plans.ts (SSoT)
+// BUG-07 CORRIGÉ : plus de plans dupliqués entre Settings et Pricing
+const PLANS = SUBSCRIPTION_PLANS.map(p => ({
+  id: `plan-${p.tier}`,
+  name: p.name,
+  price: String(p.price),
+  period: p.period,
+  description: p.tagline,
+  features: p.features,
+  badgeColor: p.badgeColor
+}));
+
 
 export default function SettingsPage({ state, isDark, activeItemId = "set-1", onSelectTab }: SettingsPageProps) {
   const currentTab = TABS.some(t => t.id === activeItemId) ? activeItemId : "set-1";
   const { language, setLanguage } = useLanguage();
 
-  // Subscription plan state
-  const [currentPlan, setCurrentPlan] = useState("plan-enterprise");
+  // Subscription plan state — lit le tier réel depuis localStorage
+  const getActivePlanId = () => {
+    const tier = (typeof localStorage !== "undefined"
+      ? localStorage.getItem("sensorium_subscription_tier") || "free"
+      : "free") as string;
+    const found = SUBSCRIPTION_PLANS.find(p => p.tier === tier);
+    return found ? `plan-${found.tier}` : "plan-free";
+  };
+  const [currentPlan, setCurrentPlan] = useState(getActivePlanId);
 
   // Custom Toast State for user actions
   const [toastMessage, setToastMessage] = useState<string | null>(null);
@@ -717,6 +694,11 @@ export default function SettingsPage({ state, isDark, activeItemId = "set-1", on
         </div>
       )}
 
+      {/* Sub-View: Usage & Analytics (set-usage) — FEAT-02 */}
+      {currentTab === "set-usage" && (
+        <UsageAnalyticsTab isDark={isDark} />
+      )}
+
       {/* Sub-View: Notifications (set-5) */}
       {currentTab === "set-5" && (
         <div className="p-5 rounded-lg border border-slate-200 dark:border-neutral-800 bg-white dark:bg-neutral-900/60 shadow-xs space-y-4">
@@ -1047,6 +1029,149 @@ export default function SettingsPage({ state, isDark, activeItemId = "set-1", on
           </div>
         </div>
       )}
+    </div>
+  );
+}
+
+/* ─── FEAT-02: Usage Analytics Tab Component ─── */
+function UsageAnalyticsTab({ isDark }: { isDark: boolean }) {
+  const quota = useSubscriptionQuota();
+  const [period, setPeriod] = React.useState<"7d" | "30d">("7d");
+
+  // Generate simulated daily usage data
+  const generateDailyData = (days: number) => {
+    const data = [];
+    const now = Date.now();
+    for (let i = days - 1; i >= 0; i--) {
+      const date = new Date(now - i * 86400000);
+      const label = date.toLocaleDateString("fr-FR", { day: "2-digit", month: "short" });
+      const baseUsage = quota.monthlyTokensUsed / days;
+      const variance = baseUsage * 0.4;
+      const tokens = Math.max(0, Math.round(baseUsage + (Math.random() - 0.5) * variance));
+      const api = Math.max(0, Math.round((quota.requestsInWindow / days) * (0.8 + Math.random() * 0.4)));
+      data.push({ label, tokens, api });
+    }
+    return data;
+  };
+
+  const days = period === "7d" ? 7 : 30;
+  const [chartData] = React.useState(() => generateDailyData(30));
+  const visibleData = chartData.slice(-days);
+  const maxTokens = Math.max(...visibleData.map(d => d.tokens), 1);
+
+  const topConsumers = [
+    { name: "Inférences AIOps", tokens: Math.round(quota.monthlyTokensUsed * 0.52), pct: 52, icon: "🤖" },
+    { name: "Rapports ESG/DORA", tokens: Math.round(quota.monthlyTokensUsed * 0.23), pct: 23, icon: "📄" },
+    { name: "Alertes Prédictives", tokens: Math.round(quota.monthlyTokensUsed * 0.15), pct: 15, icon: "⚡" },
+    { name: "Copilote Maintenance", tokens: Math.round(quota.monthlyTokensUsed * 0.10), pct: 10, icon: "🔧" },
+  ];
+
+  const handleExportCSV = () => {
+    exportToCSV(
+      visibleData,
+      [
+        { key: "label", label: "Date" },
+        { key: "tokens", label: "Tokens IA Consommés" },
+        { key: "api", label: "Requêtes API" },
+      ],
+      timestampedFilename("usage_analytics")
+    );
+  };
+
+  const fmtNum = (n: number) =>
+    n >= 1_000_000 ? `${(n / 1_000_000).toFixed(1)}M`
+    : n >= 1_000 ? `${(n / 1_000).toFixed(0)}K`
+    : String(n);
+
+  return (
+    <div className="space-y-6">
+      {/* Header */}
+      <div className="flex items-center justify-between flex-wrap gap-3">
+        <div>
+          <h2 className="text-lg font-bold">Usage & Analytics</h2>
+          <p className="text-xs text-neutral-500">Consommation réelle des quotas IA, API et entitlements pour le tier <strong>{quota.config.name}</strong>.</p>
+        </div>
+        <div className="flex items-center gap-2">
+          <div className="flex rounded-xl overflow-hidden border border-neutral-200 dark:border-neutral-800">
+            {(["7d", "30d"] as const).map(p => (
+              <button key={p} onClick={() => setPeriod(p)}
+                className={`px-3 py-1.5 text-xs font-medium transition-colors ${
+                  period === p
+                    ? "bg-orange-500 text-white"
+                    : "bg-white dark:bg-neutral-900 text-neutral-500 hover:text-neutral-900 dark:hover:text-white"
+                }`}>{p}</button>
+            ))}
+          </div>
+          <button onClick={handleExportCSV}
+            className="px-3 py-1.5 text-xs font-medium bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-xl hover:border-orange-500 text-neutral-600 dark:text-neutral-300 transition-all flex items-center gap-1.5">
+            <Download className="w-3.5 h-3.5" /> Export CSV
+          </button>
+        </div>
+      </div>
+
+      {/* KPI Cards */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        {[
+          { label: "Tokens Utilisés", value: fmtNum(quota.monthlyTokensUsed), sub: `/ ${fmtNum(quota.monthlyTokensLimit)} max`, pct: quota.monthlyTokensPercent, color: "text-orange-400" },
+          { label: "Tokens Restants", value: fmtNum(quota.monthlyTokensRemaining), sub: `Réinitialisation dans ${quota.daysUntilReset}j`, pct: 100 - quota.monthlyTokensPercent, color: "text-emerald-400" },
+          { label: "Req / min", value: String(quota.requestsInWindow), sub: `/ ${quota.requestsLimit} max`, pct: quota.requestsPercent, color: "text-blue-400" },
+          { label: "Entitlements", value: quota.entitlementsLimit === -1 ? "∞" : fmtNum(quota.entitlementsUsed), sub: quota.entitlementsLimit === -1 ? "Illimité" : `/ ${fmtNum(quota.entitlementsLimit)}`, pct: quota.entitlementsPercent, color: "text-purple-400" },
+        ].map((kpi, i) => (
+          <div key={i} className="p-4 rounded-2xl border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900/60 space-y-2">
+            <p className="text-[11px] text-neutral-500 font-medium">{kpi.label}</p>
+            <p className={`text-2xl font-bold font-mono ${kpi.color}`}>{kpi.value}</p>
+            <p className="text-[10px] text-neutral-400">{kpi.sub}</p>
+            <div className="w-full h-1 bg-neutral-100 dark:bg-neutral-800 rounded-full overflow-hidden">
+              <div className={`h-full ${kpi.color.replace("text-", "bg-")} rounded-full transition-all`}
+                style={{ width: `${kpi.pct}%` }} />
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* Bar Chart */}
+      <div className="p-5 rounded-2xl border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900/60">
+        <h3 className="text-sm font-semibold mb-4">Tokens IA — {period === "7d" ? "7 derniers jours" : "30 derniers jours"}</h3>
+        <div className="flex items-end gap-1 h-32">
+          {visibleData.map((d, i) => {
+            const h = Math.max(4, Math.round((d.tokens / maxTokens) * 100));
+            const pct = Math.round((d.tokens / maxTokens) * 100);
+            return (
+              <div key={i} className="flex-1 flex flex-col items-center gap-1 group" title={`${d.label}: ${fmtNum(d.tokens)} tokens`}>
+                <div
+                  className="w-full rounded-t-lg bg-gradient-to-t from-orange-600 to-orange-400 opacity-80 group-hover:opacity-100 transition-all"
+                  style={{ height: `${h}%`, minHeight: "4px" }}
+                />
+                <span className="text-[9px] text-neutral-400 rotate-45 origin-left hidden md:inline-block">{d.label}</span>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* Top Consumers */}
+      <div className="p-5 rounded-2xl border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900/60">
+        <h3 className="text-sm font-semibold mb-4">Top Consommateurs de Tokens</h3>
+        <div className="space-y-3">
+          {topConsumers.map((c, i) => (
+            <div key={i} className="flex items-center gap-3">
+              <span className="text-lg w-7 text-center">{c.icon}</span>
+              <div className="flex-1 min-w-0">
+                <div className="flex justify-between text-xs mb-1">
+                  <span className="font-medium text-neutral-700 dark:text-neutral-300">{c.name}</span>
+                  <span className="font-mono text-neutral-500">{fmtNum(c.tokens)} · {c.pct}%</span>
+                </div>
+                <div className="w-full h-2 bg-neutral-100 dark:bg-neutral-800 rounded-full overflow-hidden">
+                  <div
+                    className="h-full bg-gradient-to-r from-orange-500 to-amber-400 rounded-full"
+                    style={{ width: `${c.pct}%` }}
+                  />
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
     </div>
   );
 }

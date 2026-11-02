@@ -89,6 +89,10 @@ export default function PricingPage({
       : details.planId === "P-44Y462991D576054FNKY3PKI" ? "pro"
       : "silver";
 
+    const PLAN_NAMES: Record<string, string> = {
+      free: "Free Trial", silver: "BIM Foundation", pro: "Hypervision Twin", enterprise: "Sovereign Fleet"
+    };
+
     try {
       await new Promise(resolve => setTimeout(resolve, 1200));
       setVerificationStep(language === "fr" ? `Activation des privilèges ${newTier.toUpperCase()}...` : `Activating ${newTier.toUpperCase()} privileges...`);
@@ -103,6 +107,12 @@ export default function PricingPage({
       if (onUpgradeTier) {
         onUpgradeTier(newTier);
       }
+
+      // BUG-05 CORRIGÉ : synchroniser QuotaCounter, FeatureGate, SubscriptionGuard et Toast
+      window.dispatchEvent(new CustomEvent("sensorium:subscription_changed", {
+        detail: { tier: newTier, planName: PLAN_NAMES[newTier] }
+      }));
+      window.dispatchEvent(new CustomEvent("sensorium:quota_updated", { detail: { tier: newTier } }));
 
       await logAuditEvent(
         "PAYPAL_SUBSCRIPTION_SUCCESS",
@@ -127,8 +137,14 @@ export default function PricingPage({
     if (onUpgradeTier) {
       onUpgradeTier("free");
     }
+    // Sync événements
+    window.dispatchEvent(new CustomEvent("sensorium:subscription_changed", {
+      detail: { tier: "free", planName: "Free Trial" }
+    }));
+    window.dispatchEvent(new CustomEvent("sensorium:quota_updated", { detail: { tier: "free" } }));
     await logAuditEvent("SUBSCRIPTION_DOWNGRADED_FREE", "Subscription reverted to FREE Tier.");
   };
+
 
   const comparisonFeatures: FeatureComparisonRow[] = [
     {

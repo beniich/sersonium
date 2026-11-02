@@ -177,6 +177,17 @@ export function useSubscriptionGate(user: User | null | undefined) {
     checkSubscription();
   }, [checkSubscription]);
 
+  // BUG-02 CORRIG\u00c9 : Re-v\u00e9rifier l'abonnement quand le tier change dans n'importe quel composant
+  useEffect(() => {
+    const handleTierChange = () => checkSubscription();
+    window.addEventListener('sensorium:subscription_changed', handleTierChange);
+    window.addEventListener('sensorium:quota_updated', handleTierChange);
+    return () => {
+      window.removeEventListener('sensorium:subscription_changed', handleTierChange);
+      window.removeEventListener('sensorium:quota_updated', handleTierChange);
+    };
+  }, [checkSubscription]);
+
   return {
     ...subState,
     isUpgradeModalOpen,
