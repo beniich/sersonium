@@ -28,6 +28,33 @@ export default function WorkspacePage({ isDark, activeItemId = "ws-1", onSelectT
   const [needsAuth, setNeedsAuth] = useState(true);
   const [user, setUser] = useState<User | null>(null);
   const [isLoggingIn, setIsLoggingIn] = useState(false);
+  const [exportStatus, setExportStatus] = useState<string | null>(null);
+
+  const handleExportSheet = () => {
+    setExportStatus("Exportation Google Sheets en cours...");
+    const csvContent = "data:text/csv;charset=utf-8,ID,Site,PUE,Status,WorkOrders\nDC-1,Paris Nord,1.14,Optimal,12\nDC-2,Francfort,1.18,Optimal,4\nDC-3,Dublin,1.22,Maintenance,7";
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement("a");
+    link.setAttribute("href", encodedUri);
+    link.setAttribute("download", `sensorium-analytics-${new Date().toISOString().slice(0, 10)}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    setTimeout(() => setExportStatus(null), 2500);
+  };
+
+  const handleGenerateSlides = () => {
+    setExportStatus("Génération de la présentation...");
+    const htmlContent = "<html><body><h1>SENSORIUM Monthly Executive Briefing</h1><p>Global PUE: 1.15 | SLAs: 99.998%</p></body></html>";
+    const blob = new Blob([htmlContent], { type: "text/html" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `sensorium-briefing-${new Date().toISOString().slice(0, 10)}.html`;
+    a.click();
+    URL.revokeObjectURL(url);
+    setTimeout(() => setExportStatus(null), 2500);
+  };
   const [token, setToken] = useState<string | null>(null);
 
   // Data states
@@ -437,6 +464,11 @@ export default function WorkspacePage({ isDark, activeItemId = "ws-1", onSelectT
 
           {currentTab === "ws-5" && (
             <div className="space-y-6">
+              {exportStatus && (
+                <div className="p-3 bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 rounded-xl text-xs font-mono text-center animate-pulse">
+                  {exportStatus}
+                </div>
+              )}
               <div className="grid md:grid-cols-2 gap-6">
                 <div className="bg-white dark:bg-[#15151a] p-6 rounded-xl border border-neutral-200 dark:border-white/10 flex flex-col items-center text-center">
                    <div className="w-12 h-12 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mb-4">
@@ -446,7 +478,10 @@ export default function WorkspacePage({ isDark, activeItemId = "ws-1", onSelectT
                   <p className="text-neutral-500 text-sm mb-6 flex-grow">
                     Export global infrastructure analytics, CAFM work orders, and billing invoices directly into a new spreadsheet.
                   </p>
-                  <button className="w-full bg-emerald-50 text-emerald-600 hover:bg-emerald-100 dark:bg-emerald-500/10 dark:hover:bg-emerald-500/20 font-medium py-2 rounded-lg transition-colors">
+                  <button 
+                    onClick={handleExportSheet}
+                    className="w-full bg-emerald-50 text-emerald-600 hover:bg-emerald-100 dark:bg-emerald-500/10 dark:hover:bg-emerald-500/20 font-medium py-2 rounded-lg transition-colors cursor-pointer"
+                  >
                     Create Sheet Export
                   </button>
                 </div>
@@ -459,7 +494,10 @@ export default function WorkspacePage({ isDark, activeItemId = "ws-1", onSelectT
                   <p className="text-neutral-500 text-sm mb-6 flex-grow">
                     Create a Google Slides presentation summarizing the current month's global traffic and zero trust access policies.
                   </p>
-                  <button className="w-full bg-yellow-50 text-yellow-600 hover:bg-yellow-100 dark:bg-yellow-500/10 dark:hover:bg-yellow-500/20 font-medium py-2 rounded-lg transition-colors">
+                  <button 
+                    onClick={handleGenerateSlides}
+                    className="w-full bg-yellow-50 text-yellow-600 hover:bg-yellow-100 dark:bg-yellow-500/10 dark:hover:bg-yellow-500/20 font-medium py-2 rounded-lg transition-colors cursor-pointer"
+                  >
                     Generate Slides
                   </button>
                 </div>

@@ -313,7 +313,11 @@ export default function BrandVisionPage({ isDark, onExplorePublic }: BrandVision
                       {color.hex}
                     </span>
                     <button 
-                      className="p-1.5 rounded-lg bg-black/30 hover:bg-black/50 text-white backdrop-blur-md opacity-0 group-hover:opacity-100 transition-opacity"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleCopyHex(color.hex);
+                      }}
+                      className="p-1.5 rounded-lg bg-black/30 hover:bg-black/50 text-white backdrop-blur-md opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer"
                       title="Copy HEX Code"
                     >
                       {copiedHex === color.hex ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}

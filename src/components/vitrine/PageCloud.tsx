@@ -29,7 +29,10 @@ export const PageCloud: React.FC<PageCloudProps> = ({ onOpenDemo }) => {
                 <button onClick={onOpenDemo} className="inline-flex items-center gap-2.5 px-6 py-3.5 rounded-xl bg-gradient-to-r from-orange-500 to-orange-600 text-white font-bold text-sm shadow-xl shadow-orange-500/30 hover:brightness-105 transition-all">
                   Découvrir notre cloud →
                 </button>
-                <button className="inline-flex items-center gap-2 px-5 py-3.5 rounded-xl bg-white border border-slate-200 text-slate-800 font-bold text-sm shadow-sm hover:bg-slate-50 transition-colors">
+                <button 
+                  onClick={onOpenDemo}
+                  className="inline-flex items-center gap-2 px-5 py-3.5 rounded-xl bg-white border border-slate-200 text-slate-800 font-bold text-sm shadow-sm hover:bg-slate-50 transition-colors cursor-pointer"
+                >
                   ▷ Voir la vidéo
                 </button>
               </div>
