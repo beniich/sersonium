@@ -85,6 +85,18 @@ router.use("/manage", cockpitAccess, manageRoutes);
 router.use("/zero-trust", cockpitAccess, zeroTrustRoutes);
 
 // Sprint 2: Infrastructure (CAFM & Predictive Maintenance)
+// Route publique de synthèse pour le Vision Dashboard avant le bouclier strict
+router.get("/cafm/dashboard/summary", async (req, res) => {
+  try {
+    const { getTenantClient } = await import("../../db/tenantPrisma.js");
+    const { CafmService } = await import("../../services/cafm.service.js");
+    const tenantPrisma = getTenantClient("caisse-retraites-default");
+    const summary = await CafmService.getDashboardSummary(tenantPrisma);
+    res.status(200).json({ success: true, data: summary });
+  } catch (error: any) {
+    res.status(500).json({ success: false, error: { message: error.message } });
+  }
+});
 router.use("/cafm", cockpitAccess, cafmRoutes);
 
 // Sprint 2: Storage & DB (S3/R2 Presigned URLs & File Metadata)

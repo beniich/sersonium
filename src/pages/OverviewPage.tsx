@@ -56,7 +56,7 @@ interface OverviewPageProps {
 export default function OverviewPage({ 
   state, 
   isDark = true, 
-  activeItemId = "ov-general", 
+  activeItemId = "ov-glass", 
   user,
   onSignIn,
   onSelectTab,
@@ -66,7 +66,7 @@ export default function OverviewPage({
   isCompactMode: isCompactModeProp,
   onToggleCompactMode: onToggleCompactModeProp
 }: OverviewPageProps) {
-  const activeTab = MODULE_TABS.some(t => t.id === activeItemId) ? activeItemId : "ov-general";
+  const activeTab = MODULE_TABS.some(t => t.id === activeItemId) ? activeItemId : "ov-glass";
 
   const handleTabChange = (tabId: string) => {
     if (onSelectTab) onSelectTab(tabId);
@@ -116,6 +116,21 @@ export default function OverviewPage({
   const effectiveCompactMode = isCompactModeProp !== undefined ? isCompactModeProp : isCompactMode;
   const effectiveToggleCompactMode = onToggleCompactModeProp || toggleCompactMode;
 
+  // 🌟 NOUVEAU : Executive Glass Dashboard Haute Fidélité (Mockup Référence direct sans encombrements)
+  if (activeTab === "ov-glass") {
+    return (
+      <div className="w-full -m-2 sm:-m-4 md:-m-6">
+        <ExecutiveGlassDashboard
+          state={state}
+          isDark={isDark}
+          onNavigateToTab={handleTabChange}
+          onOpenReportModal={onOpenReportModal}
+          onOpenTicketModal={() => onCreateWorkOrderForNode?.("global-system")}
+        />
+      </div>
+    );
+  }
+
   return (
     <div className={`space-y-3 sm:space-y-3.5 animate-in fade-in duration-200 ${effectiveCompactMode ? "compact-erp-mode text-xs" : ""}`}>
       
@@ -161,17 +176,6 @@ export default function OverviewPage({
           isDark={isDark}
           isCompactMode={isCompactMode}
           onNavigateTab={handleTabChange}
-        />
-      )}
-
-      {/* 🌟 NOUVEAU : Executive Glass Dashboard Haute Fidélité (Mockup Référence) */}
-      {activeTab === "ov-glass" && (
-        <ExecutiveGlassDashboard
-          state={state}
-          isDark={isDark}
-          onNavigateToTab={handleTabChange}
-          onOpenReportModal={onOpenReportModal}
-          onOpenTicketModal={() => onCreateWorkOrderForNode?.("global-system")}
         />
       )}
 

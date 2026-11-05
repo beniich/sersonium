@@ -37,7 +37,7 @@ export const PostersGalleryModal: React.FC<PostersGalleryModalProps> = ({
   const [activePoster, setActivePoster] = useState<BannerPoster | null>(null);
 
   const categories = [
-    { id: 'all', label: 'Toutes les affiches (28)' },
+    { id: 'all', label: `Toutes les affiches (${SENSORIUM_POSTERS.length})` },
     { id: 'supervision', label: 'Supervision & IoT' },
     { id: 'security', label: 'Sécurité & Zero-Trust' },
     { id: 'compliance', label: 'Conformité & DORA' },

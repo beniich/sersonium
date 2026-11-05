@@ -141,3 +141,5 @@ export function getTenantPrisma(tenantId: string) {
 }
 
 export type TenantPrismaClient = ReturnType<typeof getTenantPrisma>;
+
+export const getTenantClient = getTenantPrisma;

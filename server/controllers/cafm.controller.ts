@@ -88,3 +88,21 @@ export const predictAssetFailure = async (req: AuthenticatedRequest, res: Respon
     });
   }
 };
+
+export const getDashboardSummary = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
+  try {
+    const tenantPrisma = req.tenantPrisma!;
+    const summary = await CafmService.getDashboardSummary(tenantPrisma);
+
+    res.status(200).json({
+      success: true,
+      data: summary,
+      meta: { tenantId: req.tenantId }
+    });
+  } catch (error: any) {
+    res.status(500).json({
+      success: false,
+      error: { code: "DASHBOARD_SUMMARY_FAILED", message: error.message }
+    });
+  }
+};

@@ -6,7 +6,6 @@ import {
   getProfile, 
   getCsrfToken,
   getGoogleAuthUrl,
-  getGoogleAuthUrl,
   handleGoogleCallback,
   deleteUserAccountGdpr
 } from "../../controllers/auth.controller.js";

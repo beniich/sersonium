@@ -9,6 +9,126 @@ export interface BannerPoster {
 }
 
 export const SENSORIUM_POSTERS: BannerPoster[] = [
+
+  {
+    "id": 1,
+    "title": "Plateforme CAFM Futuriste SENSORIUM",
+    "subtitle": "Supervision globale, GMAO augmentée et hypervision souveraine",
+    "category": "twin",
+    "image": "/affiche/plateforme-cafm-futuriste-sensorium.png",
+    "description": "Modélisation spatiale unifiée, monitoring temps réel et orchestration intelligente des infrastructures critiques.",
+    "tags": [
+      "CAFM Pro",
+      "Hypervision",
+      "IoT"
+    ]
+  },
+  {
+    "id": 2,
+    "title": "Sécurité Intelligente & Confiance Totale",
+    "subtitle": "Architecture Zero-Trust, chiffrement de bout en bout et coffre éphémère",
+    "category": "security",
+    "image": "/affiche/securite-intelligente-et-confiance-totale.png",
+    "description": "Protection périmétrique mTLS, clés cryptographiques session-level, isolation multi-tenant stricte et audit continu.",
+    "tags": [
+      "Zero-Trust",
+      "mTLS",
+      "Cyber-Résilience"
+    ]
+  },
+  {
+    "id": 3,
+    "title": "Infrastructure Cloud Souveraine & Performante",
+    "subtitle": "Déploiement multi-cloud hybride, edge computing et haute disponibilité",
+    "category": "supervision",
+    "image": "/affiche/infrastructure-cloud-souveraine-et-performante.png",
+    "description": "Orchestration résiliente sans dépendance externe, latence sub-milliseconde et tolérance aux pannes native.",
+    "tags": [
+      "Cloud Souverain",
+      "Edge AI",
+      "Haute Dispo"
+    ]
+  },
+  {
+    "id": 4,
+    "title": "Plateforme SaaS de Conformité Futuriste",
+    "subtitle": "Conformité DORA Art. 24, ISO 27001 et reporting ESG / CSRD Scope 1-3",
+    "category": "compliance",
+    "image": "/affiche/plateforme-saas-de-conformite-futuriste.png",
+    "description": "Génération automatisée de rapports d'audit horodatés cryptographiquement SHA-256 avec archivage probant.",
+    "tags": [
+      "DORA",
+      "ISO 27001",
+      "CSRD"
+    ]
+  },
+  {
+    "id": 5,
+    "title": "Fonctionnalités Puissantes & Gestion Intelligente",
+    "subtitle": "Gestion de cycle de vie des actifs industriels et maintenance prédictive IA",
+    "category": "supervision",
+    "image": "/affiche/fonctionnalites-puissantes-gestion-intelligente-securisee.png",
+    "description": "Planification dynamique des interventions, suivi des ordres de travail et optimisation énergétique des parcs CVC.",
+    "tags": [
+      "GMAO Pro",
+      "Actifs 360°",
+      "IA Prédictive"
+    ]
+  },
+  {
+    "id": 6,
+    "title": "SENSORIUM CAFM PRO : Performance Opérationnelle",
+    "subtitle": "KPIs consolidés, optimisation des coûts et réduction continue du gaspillage",
+    "category": "energy",
+    "image": "/affiche/sensorium-cafm-pro-performance-operationnelle.png",
+    "description": "Métriques financières et techniques unifiées pour décideurs C-Level et équipes d'exploitation terrain.",
+    "tags": [
+      "Performance",
+      "ROI",
+      "Supervision"
+    ]
+  },
+  {
+    "id": 7,
+    "title": "Plateforme Intelligente SENSORIUM CAFM PRO",
+    "subtitle": "Centre de commande tactile et supervision multi-tenants en temps réel",
+    "category": "twin",
+    "image": "/affiche/plateforme-intelligente-sensorium-cafm-pro.png",
+    "description": "Tableau de bord ergonomique unifiant IoT, capteurs de flux et maintenance proactive sur site.",
+    "tags": [
+      "Cockpit",
+      "Multi-Tenants",
+      "Live"
+    ]
+  },
+  {
+    "id": 8,
+    "title": "Supervision Télémétrique & Flux Haute Densité",
+    "subtitle": "Ingestion d'événements Kafka en direct et pilotage d'équipements",
+    "category": "supervision",
+    "image": "/affiche/plateforme-intelligente-sensorium-cafm-pro-1-.png",
+    "description": "Surveillance de milliers de points de mesure avec détection automatique d'anomalies par modèles Edge.",
+    "tags": [
+      "Kafka",
+      "IoT Industriel",
+      "Télémétrie"
+    ]
+  },
+  {
+    "id": 9,
+    "title": "Efficience Opérationnelle & Synergie Énergétique",
+    "subtitle": "Régulation intelligente des consommations et empreinte carbone minimale",
+    "category": "energy",
+    "image": "/affiche/sensorium-cafm-pro-performance-operationnelle-1-.png",
+    "description": "Algorithmes de pilotage bioclimatique et synchronisation avec les réseaux électriques intelligents.",
+    "tags": [
+      "Efficience",
+      "Smart Grid",
+      "Carbone"
+    ]
+  }
+,
+
   {
     id: 1,
     title: "Centre de Contrôle Opérationnel & Jumeau Numérique",
@@ -261,4 +381,5 @@ export const SENSORIUM_POSTERS: BannerPoster[] = [
     description: "Indépendance technologique, hébergement souverain certifié SecNumCloud et conformité RGPD intégrale.",
     tags: ["SecNumCloud", "Souveraineté", "Vision 2030"]
   }
+
 ];

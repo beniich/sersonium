@@ -9,8 +9,8 @@ export interface ModuleTab {
 }
 
 export const MODULE_TABS: ModuleTab[] = [
-  { id: "ov-general", label: "Vue Globale", path: "/dashboard" },
-  { id: "ov-glass", label: "Executive Glass ✨", path: "/dashboard" },
+  { id: "ov-glass", label: "✨ Vision Dashboard", path: "/dashboard" },
+  { id: "ov-general", label: "Vue Globale ERP", path: "/dashboard" },
   { id: "ov-asset-hub", label: "Fiche Actifs 360°", path: "/dashboard" },
   { id: "cockpit", label: "Jumeau 3D", path: "/cockpit" },
   { id: "compute", label: "Silicon X1", path: "/compute" },
