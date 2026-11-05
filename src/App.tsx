@@ -476,7 +476,11 @@ export default function App() {
     if (newPage !== activePage) {
       setActivePage(newPage);
       if (newPage === "overview") {
-        setActiveItemId(location.pathname.includes("/cafm") ? "ov-cafm" : "ov-general");
+        const overviewPrefixes = ["ov-", "cafm-", "kpi-"];
+        const isAlreadyOverviewTab = overviewPrefixes.some(pref => activeItemId.startsWith(pref));
+        if (!isAlreadyOverviewTab) {
+          setActiveItemId(location.pathname.includes("/cafm") ? "ov-cafm" : "ov-general");
+        }
       } else if (newPage === "cockpit") {
         setActiveItemId("spider-cockpit");
       } else if (newPage === "portal") {
@@ -587,7 +591,15 @@ export default function App() {
       case "iam": return <IamAdminPage isDark={isDark} />;
       case "ai-studio":
       case "artifacts-ide":
-        return <ArtifactsIdeStudio isDark={isDark} state={state} onNavigate={(p) => setActivePage(p as any)} />;
+        return (
+          <ArtifactsIdeStudio 
+            isDark={isDark} 
+            state={state} 
+            onNavigate={(p) => setActivePage(p as any)} 
+            onUpgrade={handleUpgradeTier}
+            currentSubscriptionTier={state?.subscriptionTier}
+          />
+        );
       case "cockpit":
       case "digital-twin":
         return (
@@ -748,12 +760,24 @@ export default function App() {
                 activeTab={activeItemId}
                 activePage={activePage}
                 onSelectTab={(id) => {
-                  setActiveItemId(id);
-                  setActivePage("overview");
+                  if (id === "cockpit") {
+                    setActivePage("cockpit");
+                    setActiveItemId("spider-cockpit");
+                  } else if (id === "compute") {
+                    setActivePage("compute");
+                    setActiveItemId("compute-1");
+                  } else if (id === "compliance") {
+                    setActivePage("compliance");
+                    setActiveItemId("res-dora");
+                  } else {
+                    setActiveItemId(id);
+                    setActivePage("overview");
+                  }
                 }}
                 onOpenAiStudio={() => {
-                  setActiveItemId("ai-studio");
+                  setActiveItemId("ws-ide");
                   setActivePage("ai-studio" as any);
+                  navigate("/ai-studio");
                 }}
                 isCompactMode={isCompactMode}
                 onToggleCompactMode={toggleCompactMode}

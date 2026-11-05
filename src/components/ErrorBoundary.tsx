@@ -29,7 +29,10 @@ export class ErrorBoundary extends Component<Props, State> {
   }
 
   private handleReload = () => {
-    window.location.reload();
+    try {
+      this.setState({ hasError: false, error: null, errorInfo: null });
+    } catch {}
+    window.location.href = "/dashboard";
   };
 
   private handleReset = () => {
@@ -37,6 +40,7 @@ export class ErrorBoundary extends Component<Props, State> {
       localStorage.removeItem("sensorium_auth_user");
       localStorage.removeItem("sensorium_access_token");
       localStorage.removeItem("sensorium_rbac_session");
+      this.setState({ hasError: false, error: null, errorInfo: null });
     } catch {
       // Ignore
     }

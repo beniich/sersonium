@@ -110,7 +110,10 @@ export const FeatureGate: React.FC<FeatureGateProps> = ({
         featureTitle={featureTitle}
         featureDescription={featureDescription}
         requiredTier={requiredTier}
-        onUpgrade={onUpgrade}
+        onUpgrade={(tier) => {
+          setLocalTierKey(tier.toUpperCase());
+          if (onUpgrade) onUpgrade(tier);
+        }}
         isDark={isDark}
       />
     </div>

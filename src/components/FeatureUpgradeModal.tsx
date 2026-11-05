@@ -24,11 +24,26 @@ export const FeatureUpgradeModal: React.FC<FeatureUpgradeModalProps> = ({
   if (!isOpen) return null;
 
   const handleSelectTier = (tier: SubscriptionTier) => {
+    // 1. Persistance locale
+    localStorage.setItem("sensorium_subscription_tier", tier);
+    localStorage.setItem("sensorium_user_tier", tier);
+
+    // 2. Synchronisation globale par CustomEvents pour réactivité immédiate (FeatureGate, QuotaCounter, etc.)
+    const PLAN_NAMES: Record<string, string> = {
+      free: "Free Trial",
+      starter: "BIM Foundation",
+      silver: "BIM Foundation",
+      pro: "Hypervision Twin",
+      enterprise: "Sovereign Fleet"
+    };
+    window.dispatchEvent(new CustomEvent("sensorium:subscription_changed", {
+      detail: { tier, planName: PLAN_NAMES[tier.toLowerCase()] ?? tier }
+    }));
+    window.dispatchEvent(new CustomEvent("sensorium:quota_updated", { detail: { tier } }));
+
+    // 3. Callback parent
     if (onUpgrade) {
       onUpgrade(tier);
-    } else {
-      localStorage.setItem("sensorium_subscription_tier", tier);
-      localStorage.setItem("sensorium_user_tier", tier);
     }
     onClose();
   };

@@ -47,7 +47,7 @@ export const ModuleNavigationBar: React.FC<ModuleNavigationBarProps> = ({
     if (onSelectTab) {
       onSelectTab(tab.id);
     }
-    if (tab.path && tab.id === "cockpit" || tab.id === "compute" || tab.id === "compliance") {
+    if (tab.path) {
       navigate(tab.path);
     }
   };

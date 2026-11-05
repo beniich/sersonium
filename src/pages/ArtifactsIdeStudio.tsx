@@ -35,6 +35,7 @@ import SelfHealingModal, { SelfHealingIncident, DEFAULT_INCIDENT } from "../comp
 import RollbackWatchdogStatus from "../components/RollbackWatchdogStatus";
 import FeatureGate from "../components/FeatureGate";
 import PageHeaderBanner from "../components/PageHeaderBanner";
+import { SubscriptionTier } from "../types";
 
 export interface ArtifactData {
   id: string;
@@ -265,7 +266,21 @@ DC-VIE-08,Vienne (Autriche),1.16,21.9,890,530,99.997%,Optimal`
   }
 };
 
-export default function ArtifactsIdeStudio({ isDark = true }: { isDark?: boolean; state?: any; onNavigate?: (p: string) => void }) {
+export interface ArtifactsIdeStudioProps {
+  isDark?: boolean;
+  state?: any;
+  onNavigate?: (p: string) => void;
+  onUpgrade?: (tier: SubscriptionTier) => void;
+  currentSubscriptionTier?: SubscriptionTier;
+}
+
+export default function ArtifactsIdeStudio({
+  isDark = true,
+  state,
+  onNavigate,
+  onUpgrade,
+  currentSubscriptionTier,
+}: ArtifactsIdeStudioProps) {
   // Liste des artefacts en mémoire
   const [artifacts, setArtifacts] = useState<Record<string, ArtifactData>>(INITIAL_ARTIFACTS);
   const [activeArtifactId, setActiveArtifactId] = useState<string>("art-tf-1");
@@ -735,6 +750,8 @@ spec:
       featureTitle="🤖 SENSORIUM AI Artifacts IDE & Copilot"
       featureDescription="La génération d'artefacts IaC, le copilote Gemini en direct et la boucle d'auto-remédiation SRE requièrent un abonnement Pro actif."
       isDark={isDark}
+      onUpgrade={onUpgrade}
+      currentSubscriptionTier={currentSubscriptionTier || state?.subscriptionTier}
     >
       <div className={`space-y-4 animate-in fade-in duration-300 ${isFullScreen ? "fixed inset-0 z-50 bg-[#f8fafc] dark:bg-[#070709] p-4 overflow-hidden" : ""}`}>
       
