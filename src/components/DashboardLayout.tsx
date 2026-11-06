@@ -481,15 +481,15 @@ export default function DashboardLayout(props: any) {
               <div className="flex flex-col items-center gap-2 w-full px-2">
                 <button
                   onClick={toggleSidebarCollapse}
-                  className="p-2 rounded-lg text-slate-500 dark:text-neutral-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/[0.06] transition-colors"
+                  className="p-2 rounded-lg text-slate-400 dark:text-[#858585] hover:text-white hover:bg-slate-100 dark:hover:bg-white/[0.06] transition-colors cursor-pointer"
                   title="Déployer la barre latérale"
                 >
-                  <PanelLeftOpen className="w-5 h-5 text-orange-500" />
+                  <PanelLeftOpen className="w-5 h-5 text-slate-400 dark:text-[#858585]" />
                 </button>
 
                 <div className="w-8 h-px bg-slate-200 dark:bg-white/[0.08] my-1" />
 
-                {/* Group icons quick navigation */}
+                {/* Group icons quick navigation - VS Code Activity Bar style */}
                 <div className="flex flex-col gap-1.5 w-full items-center overflow-y-auto max-h-[calc(100vh-220px)] custom-scrollbar py-1">
                   {SENSORIUM_SERVICE_SUITE.map(group => {
                     const hasActive = group.items.some(it => it.id === activeItemId);
@@ -498,19 +498,21 @@ export default function DashboardLayout(props: any) {
                       <button
                         key={group.id}
                         onClick={() => firstItem && handleSelectService(firstItem.page, firstItem.id)}
-                        className={`p-2 rounded-xl transition-all relative group flex items-center justify-center ${
+                        className={`p-2.5 rounded-xl transition-all relative group flex items-center justify-center cursor-pointer ${
                           hasActive 
-                            ? "bg-orange-500/15 text-orange-600 dark:text-orange-400 border border-orange-500/30" 
-                            : "text-slate-500 dark:text-neutral-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/[0.06]"
+                            ? "bg-white/10 text-white border border-white/20 shadow-sm" 
+                            : "text-slate-400 dark:text-[#858585] hover:text-white hover:bg-white/[0.06]"
                         }`}
                         title={getGroupName(group.id, group.name)}
                       >
-                        <group.icon className="w-4 h-4" />
+                        <group.icon className={`w-5 h-5 ${hasActive ? "text-white" : "text-slate-400 dark:text-[#858585] group-hover:text-white"} transition-colors`} />
                         {hasActive && (
-                          <span className="absolute right-1 top-1 w-1.5 h-1.5 rounded-full bg-orange-500" />
+                          <span className="absolute -top-0.5 -right-0.5 min-w-[15px] h-3.5 px-0.5 rounded-full bg-[#007acc] text-white text-[9px] font-bold flex items-center justify-center shadow-xs">
+                            1
+                          </span>
                         )}
                         {/* Tooltip on hover */}
-                        <div className="absolute left-full ml-2 px-2 py-1 bg-slate-900 text-white text-[11px] rounded shadow-lg whitespace-nowrap opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity z-50">
+                        <div className="absolute left-full ml-2 px-2.5 py-1 bg-slate-900 border border-slate-700 text-white text-[11px] rounded-lg shadow-xl whitespace-nowrap opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity z-50">
                           {getGroupName(group.id, group.name)}
                         </div>
                       </button>
@@ -523,10 +525,10 @@ export default function DashboardLayout(props: any) {
                 <div className="p-2 w-full flex justify-center border-t border-slate-200/80 dark:border-white/[0.07]">
                   <button
                     onClick={onReturnToPortal}
-                    className="p-2 rounded-lg text-slate-500 dark:text-neutral-400 hover:text-indigo-400 hover:bg-slate-100 dark:hover:bg-white/[0.06] transition-colors"
+                    className="p-2 rounded-lg text-slate-400 dark:text-[#858585] hover:text-white hover:bg-slate-100 dark:hover:bg-white/[0.06] transition-colors cursor-pointer"
                     title="Portail Public SENSORIUM"
                   >
-                    <Globe className="w-4 h-4 text-indigo-400" />
+                    <Globe className="w-4 h-4 text-slate-400 dark:text-[#858585]" />
                   </button>
                 </div>
               )}
@@ -601,7 +603,7 @@ export default function DashboardLayout(props: any) {
                         className="w-full flex items-center justify-between px-2.5 py-1 rounded text-[11px] font-semibold text-slate-600 dark:text-neutral-400 hover:text-slate-900 dark:hover:text-neutral-200 hover:bg-slate-100/80 dark:hover:bg-white/[0.03] transition-colors cursor-pointer group"
                       >
                         <div className="flex items-center gap-2 min-w-0">
-                          <group.icon className={`w-3.5 h-3.5 flex-shrink-0 ${hasActiveItem ? "text-orange-500 dark:text-orange-400" : "text-slate-400 dark:text-neutral-500"}`} />
+                          <group.icon className={`w-3.5 h-3.5 flex-shrink-0 ${hasActiveItem ? "text-white" : "text-slate-400 dark:text-[#858585] group-hover:text-white"} transition-colors`} />
                           <span className="truncate uppercase tracking-wider text-[10px] font-mono">{getGroupName(group.id, group.name)}</span>
                         </div>
 
@@ -674,7 +676,7 @@ export default function DashboardLayout(props: any) {
                     onClick={onReturnToPortal}
                     className="w-full py-2 px-3 rounded-lg bg-white dark:bg-white/[0.04] hover:bg-slate-100 dark:hover:bg-white/[0.08] border border-slate-200 dark:border-white/[0.07] text-slate-700 dark:text-neutral-300 hover:text-slate-900 dark:hover:text-white text-xs font-medium flex items-center justify-center gap-2 transition-all cursor-pointer group shadow-2xs"
                   >
-                    <Globe className="w-3.5 h-3.5 text-indigo-400 group-hover:scale-110 transition-transform" />
+                    <Globe className="w-3.5 h-3.5 text-slate-400 dark:text-[#858585] group-hover:text-white group-hover:scale-110 transition-all" />
                     <span>Portail Public SENSORIUM</span>
                   </button>
                 </div>
@@ -784,7 +786,7 @@ export default function DashboardLayout(props: any) {
                     }}
                     className="w-full py-2.5 px-3 bg-slate-100 dark:bg-white/[0.04] hover:bg-slate-200 dark:hover:bg-white/[0.08] text-slate-700 dark:text-neutral-300 rounded-xl text-xs font-medium flex items-center justify-center gap-2 min-h-[44px] cursor-pointer transition-colors"
                   >
-                    <Globe className="w-4 h-4 text-indigo-400" />
+                    <Globe className="w-4 h-4 text-slate-400 dark:text-[#858585] group-hover:text-white" />
                     <span>Portail Public SENSORIUM</span>
                   </button>
                 )}
@@ -807,7 +809,7 @@ export default function DashboardLayout(props: any) {
           className="group px-3.5 sm:px-4 py-2.5 rounded-full bg-slate-900/90 text-white dark:bg-white/90 dark:text-black hover:bg-slate-900 dark:hover:bg-white border border-slate-700/50 dark:border-white/30 backdrop-blur-xl shadow-xl hover:shadow-2xl flex items-center gap-2.5 text-xs font-semibold transition-all cursor-pointer hover:scale-105 active:scale-95"
           title="Open quick telemetry setup"
         >
-          <SlidersHorizontal className="w-4 h-4 text-orange-500 dark:text-orange-600 animate-pulse" />
+          <SlidersHorizontal className="w-4 h-4 text-slate-400 dark:text-[#858585] group-hover:text-white" />
           <span className="hidden xs:inline">Quick Setup</span>
           <span className="w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_6px_rgba(16,185,129,0.8)]" />
         </button>

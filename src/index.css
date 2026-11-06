@@ -374,3 +374,74 @@ body:not(.dark),
   animation: pulseGlow 4s ease-in-out infinite;
 }
 
+/* ==========================================================================
+   VS CODE / ACTIVITY BAR MONOCHROME ICON SYSTEM
+   Harmonisation de tous les icônes de l'application en gris neutre (#858585 / #94a3b8)
+   comme la barre latérale VS Code, avec illumination au blanc pur au survol / actif.
+   ========================================================================== */
+
+svg.lucide,
+.lucide,
+svg[class*="lucide-"],
+.material-symbols-outlined {
+  color: #858585;
+  transition: color 150ms cubic-bezier(0.4, 0, 0.2, 1), opacity 150ms ease;
+}
+
+/* Mode clair : gris ardoise neutre propre */
+:root:not(.dark) svg.lucide,
+:root:not(.dark) .lucide,
+:root:not(.dark) svg[class*="lucide-"],
+:root:not(.dark) .material-symbols-outlined {
+  color: #64748b;
+}
+
+/* Mode sombre : gris VS Code #858585 standard */
+.dark svg.lucide,
+.dark .lucide,
+.dark svg[class*="lucide-"],
+.dark .material-symbols-outlined {
+  color: #858585;
+}
+
+/* Illumination au blanc éclatant (#ffffff) sur hover / focus / active */
+button:hover svg.lucide,
+button:hover .lucide,
+button:hover .material-symbols-outlined,
+button:focus-visible svg.lucide,
+a:hover svg.lucide,
+a:hover .lucide,
+a:hover .material-symbols-outlined,
+.group:hover svg.lucide,
+.group:hover .lucide,
+.group:hover .material-symbols-outlined,
+[role="button"]:hover svg.lucide,
+[role="button"]:hover .lucide,
+.active svg.lucide,
+[data-state="active"] svg.lucide,
+[aria-selected="true"] svg.lucide {
+  color: #ffffff;
+}
+
+:root:not(.dark) button:hover svg.lucide,
+:root:not(.dark) button:hover .lucide,
+:root:not(.dark) button:hover .material-symbols-outlined,
+:root:not(.dark) a:hover svg.lucide,
+:root:not(.dark) a:hover .lucide,
+:root:not(.dark) .group:hover svg.lucide,
+:root:not(.dark) .group:hover .lucide,
+:root:not(.dark) [role="button"]:hover svg.lucide {
+  color: #0f172a;
+}
+
+/* Maintien des icônes contrastées sur les boutons pleins colorés */
+button[class*="bg-indigo-"] svg.lucide,
+button[class*="bg-blue-"] svg.lucide,
+button[class*="bg-orange-"] svg.lucide,
+button[class*="bg-emerald-"] svg.lucide,
+button[class*="bg-purple-"] svg.lucide,
+.text-white svg.lucide,
+.icon-white svg.lucide {
+  color: #ffffff;
+}
+

@@ -86,7 +86,7 @@ export const ModuleNavigationBar: React.FC<ModuleNavigationBarProps> = ({
             }`}
             title="Studio d'Artefacts & Copilote IA"
           >
-            <Sparkles className="w-3 h-3 text-purple-400" />
+            <Sparkles className="w-3 h-3 text-slate-400 dark:text-[#858585] group-hover:text-white" />
             <span className="hidden sm:inline">Copilote IA</span>
           </button>
         )}

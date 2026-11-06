@@ -113,11 +113,11 @@ export const MasterHeader: React.FC<MasterHeaderProps> = ({
         {/* Theme Toggle Button */}
         <button
           onClick={toggleTheme}
-          className="p-1.5 rounded-lg bg-gray-900/60 hover:bg-gray-800 border border-gray-700/60 text-amber-400 dark:text-amber-300 hover:text-white transition-all shadow-xs flex items-center justify-center cursor-pointer"
+          className="p-1.5 rounded-lg bg-gray-900/60 hover:bg-gray-800 border border-gray-700/60 text-slate-400 dark:text-[#858585] hover:text-white transition-all shadow-xs flex items-center justify-center cursor-pointer"
           title={theme === "dark" ? "Passer en Mode Clair" : "Passer en Mode Sombre"}
           aria-label="Basculer le thème"
         >
-          {theme === "dark" ? <Sun size={14} className="text-amber-400" /> : <Moon size={14} className="text-indigo-400" />}
+          {theme === "dark" ? <Sun size={14} className="text-slate-400 dark:text-[#858585] hover:text-white" /> : <Moon size={14} className="text-slate-400 dark:text-[#858585] hover:text-white" />}
         </button>
 
         <div 
