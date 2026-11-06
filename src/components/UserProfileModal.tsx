@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useRef } from "react";
 import { 
   X, User, Building2, Mail, Camera, ShieldCheck, Check, 
-  Sparkles, RefreshCw, Upload, Image as ImageIcon, CheckCircle2
+  Sparkles, RefreshCw, Upload, Image as ImageIcon, CheckCircle2,
+  Crown, UserPlus
 } from "lucide-react";
 import { useRbac } from "@/hooks/useRbac";
 import type { User as FirebaseUser } from "firebase/auth";
@@ -11,6 +12,8 @@ export interface UserProfileModalProps {
   onClose: () => void;
   firebaseUser?: FirebaseUser | null;
   onSuccess?: () => void;
+  onOpenPricing?: () => void;
+  onOpenAuth?: (tab: 'register' | 'login') => void;
 }
 
 export const UserProfileModal: React.FC<UserProfileModalProps> = ({
@@ -18,6 +21,8 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
   onClose,
   firebaseUser,
   onSuccess,
+  onOpenPricing,
+  onOpenAuth,
 }) => {
   const { currentUser, currentTenant, updateProfile } = useRbac();
 
@@ -332,6 +337,37 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
                 <span>{currentUser?.role ?? "TENANT_ADMIN"}</span>
               </div>
             </div>
+          </div>
+
+          {/* Raccourcis Rapides Abonnement & Inscription */}
+          <div className="pt-2 grid grid-cols-1 sm:grid-cols-2 gap-2">
+            {onOpenPricing && (
+              <button
+                type="button"
+                onClick={() => {
+                  onClose();
+                  onOpenPricing();
+                }}
+                className="w-full flex items-center justify-center gap-2 p-2.5 rounded-xl bg-orange-500/10 hover:bg-orange-500/20 border border-orange-500/30 text-orange-400 hover:text-orange-300 text-xs font-semibold transition-all cursor-pointer shadow-xs active:scale-95"
+              >
+                <Crown className="w-3.5 h-3.5" />
+                <span>Gérer mon Abonnement</span>
+              </button>
+            )}
+
+            {onOpenAuth && (
+              <button
+                type="button"
+                onClick={() => {
+                  onClose();
+                  onOpenAuth('register');
+                }}
+                className="w-full flex items-center justify-center gap-2 p-2.5 rounded-xl bg-indigo-600/20 hover:bg-indigo-600/30 border border-indigo-500/40 text-indigo-300 hover:text-white text-xs font-semibold transition-all cursor-pointer shadow-xs active:scale-95"
+              >
+                <UserPlus className="w-3.5 h-3.5" />
+                <span>Nouvelle Inscription</span>
+              </button>
+            )}
           </div>
 
           {/* Modal Actions */}

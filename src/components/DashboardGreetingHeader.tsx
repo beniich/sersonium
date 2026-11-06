@@ -18,7 +18,9 @@ import {
   X,
   Server,
   Filter,
-  Check
+  Check,
+  Crown,
+  UserPlus
 } from "lucide-react";
 import { GlobalState, CAFMWorkOrder, EdgeNode } from "../types";
 import { User } from "firebase/auth";
@@ -27,6 +29,7 @@ import { collection, addDoc, doc, updateDoc } from "firebase/firestore";
 import InteractiveDashboardCard, { QuickActionItem } from "./InteractiveDashboardCard";
 import { useAppContext } from "../contexts/AppContext";
 import UserProfileModal from "./UserProfileModal";
+import { SensoriumAuthModal } from "./SensoriumAuthModal";
 
 interface DashboardGreetingHeaderProps {
   user?: User | null;
@@ -50,6 +53,7 @@ export default function DashboardGreetingHeader({
   const { jumpToAsset } = useAppContext();
   const [tasksDrawerOpen, setTasksDrawerOpen] = useState(false);
   const [isQuickAddOpen, setIsQuickAddOpen] = useState(false);
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [currentTime, setCurrentTime] = useState<string>("");
   const [filterPriority, setFilterPriority] = useState<string>("all");
   
@@ -288,6 +292,38 @@ export default function DashboardGreetingHeader({
 
           {/* Quick Actions & Tasks Drawer Trigger */}
           <div className="flex items-center gap-2 self-stretch lg:self-auto justify-end flex-wrap">
+            {/* Bouton Inscription / Connexion */}
+            <button
+              onClick={() => {
+                if (onSignIn) {
+                  onSignIn();
+                } else {
+                  setIsAuthModalOpen(true);
+                }
+              }}
+              className="px-2.5 py-1.5 rounded-lg bg-indigo-600/20 hover:bg-indigo-600/30 border border-indigo-500/35 text-indigo-300 hover:text-white text-xs font-semibold flex items-center gap-1.5 transition-all cursor-pointer shadow-xs active:scale-95 min-h-[32px]"
+              title="Créer un compte ou se connecter à SENSORIUM"
+            >
+              <UserPlus className="w-3.5 h-3.5 text-indigo-400" />
+              <span>Inscription</span>
+            </button>
+
+            {/* Bouton Tarifs & Abonnements */}
+            <button
+              onClick={() => {
+                if (onNavigateToTab) {
+                  onNavigateToTab("pricing");
+                } else if (typeof window !== "undefined") {
+                  window.location.href = "/pricing";
+                }
+              }}
+              className="px-2.5 py-1.5 rounded-lg bg-orange-500/15 hover:bg-orange-500/25 border border-orange-500/30 text-orange-400 hover:text-orange-300 text-xs font-semibold flex items-center gap-1.5 transition-all cursor-pointer shadow-xs active:scale-95 min-h-[32px]"
+              title="Consulter et gérer l'abonnement"
+            >
+              <Crown className="w-3.5 h-3.5 text-orange-400" />
+              <span>Abonnement</span>
+            </button>
+
             <button
               onClick={() => setIsQuickAddOpen(true)}
               className="px-2.5 py-1.5 rounded-lg bg-white/[0.05] hover:bg-white/[0.1] border border-white/[0.1] text-neutral-200 text-xs font-medium flex items-center gap-1.5 transition-all cursor-pointer shadow-xs active:scale-95 min-h-[32px]"
@@ -849,6 +885,19 @@ export default function DashboardGreetingHeader({
         isOpen={isProfileModalOpen}
         onClose={() => setIsProfileModalOpen(false)}
         firebaseUser={user}
+        onOpenPricing={() => {
+          if (onNavigateToTab) onNavigateToTab("pricing");
+          else if (typeof window !== "undefined") window.location.href = "/pricing";
+        }}
+        onOpenAuth={() => setIsAuthModalOpen(true)}
+      />
+
+      {/* Modale d'authentification et inscription */}
+      <SensoriumAuthModal
+        isOpen={isAuthModalOpen}
+        onClose={() => setIsAuthModalOpen(false)}
+        defaultTab="register"
+        onSuccess={() => setIsAuthModalOpen(false)}
       />
     </div>
   );

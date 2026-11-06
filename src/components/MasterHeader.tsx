@@ -1,12 +1,13 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Menu, Sun, Moon } from 'lucide-react';
+import { Menu, Sun, Moon, Crown, UserPlus } from 'lucide-react';
 import { useRbac } from '@/hooks/useRbac';
 import { useConnectionHealth } from '@/hooks/useConnectionHealth';
 import { useTheme } from '../App';
 import ConnectionBadge from './ConnectionBadge';
 import SubscriptionQuotaCounter from './SubscriptionQuotaCounter';
 import UserProfileModal from './UserProfileModal';
+import { SensoriumAuthModal } from './SensoriumAuthModal';
 
 export interface MasterHeaderProps {
   onOpenMenu?: () => void;
@@ -24,6 +25,8 @@ export const MasterHeader: React.FC<MasterHeaderProps> = ({
   const { sla, latency, aiStatus, aiCircuitState, zeroTrustStatus, zeroTrustScore } = useConnectionHealth();
   const { theme, toggleTheme } = useTheme();
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
+  const [authDefaultTab, setAuthDefaultTab] = useState<'register' | 'login'>('register');
 
   // Initiales locales pour profil souverain (zero fuite vers serveurs tiers)
   const initials = currentUser?.name
@@ -98,17 +101,40 @@ export const MasterHeader: React.FC<MasterHeaderProps> = ({
         />
       </div>
 
-      {/* ZONE 3 : THÈME, PROFIL, QUOTAS & SESSION */}
-      <div className="flex items-center gap-2 sm:gap-2.5">
+      {/* ZONE 3 : THÈME, PROFIL, QUOTAS, ABONNEMENT & INSCRIPTION */}
+      <div className="flex items-center gap-1.5 sm:gap-2">
+        {/* Bouton d'Abonnement explicite */}
+        <button
+          onClick={() => navigate('/pricing')}
+          className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-orange-500/15 hover:bg-orange-500/25 border border-orange-500/35 text-orange-400 hover:text-orange-300 text-xs font-semibold transition-all cursor-pointer shadow-xs active:scale-95"
+          title="Consulter les forfaits et gérer votre abonnement SENSORIUM"
+        >
+          <Crown size={13} className="text-orange-400" />
+          <span className="hidden sm:inline">Abonnement</span>
+        </button>
+
+        {/* Bouton d'Inscription & Connexion explicite */}
+        <button
+          onClick={() => {
+            setAuthDefaultTab('register');
+            setIsAuthModalOpen(true);
+          }}
+          className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-indigo-600/25 hover:bg-indigo-600/40 border border-indigo-500/40 text-indigo-300 hover:text-white text-xs font-semibold transition-all cursor-pointer shadow-xs active:scale-95"
+          title="Créer un compte ou se connecter à la plateforme SENSORIUM"
+        >
+          <UserPlus size={13} className="text-indigo-400" />
+          <span className="hidden sm:inline">Inscription</span>
+        </button>
+
         {/* Compteur interactif de quotas d'abonnement & Tokens IA */}
         <SubscriptionQuotaCounter 
           variant="pill" 
           onOpenPricing={() => navigate('/pricing')} 
-          className="hidden sm:inline-flex"
+          className="hidden xl:inline-flex"
         />
 
         {/* Badge Interactif Mode Live Cloud vs Mode Simulation */}
-        <ConnectionBadge className="hidden md:inline-flex" />
+        <ConnectionBadge className="hidden lg:inline-flex" />
 
         {/* Theme Toggle Button */}
         <button
@@ -155,6 +181,21 @@ export const MasterHeader: React.FC<MasterHeaderProps> = ({
       <UserProfileModal
         isOpen={isProfileModalOpen}
         onClose={() => setIsProfileModalOpen(false)}
+        onOpenPricing={() => navigate('/pricing')}
+        onOpenAuth={(tab) => {
+          setAuthDefaultTab(tab);
+          setIsAuthModalOpen(true);
+        }}
+      />
+
+      {/* Modale d'Inscription & Authentification SENSORIUM */}
+      <SensoriumAuthModal
+        isOpen={isAuthModalOpen}
+        onClose={() => setIsAuthModalOpen(false)}
+        defaultTab={authDefaultTab}
+        onSuccess={() => {
+          setIsAuthModalOpen(false);
+        }}
       />
     </header>
   );
