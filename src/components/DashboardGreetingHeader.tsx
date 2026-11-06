@@ -26,6 +26,7 @@ import { db } from "../firebase";
 import { collection, addDoc, doc, updateDoc } from "firebase/firestore";
 import InteractiveDashboardCard, { QuickActionItem } from "./InteractiveDashboardCard";
 import { useAppContext } from "../contexts/AppContext";
+import UserProfileModal from "./UserProfileModal";
 
 interface DashboardGreetingHeaderProps {
   user?: User | null;
@@ -78,6 +79,15 @@ export default function DashboardGreetingHeader({
     return "Good evening";
   };
 
+  const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
+  const [localProfileVersion, setLocalProfileVersion] = useState(0);
+
+  useEffect(() => {
+    const handleProfileUpdated = () => setLocalProfileVersion(v => v + 1);
+    window.addEventListener("sensorium:profile_updated", handleProfileUpdated);
+    return () => window.removeEventListener("sensorium:profile_updated", handleProfileUpdated);
+  }, []);
+
   // Format today's date in English
   const formattedDate = new Intl.DateTimeFormat("en-US", {
     weekday: "long",
@@ -89,8 +99,12 @@ export default function DashboardGreetingHeader({
   // Capitalize first letter of date
   const capitalizedDate = formattedDate.charAt(0).toUpperCase() + formattedDate.slice(1);
 
-  // Extract user's name from Firebase User or Team Members
+  // Extract user's name from LocalStorage, Firebase User or Team Members
   const getUserDisplayName = () => {
+    if (typeof localStorage !== "undefined") {
+      const stored = localStorage.getItem("sensorium_user_name");
+      if (stored) return stored;
+    }
     if (user?.displayName) {
       return user.displayName;
     }
@@ -211,16 +225,20 @@ export default function DashboardGreetingHeader({
           {/* User Profile & Greeting */}
           <div className="flex items-center gap-2.5 sm:gap-3">
             {/* Avatar */}
-            <div className="relative flex-shrink-0">
-              {user?.photoURL ? (
+            <div 
+              onClick={() => setIsProfileModalOpen(true)}
+              className="relative flex-shrink-0 cursor-pointer group"
+              title="Modifier mon profil & photo Gmail"
+            >
+              {(user?.photoURL || (typeof localStorage !== "undefined" && localStorage.getItem("sensorium_user_avatar"))) ? (
                 <img 
-                  src={user.photoURL} 
+                  src={user?.photoURL || (typeof localStorage !== "undefined" ? localStorage.getItem("sensorium_user_avatar") || "" : "")} 
                   alt={displayName} 
                   referrerPolicy="no-referrer"
-                  className="w-10 h-10 sm:w-11 sm:h-11 rounded-xl object-cover border border-white/20 shadow-md"
+                  className="w-10 h-10 sm:w-11 sm:h-11 rounded-xl object-cover border border-white/20 shadow-md group-hover:border-orange-500 transition-colors"
                 />
               ) : (
-                <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-xl bg-gradient-to-br from-neutral-800 to-neutral-900 border border-white/[0.15] text-white flex items-center justify-center font-bold text-xs sm:text-sm tracking-wider shadow-[0_4px_16px_rgba(0,0,0,0.4)]">
+                <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-xl bg-gradient-to-br from-neutral-800 to-neutral-900 border border-white/[0.15] text-white flex items-center justify-center font-bold text-xs sm:text-sm tracking-wider shadow-[0_4px_16px_rgba(0,0,0,0.4)] group-hover:border-orange-500 transition-colors">
                   {getUserInitials()}
                 </div>
               )}
@@ -826,6 +844,12 @@ export default function DashboardGreetingHeader({
           </div>
         </div>
       )}
+      {/* Modale de modification de profil & photo Gmail */}
+      <UserProfileModal
+        isOpen={isProfileModalOpen}
+        onClose={() => setIsProfileModalOpen(false)}
+        firebaseUser={user}
+      />
     </div>
   );
 }

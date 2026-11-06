@@ -3,7 +3,7 @@ import { GlobalState, AuditLog, WalletTransaction, PayPalConfig, PayPalPaymentRe
 import { 
   CreditCard, ShieldCheck, Users, Key, Bell, Sliders, Plus, X, 
   ArrowUpRight, CheckCircle2, Download, Trash2, Shield, Settings, 
-  ToggleLeft, ToggleRight, Check, AlertTriangle, CreditCard as CardIcon 
+  ToggleLeft, ToggleRight, Check, AlertTriangle, CreditCard as CardIcon, User
 } from "lucide-react";
 import { db } from "../firebase";
 import { collection, addDoc } from "firebase/firestore";
@@ -18,6 +18,7 @@ import {
 import PayPalManager from "../components/PayPalManager";
 import AuthorizationsManager from "../components/AuthorizationsManager";
 import GoogleAuthManager from "../components/GoogleAuthManager";
+import UserProfileModal from "../components/UserProfileModal";
 import { useLanguage } from "../App";
 import PageHeaderBanner from "../components/PageHeaderBanner";
 import { PLANS as SUBSCRIPTION_PLANS } from "../data/plans";
@@ -68,6 +69,7 @@ export default function SettingsPage({ state, isDark, activeItemId = "set-1", on
     return found ? `plan-${found.tier}` : "plan-free";
   };
   const [currentPlan, setCurrentPlan] = useState(getActivePlanId);
+  const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
 
   // Custom Toast State for user actions
   const [toastMessage, setToastMessage] = useState<string | null>(null);
@@ -328,12 +330,21 @@ export default function SettingsPage({ state, isDark, activeItemId = "set-1", on
               </>
             )}
             {currentTab === "set-2" && (
-              <button 
-                onClick={() => setIsInviteOpen(true)}
-                className="px-3.5 py-2 bg-gradient-to-r from-orange-500 to-amber-600 hover:from-orange-600 hover:to-amber-700 text-white rounded-xl text-xs font-bold flex items-center gap-2 transition-all cursor-pointer shadow-lg shadow-orange-500/20"
-              >
-                <Plus className="w-4 h-4" /> Invite Member
-              </button>
+              <>
+                <button
+                  onClick={() => setIsProfileModalOpen(true)}
+                  className="px-3.5 py-2 bg-white/10 hover:bg-white/15 text-white border border-white/10 rounded-xl text-xs font-medium flex items-center gap-2 cursor-pointer backdrop-blur-md transition-all"
+                  title="Modifier mon profil et mon organisation"
+                >
+                  <User className="w-4 h-4 text-orange-400" /> Profil &amp; Entreprise M
+                </button>
+                <button 
+                  onClick={() => setIsInviteOpen(true)}
+                  className="px-3.5 py-2 bg-gradient-to-r from-orange-500 to-amber-600 hover:from-orange-600 hover:to-amber-700 text-white rounded-xl text-xs font-bold flex items-center gap-2 transition-all cursor-pointer shadow-lg shadow-orange-500/20"
+                >
+                  <Plus className="w-4 h-4" /> Invite Member
+                </button>
+              </>
             )}
             {currentTab === "set-3" && (
               <button 
@@ -1029,6 +1040,11 @@ export default function SettingsPage({ state, isDark, activeItemId = "set-1", on
           </div>
         </div>
       )}
+      {/* Modale de Gestion du Profil & Organisation */}
+      <UserProfileModal
+        isOpen={isProfileModalOpen}
+        onClose={() => setIsProfileModalOpen(false)}
+      />
     </div>
   );
 }

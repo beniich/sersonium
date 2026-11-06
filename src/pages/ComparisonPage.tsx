@@ -95,7 +95,7 @@ const COMPARISON_DATA: ComparisonFeature[] = [
     sensorium: {
       status: "superior",
       title: "Souveraine & Maîtrisée",
-      description: "Contrôle total sur la localisation des données en local (On-Premise) ou cloud souverain étanche. Idéal pour la CMR et Caisse des Dépôts.",
+      description: "Contrôle total sur la localisation des données en local (On-Premise) ou cloud souverain étanche. Idéal pour l'Entreprise M et Caisse des Dépôts.",
       badge: "100% Souverain"
     },
     executiveValue: "Sanctuarisation des données étatiques, bancaires et de retraite contre l'espionnage économique."
@@ -204,7 +204,7 @@ SENSORIUM, en revanche, est une plateforme de Résilience. Nous ne nous contento
           </h1>
 
           <p className="text-sm sm:text-base text-slate-300 leading-relaxed max-w-3xl">
-            Pourquoi les grandes institutions souveraines (<strong>CMR, Caisse des Dépôts, banques et opérateurs d'infrastructures vitales</strong>)
+            Pourquoi les grandes institutions souveraines (<strong>Entreprise M, Caisse des Dépôts, banques et opérateurs d'infrastructures vitales</strong>)
             dépassent le modèle UEM traditionnel pour adopter l'approche unifiée, souveraine et prédictive de <strong>SENSORIUM</strong>.
           </p>
 
@@ -213,7 +213,7 @@ SENSORIUM, en revanche, est une plateforme de Résilience. Nous ne nous contento
               <ShieldCheck size={14} className="text-emerald-400" /> Zero-Trust Natif
             </span>
             <span className="px-3 py-1 rounded-lg bg-white/5 border border-white/10 text-slate-300 flex items-center gap-1.5">
-              <Building2 size={14} className="text-orange-400" /> Souveraineté CMR / Caisse des Dépôts
+              <Building2 size={14} className="text-orange-400" /> Souveraineté Entreprise M / Caisse des Dépôts
             </span>
             <span className="px-3 py-1 rounded-lg bg-white/5 border border-white/10 text-slate-300 flex items-center gap-1.5">
               <Cpu size={14} className="text-cyan-400" /> Convergence IT + OT + IoT
@@ -518,7 +518,7 @@ SENSORIUM, en revanche, est une plateforme de Résilience. Nous ne nous contento
           </div>
           <h3 className="text-sm font-bold text-white">3. Souveraineté &amp; Séquestre</h3>
           <p className="text-xs text-slate-400 leading-relaxed">
-            Hébergement étanche sans transfert vers des tiers américains ou indiens. Chaque organisation (CMR, Caisse de Dépôt) possède son coffre et contrôle ses certificats.
+            Hébergement étanche sans transfert vers des tiers américains ou indiens. Chaque organisation (Entreprise M, Caisse de Dépôt) possède son coffre et contrôle ses certificats.
           </p>
         </div>
 

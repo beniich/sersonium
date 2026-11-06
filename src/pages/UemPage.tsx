@@ -500,7 +500,7 @@ function DeployAgentModal({ onClose }: { onClose: () => void }) {
         {/* Footer */}
         <div className="flex items-center justify-between p-4 border-t border-slate-800 bg-slate-950/40">
           <div className="text-xs text-slate-500 font-mono">
-            Token Tenant : CMR-FLEET-01 · Clé API : SENS-AGENT-CMR-***
+            Token Tenant : ENTM-FLEET-01 · Clé API : SENS-AGENT-ENTM-***
           </div>
           <button
             onClick={onClose}
@@ -597,7 +597,7 @@ export default function UemPage({ isDark }: UemPageProps) {
         badgeColor="bg-cyan-500/15 text-cyan-400 border-cyan-500/30"
         status={{ label: "ZERO-TRUST • DLP ACTIF", color: "emerald" }}
         title="UEM Sovereign Fleet Manager"
-        subtitle={`CMR Fleet · ${stats.totalTerminals} Terminaux Déployés · Agent v1.0.0`}
+        subtitle={`Entreprise M Fleet · ${stats.totalTerminals} Terminaux Déployés · Agent v1.0.0`}
         description="Supervision unifiée de terminaux Windows/Linux/Mac : télé-inventaire matériel, verrouillage ports USB et enforcement des politiques de sécurité."
         telemetry={[
           { label: "Total Flotte", value: stats.totalTerminals },

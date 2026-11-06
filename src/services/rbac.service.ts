@@ -215,11 +215,11 @@ export const ROLE_COLORS: Record<RbacRole, string> = {
 export const MOCK_TENANTS: Tenant[] = [
   {
     id: "tenant-cmr",
-    name: "Caisse Marocaine des Retraites",
-    domain: "cmr.ma",
+    name: "Entreprise M",
+    domain: "entreprise-m.ma",
     tier: "ENTERPRISE",
     ssoProvider: "azure_ad",
-    ssoConfig: { tenantId: "xxxx-cmr-azure-tenant" },
+    ssoConfig: { tenantId: "xxxx-entreprise-m-azure-tenant" },
     createdAt: "2025-01-15T09:00:00Z",
     contractExpiry: "2027-01-15T00:00:00Z",
     maxUsers: 250,
@@ -286,19 +286,20 @@ class RbacService {
   public syncFromAuthUser(user: AuthUser): void {
     const role = this.mapAuthRole(user.role);
     const tenant = MOCK_TENANTS.find((t) => t.id === user.tenantId) || {
-      id: user.tenantId || "tenant-default",
-      name: user.organizationName || "Organisation SENSORIUM",
-      domain: user.email.split("@")[1] || "sensorium.ai",
+      id: user.tenantId || "tenant-cmr",
+      name: user.organizationName || "Entreprise M",
+      domain: user.email.split("@")[1] || "entreprise-m.ma",
       tier: "ENTERPRISE",
       createdAt: new Date().toISOString(),
       maxUsers: 100,
       features: { digitalTwin: true, realtimeKafka: true, csrdCompliance: true, ztnaHardware: true, souvereign: true },
     };
 
-    const member: TenantMember = {
+    const member: TenantMember & { photoUrl?: string } = {
       userId: user.userId,
       email: user.email,
-      displayName: user.email.split("@")[0],
+      displayName: user.displayName || user.email.split("@")[0],
+      photoUrl: user.photoUrl,
       role,
       tenantId: tenant.id,
       isActive: true,
@@ -312,6 +313,73 @@ class RbacService {
       this.session.permissions = Array.from(new Set([...this.session.permissions, ...user.permissions as Permission[]]));
     }
     this.saveToStorage();
+
+    if (typeof window !== "undefined") {
+      window.dispatchEvent(new CustomEvent("sensorium:profile_updated", {
+        detail: {
+          displayName: this.session.displayName,
+          photoUrl: this.session.photoUrl,
+          companyName: this.session.tenant.name,
+        }
+      }));
+    }
+  }
+
+  public updateProfile(updates: { displayName?: string; photoUrl?: string; companyName?: string }): RbacSession | null {
+    if (!this.session) {
+      const defaultTenant: Tenant = {
+        id: "tenant-cmr",
+        name: updates.companyName || "Entreprise M",
+        domain: "entreprise-m.ma",
+        tier: "ENTERPRISE",
+        createdAt: new Date().toISOString(),
+        maxUsers: 250,
+        features: { digitalTwin: true, realtimeKafka: true, csrdCompliance: true, ztnaHardware: true, souvereign: true },
+      };
+      const defaultMember: TenantMember & { photoUrl?: string } = {
+        userId: "usr-local-admin",
+        email: "admin@entreprise-m.ma",
+        displayName: updates.displayName || "Admin User",
+        photoUrl: updates.photoUrl,
+        role: "TENANT_ADMIN",
+        tenantId: defaultTenant.id,
+        isActive: true,
+        invitedAt: new Date().toISOString(),
+        invitedBy: "system",
+        mfaEnabled: true,
+      };
+      this.session = this.buildSession(defaultMember, defaultTenant, "mock");
+    }
+
+    if (updates.displayName) {
+      this.session.displayName = updates.displayName;
+    }
+    if (updates.photoUrl !== undefined) {
+      this.session.photoUrl = updates.photoUrl;
+    }
+    if (updates.companyName) {
+      this.session.tenant.name = updates.companyName;
+    }
+    this.saveToStorage();
+
+    if (typeof localStorage !== "undefined") {
+      localStorage.setItem("sensorium_company_name", this.session.tenant.name);
+      localStorage.setItem("sensorium_user_name", this.session.displayName);
+      if (this.session.photoUrl) {
+        localStorage.setItem("sensorium_user_avatar", this.session.photoUrl);
+      }
+    }
+
+    if (typeof window !== "undefined") {
+      window.dispatchEvent(new CustomEvent("sensorium:profile_updated", {
+        detail: {
+          displayName: this.session.displayName,
+          photoUrl: this.session.photoUrl,
+          companyName: this.session.tenant.name,
+        }
+      }));
+    }
+    return this.session;
   }
 
   private mapAuthRole(roleStr: string): RbacRole {

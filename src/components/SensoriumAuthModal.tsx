@@ -176,7 +176,7 @@ export const SensoriumAuthModal: React.FC<SensoriumAuthModalProps> = ({
     {
       role: 'TENANT_ADMIN' as RbacRole,
       title: 'Directeur des Infrastructures',
-      org: 'Airbus Defence & Space (CMR)',
+      org: 'Entreprise M (Souverain)',
       icon: <Building2 className="w-5 h-5 text-blue-400" />,
       color: 'border-blue-500/40 bg-blue-500/10 hover:border-blue-500',
     },

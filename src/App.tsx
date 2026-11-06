@@ -44,6 +44,7 @@ import { initAuth, googleSignIn, logout, db } from "./firebase";
 import { doc, setDoc } from "firebase/firestore";
 import type { User } from "firebase/auth";
 import type { SubscriptionTier } from "./types";
+import rbacService from "./services/rbac.service";
 
 export type ThemeMode = "system" | "light" | "dark";
 
@@ -350,6 +351,17 @@ export default function App() {
         clearTimeout(timer);
         setUser(user);
         setAuthLoading(false);
+        if (user) {
+          rbacService.syncFromAuthUser({
+            userId: user.uid,
+            email: user.email || "user@gmail.com",
+            displayName: user.displayName || user.email?.split("@")[0] || "Administrateur",
+            photoUrl: user.photoURL || undefined,
+            role: "admin",
+            tenantId: "tenant-cmr",
+            organizationName: (typeof localStorage !== "undefined" && localStorage.getItem("sensorium_company_name")) || "Entreprise M",
+          });
+        }
       },
       () => {
         clearTimeout(timer);

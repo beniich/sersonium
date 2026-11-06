@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Menu, Sun, Moon } from 'lucide-react';
 import { useRbac } from '@/hooks/useRbac';
@@ -6,6 +6,7 @@ import { useConnectionHealth } from '@/hooks/useConnectionHealth';
 import { useTheme } from '../App';
 import ConnectionBadge from './ConnectionBadge';
 import SubscriptionQuotaCounter from './SubscriptionQuotaCounter';
+import UserProfileModal from './UserProfileModal';
 
 export interface MasterHeaderProps {
   onOpenMenu?: () => void;
@@ -22,10 +23,11 @@ export const MasterHeader: React.FC<MasterHeaderProps> = ({
   const { currentUser, currentTenant } = useRbac();
   const { sla, latency, aiStatus, aiCircuitState, zeroTrustStatus, zeroTrustScore } = useConnectionHealth();
   const { theme, toggleTheme } = useTheme();
+  const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
 
   // Initiales locales pour profil souverain (zero fuite vers serveurs tiers)
   const initials = currentUser?.name
-    ?.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2) ?? 'AU';
+    ?.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2) ?? 'EM';
 
   return (
     <header className={`h-[44px] w-full bg-[#0a0b11] border-b border-gray-800 flex items-center justify-between px-3 sm:px-4 sticky top-0 z-50 backdrop-blur-md bg-opacity-95 ${className}`}>
@@ -56,10 +58,14 @@ export const MasterHeader: React.FC<MasterHeaderProps> = ({
 
         <div className="h-4 w-[1px] bg-gray-700 mx-1 hidden xs:block" />
 
-        <div className="flex flex-col">
-          <span className="text-[9px] text-gray-500 uppercase font-bold leading-none">Active Tenant</span>
-          <span className="text-xs text-gray-200 font-medium leading-tight truncate max-w-[140px] sm:max-w-[220px]">
-            {currentTenant?.name ?? 'Airbus Defence & Space'}
+        <div 
+          onClick={() => setIsProfileModalOpen(true)}
+          className="flex flex-col cursor-pointer group" 
+          title="Modifier le nom de l'organisation active"
+        >
+          <span className="text-[9px] text-gray-500 uppercase font-bold leading-none group-hover:text-orange-400 transition-colors">Active Tenant</span>
+          <span className="text-xs text-gray-200 font-medium leading-tight truncate max-w-[140px] sm:max-w-[220px] group-hover:text-white transition-colors">
+            {currentTenant?.name ?? 'Entreprise M'}
           </span>
         </div>
       </div>
@@ -114,8 +120,12 @@ export const MasterHeader: React.FC<MasterHeaderProps> = ({
           {theme === "dark" ? <Sun size={14} className="text-amber-400" /> : <Moon size={14} className="text-indigo-400" />}
         </button>
 
-        <div className="text-right hidden sm:block">
-          <p className="text-[11px] font-bold text-white leading-none truncate max-w-[120px]">
+        <div 
+          onClick={() => setIsProfileModalOpen(true)}
+          className="text-right hidden sm:block cursor-pointer group"
+          title="Modifier votre profil et nom d'organisation"
+        >
+          <p className="text-[11px] font-bold text-white leading-none truncate max-w-[120px] group-hover:text-orange-400 transition-colors">
             {currentUser?.name ?? 'Admin User'}
           </p>
           <p className="text-[9px] text-gray-500 uppercase leading-none mt-0.5">
@@ -123,18 +133,29 @@ export const MasterHeader: React.FC<MasterHeaderProps> = ({
           </p>
         </div>
 
-        {/* Avatar Souverain Local */}
+        {/* Avatar Souverain Local / Photo de profil Gmail */}
         <div 
-          onClick={() => {
-            if (onOpenEnterpriseLogin) onOpenEnterpriseLogin();
-            else navigate('/admin');
-          }}
-          className="w-7 h-7 rounded-full bg-indigo-700 border border-indigo-500 flex items-center justify-center cursor-pointer hover:ring-2 ring-indigo-500 transition-all shadow-sm"
-          title="Authentification Entreprise (RBAC / SSO)"
+          onClick={() => setIsProfileModalOpen(true)}
+          className="w-7 h-7 rounded-full bg-indigo-700 border border-indigo-500/80 flex items-center justify-center cursor-pointer hover:ring-2 ring-orange-500 transition-all shadow-sm overflow-hidden"
+          title="Modifier mon profil & photo Gmail"
         >
-          <span className="text-white text-[11px] font-bold tracking-tight">{initials}</span>
+          {currentUser?.photoUrl ? (
+            <img 
+              src={currentUser.photoUrl} 
+              alt={currentUser.name || "Profil"} 
+              className="w-full h-full object-cover" 
+            />
+          ) : (
+            <span className="text-white text-[11px] font-bold tracking-tight">{initials}</span>
+          )}
         </div>
       </div>
+
+      {/* Modale de Gestion du Profil Utilisateur & Organisation */}
+      <UserProfileModal
+        isOpen={isProfileModalOpen}
+        onClose={() => setIsProfileModalOpen(false)}
+      />
     </header>
   );
 };

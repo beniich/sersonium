@@ -32,8 +32,8 @@ const profiles: ProfileItem[] = [
     role: "TENANT_ADMIN", 
     tenantId: "tenant-cmr", 
     roleLabel: "Administrateur Tenant", 
-    org: "Airbus Defence & Space (CMR)", 
-    desc: "Admin CMR — Toutes les fonctions", 
+    org: "Entreprise M (Souverain)", 
+    desc: "Admin Entreprise M — Toutes les fonctions", 
     icon: <Building2 size={20} />, 
     color: "text-blue-400" 
   },
@@ -41,7 +41,7 @@ const profiles: ProfileItem[] = [
     role: "FACILITY_LEAD", 
     tenantId: "tenant-cmr", 
     roleLabel: "Responsable Site", 
-    org: "Airbus Defence & Space (CMR)", 
+    org: "Entreprise M (Souverain)", 
     desc: "Supervision installations & CAFM", 
     icon: <HardHat size={20} />, 
     color: "text-emerald-400" 
@@ -50,7 +50,7 @@ const profiles: ProfileItem[] = [
     role: "FIELD_TECHNICIAN", 
     tenantId: "tenant-cmr", 
     roleLabel: "Technicien Terrain", 
-    org: "Airbus Defence & Space (CMR)", 
+    org: "Entreprise M (Souverain)", 
     desc: "Interventions terrain GMAO", 
     icon: <Wrench size={20} />, 
     color: "text-orange-400" 

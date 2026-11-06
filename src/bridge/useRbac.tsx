@@ -43,6 +43,7 @@ interface RbacContextType {
   refreshSession: () => void;
   inviteMember: (member: Omit<TenantMember, "userId" | "invitedAt" | "invitedBy">) => { success: boolean; error?: string };
   changeRole: (userId: string, newRole: RbacRole) => { success: boolean; error?: string };
+  updateProfile: (updates: { displayName?: string; photoUrl?: string; companyName?: string }) => void;
 }
 
 const RbacContext = createContext<RbacContextType | null>(null);
@@ -56,10 +57,20 @@ export function RbacProvider({ children }: { children: ReactNode }) {
     setSession(rbacService.getSession());
   }, []);
 
-  // Re-check session expiry every 60s
+  // Re-check session expiry every 60s & listen for live profile updates
   useEffect(() => {
     const timer = setInterval(refreshSession, 60_000);
-    return () => clearInterval(timer);
+    const handleProfileUpdated = () => refreshSession();
+    window.addEventListener("sensorium:profile_updated", handleProfileUpdated);
+    return () => {
+      clearInterval(timer);
+      window.removeEventListener("sensorium:profile_updated", handleProfileUpdated);
+    };
+  }, [refreshSession]);
+
+  const updateProfile = useCallback((updates: { displayName?: string; photoUrl?: string; companyName?: string }) => {
+    rbacService.updateProfile(updates);
+    refreshSession();
   }, [refreshSession]);
 
   const loginWithEmail = useCallback(async (email: string, password: string) => {
@@ -144,7 +155,7 @@ export function RbacProvider({ children }: { children: ReactNode }) {
       loginWithEmail, loginWithGoogle, loginAsMock, logout,
       can, canAll, canAny, hasRole, hasMinRole,
       tenantMembers, allTenants,
-      refreshSession, inviteMember, changeRole,
+      refreshSession, inviteMember, changeRole, updateProfile,
     }}>
       {children}
     </RbacContext.Provider>
