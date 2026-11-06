@@ -1911,11 +1911,11 @@ export const EnterpriseArchitectureLanding: React.FC<EnterpriseArchitectureLandi
             </div>
             
             <div className="flex items-center gap-4">
-              <a href="/confidentialite" className="hover:text-white text-[#d2d2d7] transition-colors">Confidentialité</a>
+              <a href="/privacy.html" target="_blank" rel="noopener noreferrer" className="hover:text-white text-[#d2d2d7] transition-colors">Confidentialité</a>
               <span>|</span>
-              <a href="/conditions" className="hover:text-white text-[#d2d2d7] transition-colors">Conditions d'utilisation</a>
+              <a href="/site/conditions.html" target="_blank" rel="noopener noreferrer" className="hover:text-white text-[#d2d2d7] transition-colors">Conditions d'utilisation</a>
               <span>|</span>
-              <a href="/mentions-legales" className="hover:text-white text-[#d2d2d7] transition-colors">Mentions légales</a>
+              <a href="/site/mentions-legales.html" target="_blank" rel="noopener noreferrer" className="hover:text-white text-[#d2d2d7] transition-colors">Mentions légales</a>
               <span>|</span>
               <button type="button" onClick={(e) => { e.preventDefault(); }} className="hover:text-white text-[#d2d2d7] transition-colors flex items-center gap-1 cursor-pointer bg-transparent border-none p-0">
                 <Globe2 className="w-3 h-3" />
@@ -1947,7 +1947,7 @@ export const EnterpriseArchitectureLanding: React.FC<EnterpriseArchitectureLandi
 
           {/* Quick Nav Anchors */}
           <a
-            href="#mockups"
+            href="#devices"
             className="p-2 sm:px-3 sm:py-1.5 rounded-full hover:bg-white/10 text-white/80 hover:text-white transition-all text-xs font-medium flex items-center gap-1.5"
             title="Showcase Mockups"
           >

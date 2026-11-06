@@ -218,14 +218,22 @@ export const UnifiedAssetFile: React.FC<UnifiedAssetFileProps> = ({
           <div className="p-3.5 rounded-lg bg-slate-50 dark:bg-white/[0.02] border border-slate-200/80 dark:border-white/[0.05] space-y-2">
             <span className="text-[10px] font-mono uppercase text-slate-400 block">Documentation &amp; Plans GED</span>
             <div className="space-y-2 text-xs">
-              <a href="#pdf-manual" className="flex items-center justify-between p-2 rounded bg-white dark:bg-white/[0.04] border border-slate-200 dark:border-white/10 hover:border-orange-500 transition-colors">
+              <button
+                type="button"
+                onClick={() => window.open('/site/architecture.html', '_blank')}
+                className="w-full flex items-center justify-between p-2 rounded bg-white dark:bg-white/[0.04] border border-slate-200 dark:border-white/10 hover:border-orange-500 transition-colors text-left cursor-pointer"
+              >
                 <span className="flex items-center gap-1.5"><FileText className="w-3.5 h-3.5 text-orange-500" /> Manuel Exploitation (PDF)</span>
                 <ExternalLink className="w-3 h-3 text-slate-400" />
-              </a>
-              <a href="#schema-elec" className="flex items-center justify-between p-2 rounded bg-white dark:bg-white/[0.04] border border-slate-200 dark:border-white/10 hover:border-orange-500 transition-colors">
+              </button>
+              <button
+                type="button"
+                onClick={() => window.open('/site/jumeau_numerique_3d.html', '_blank')}
+                className="w-full flex items-center justify-between p-2 rounded bg-white dark:bg-white/[0.04] border border-slate-200 dark:border-white/10 hover:border-orange-500 transition-colors text-left cursor-pointer"
+              >
                 <span className="flex items-center gap-1.5"><Folder className="w-3.5 h-3.5 text-blue-500" /> Schéma Unifilaire CAFM</span>
                 <ExternalLink className="w-3 h-3 text-slate-400" />
-              </a>
+              </button>
             </div>
           </div>
         </div>
