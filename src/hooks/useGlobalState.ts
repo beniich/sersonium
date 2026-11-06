@@ -770,6 +770,18 @@ export function useGlobalState(userId: string | null, isMockMode: boolean = fals
 
   const [loading, setLoading] = useState(!isMockMode && !!userId);
 
+  // Réactivité en temps réel aux changements d'abonnement / niveau
+  useEffect(() => {
+    const handleSubscriptionChanged = (e: any) => {
+      const tier = e?.detail?.tier;
+      if (tier) {
+        setState(prev => ({ ...prev, subscriptionTier: tier }));
+      }
+    };
+    window.addEventListener("sensorium:subscription_changed", handleSubscriptionChanged);
+    return () => window.removeEventListener("sensorium:subscription_changed", handleSubscriptionChanged);
+  }, []);
+
   // When in Mock Mode: live micro-fluctuations simulation (keeps graphs & nodes feeling alive)
   useEffect(() => {
     if (!isMockMode && !!userId) return;
@@ -843,7 +855,7 @@ export function useGlobalState(userId: string | null, isMockMode: boolean = fals
             const nodesSnap = await getDocs(userNodesRef);
             
             if (nodesSnap.empty) {
-              console.log(`Seeding database for user ${userId}...`);
+              console.info(`[SENSORIUM] Seeding initial workspace for user ${userId}...`);
               const promises = [
                 ...initialNodes.map(n => setDoc(doc(db, `users/${userId}/nodes`, n.id), n)),
                 ...initialSecurityEvents.map(e => setDoc(doc(db, `users/${userId}/securityEvents`, e.id), e)),

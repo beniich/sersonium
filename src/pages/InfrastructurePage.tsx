@@ -907,8 +907,8 @@ export default function InfrastructurePage({ state, isDark, activeItemId = "inf-
         <AssetHierarchyExplorer 
           state={state} 
           isDark={isDark} 
-          onSelectAsset={(asset) => {
-            console.log("Selected asset", asset);
+          onSelectAsset={(_asset) => {
+            // Asset selection handled by AssetHierarchyExplorer internally
           }}
         />
       )}

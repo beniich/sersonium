@@ -391,7 +391,7 @@ export const EnterpriseArchitectureLanding: React.FC<EnterpriseArchitectureLandi
       <nav className="sticky top-0 z-50 w-full bg-[#000000]/80 backdrop-blur-md border-b border-white/[0.12] transition-colors">
         <div className="max-w-[1024px] mx-auto px-4 sm:px-8 h-11 flex items-center justify-between text-[12px] text-[#d2d2d7] font-normal tracking-tight">
           
-          <a href="#" className="text-white hover:text-white/80 transition-colors flex items-center gap-2">
+          <a href="#vision" className="text-white hover:text-white/80 transition-colors flex items-center gap-2">
             <LacazaLogo size="sm" showPanelBadge={false} showText={false} />
             <span className="font-semibold text-white tracking-tight text-[13px]">LACAZA</span>
           </a>
@@ -1896,10 +1896,10 @@ export const EnterpriseArchitectureLanding: React.FC<EnterpriseArchitectureLandi
             <div className="space-y-3">
               <span className="text-white font-semibold text-xs block">À Propos</span>
               <ul className="space-y-2">
-                <li><a href="#" className="hover:text-white text-[#d2d2d7] transition-colors">Vision d'Entreprise</a></li>
-                <li><a href="#" className="hover:text-white text-[#d2d2d7] transition-colors">Documentation API</a></li>
+                <li><a href="#vision" className="hover:text-white text-[#d2d2d7] transition-colors">Vision d'Entreprise</a></li>
+                <li><a href="https://docs.sensorium.io" target="_blank" rel="noopener noreferrer" className="hover:text-white text-[#d2d2d7] transition-colors">Documentation API</a></li>
                 <li><a href="/story-reels.html" target="_blank" rel="noopener noreferrer" className="hover:text-white text-[#d2d2d7] transition-colors">Keynote Story 9:16</a></li>
-                <li><a href="#" className="hover:text-white text-[#d2d2d7] transition-colors">Contacter le Support</a></li>
+                <li><a href="mailto:support@sensorium.io" className="hover:text-white text-[#d2d2d7] transition-colors">Contacter le Support</a></li>
               </ul>
             </div>
           </div>
@@ -1911,16 +1911,16 @@ export const EnterpriseArchitectureLanding: React.FC<EnterpriseArchitectureLandi
             </div>
             
             <div className="flex items-center gap-4">
-              <a href="#" className="hover:text-white text-[#d2d2d7] transition-colors">Confidentialité</a>
+              <a href="/confidentialite" className="hover:text-white text-[#d2d2d7] transition-colors">Confidentialité</a>
               <span>|</span>
-              <a href="#" className="hover:text-white text-[#d2d2d7] transition-colors">Conditions d'utilisation</a>
+              <a href="/conditions" className="hover:text-white text-[#d2d2d7] transition-colors">Conditions d'utilisation</a>
               <span>|</span>
-              <a href="#" className="hover:text-white text-[#d2d2d7] transition-colors">Mentions légales</a>
+              <a href="/mentions-legales" className="hover:text-white text-[#d2d2d7] transition-colors">Mentions légales</a>
               <span>|</span>
-              <a href="#" className="hover:text-white text-[#d2d2d7] transition-colors flex items-center gap-1">
+              <button type="button" onClick={(e) => { e.preventDefault(); }} className="hover:text-white text-[#d2d2d7] transition-colors flex items-center gap-1 cursor-pointer bg-transparent border-none p-0">
                 <Globe2 className="w-3 h-3" />
                 <span>France (Français)</span>
-              </a>
+              </button>
             </div>
           </div>
 

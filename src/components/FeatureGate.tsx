@@ -48,9 +48,12 @@ export const FeatureGate: React.FC<FeatureGateProps> = ({
   const [localTierKey, setLocalTierKey] = useState<string>(readLocalTier);
 
   // BUG-03 CORRIGÉ : Écoute des événements SENSORIUM + storage (cross-tab)
-  // Suppression du polling setInterval — les events custom sont instantanés
+  // Prise en compte immédiate de l'événement custom ou fallback sur storage
   useEffect(() => {
-    const sync = () => setLocalTierKey(readLocalTier());
+    const sync = (e?: any) => {
+      const tier = e?.detail?.tier || readLocalTier();
+      if (tier) setLocalTierKey(tier.toUpperCase());
+    };
     window.addEventListener("storage", sync);
     window.addEventListener("sensorium:quota_updated", sync);
     window.addEventListener("sensorium:subscription_changed", sync);
@@ -61,12 +64,10 @@ export const FeatureGate: React.FC<FeatureGateProps> = ({
     };
   }, []);
 
-  // Détermine le rang effectif : le prop React est prioritaire
-  const effectiveTierKey = currentSubscriptionTier
-    ? currentSubscriptionTier.toUpperCase()
-    : localTierKey;
-
-  const userRank = TIER_RANK[effectiveTierKey] ?? 0;   // ← fallback 0 = FREE (pas 1)
+  // Détermine le rang effectif : on prend le rang le plus élevé entre la prop React et l'état local/storage
+  const localRank = TIER_RANK[localTierKey.toUpperCase()] ?? 0;
+  const propRank = currentSubscriptionTier ? (TIER_RANK[currentSubscriptionTier.toUpperCase()] ?? 0) : 0;
+  const userRank = Math.max(localRank, propRank);
   const requiredRank = TIER_RANK[requiredTier] ?? 2;
 
   // Si le palier est suffisant, on affiche directement le contenu

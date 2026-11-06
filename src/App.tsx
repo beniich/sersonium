@@ -413,6 +413,7 @@ export default function App() {
   const handleUpgradeTier = async (tier: SubscriptionTier) => {
     try {
       localStorage.setItem("sensorium_subscription_tier", tier);
+      localStorage.setItem("sensorium_user_tier", tier);
       if (state) state.subscriptionTier = tier;
       if (user?.uid) {
         await setDoc(doc(db, `users/${user.uid}/profile`, "subscription"), { tier, updatedAt: new Date().toISOString() }, { merge: true });

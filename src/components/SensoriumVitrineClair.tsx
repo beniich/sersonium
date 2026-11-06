@@ -1,17 +1,17 @@
 import React, { useState } from 'react';
-import { 
-  Building2, 
-  Lock, 
-  Box, 
-  Wrench, 
-  ShieldCheck, 
-  FileText, 
-  Clock, 
-  Radio, 
-  CheckCircle2, 
-  ArrowRight, 
-  ChevronDown, 
-  Globe, 
+import {
+  Building2,
+  Lock,
+  Box,
+  Wrench,
+  ShieldCheck,
+  FileText,
+  Clock,
+  Radio,
+  CheckCircle2,
+  ArrowRight,
+  ChevronDown,
+  Globe,
   Menu,
   X,
   Play,
@@ -71,7 +71,7 @@ export const SensoriumVitrineClair: React.FC<SensoriumVitrineClairProps> = ({
       try {
         const saved = localStorage.getItem('sensorium_registered_user');
         if (saved) return JSON.parse(saved);
-      } catch {}
+      } catch { }
     }
     return null;
   });
@@ -125,13 +125,13 @@ export const SensoriumVitrineClair: React.FC<SensoriumVitrineClairProps> = ({
 
   return (
     <div className="min-h-screen bg-white text-slate-900 font-['Inter',sans-serif] selection:bg-[#e0822d]/20 selection:text-[#e0822d] relative antialiased">
-      
+
       {/* ═══════════════════════════════════════════════════════════
           1. HEADER / NAVBAR
       ════════════════════════════════════════════════════════════ */}
       <header className="sticky top-0 w-full z-50 bg-white/95 backdrop-blur-md border-b border-slate-100 shadow-xs">
         <div className="max-w-7xl mx-auto px-4 sm:px-8 h-20 flex items-center justify-between gap-4">
-          
+
           {/* Logo SENSORIUM CAFM PRO */}
           <div className="flex items-center gap-3 cursor-pointer" onClick={() => scrollTo('accueil')}>
             <div className="w-10 h-10 rounded-xl flex items-center justify-center bg-white shadow-xs border border-slate-200 overflow-hidden p-1 shrink-0">
@@ -173,10 +173,10 @@ export const SensoriumVitrineClair: React.FC<SensoriumVitrineClairProps> = ({
             <button onClick={() => navigateTo('contact')} className={`${activePage === 'contact' ? 'text-slate-900 font-semibold border-b-2 border-[#e0822d]' : 'hover:text-slate-900 transition-colors'} cursor-pointer pb-1`}>
               Contact
             </button>
-            
+
             {/* Direct Dashboard Link */}
-            <button 
-              onClick={() => handleRequireAuthOrEnter(registeredUser ? 'login' : 'register')} 
+            <button
+              onClick={() => handleRequireAuthOrEnter(registeredUser ? 'login' : 'register')}
               className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-gradient-to-r from-orange-50 to-amber-50 border border-orange-200 text-[#e0822d] font-bold text-xs hover:from-[#e0822d] hover:to-orange-600 hover:text-white transition-all shadow-xs cursor-pointer group"
               title="Accéder au dashboard opérationnel complet (inscription / connexion requise)"
             >
@@ -197,9 +197,9 @@ export const SensoriumVitrineClair: React.FC<SensoriumVitrineClairProps> = ({
                   {registeredUser.company && (
                     <span className="text-[10px] text-slate-500 font-medium hidden xl:inline">({registeredUser.company})</span>
                   )}
-                  <button 
-                    onClick={handleUserLogout} 
-                    title="Se déconnecter" 
+                  <button
+                    onClick={handleUserLogout}
+                    title="Se déconnecter"
                     className="text-slate-400 hover:text-red-500 ml-1 transition-colors cursor-pointer"
                   >
                     <LogOut className="w-3 h-3" />
@@ -243,7 +243,7 @@ export const SensoriumVitrineClair: React.FC<SensoriumVitrineClairProps> = ({
             </button>
 
             {/* Language Switcher */}
-            <div 
+            <div
               className="hidden sm:flex items-center gap-1 text-xs font-semibold text-slate-600 pl-1 cursor-pointer hover:text-slate-900 select-none"
               onClick={() => setActiveLang(activeLang === 'FR' ? 'EN' : 'FR')}
             >
@@ -272,8 +272,8 @@ export const SensoriumVitrineClair: React.FC<SensoriumVitrineClairProps> = ({
               </button>
             ))}
             <div className="pt-3 border-t border-slate-100 space-y-2">
-              <button 
-                onClick={() => { setMobileMenuOpen(false); handleRequireAuthOrEnter(registeredUser ? 'login' : 'register'); }} 
+              <button
+                onClick={() => { setMobileMenuOpen(false); handleRequireAuthOrEnter(registeredUser ? 'login' : 'register'); }}
                 className="w-full flex items-center justify-center gap-2 py-3 px-4 rounded-xl bg-slate-900 text-white font-bold text-xs shadow-md"
               >
                 <LayoutDashboard className="w-4 h-4 text-orange-400" />
@@ -378,526 +378,526 @@ export const SensoriumVitrineClair: React.FC<SensoriumVitrineClairProps> = ({
 
       {activePage === 'accueil' && (
         <main>
-        {/* ═══════════════════════════════════════════════════════════
+          {/* ═══════════════════════════════════════════════════════════
             2. HERO SECTION
         ════════════════════════════════════════════════════════════ */}
-        <section id="accueil" className="relative w-full overflow-hidden bg-gradient-to-b from-slate-50/70 via-white to-white pt-12 sm:pt-20 pb-20">
-          <div className="max-w-7xl mx-auto px-4 sm:px-8">
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-12 items-center">
-              
-              {/* Left Column (5 cols) */}
-              <div className="lg:col-span-5 space-y-6 text-left">
-                
-                {/* Pre-title */}
-                <div className="text-[11px] font-mono font-bold tracking-[0.2em] text-slate-500 uppercase flex items-center gap-2">
-                  <span className="w-1.5 h-1.5 rounded-full bg-[#e0822d]" />
-                  <span>SENSORIUM CAFM PRO</span>
-                </div>
+          <section id="accueil" className="relative w-full overflow-hidden bg-gradient-to-b from-slate-50/70 via-white to-white pt-12 sm:pt-20 pb-20">
+            <div className="max-w-7xl mx-auto px-4 sm:px-8">
+              <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-12 items-center">
 
-                {/* Main Headline */}
-                <h1 className="font-['Manrope'] font-extrabold text-3xl sm:text-4xl lg:text-[42px] leading-[1.15] text-slate-900 tracking-tight">
-                  La supervision opérationnelle au service de votre performance
-                </h1>
+                {/* Left Column (5 cols) */}
+                <div className="lg:col-span-5 space-y-6 text-left">
 
-                {/* Subtitle */}
-                <p className="text-sm sm:text-base text-slate-600 leading-relaxed max-w-lg font-normal">
-                  Une plateforme unifiée pour la gestion des infrastructures, la maintenance, la sécurité, la conformité et la traçabilité.
-                </p>
-
-                {/* 4 Feature Pills in a row */}
-                <div className="flex flex-wrap items-center gap-2 pt-1">
-                  <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-slate-50 border border-slate-200/80 text-[11px] font-medium text-slate-700 shadow-2xs">
-                    <Box className="w-3.5 h-3.5 text-[#e0822d]" />
-                    <span>CAFM / GMAO</span>
+                  {/* Pre-title */}
+                  <div className="text-[11px] font-mono font-bold tracking-[0.2em] text-slate-500 uppercase flex items-center gap-2">
+                    <span className="w-1.5 h-1.5 rounded-full bg-[#e0822d]" />
+                    <span>SENSORIUM CAFM PRO</span>
                   </div>
-                  <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-slate-50 border border-slate-200/80 text-[11px] font-medium text-slate-700 shadow-2xs">
-                    <Lock className="w-3.5 h-3.5 text-[#e0822d]" />
-                    <span>Sécurité &amp; Accès</span>
-                  </div>
-                  <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-slate-50 border border-slate-200/80 text-[11px] font-medium text-slate-700 shadow-2xs">
-                    <FileCheck className="w-3.5 h-3.5 text-[#e0822d]" />
-                    <span>Conformité &amp; Audit</span>
-                  </div>
-                  <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-slate-50 border border-slate-200/80 text-[11px] font-medium text-slate-700 shadow-2xs">
-                    <Cloud className="w-3.5 h-3.5 text-[#e0822d]" />
-                    <span>Cloud &amp; IoT</span>
-                  </div>
-                </div>
 
-                {/* 2 Action Buttons */}
-                <div className="flex flex-wrap items-center gap-3 pt-3">
-                  <button
-                    onClick={() => setIsDemoModalOpen(true)}
-                    className="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-[#e0822d] hover:bg-[#c66e20] text-white font-['Manrope'] font-semibold text-xs tracking-wide shadow-md shadow-orange-500/25 hover:shadow-lg transition-all cursor-pointer"
-                  >
-                    <span>Demander une démo</span>
-                    <ArrowRight className="w-4 h-4" />
-                  </button>
+                  {/* Main Headline */}
+                  <h1 className="font-['Manrope'] font-extrabold text-3xl sm:text-4xl lg:text-[42px] leading-[1.15] text-slate-900 tracking-tight">
+                    La supervision opérationnelle au service de votre performance
+                  </h1>
 
-                  <button
-                    onClick={() => handleRequireAuthOrEnter(registeredUser ? 'login' : 'register')}
-                    className="inline-flex items-center gap-2.5 px-6 py-3 rounded-full bg-slate-900 hover:bg-slate-800 text-white font-['Manrope'] font-semibold text-xs shadow-md hover:shadow-lg transition-all cursor-pointer group"
-                  >
-                    <div className="w-5 h-5 rounded-full bg-orange-500 flex items-center justify-center text-white">
-                      <LayoutDashboard className="w-3 h-3 group-hover:scale-110 transition-transform" />
+                  {/* Subtitle */}
+                  <p className="text-sm sm:text-base text-slate-600 leading-relaxed max-w-lg font-normal">
+                    Une plateforme unifiée pour la gestion des infrastructures, la maintenance, la sécurité, la conformité et la traçabilité.
+                  </p>
+
+                  {/* 4 Feature Pills in a row */}
+                  <div className="flex flex-wrap items-center gap-2 pt-1">
+                    <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-slate-50 border border-slate-200/80 text-[11px] font-medium text-slate-700 shadow-2xs">
+                      <Box className="w-3.5 h-3.5 text-[#e0822d]" />
+                      <span>CAFM / GMAO</span>
                     </div>
-                    <span>{registeredUser ? 'Ouvrir mon Dashboard' : 'Créer un compte & Ouvrir le Dashboard'}</span>
-                  </button>
+                    <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-slate-50 border border-slate-200/80 text-[11px] font-medium text-slate-700 shadow-2xs">
+                      <Lock className="w-3.5 h-3.5 text-[#e0822d]" />
+                      <span>Sécurité &amp; Accès</span>
+                    </div>
+                    <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-slate-50 border border-slate-200/80 text-[11px] font-medium text-slate-700 shadow-2xs">
+                      <FileCheck className="w-3.5 h-3.5 text-[#e0822d]" />
+                      <span>Conformité &amp; Audit</span>
+                    </div>
+                    <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-slate-50 border border-slate-200/80 text-[11px] font-medium text-slate-700 shadow-2xs">
+                      <Cloud className="w-3.5 h-3.5 text-[#e0822d]" />
+                      <span>Cloud &amp; IoT</span>
+                    </div>
+                  </div>
+
+                  {/* 2 Action Buttons */}
+                  <div className="flex flex-wrap items-center gap-3 pt-3">
+                    <button
+                      onClick={() => setIsDemoModalOpen(true)}
+                      className="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-[#e0822d] hover:bg-[#c66e20] text-white font-['Manrope'] font-semibold text-xs tracking-wide shadow-md shadow-orange-500/25 hover:shadow-lg transition-all cursor-pointer"
+                    >
+                      <span>Demander une démo</span>
+                      <ArrowRight className="w-4 h-4" />
+                    </button>
+
+                    <button
+                      onClick={() => handleRequireAuthOrEnter(registeredUser ? 'login' : 'register')}
+                      className="inline-flex items-center gap-2.5 px-6 py-3 rounded-full bg-slate-900 hover:bg-slate-800 text-white font-['Manrope'] font-semibold text-xs shadow-md hover:shadow-lg transition-all cursor-pointer group"
+                    >
+                      <div className="w-5 h-5 rounded-full bg-orange-500 flex items-center justify-center text-white">
+                        <LayoutDashboard className="w-3 h-3 group-hover:scale-110 transition-transform" />
+                      </div>
+                      <span>{registeredUser ? 'Ouvrir mon Dashboard' : 'Créer un compte & Ouvrir le Dashboard'}</span>
+                    </button>
+                  </div>
+
+                </div>
+
+                {/* Right Column: Master Hero Visual (7 cols) */}
+                <div className="lg:col-span-7 relative">
+                  <div className="relative rounded-2xl overflow-hidden shadow-2xl border border-slate-200/80 bg-slate-900 group">
+                    <img
+                      src="/banners/banner-1.png"
+                      alt="SENSORIUM CAFM Pro — Architecture d'audit immuable et traçabilité"
+                      className="w-full h-[400px] sm:h-[480px] object-cover object-center filter contrast-[1.02] brightness-[0.98] group-hover:scale-101 transition-transform duration-700"
+                      loading="eager"
+                    />
+                    {/* Subtle Gradient vignette */}
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent pointer-events-none" />
+                  </div>
                 </div>
 
               </div>
-
-              {/* Right Column: Master Hero Visual (7 cols) */}
-              <div className="lg:col-span-7 relative">
-                <div className="relative rounded-2xl overflow-hidden shadow-2xl border border-slate-200/80 bg-slate-900 group">
-                  <img
-                    src="/banners/banner-1.png"
-                    alt="SENSORIUM CAFM Pro — Architecture d'audit immuable et traçabilité"
-                    className="w-full h-[400px] sm:h-[480px] object-cover object-center filter contrast-[1.02] brightness-[0.98] group-hover:scale-101 transition-transform duration-700"
-                    loading="eager"
-                  />
-                  {/* Subtle Gradient vignette */}
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent pointer-events-none" />
-                </div>
-              </div>
-
             </div>
-          </div>
-        </section>
+          </section>
 
-        {/* ═══════════════════════════════════════════════════════════
+          {/* ═══════════════════════════════════════════════════════════
             3. SECTION "NOS MODULES" (Horizontal Split Layout)
         ════════════════════════════════════════════════════════════ */}
-        <section id="plateforme" className="py-20 bg-white border-t border-slate-100">
-          <div className="max-w-7xl mx-auto px-4 sm:px-8">
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-12 items-start">
-              
-              {/* Left Column: Headlines (4 cols) */}
-              <div className="lg:col-span-4 space-y-4 text-left lg:sticky lg:top-28">
-                <div className="text-xs font-mono font-bold tracking-wider text-[#e0822d] uppercase">
-                  ✦ NOS MODULES
+          <section id="plateforme" className="py-20 bg-white border-t border-slate-100">
+            <div className="max-w-7xl mx-auto px-4 sm:px-8">
+              <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-12 items-start">
+
+                {/* Left Column: Headlines (4 cols) */}
+                <div className="lg:col-span-4 space-y-4 text-left lg:sticky lg:top-28">
+                  <div className="text-xs font-mono font-bold tracking-wider text-[#e0822d] uppercase">
+                    ✦ NOS MODULES
+                  </div>
+                  <h2 className="font-['Manrope'] font-bold text-3xl sm:text-4xl text-slate-900 tracking-tight leading-tight">
+                    Une plateforme complète pour une gestion intelligente
+                  </h2>
+                  <p className="text-sm text-slate-600 leading-relaxed">
+                    SENSORIUM CAFM PRO centralise vos données et automatise vos processus pour une supervision en temps réel, fiable et sécurisée.
+                  </p>
+                  <div className="pt-2">
+                    <button
+                      onClick={onEnterDashboard}
+                      className="inline-flex items-center gap-2 text-xs font-bold text-[#e0822d] hover:text-[#c66e20] transition-colors cursor-pointer"
+                    >
+                      <span>Explorer toutes les fonctionnalités</span>
+                      <ArrowRight className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
                 </div>
-                <h2 className="font-['Manrope'] font-bold text-3xl sm:text-4xl text-slate-900 tracking-tight leading-tight">
-                  Une plateforme complète pour une gestion intelligente
-                </h2>
-                <p className="text-sm text-slate-600 leading-relaxed">
-                  SENSORIUM CAFM PRO centralise vos données et automatise vos processus pour une supervision en temps réel, fiable et sécurisée.
-                </p>
-                <div className="pt-2">
-                  <button
-                    onClick={onEnterDashboard}
-                    className="inline-flex items-center gap-2 text-xs font-bold text-[#e0822d] hover:text-[#c66e20] transition-colors cursor-pointer"
-                  >
-                    <span>Explorer toutes les fonctionnalités</span>
-                    <ArrowRight className="w-3.5 h-3.5" />
-                  </button>
+
+                {/* Right Column: 2x3 Grid of 6 Cards (8 cols) */}
+                <div className="lg:col-span-8 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-5">
+
+                  {/* Card 1: Gestion des actifs */}
+                  <div className="p-6 rounded-2xl bg-white border border-slate-200/90 shadow-2xs hover:shadow-md transition-all text-left flex flex-col justify-between group">
+                    <div className="space-y-3">
+                      <div className="w-11 h-11 rounded-2xl bg-orange-50 border border-orange-200/60 flex items-center justify-center text-[#e0822d] group-hover:scale-105 transition-transform">
+                        <Box className="w-5 h-5" />
+                      </div>
+                      <h3 className="font-['Manrope'] font-bold text-base text-slate-900">
+                        Gestion des actifs
+                      </h3>
+                      <p className="text-xs text-slate-500 leading-relaxed">
+                        Inventaire, cycle de vie, maintenance
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Card 2: Maintenance (GMAO) */}
+                  <div className="p-6 rounded-2xl bg-white border border-slate-200/90 shadow-2xs hover:shadow-md transition-all text-left flex flex-col justify-between group">
+                    <div className="space-y-3">
+                      <div className="w-11 h-11 rounded-2xl bg-orange-50 border border-orange-200/60 flex items-center justify-center text-[#e0822d] group-hover:scale-105 transition-transform">
+                        <Wrench className="w-5 h-5" />
+                      </div>
+                      <h3 className="font-['Manrope'] font-bold text-base text-slate-900">
+                        Maintenance (GMAO)
+                      </h3>
+                      <p className="text-xs text-slate-500 leading-relaxed">
+                        Planification, interventions, coûts
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Card 3: Gestion des accès */}
+                  <div className="p-6 rounded-2xl bg-white border border-slate-200/90 shadow-2xs hover:shadow-md transition-all text-left flex flex-col justify-between group">
+                    <div className="space-y-3">
+                      <div className="w-11 h-11 rounded-2xl bg-orange-50 border border-orange-200/60 flex items-center justify-center text-[#e0822d] group-hover:scale-105 transition-transform">
+                        <Lock className="w-5 h-5" />
+                      </div>
+                      <h3 className="font-['Manrope'] font-bold text-base text-slate-900">
+                        Gestion des accès
+                      </h3>
+                      <p className="text-xs text-slate-500 leading-relaxed">
+                        RBAC, SSO, identité numérique
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Card 4: Traçabilité & Audit */}
+                  <div className="p-6 rounded-2xl bg-white border border-slate-200/90 shadow-2xs hover:shadow-md transition-all text-left flex flex-col justify-between group">
+                    <div className="space-y-3">
+                      <div className="w-11 h-11 rounded-2xl bg-orange-50 border border-orange-200/60 flex items-center justify-center text-[#e0822d] group-hover:scale-105 transition-transform">
+                        <FileText className="w-5 h-5" />
+                      </div>
+                      <h3 className="font-['Manrope'] font-bold text-base text-slate-900">
+                        Traçabilité &amp; Audit
+                      </h3>
+                      <p className="text-xs text-slate-500 leading-relaxed">
+                        Registres immuables, preuves réglementaires
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Card 5: Conformité DORA */}
+                  <div className="p-6 rounded-2xl bg-white border border-slate-200/90 shadow-2xs hover:shadow-md transition-all text-left flex flex-col justify-between group">
+                    <div className="space-y-3">
+                      <div className="w-11 h-11 rounded-2xl bg-orange-50 border border-orange-200/60 flex items-center justify-center text-[#e0822d] group-hover:scale-105 transition-transform">
+                        <Clock className="w-5 h-5" />
+                      </div>
+                      <h3 className="font-['Manrope'] font-bold text-base text-slate-900">
+                        Conformité DORA
+                      </h3>
+                      <p className="text-xs text-slate-500 leading-relaxed">
+                        Contrôles, rapports, continuité d'activité
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Card 6: Supervision temps réel */}
+                  <div className="p-6 rounded-2xl bg-white border border-slate-200/90 shadow-2xs hover:shadow-md transition-all text-left flex flex-col justify-between group">
+                    <div className="space-y-3">
+                      <div className="w-11 h-11 rounded-2xl bg-orange-50 border border-orange-200/60 flex items-center justify-center text-[#e0822d] group-hover:scale-105 transition-transform">
+                        <Radio className="w-5 h-5" />
+                      </div>
+                      <h3 className="font-['Manrope'] font-bold text-base text-slate-900">
+                        Supervision temps réel
+                      </h3>
+                      <p className="text-xs text-slate-500 leading-relaxed">
+                        IoT, capteurs, tableaux de bord
+                      </p>
+                    </div>
+                  </div>
+
                 </div>
+
               </div>
-
-              {/* Right Column: 2x3 Grid of 6 Cards (8 cols) */}
-              <div className="lg:col-span-8 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-5">
-                
-                {/* Card 1: Gestion des actifs */}
-                <div className="p-6 rounded-2xl bg-white border border-slate-200/90 shadow-2xs hover:shadow-md transition-all text-left flex flex-col justify-between group">
-                  <div className="space-y-3">
-                    <div className="w-11 h-11 rounded-2xl bg-orange-50 border border-orange-200/60 flex items-center justify-center text-[#e0822d] group-hover:scale-105 transition-transform">
-                      <Box className="w-5 h-5" />
-                    </div>
-                    <h3 className="font-['Manrope'] font-bold text-base text-slate-900">
-                      Gestion des actifs
-                    </h3>
-                    <p className="text-xs text-slate-500 leading-relaxed">
-                      Inventaire, cycle de vie, maintenance
-                    </p>
-                  </div>
-                </div>
-
-                {/* Card 2: Maintenance (GMAO) */}
-                <div className="p-6 rounded-2xl bg-white border border-slate-200/90 shadow-2xs hover:shadow-md transition-all text-left flex flex-col justify-between group">
-                  <div className="space-y-3">
-                    <div className="w-11 h-11 rounded-2xl bg-orange-50 border border-orange-200/60 flex items-center justify-center text-[#e0822d] group-hover:scale-105 transition-transform">
-                      <Wrench className="w-5 h-5" />
-                    </div>
-                    <h3 className="font-['Manrope'] font-bold text-base text-slate-900">
-                      Maintenance (GMAO)
-                    </h3>
-                    <p className="text-xs text-slate-500 leading-relaxed">
-                      Planification, interventions, coûts
-                    </p>
-                  </div>
-                </div>
-
-                {/* Card 3: Gestion des accès */}
-                <div className="p-6 rounded-2xl bg-white border border-slate-200/90 shadow-2xs hover:shadow-md transition-all text-left flex flex-col justify-between group">
-                  <div className="space-y-3">
-                    <div className="w-11 h-11 rounded-2xl bg-orange-50 border border-orange-200/60 flex items-center justify-center text-[#e0822d] group-hover:scale-105 transition-transform">
-                      <Lock className="w-5 h-5" />
-                    </div>
-                    <h3 className="font-['Manrope'] font-bold text-base text-slate-900">
-                      Gestion des accès
-                    </h3>
-                    <p className="text-xs text-slate-500 leading-relaxed">
-                      RBAC, SSO, identité numérique
-                    </p>
-                  </div>
-                </div>
-
-                {/* Card 4: Traçabilité & Audit */}
-                <div className="p-6 rounded-2xl bg-white border border-slate-200/90 shadow-2xs hover:shadow-md transition-all text-left flex flex-col justify-between group">
-                  <div className="space-y-3">
-                    <div className="w-11 h-11 rounded-2xl bg-orange-50 border border-orange-200/60 flex items-center justify-center text-[#e0822d] group-hover:scale-105 transition-transform">
-                      <FileText className="w-5 h-5" />
-                    </div>
-                    <h3 className="font-['Manrope'] font-bold text-base text-slate-900">
-                      Traçabilité &amp; Audit
-                    </h3>
-                    <p className="text-xs text-slate-500 leading-relaxed">
-                      Registres immuables, preuves réglementaires
-                    </p>
-                  </div>
-                </div>
-
-                {/* Card 5: Conformité DORA */}
-                <div className="p-6 rounded-2xl bg-white border border-slate-200/90 shadow-2xs hover:shadow-md transition-all text-left flex flex-col justify-between group">
-                  <div className="space-y-3">
-                    <div className="w-11 h-11 rounded-2xl bg-orange-50 border border-orange-200/60 flex items-center justify-center text-[#e0822d] group-hover:scale-105 transition-transform">
-                      <Clock className="w-5 h-5" />
-                    </div>
-                    <h3 className="font-['Manrope'] font-bold text-base text-slate-900">
-                      Conformité DORA
-                    </h3>
-                    <p className="text-xs text-slate-500 leading-relaxed">
-                      Contrôles, rapports, continuité d'activité
-                    </p>
-                  </div>
-                </div>
-
-                {/* Card 6: Supervision temps réel */}
-                <div className="p-6 rounded-2xl bg-white border border-slate-200/90 shadow-2xs hover:shadow-md transition-all text-left flex flex-col justify-between group">
-                  <div className="space-y-3">
-                    <div className="w-11 h-11 rounded-2xl bg-orange-50 border border-orange-200/60 flex items-center justify-center text-[#e0822d] group-hover:scale-105 transition-transform">
-                      <Radio className="w-5 h-5" />
-                    </div>
-                    <h3 className="font-['Manrope'] font-bold text-base text-slate-900">
-                      Supervision temps réel
-                    </h3>
-                    <p className="text-xs text-slate-500 leading-relaxed">
-                      IoT, capteurs, tableaux de bord
-                    </p>
-                  </div>
-                </div>
-
-              </div>
-
             </div>
-          </div>
-        </section>
+          </section>
 
-        {/* ═══════════════════════════════════════════════════════════
+          {/* ═══════════════════════════════════════════════════════════
             4. SECTION "SÉCURITÉ & IDENTITÉ"
         ════════════════════════════════════════════════════════════ */}
-        <section id="securite" className="py-20 bg-slate-50/60 border-t border-slate-100">
-          <div className="max-w-7xl mx-auto px-4 sm:px-8">
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-14 items-center">
-              
-              {/* Left Column: Visual (7 cols) */}
-              <div className="lg:col-span-7 relative">
-                <div className="relative rounded-2xl overflow-hidden shadow-xl border border-slate-200 bg-slate-900 group">
-                  <img
-                    src="/banners/banner-2.png"
-                    alt="SENSORIUM CAFM Pro — Sécurité intelligente et confiance totale"
-                    className="w-full h-[380px] sm:h-[440px] object-cover object-center filter contrast-[1.02] brightness-[0.98]"
-                    loading="lazy"
-                  />
-                </div>
-              </div>
+          <section id="securite" className="py-20 bg-slate-50/60 border-t border-slate-100">
+            <div className="max-w-7xl mx-auto px-4 sm:px-8">
+              <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-14 items-center">
 
-              {/* Right Column: Text & Checklist (5 cols) */}
-              <div className="lg:col-span-5 space-y-6 text-left">
-                
-                <div className="text-xs font-mono font-bold tracking-wider text-[#e0822d] uppercase">
-                  ✦ SÉCURITÉ &amp; IDENTITÉ
+                {/* Left Column: Visual (7 cols) */}
+                <div className="lg:col-span-7 relative">
+                  <div className="relative rounded-2xl overflow-hidden shadow-xl border border-slate-200 bg-slate-900 group">
+                    <img
+                      src="/banners/banner-2.png"
+                      alt="SENSORIUM CAFM Pro — Sécurité intelligente et confiance totale"
+                      className="w-full h-[380px] sm:h-[440px] object-cover object-center filter contrast-[1.02] brightness-[0.98]"
+                      loading="lazy"
+                    />
+                  </div>
                 </div>
 
-                <h2 className="font-['Manrope'] font-bold text-3xl sm:text-4xl text-slate-900 tracking-tight leading-tight">
-                  Une identité maîtrisée, une confiance renforcée
-                </h2>
+                {/* Right Column: Text & Checklist (5 cols) */}
+                <div className="lg:col-span-5 space-y-6 text-left">
 
-                <p className="text-sm text-slate-600 leading-relaxed font-normal">
-                  Contrôlez les accès, protégez vos données et assurez une authentification continue avec des technologies de pointe (RBAC, SSO, mTLS, MFA).
-                </p>
-
-                <ul className="space-y-3.5 pt-1 text-xs sm:text-sm text-slate-700">
-                  <li className="flex items-center gap-3">
-                    <div className="w-5 h-5 rounded-full bg-[#e0822d] flex items-center justify-center text-white shrink-0 shadow-xs">
-                      <Check className="w-3 h-3 stroke-[3]" />
-                    </div>
-                    <span>RBAC dynamique et granulaire</span>
-                  </li>
-                  <li className="flex items-center gap-3">
-                    <div className="w-5 h-5 rounded-full bg-[#e0822d] flex items-center justify-center text-white shrink-0 shadow-xs">
-                      <Check className="w-3 h-3 stroke-[3]" />
-                    </div>
-                    <span>SSO / MFA / mTLS</span>
-                  </li>
-                  <li className="flex items-center gap-3">
-                    <div className="w-5 h-5 rounded-full bg-[#e0822d] flex items-center justify-center text-white shrink-0 shadow-xs">
-                      <Check className="w-3 h-3 stroke-[3]" />
-                    </div>
-                    <span>Traçabilité complète des accès</span>
-                  </li>
-                  <li className="flex items-center gap-3">
-                    <div className="w-5 h-5 rounded-full bg-[#e0822d] flex items-center justify-center text-white shrink-0 shadow-xs">
-                      <Check className="w-3 h-3 stroke-[3]" />
-                    </div>
-                    <span>Détection des anomalies et prévention des fraudes</span>
-                  </li>
-                </ul>
-
-                <div className="pt-2">
-                  <button
-                    onClick={() => { if (onNavigate) onNavigate('security'); else onEnterDashboard(); }}
-                    className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full border border-slate-300 hover:border-slate-400 bg-white text-slate-800 text-xs font-semibold shadow-2xs hover:shadow-xs transition-all cursor-pointer"
-                  >
-                    <span>En savoir plus</span>
-                    <ArrowRight className="w-3.5 h-3.5 text-[#e0822d]" />
-                  </button>
-                </div>
-
-              </div>
-
-            </div>
-          </div>
-        </section>
-
-        {/* ═══════════════════════════════════════════════════════════
-            5. SECTION "CONFORMITÉ DORA"
-        ════════════════════════════════════════════════════════════ */}
-        <section id="conformite" className="py-20 bg-white border-t border-slate-100">
-          <div className="max-w-7xl mx-auto px-4 sm:px-8">
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-14 items-center">
-              
-              {/* Left Column: Headlines & Checklist (6 cols) */}
-              <div className="lg:col-span-6 space-y-6 text-left">
-                
-                <div className="text-xs font-mono font-bold tracking-wider text-[#e0822d] uppercase">
-                  ✦ CONFORMITÉ
-                </div>
-
-                <h2 className="font-['Manrope'] font-bold text-3xl sm:text-4xl text-slate-900 tracking-tight leading-tight">
-                  DORA et plus encore
-                </h2>
-
-                <p className="text-sm text-slate-600 leading-relaxed font-normal">
-                  Anticipez les réglementations et gardez une longueur d'avance avec une plateforme pensée dès l'origine pour la conformité.
-                </p>
-
-                <ul className="space-y-3.5 pt-1 text-xs sm:text-sm text-slate-700">
-                  <li className="flex items-center gap-3">
-                    <div className="w-5 h-5 rounded-full bg-[#e0822d] flex items-center justify-center text-white shrink-0 shadow-xs">
-                      <Check className="w-3 h-3 stroke-[3]" />
-                    </div>
-                    <span>DORA Art. 24 – Gestion des risques TIC</span>
-                  </li>
-                  <li className="flex items-center gap-3">
-                    <div className="w-5 h-5 rounded-full bg-[#e0822d] flex items-center justify-center text-white shrink-0 shadow-xs">
-                      <Check className="w-3 h-3 stroke-[3]" />
-                    </div>
-                    <span>Audit et rapports automatisés</span>
-                  </li>
-                  <li className="flex items-center gap-3">
-                    <div className="w-5 h-5 rounded-full bg-[#e0822d] flex items-center justify-center text-white shrink-0 shadow-xs">
-                      <Check className="w-3 h-3 stroke-[3]" />
-                    </div>
-                    <span>Preuves immuables et horodatées</span>
-                  </li>
-                  <li className="flex items-center gap-3">
-                    <div className="w-5 h-5 rounded-full bg-[#e0822d] flex items-center justify-center text-white shrink-0 shadow-xs">
-                      <Check className="w-3 h-3 stroke-[3]" />
-                    </div>
-                    <span>ISO 27001 / RGPD / Normes sectorielles</span>
-                  </li>
-                </ul>
-
-                <div className="pt-2">
-                  <button
-                    onClick={() => { if (onNavigate) onNavigate('compliance'); else onEnterDashboard(); }}
-                    className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full border border-slate-300 hover:border-slate-400 bg-white text-slate-800 text-xs font-semibold shadow-2xs hover:shadow-xs transition-all cursor-pointer"
-                  >
-                    <span>Découvrir la conformité</span>
-                    <ArrowRight className="w-3.5 h-3.5 text-[#e0822d]" />
-                  </button>
-                </div>
-
-              </div>
-
-              {/* Right Column: Holographic Card + Shield (6 cols) */}
-              <div className="lg:col-span-6">
-                <div className="relative rounded-2xl p-8 sm:p-10 bg-gradient-to-br from-slate-900 via-slate-950 to-neutral-900 text-white shadow-xl border border-slate-800 overflow-hidden flex flex-col sm:flex-row items-center justify-between gap-8">
-                  
-                  <div className="absolute -right-20 -top-20 w-64 h-64 rounded-full bg-amber-500/15 blur-3xl pointer-events-none" />
-
-                  <div className="space-y-4 text-left z-10">
-                    <div className="text-xs font-mono font-bold tracking-wider text-amber-300 uppercase">
-                      DORA Art. 24 Compliance
-                    </div>
-                    <ul className="space-y-2.5 text-xs text-slate-300 font-medium">
-                      <li className="flex items-center gap-2.5">
-                        <Check className="w-4 h-4 text-amber-400" />
-                        <span>Risk Management</span>
-                      </li>
-                      <li className="flex items-center gap-2.5">
-                        <Check className="w-4 h-4 text-amber-400" />
-                        <span>Incident Reporting</span>
-                      </li>
-                      <li className="flex items-center gap-2.5">
-                        <Check className="w-4 h-4 text-amber-400" />
-                        <span>Testing &amp; Resilience</span>
-                      </li>
-                      <li className="flex items-center gap-2.5">
-                        <Check className="w-4 h-4 text-amber-400" />
-                        <span>Third-Party Management</span>
-                      </li>
-                    </ul>
+                  <div className="text-xs font-mono font-bold tracking-wider text-[#e0822d] uppercase">
+                    ✦ SÉCURITÉ &amp; IDENTITÉ
                   </div>
 
-                  <div className="relative z-10 flex items-center justify-center shrink-0">
-                    <div className="w-32 h-32 sm:w-36 sm:h-36 rounded-full bg-amber-500/10 border border-amber-400/30 flex items-center justify-center shadow-[0_0_50px_rgba(245,158,11,0.25)]">
-                      <div className="w-24 h-24 rounded-full bg-gradient-to-br from-amber-400 to-orange-600 flex items-center justify-center shadow-lg">
-                        <Check className="w-12 h-12 text-white stroke-[2.5]" />
+                  <h2 className="font-['Manrope'] font-bold text-3xl sm:text-4xl text-slate-900 tracking-tight leading-tight">
+                    Une identité maîtrisée, une confiance renforcée
+                  </h2>
+
+                  <p className="text-sm text-slate-600 leading-relaxed font-normal">
+                    Contrôlez les accès, protégez vos données et assurez une authentification continue avec des technologies de pointe (RBAC, SSO, mTLS, MFA).
+                  </p>
+
+                  <ul className="space-y-3.5 pt-1 text-xs sm:text-sm text-slate-700">
+                    <li className="flex items-center gap-3">
+                      <div className="w-5 h-5 rounded-full bg-[#e0822d] flex items-center justify-center text-white shrink-0 shadow-xs">
+                        <Check className="w-3 h-3 stroke-[3]" />
+                      </div>
+                      <span>RBAC dynamique et granulaire</span>
+                    </li>
+                    <li className="flex items-center gap-3">
+                      <div className="w-5 h-5 rounded-full bg-[#e0822d] flex items-center justify-center text-white shrink-0 shadow-xs">
+                        <Check className="w-3 h-3 stroke-[3]" />
+                      </div>
+                      <span>SSO / MFA / mTLS</span>
+                    </li>
+                    <li className="flex items-center gap-3">
+                      <div className="w-5 h-5 rounded-full bg-[#e0822d] flex items-center justify-center text-white shrink-0 shadow-xs">
+                        <Check className="w-3 h-3 stroke-[3]" />
+                      </div>
+                      <span>Traçabilité complète des accès</span>
+                    </li>
+                    <li className="flex items-center gap-3">
+                      <div className="w-5 h-5 rounded-full bg-[#e0822d] flex items-center justify-center text-white shrink-0 shadow-xs">
+                        <Check className="w-3 h-3 stroke-[3]" />
+                      </div>
+                      <span>Détection des anomalies et prévention des fraudes</span>
+                    </li>
+                  </ul>
+
+                  <div className="pt-2">
+                    <button
+                      onClick={() => { if (onNavigate) onNavigate('security'); else onEnterDashboard(); }}
+                      className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full border border-slate-300 hover:border-slate-400 bg-white text-slate-800 text-xs font-semibold shadow-2xs hover:shadow-xs transition-all cursor-pointer"
+                    >
+                      <span>En savoir plus</span>
+                      <ArrowRight className="w-3.5 h-3.5 text-[#e0822d]" />
+                    </button>
+                  </div>
+
+                </div>
+
+              </div>
+            </div>
+          </section>
+
+          {/* ═══════════════════════════════════════════════════════════
+            5. SECTION "CONFORMITÉ DORA"
+        ════════════════════════════════════════════════════════════ */}
+          <section id="conformite" className="py-20 bg-white border-t border-slate-100">
+            <div className="max-w-7xl mx-auto px-4 sm:px-8">
+              <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-14 items-center">
+
+                {/* Left Column: Headlines & Checklist (6 cols) */}
+                <div className="lg:col-span-6 space-y-6 text-left">
+
+                  <div className="text-xs font-mono font-bold tracking-wider text-[#e0822d] uppercase">
+                    ✦ CONFORMITÉ
+                  </div>
+
+                  <h2 className="font-['Manrope'] font-bold text-3xl sm:text-4xl text-slate-900 tracking-tight leading-tight">
+                    DORA et plus encore
+                  </h2>
+
+                  <p className="text-sm text-slate-600 leading-relaxed font-normal">
+                    Anticipez les réglementations et gardez une longueur d'avance avec une plateforme pensée dès l'origine pour la conformité.
+                  </p>
+
+                  <ul className="space-y-3.5 pt-1 text-xs sm:text-sm text-slate-700">
+                    <li className="flex items-center gap-3">
+                      <div className="w-5 h-5 rounded-full bg-[#e0822d] flex items-center justify-center text-white shrink-0 shadow-xs">
+                        <Check className="w-3 h-3 stroke-[3]" />
+                      </div>
+                      <span>DORA Art. 24 – Gestion des risques TIC</span>
+                    </li>
+                    <li className="flex items-center gap-3">
+                      <div className="w-5 h-5 rounded-full bg-[#e0822d] flex items-center justify-center text-white shrink-0 shadow-xs">
+                        <Check className="w-3 h-3 stroke-[3]" />
+                      </div>
+                      <span>Audit et rapports automatisés</span>
+                    </li>
+                    <li className="flex items-center gap-3">
+                      <div className="w-5 h-5 rounded-full bg-[#e0822d] flex items-center justify-center text-white shrink-0 shadow-xs">
+                        <Check className="w-3 h-3 stroke-[3]" />
+                      </div>
+                      <span>Preuves immuables et horodatées</span>
+                    </li>
+                    <li className="flex items-center gap-3">
+                      <div className="w-5 h-5 rounded-full bg-[#e0822d] flex items-center justify-center text-white shrink-0 shadow-xs">
+                        <Check className="w-3 h-3 stroke-[3]" />
+                      </div>
+                      <span>ISO 27001 / RGPD / Normes sectorielles</span>
+                    </li>
+                  </ul>
+
+                  <div className="pt-2">
+                    <button
+                      onClick={() => { if (onNavigate) onNavigate('compliance'); else onEnterDashboard(); }}
+                      className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full border border-slate-300 hover:border-slate-400 bg-white text-slate-800 text-xs font-semibold shadow-2xs hover:shadow-xs transition-all cursor-pointer"
+                    >
+                      <span>Découvrir la conformité</span>
+                      <ArrowRight className="w-3.5 h-3.5 text-[#e0822d]" />
+                    </button>
+                  </div>
+
+                </div>
+
+                {/* Right Column: Holographic Card + Shield (6 cols) */}
+                <div className="lg:col-span-6">
+                  <div className="relative rounded-2xl p-8 sm:p-10 bg-gradient-to-br from-slate-900 via-slate-950 to-neutral-900 text-white shadow-xl border border-slate-800 overflow-hidden flex flex-col sm:flex-row items-center justify-between gap-8">
+
+                    <div className="absolute -right-20 -top-20 w-64 h-64 rounded-full bg-amber-500/15 blur-3xl pointer-events-none" />
+
+                    <div className="space-y-4 text-left z-10">
+                      <div className="text-xs font-mono font-bold tracking-wider text-amber-300 uppercase">
+                        DORA Art. 24 Compliance
+                      </div>
+                      <ul className="space-y-2.5 text-xs text-slate-300 font-medium">
+                        <li className="flex items-center gap-2.5">
+                          <Check className="w-4 h-4 text-amber-400" />
+                          <span>Risk Management</span>
+                        </li>
+                        <li className="flex items-center gap-2.5">
+                          <Check className="w-4 h-4 text-amber-400" />
+                          <span>Incident Reporting</span>
+                        </li>
+                        <li className="flex items-center gap-2.5">
+                          <Check className="w-4 h-4 text-amber-400" />
+                          <span>Testing &amp; Resilience</span>
+                        </li>
+                        <li className="flex items-center gap-2.5">
+                          <Check className="w-4 h-4 text-amber-400" />
+                          <span>Third-Party Management</span>
+                        </li>
+                      </ul>
+                    </div>
+
+                    <div className="relative z-10 flex items-center justify-center shrink-0">
+                      <div className="w-32 h-32 sm:w-36 sm:h-36 rounded-full bg-amber-500/10 border border-amber-400/30 flex items-center justify-center shadow-[0_0_50px_rgba(245,158,11,0.25)]">
+                        <div className="w-24 h-24 rounded-full bg-gradient-to-br from-amber-400 to-orange-600 flex items-center justify-center shadow-lg">
+                          <Check className="w-12 h-12 text-white stroke-[2.5]" />
+                        </div>
+                      </div>
+                    </div>
+
+                  </div>
+                </div>
+
+              </div>
+            </div>
+          </section>
+
+          {/* ═══════════════════════════════════════════════════════════
+            6. BANDEAU DE STATISTIQUES (4 colonnes)
+        ════════════════════════════════════════════════════════════ */}
+          <section id="apropos" className="py-12 bg-slate-50/80 border-y border-slate-200/80">
+            <div className="max-w-7xl mx-auto px-4 sm:px-8">
+              <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 text-left">
+
+                <div className="flex items-center gap-4">
+                  <div className="w-12 h-12 rounded-xl bg-white border border-slate-200 flex items-center justify-center text-[#e0822d] shadow-2xs shrink-0">
+                    <Building2 className="w-6 h-6" />
+                  </div>
+                  <div>
+                    <div className="font-['Manrope'] text-2xl sm:text-3xl font-extrabold text-slate-900">500+</div>
+                    <div className="text-xs text-slate-500">Bâtiments &amp; sites gérés</div>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-4">
+                  <div className="w-12 h-12 rounded-xl bg-white border border-slate-200 flex items-center justify-center text-[#e0822d] shadow-2xs shrink-0">
+                    <ShieldCheck className="w-6 h-6" />
+                  </div>
+                  <div>
+                    <div className="font-['Manrope'] text-2xl sm:text-3xl font-extrabold text-slate-900">99,99%</div>
+                    <div className="text-xs text-slate-500">Disponibilité de la plateforme</div>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-4">
+                  <div className="w-12 h-12 rounded-xl bg-white border border-slate-200 flex items-center justify-center text-[#e0822d] shadow-2xs shrink-0">
+                    <Clock className="w-6 h-6" />
+                  </div>
+                  <div>
+                    <div className="font-['Manrope'] text-2xl sm:text-3xl font-extrabold text-slate-900">&lt; 200 ms</div>
+                    <div className="text-xs text-slate-500">Temps de réponse audit</div>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-4">
+                  <div className="w-12 h-12 rounded-xl bg-white border border-slate-200 flex items-center justify-center text-[#e0822d] shadow-2xs shrink-0">
+                    <Globe className="w-6 h-6" />
+                  </div>
+                  <div>
+                    <div className="font-['Manrope'] text-2xl sm:text-3xl font-extrabold text-slate-900">100%</div>
+                    <div className="text-xs text-slate-500">Souveraineté des données</div>
+                  </div>
+                </div>
+
+              </div>
+            </div>
+          </section>
+
+          {/* ═══════════════════════════════════════════════════════════
+            7. CALL TO ACTION FINAL & BANNIÈRE PRE-FOOTER
+        ════════════════════════════════════════════════════════════ */}
+          <section id="contact" className="py-16 bg-[#121316] text-white relative overflow-hidden">
+            <div
+              className="absolute inset-0 opacity-25 pointer-events-none bg-cover bg-center"
+              style={{ backgroundImage: `url('/banners/banner-3.png')` }}
+            />
+            <div className="absolute inset-0 bg-gradient-to-r from-[#0c0d0f] via-[#121316]/95 to-[#0c0d0f]" />
+
+            <div className="max-w-7xl mx-auto px-4 sm:px-8 relative z-10">
+              <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+
+                {/* Left Column: Brand Statement (4 cols) */}
+                <div className="lg:col-span-4 space-y-4 text-left">
+                  <div className="flex items-center gap-3">
+                    <div className="w-9 h-9 rounded-xl flex items-center justify-center bg-white/10 border border-white/20 p-1">
+                      <img src="/logo-icon.png" alt="SENSORIUM" className="w-full h-full object-contain" />
+                    </div>
+                    <div>
+                      <div className="font-['Manrope'] font-extrabold text-base tracking-tight text-white leading-none">
+                        SENSORIUM
+                      </div>
+                      <div className="text-[10px] tracking-[0.25em] font-semibold text-orange-400 uppercase mt-0.5">
+                        CAFM PRO
                       </div>
                     </div>
                   </div>
-
-                </div>
-              </div>
-
-            </div>
-          </div>
-        </section>
-
-        {/* ═══════════════════════════════════════════════════════════
-            6. BANDEAU DE STATISTIQUES (4 colonnes)
-        ════════════════════════════════════════════════════════════ */}
-        <section id="apropos" className="py-12 bg-slate-50/80 border-y border-slate-200/80">
-          <div className="max-w-7xl mx-auto px-4 sm:px-8">
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 text-left">
-              
-              <div className="flex items-center gap-4">
-                <div className="w-12 h-12 rounded-xl bg-white border border-slate-200 flex items-center justify-center text-[#e0822d] shadow-2xs shrink-0">
-                  <Building2 className="w-6 h-6" />
-                </div>
-                <div>
-                  <div className="font-['Manrope'] text-2xl sm:text-3xl font-extrabold text-slate-900">500+</div>
-                  <div className="text-xs text-slate-500">Bâtiments &amp; sites gérés</div>
-                </div>
-              </div>
-
-              <div className="flex items-center gap-4">
-                <div className="w-12 h-12 rounded-xl bg-white border border-slate-200 flex items-center justify-center text-[#e0822d] shadow-2xs shrink-0">
-                  <ShieldCheck className="w-6 h-6" />
-                </div>
-                <div>
-                  <div className="font-['Manrope'] text-2xl sm:text-3xl font-extrabold text-slate-900">99,99%</div>
-                  <div className="text-xs text-slate-500">Disponibilité de la plateforme</div>
-                </div>
-              </div>
-
-              <div className="flex items-center gap-4">
-                <div className="w-12 h-12 rounded-xl bg-white border border-slate-200 flex items-center justify-center text-[#e0822d] shadow-2xs shrink-0">
-                  <Clock className="w-6 h-6" />
-                </div>
-                <div>
-                  <div className="font-['Manrope'] text-2xl sm:text-3xl font-extrabold text-slate-900">&lt; 200 ms</div>
-                  <div className="text-xs text-slate-500">Temps de réponse audit</div>
-                </div>
-              </div>
-
-              <div className="flex items-center gap-4">
-                <div className="w-12 h-12 rounded-xl bg-white border border-slate-200 flex items-center justify-center text-[#e0822d] shadow-2xs shrink-0">
-                  <Globe className="w-6 h-6" />
-                </div>
-                <div>
-                  <div className="font-['Manrope'] text-2xl sm:text-3xl font-extrabold text-slate-900">100%</div>
-                  <div className="text-xs text-slate-500">Souveraineté des données</div>
-                </div>
-              </div>
-
-            </div>
-          </div>
-        </section>
-
-        {/* ═══════════════════════════════════════════════════════════
-            7. CALL TO ACTION FINAL & BANNIÈRE PRE-FOOTER
-        ════════════════════════════════════════════════════════════ */}
-        <section id="contact" className="py-16 bg-[#121316] text-white relative overflow-hidden">
-          <div 
-            className="absolute inset-0 opacity-25 pointer-events-none bg-cover bg-center"
-            style={{ backgroundImage: `url('/banners/banner-3.png')` }}
-          />
-          <div className="absolute inset-0 bg-gradient-to-r from-[#0c0d0f] via-[#121316]/95 to-[#0c0d0f]" />
-
-          <div className="max-w-7xl mx-auto px-4 sm:px-8 relative z-10">
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
-              
-              {/* Left Column: Brand Statement (4 cols) */}
-              <div className="lg:col-span-4 space-y-4 text-left">
-                <div className="flex items-center gap-3">
-                  <div className="w-9 h-9 rounded-xl flex items-center justify-center bg-white/10 border border-white/20 p-1">
-                    <img src="/logo-icon.png" alt="SENSORIUM" className="w-full h-full object-contain" />
-                  </div>
-                  <div>
-                    <div className="font-['Manrope'] font-extrabold text-base tracking-tight text-white leading-none">
-                      SENSORIUM
-                    </div>
-                    <div className="text-[10px] tracking-[0.25em] font-semibold text-orange-400 uppercase mt-0.5">
-                      CAFM PRO
-                    </div>
-                  </div>
-                </div>
-                <p className="text-xs text-slate-400 leading-relaxed max-w-sm">
-                  Plus qu'une plateforme, un écosystème de confiance pour vos infrastructures.
-                </p>
-              </div>
-
-              {/* Right Column: CTA Box (8 cols) */}
-              <div className="lg:col-span-8 p-8 sm:p-10 rounded-2xl bg-white/[0.04] border border-white/10 backdrop-blur-md text-left flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
-                <div className="space-y-2 max-w-md">
-                  <h3 className="font-['Manrope'] font-bold text-2xl text-white tracking-tight">
-                    Prêt à transformer votre gestion opérationnelle ?
-                  </h3>
-                  <p className="text-xs text-slate-400">
-                    Contactez notre équipe pour une démonstration personnalisée.
+                  <p className="text-xs text-slate-400 leading-relaxed max-w-sm">
+                    Plus qu'une plateforme, un écosystème de confiance pour vos infrastructures.
                   </p>
                 </div>
 
-                <div className="shrink-0">
-                  <button
-                    onClick={() => setIsDemoModalOpen(true)}
-                    className="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-[#e0822d] hover:bg-[#c66e20] text-white font-['Manrope'] font-semibold text-xs tracking-wide shadow-lg shadow-orange-500/25 transition-all cursor-pointer"
-                  >
-                    <span>Demander une démo</span>
-                    <ArrowRight className="w-4 h-4" />
-                  </button>
+                {/* Right Column: CTA Box (8 cols) */}
+                <div className="lg:col-span-8 p-8 sm:p-10 rounded-2xl bg-white/[0.04] border border-white/10 backdrop-blur-md text-left flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+                  <div className="space-y-2 max-w-md">
+                    <h3 className="font-['Manrope'] font-bold text-2xl text-white tracking-tight">
+                      Prêt à transformer votre gestion opérationnelle ?
+                    </h3>
+                    <p className="text-xs text-slate-400">
+                      Contactez notre équipe pour une démonstration personnalisée.
+                    </p>
+                  </div>
+
+                  <div className="shrink-0">
+                    <button
+                      onClick={() => setIsDemoModalOpen(true)}
+                      className="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-[#e0822d] hover:bg-[#c66e20] text-white font-['Manrope'] font-semibold text-xs tracking-wide shadow-lg shadow-orange-500/25 transition-all cursor-pointer"
+                    >
+                      <span>Demander une démo</span>
+                      <ArrowRight className="w-4 h-4" />
+                    </button>
+                  </div>
                 </div>
+
+              </div>
+
+              {/* Horizontal Mini Menu in Pre-Footer */}
+              <div className="mt-10 pt-6 border-t border-white/10 flex flex-wrap items-center justify-end gap-6 text-xs text-slate-400">
+                <button onClick={() => navigateTo('accueil')} className="hover:text-white transition-colors cursor-pointer">Accueil</button>
+                <button onClick={() => navigateTo('plateforme')} className="hover:text-white transition-colors cursor-pointer">Plateforme</button>
+                <button onClick={() => navigateTo('securite')} className="hover:text-white transition-colors cursor-pointer">Sécurité</button>
+                <button onClick={() => navigateTo('conformite')} className="hover:text-white transition-colors cursor-pointer">Conformité</button>
+                <button onClick={() => navigateTo('cloud')} className="hover:text-white transition-colors cursor-pointer">Cloud</button>
+                <button onClick={() => navigateTo('apropos')} className="hover:text-white transition-colors cursor-pointer">À propos</button>
+                <button onClick={() => navigateTo('contact')} className="hover:text-white transition-colors cursor-pointer">Contact</button>
               </div>
 
             </div>
-
-            {/* Horizontal Mini Menu in Pre-Footer */}
-            <div className="mt-10 pt-6 border-t border-white/10 flex flex-wrap items-center justify-end gap-6 text-xs text-slate-400">
-              <button onClick={() => navigateTo('accueil')} className="hover:text-white transition-colors cursor-pointer">Accueil</button>
-              <button onClick={() => navigateTo('plateforme')} className="hover:text-white transition-colors cursor-pointer">Plateforme</button>
-              <button onClick={() => navigateTo('securite')} className="hover:text-white transition-colors cursor-pointer">Sécurité</button>
-              <button onClick={() => navigateTo('conformite')} className="hover:text-white transition-colors cursor-pointer">Conformité</button>
-              <button onClick={() => navigateTo('cloud')} className="hover:text-white transition-colors cursor-pointer">Cloud</button>
-              <button onClick={() => navigateTo('apropos')} className="hover:text-white transition-colors cursor-pointer">À propos</button>
-              <button onClick={() => navigateTo('contact')} className="hover:text-white transition-colors cursor-pointer">Contact</button>
-            </div>
-
-          </div>
-        </section>
-      </main>
+          </section>
+        </main>
       )}
 
       {/* ═══════════════════════════════════════════════════════════
@@ -917,9 +917,9 @@ export const SensoriumVitrineClair: React.FC<SensoriumVitrineClairProps> = ({
           </div>
           {/* Links */}
           <div className="flex items-center gap-5">
-            <button onClick={() => {}} className="hover:text-slate-800 transition-colors cursor-pointer">Mentions légales</button>
+            <button onClick={() => { }} className="hover:text-slate-800 transition-colors cursor-pointer">Mentions légales</button>
             <span>|</span>
-            <button onClick={() => {}} className="hover:text-slate-800 transition-colors cursor-pointer">Politique de confidentialité</button>
+            <button onClick={() => { }} className="hover:text-slate-800 transition-colors cursor-pointer">Politique de confidentialité</button>
             <span>|</span>
             <span className="text-slate-700 font-medium cursor-pointer" onClick={() => setActiveLang(activeLang === 'FR' ? 'EN' : 'FR')}>
               {activeLang === 'FR' ? 'Français' : 'English'} ▾
@@ -927,14 +927,14 @@ export const SensoriumVitrineClair: React.FC<SensoriumVitrineClairProps> = ({
           </div>
           {/* Social Icons */}
           <div className="flex items-center gap-3">
-            <a href="#" aria-label="LinkedIn" className="w-7 h-7 rounded-lg bg-slate-100 hover:bg-orange-100 hover:text-orange-600 flex items-center justify-center transition-colors text-slate-500">
-              <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 01-2.063-2.065 2.064 2.064 0 112.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
+            <a href="https://www.linkedin.com/company/sensorium-cafm" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn" className="w-7 h-7 rounded-lg bg-slate-100 hover:bg-orange-100 hover:text-orange-600 flex items-center justify-center transition-colors text-slate-500">
+              <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 01-2.063-2.065 2.064 2.064 0 112.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z" /></svg>
             </a>
-            <a href="#" aria-label="YouTube" className="w-7 h-7 rounded-lg bg-slate-100 hover:bg-orange-100 hover:text-orange-600 flex items-center justify-center transition-colors text-slate-500">
-              <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24"><path d="M23.498 6.186a3.016 3.016 0 00-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 00.502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 002.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 002.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>
+            <a href="https://www.youtube.com/@sensoriumcafm" target="_blank" rel="noopener noreferrer" aria-label="YouTube" className="w-7 h-7 rounded-lg bg-slate-100 hover:bg-orange-100 hover:text-orange-600 flex items-center justify-center transition-colors text-slate-500">
+              <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24"><path d="M23.498 6.186a3.016 3.016 0 00-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 00.502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 002.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 002.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z" /></svg>
             </a>
-            <a href="#" aria-label="Twitter/X" className="w-7 h-7 rounded-lg bg-slate-100 hover:bg-orange-100 hover:text-orange-600 flex items-center justify-center transition-colors text-slate-500">
-              <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+            <a href="https://x.com/sensoriumcafm" target="_blank" rel="noopener noreferrer" aria-label="Twitter/X" className="w-7 h-7 rounded-lg bg-slate-100 hover:bg-orange-100 hover:text-orange-600 flex items-center justify-center transition-colors text-slate-500">
+              <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" /></svg>
             </a>
           </div>
         </div>
@@ -949,7 +949,7 @@ export const SensoriumVitrineClair: React.FC<SensoriumVitrineClairProps> = ({
       {isDemoModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
           <div className="w-full max-w-lg bg-white rounded-3xl shadow-2xl border border-slate-200 overflow-hidden text-left relative">
-            <button 
+            <button
               onClick={() => setIsDemoModalOpen(false)}
               className="absolute top-5 right-5 p-2 rounded-xl text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors cursor-pointer"
             >
@@ -979,69 +979,69 @@ export const SensoriumVitrineClair: React.FC<SensoriumVitrineClairProps> = ({
                 <form onSubmit={handleDemoSubmit} className="space-y-4 text-xs">
                   <div>
                     <label className="block text-slate-700 font-semibold mb-1">Nom complet *</label>
-                    <input 
-                      type="text" 
-                      required 
-                      value={demoForm.name} 
+                    <input
+                      type="text"
+                      required
+                      value={demoForm.name}
                       onChange={e => setDemoForm({ ...demoForm, name: e.target.value })}
                       placeholder="Ex : Adam Benaich"
-                      className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-slate-900 outline-none focus:border-orange-500 transition-colors" 
+                      className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-slate-900 outline-none focus:border-orange-500 transition-colors"
                     />
                   </div>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <div>
                       <label className="block text-slate-700 font-semibold mb-1">Email professionnel *</label>
-                      <input 
-                        type="email" 
-                        required 
-                        value={demoForm.email} 
+                      <input
+                        type="email"
+                        required
+                        value={demoForm.email}
                         onChange={e => setDemoForm({ ...demoForm, email: e.target.value })}
                         placeholder="adam@entreprise.com"
-                        className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-slate-900 outline-none focus:border-orange-500 transition-colors" 
+                        className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-slate-900 outline-none focus:border-orange-500 transition-colors"
                       />
                     </div>
                     <div>
                       <label className="block text-slate-700 font-semibold mb-1">Téléphone</label>
-                      <input 
-                        type="tel" 
-                        value={demoForm.phone} 
+                      <input
+                        type="tel"
+                        value={demoForm.phone}
                         onChange={e => setDemoForm({ ...demoForm, phone: e.target.value })}
                         placeholder="+33 6 12 34 56 78"
-                        className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-slate-900 outline-none focus:border-orange-500 transition-colors" 
+                        className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-slate-900 outline-none focus:border-orange-500 transition-colors"
                       />
                     </div>
                   </div>
                   <div>
                     <label className="block text-slate-700 font-semibold mb-1">Organisation / Entreprise *</label>
-                    <input 
-                      type="text" 
-                      required 
-                      value={demoForm.company} 
+                    <input
+                      type="text"
+                      required
+                      value={demoForm.company}
                       onChange={e => setDemoForm({ ...demoForm, company: e.target.value })}
                       placeholder="Ex : Airbus, Caisse des Dépôts, TotalEnergies"
-                      className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-slate-900 outline-none focus:border-orange-500 transition-colors" 
+                      className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-slate-900 outline-none focus:border-orange-500 transition-colors"
                     />
                   </div>
                   <div>
                     <label className="block text-slate-700 font-semibold mb-1">Message ou besoins spécifiques</label>
-                    <textarea 
-                      rows={3} 
-                      value={demoForm.message} 
+                    <textarea
+                      rows={3}
+                      value={demoForm.message}
                       onChange={e => setDemoForm({ ...demoForm, message: e.target.value })}
                       placeholder="Précisez votre parc immobilier ou vos objectifs (DORA, GMAO, supervision...)"
-                      className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-slate-900 outline-none focus:border-orange-500 transition-colors resize-none" 
+                      className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-slate-900 outline-none focus:border-orange-500 transition-colors resize-none"
                     />
                   </div>
                   <div className="pt-2 flex justify-end gap-2">
-                    <button 
-                      type="button" 
+                    <button
+                      type="button"
                       onClick={() => setIsDemoModalOpen(false)}
                       className="px-4 py-2 rounded-xl text-slate-600 hover:bg-slate-100 cursor-pointer"
                     >
                       Annuler
                     </button>
-                    <button 
-                      type="submit" 
+                    <button
+                      type="submit"
                       className="px-6 py-2.5 rounded-full bg-[#e0822d] hover:bg-[#c66e20] text-white font-semibold cursor-pointer shadow-md shadow-orange-500/20"
                     >
                       Envoyer ma demande
@@ -1055,7 +1055,7 @@ export const SensoriumVitrineClair: React.FC<SensoriumVitrineClairProps> = ({
       )}
 
       {/* Modale d'Authentification & Inscription Entreprise (Registration) */}
-      <SensoriumAuthModal 
+      <SensoriumAuthModal
         isOpen={isAuthModalOpen}
         onClose={() => setIsAuthModalOpen(false)}
         onSuccess={handleAuthSuccess}

@@ -211,7 +211,7 @@ export class ConnectionManager {
     }
 
     if (oldMode !== newMode) {
-      console.log(`📡 [Sensorium Resilience] Connection Mode: ${this.state.mode}`);
+      console.info(`📡 [Sensorium Resilience] Connection Mode: ${this.state.mode}`);
       this.notifyListeners();
     }
   }
@@ -258,7 +258,7 @@ export class ConnectionManager {
    */
   public async flushQueuedActions(): Promise<number> {
     if (this.queuedActions.length === 0) return 0;
-    console.log(`🔄 [ConnectionManager] Synchronisation de ${this.queuedActions.length} actions différées...`);
+    console.info(`🔄 [ConnectionManager] Synchronisation de ${this.queuedActions.length} actions différées...`);
 
     const actionsToSync = [...this.queuedActions];
     let synced = 0;
@@ -298,7 +298,7 @@ export class ConnectionManager {
         return fallbackData;
       }
     } else {
-      console.log("🔌 Mode Simulation actif : restitution immédiate du mock/cache local");
+      console.info("🔌 Mode Simulation actif : restitution immédiate du mock/cache local");
       return fallbackData;
     }
   }
