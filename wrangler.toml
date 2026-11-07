@@ -16,9 +16,9 @@ directory = "./dist"
 binding = "ASSETS"
 
 # Domaine personnalisé Cloudflare
-# routes = [
-#   { pattern = "sersonium.cloudindustrie.com", custom_domain = true }
-# ]
+routes = [
+  { pattern = "sersonium.cloudindustrie.com", custom_domain = true }
+]
 
 [vars]
 APP_URL = "https://sersonium.cloudindustrie.com"
