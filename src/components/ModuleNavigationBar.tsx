@@ -64,7 +64,7 @@ export const ModuleNavigationBar: React.FC<ModuleNavigationBarProps> = ({
               onClick={() => handleTabClick(tab)}
               className={`px-3 py-1 rounded-full text-xs font-medium transition-all duration-150 whitespace-nowrap cursor-pointer border ${
                 isSelected
-                  ? "bg-indigo-600 text-white font-semibold border-indigo-500 shadow-sm"
+                  ? "bg-orange-500 text-white font-semibold border-orange-400 shadow-sm shadow-orange-500/20"
                   : "bg-gray-800/80 text-gray-400 hover:bg-gray-700/90 hover:text-white border-gray-700/60"
               }`}
             >

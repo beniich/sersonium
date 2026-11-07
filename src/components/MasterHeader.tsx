@@ -119,10 +119,10 @@ export const MasterHeader: React.FC<MasterHeaderProps> = ({
             setAuthDefaultTab('register');
             setIsAuthModalOpen(true);
           }}
-          className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-indigo-600/25 hover:bg-indigo-600/40 border border-indigo-500/40 text-indigo-300 hover:text-white text-xs font-semibold transition-all cursor-pointer shadow-xs active:scale-95"
+          className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-orange-500/15 hover:bg-orange-500/25 border border-orange-500/35 text-orange-400 hover:text-orange-300 text-xs font-semibold transition-all cursor-pointer shadow-xs active:scale-95"
           title="Créer un compte ou se connecter à la plateforme SENSORIUM"
         >
-          <UserPlus size={13} className="text-indigo-400" />
+          <UserPlus size={13} className="text-orange-400" />
           <span className="hidden sm:inline">Inscription</span>
         </button>
 

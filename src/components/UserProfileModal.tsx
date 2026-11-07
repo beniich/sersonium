@@ -362,9 +362,9 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
                   onClose();
                   onOpenAuth('register');
                 }}
-                className="w-full flex items-center justify-center gap-2 p-2.5 rounded-xl bg-indigo-600/20 hover:bg-indigo-600/30 border border-indigo-500/40 text-indigo-300 hover:text-white text-xs font-semibold transition-all cursor-pointer shadow-xs active:scale-95"
+                className="w-full flex items-center justify-center gap-2 p-2.5 rounded-xl bg-orange-500/15 hover:bg-orange-500/25 border border-orange-500/35 text-orange-400 hover:text-orange-300 text-xs font-semibold transition-all cursor-pointer shadow-xs active:scale-95"
               >
-                <UserPlus className="w-3.5 h-3.5" />
+                <UserPlus className="w-3.5 h-3.5 text-orange-400" />
                 <span>Nouvelle Inscription</span>
               </button>
             )}

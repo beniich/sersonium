@@ -265,8 +265,8 @@ export default function DashboardGreetingHeader({
                     <span>Firebase Auth</span>
                   </span>
                 ) : (
-                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-mono bg-indigo-500/10 border border-indigo-500/25 text-indigo-400">
-                    <UserCheck className="w-3 h-3" />
+                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-mono bg-orange-500/10 border border-orange-500/25 text-orange-400">
+                    <UserCheck className="w-3 h-3 text-orange-400" />
                     <span>Sovereign Session</span>
                   </span>
                 )}
@@ -301,10 +301,10 @@ export default function DashboardGreetingHeader({
                   setIsAuthModalOpen(true);
                 }
               }}
-              className="px-2.5 py-1.5 rounded-lg bg-indigo-600/20 hover:bg-indigo-600/30 border border-indigo-500/35 text-indigo-300 hover:text-white text-xs font-semibold flex items-center gap-1.5 transition-all cursor-pointer shadow-xs active:scale-95 min-h-[32px]"
+              className="px-2.5 py-1.5 rounded-lg bg-orange-500/15 hover:bg-orange-500/25 border border-orange-500/35 text-orange-400 hover:text-orange-300 text-xs font-semibold flex items-center gap-1.5 transition-all cursor-pointer shadow-xs active:scale-95 min-h-[32px]"
               title="Créer un compte ou se connecter à SENSORIUM"
             >
-              <UserPlus className="w-3.5 h-3.5 text-indigo-400" />
+              <UserPlus className="w-3.5 h-3.5 text-orange-400" />
               <span>Inscription</span>
             </button>
 
@@ -326,7 +326,7 @@ export default function DashboardGreetingHeader({
 
             <button
               onClick={() => setIsQuickAddOpen(true)}
-              className="px-2.5 py-1.5 rounded-lg bg-white/[0.05] hover:bg-white/[0.1] border border-white/[0.1] text-neutral-200 text-xs font-medium flex items-center gap-1.5 transition-all cursor-pointer shadow-xs active:scale-95 min-h-[32px]"
+              className="px-2.5 py-1.5 rounded-lg bg-orange-500/15 hover:bg-orange-500/25 border border-orange-500/35 text-orange-400 hover:text-orange-300 text-xs font-semibold flex items-center gap-1.5 transition-all cursor-pointer shadow-xs active:scale-95 min-h-[32px]"
               title="Add a new work order"
             >
               <Plus className="w-3.5 h-3.5 text-orange-400" />
@@ -337,13 +337,13 @@ export default function DashboardGreetingHeader({
               onClick={() => setTasksDrawerOpen(!tasksDrawerOpen)}
               className={`px-3 py-1.5 rounded-lg text-xs font-medium flex items-center gap-1.5 transition-all cursor-pointer shadow-xs active:scale-95 min-h-[32px] ${
                 openWorkOrders.length > 0 
-                  ? "bg-white text-black hover:bg-neutral-200" 
-                  : "bg-white/[0.08] text-white hover:bg-white/[0.15] border border-white/[0.12]"
+                  ? "bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white font-semibold shadow-xs shadow-orange-500/20" 
+                  : "bg-orange-500/10 text-orange-400 hover:bg-orange-500/20 border border-orange-500/30"
               }`}
             >
-              <Wrench className="w-3.5 h-3.5" />
+              <Wrench className="w-3.5 h-3.5 text-current" />
               <span>Today's Tasks ({openWorkOrders.length})</span>
-              {tasksDrawerOpen ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
+              {tasksDrawerOpen ? <ChevronUp className="w-3.5 h-3.5 text-current" /> : <ChevronDown className="w-3.5 h-3.5 text-current" />}
             </button>
           </div>
         </div>
