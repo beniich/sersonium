@@ -16,16 +16,20 @@ import {
   ExternalLink,
   MapPin,
   ChevronRight,
-  Sparkles
+  Sparkles,
+  ShieldAlert,
+  Save,
+  Check
 } from "lucide-react";
 import { GlobalState, EdgeNode } from "../types";
 import { useAppContext } from "../contexts/AppContext";
+import { TechnicalInput, TechnicalFieldType } from "./TechnicalInput";
 
 export interface CustomField {
   id: string;
   name: string;
   value: string;
-  type: "text" | "number" | "date" | "status";
+  type: "text" | "number" | "date" | "status" | TechnicalFieldType;
 }
 
 interface UnifiedAssetFileProps {
@@ -62,7 +66,62 @@ export const UnifiedAssetFile: React.FC<UnifiedAssetFileProps> = ({
 
   const [newFieldName, setNewFieldName] = useState("");
   const [newFieldValue, setNewFieldValue] = useState("");
+  const [newFieldType, setNewFieldType] = useState<"text" | TechnicalFieldType>("text");
+  const [isFieldValid, setIsFieldValid] = useState(true);
   const [isAddingField, setIsAddingField] = useState(false);
+
+  // Configuration Réseau OT & Paramètres Sensibles (Signal Cognitif Industriel)
+  const [otConfigs, setOtConfigs] = useState<Record<string, {
+    ip: string;
+    mac: string;
+    iot_code: string;
+    api_key: string;
+    port: string;
+    vlan: string;
+  }>>(() => {
+    try {
+      const saved = localStorage.getItem("sensorium_asset_ot_configs");
+      if (saved) return JSON.parse(saved);
+    } catch {}
+    return {
+      "node-paris-01": {
+        ip: "192.168.10.45",
+        mac: "00:1A:2B:3C:4D:5E",
+        iot_code: "NODE-FRA1-PUE-X1",
+        api_key: "sk_live_sec_fra1_ot_94827409249",
+        port: "502",
+        vlan: "120"
+      }
+    };
+  });
+
+  const [otSavedToast, setOtSavedToast] = useState(false);
+  const currentOt = otConfigs[selectedNodeId] || {
+    ip: "192.168.10.45",
+    mac: "00:1A:2B:3C:4D:5E",
+    iot_code: `NODE-${selectedNodeId.toUpperCase()}-01`,
+    api_key: "sk_live_ot_control_84920482048",
+    port: "502",
+    vlan: "120"
+  };
+
+  const handleUpdateOtField = (field: "ip" | "mac" | "iot_code" | "api_key" | "port" | "vlan", val: string) => {
+    setOtConfigs(prev => ({
+      ...prev,
+      [selectedNodeId]: {
+        ...(prev[selectedNodeId] || currentOt),
+        [field]: val
+      }
+    }));
+  };
+
+  const handleSaveOtConfig = () => {
+    try {
+      localStorage.setItem("sensorium_asset_ot_configs", JSON.stringify(otConfigs));
+      setOtSavedToast(true);
+      setTimeout(() => setOtSavedToast(false), 2500);
+    } catch {}
+  };
 
   const selectedNode = nodes.find(n => n.id === selectedNodeId) || nodes[0] || {
     id: "node-paris-01",
@@ -77,14 +136,14 @@ export const UnifiedAssetFile: React.FC<UnifiedAssetFileProps> = ({
 
   const handleAddCustomField = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newFieldName.trim()) return;
+    if (!newFieldName.trim() || !isFieldValid) return;
     const updated = [
       ...customFields,
       {
         id: `cf-${Date.now()}`,
         name: newFieldName.trim(),
         value: newFieldValue.trim() || "Non spécifié",
-        type: "text" as const
+        type: newFieldType
       }
     ];
     setCustomFields(updated);
@@ -93,6 +152,7 @@ export const UnifiedAssetFile: React.FC<UnifiedAssetFileProps> = ({
     } catch {}
     setNewFieldName("");
     setNewFieldValue("");
+    setNewFieldType("text");
     setIsAddingField(false);
   };
 
@@ -234,6 +294,90 @@ export const UnifiedAssetFile: React.FC<UnifiedAssetFileProps> = ({
                 <span className="flex items-center gap-1.5"><Folder className="w-3.5 h-3.5 text-blue-500" /> Schéma Unifilaire CAFM</span>
                 <ExternalLink className="w-3 h-3 text-slate-400" />
               </button>
+            </div>
+          </div>
+
+          {/* Sécurité Réseau OT & Paramètres Sensibles (Signal Cognitif Industriel) */}
+          <div className="col-span-1 md:col-span-2 lg:col-span-3 p-4 rounded-xl bg-gradient-to-br from-yellow-500/[0.06] via-transparent to-slate-900/40 border border-yellow-500/30 space-y-4 shadow-sm">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-yellow-500/20">
+              <div className="flex items-center gap-3">
+                <div className="w-9 h-9 rounded-xl bg-yellow-500/20 border border-yellow-500/40 flex items-center justify-center text-yellow-500 shadow-[0_0_15px_rgba(250,204,21,0.2)]">
+                  <ShieldAlert className="w-5 h-5 animate-pulse" />
+                </div>
+                <div>
+                  <h4 className="text-xs sm:text-sm font-bold text-slate-800 dark:text-white flex items-center gap-2">
+                    <span>Paramètres Réseau OT &amp; Saisie Critique Sécurisée</span>
+                    <span className="text-[10px] px-2 py-0.5 rounded-full bg-yellow-500/20 text-yellow-600 dark:text-yellow-400 border border-yellow-500/40 font-mono font-semibold">
+                      Signal Cognitif Niveau 1 à 3
+                    </span>
+                  </h4>
+                  <p className="text-[11px] text-slate-500 dark:text-neutral-400 mt-0.5">
+                    Signal Jaune Électrique d'alerte, validation instantanée Regex et masquage anti-indiscrétion (Privacy Shoulder Surfing).
+                  </p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={handleSaveOtConfig}
+                className="px-3.5 py-1.5 rounded-lg bg-yellow-500 hover:bg-yellow-400 text-black font-bold text-xs flex items-center gap-1.5 transition-all shadow-md shadow-yellow-500/20 cursor-pointer self-start sm:self-auto"
+              >
+                {otSavedToast ? (
+                  <>
+                    <Check className="w-3.5 h-3.5 text-black" />
+                    <span>Configuration Enregistrée !</span>
+                  </>
+                ) : (
+                  <>
+                    <Save className="w-3.5 h-3.5" />
+                    <span>Sauvegarder Réseau OT</span>
+                  </>
+                )}
+              </button>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+              <TechnicalInput
+                label="IP Automate PLC (Fieldbus)"
+                type="ip"
+                value={currentOt.ip}
+                onChange={(e) => handleUpdateOtField('ip', e.target.value)}
+                helperText="Format IPv4 (0-255 par octet) — Modbus/TCP"
+              />
+              <TechnicalInput
+                label="Adresse MAC Contrôleur"
+                type="mac"
+                value={currentOt.mac}
+                onChange={(e) => handleUpdateOtField('mac', e.target.value)}
+                helperText="Format 6 octets hexadécimaux"
+              />
+              <TechnicalInput
+                label="Identifiant Capteur / Nœud IoT"
+                type="iot_code"
+                value={currentOt.iot_code}
+                onChange={(e) => handleUpdateOtField('iot_code', e.target.value)}
+                helperText="Code alphanumérique avec masquage"
+              />
+              <TechnicalInput
+                label="Clé Secrète API OT Télémétrie"
+                type="api_key"
+                value={currentOt.api_key}
+                onChange={(e) => handleUpdateOtField('api_key', e.target.value)}
+                helperText="Jeton cryptographique sécurisé"
+              />
+              <TechnicalInput
+                label="Port Réseau Bus Modbus/BACnet"
+                type="port"
+                value={currentOt.port}
+                onChange={(e) => handleUpdateOtField('port', e.target.value)}
+                helperText="Port TCP/UDP (1 - 65535, ex: 502 Modbus)"
+              />
+              <TechnicalInput
+                label="ID VLAN Industriel Cloisonné"
+                type="vlan"
+                value={currentOt.vlan}
+                onChange={(e) => handleUpdateOtField('vlan', e.target.value)}
+                helperText="Segment réseau isolé (1 - 4094)"
+              />
             </div>
           </div>
         </div>
@@ -385,55 +529,127 @@ export const UnifiedAssetFile: React.FC<UnifiedAssetFileProps> = ({
 
           {/* Form to add custom field */}
           {isAddingField && (
-            <form onSubmit={handleAddCustomField} className="p-3.5 rounded-xl bg-orange-500/10 border border-orange-500/30 flex flex-col sm:flex-row gap-2">
-              <input
-                type="text"
-                placeholder="Nom du champ (ex: N° Bon de commande, Référent audit)"
-                value={newFieldName}
-                onChange={(e) => setNewFieldName(e.target.value)}
-                className="flex-1 px-3 py-1.5 rounded-lg text-xs bg-white dark:bg-black/40 border border-slate-200 dark:border-white/10 text-slate-900 dark:text-white outline-none focus:border-orange-500"
-                required
-              />
-              <input
-                type="text"
-                placeholder="Valeur du champ (ex: AXA-2026-X14)"
-                value={newFieldValue}
-                onChange={(e) => setNewFieldValue(e.target.value)}
-                className="flex-1 px-3 py-1.5 rounded-lg text-xs bg-white dark:bg-black/40 border border-slate-200 dark:border-white/10 text-slate-900 dark:text-white outline-none focus:border-orange-500"
-              />
-              <button
-                type="submit"
-                className="px-4 py-1.5 rounded-lg bg-orange-500 hover:bg-orange-600 text-white text-xs font-bold transition-colors"
-              >
-                Enregistrer
-              </button>
+            <form onSubmit={handleAddCustomField} className="p-4 rounded-xl bg-gradient-to-br from-orange-500/10 via-yellow-500/5 to-transparent border border-orange-500/30 flex flex-col gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label className="text-[10px] font-mono text-slate-400 block mb-1">Nom du champ métier :</label>
+                  <input
+                    type="text"
+                    placeholder="ex: Passerelle IP Secours, Adresse MAC, Code Capteur"
+                    value={newFieldName}
+                    onChange={(e) => setNewFieldName(e.target.value)}
+                    className="w-full px-3 py-2 rounded-lg text-xs bg-white dark:bg-black/50 border border-slate-200 dark:border-white/10 text-slate-900 dark:text-white outline-none focus:border-orange-500"
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="text-[10px] font-mono text-slate-400 block mb-1">Type de validation :</label>
+                  <select
+                    value={newFieldType}
+                    onChange={(e) => {
+                      setNewFieldType(e.target.value as any);
+                      setIsFieldValid(true);
+                    }}
+                    className="w-full px-3 py-2 rounded-lg text-xs bg-white dark:bg-black/50 border border-slate-200 dark:border-white/10 text-slate-900 dark:text-white outline-none focus:border-orange-500"
+                  >
+                    <option value="text">Texte Standard (Non sensible)</option>
+                    <option value="ip">⚠️ Adresse IP (Signal Jaune + Validation IPv4)</option>
+                    <option value="mac">⚠️ Adresse MAC (Validation Hex 6 octets)</option>
+                    <option value="iot_code">⚠️ Code IoT / Node (Protection &amp; Masquage)</option>
+                    <option value="api_key">⚠️ Clé API / Token (Masquage direct)</option>
+                    <option value="port">⚠️ Port Réseau (1 - 65535)</option>
+                    <option value="vlan">⚠️ VLAN ID (1 - 4094)</option>
+                  </select>
+                </div>
+              </div>
+
+              {/* Dynamic input: TechnicalInput with Regex & Privacy vs Simple text */}
+              {newFieldType !== "text" ? (
+                <div className="pt-1">
+                  <TechnicalInput
+                    label={`Valeur technique sécurisée (${newFieldType.toUpperCase()})`}
+                    type={newFieldType as TechnicalFieldType}
+                    value={newFieldValue}
+                    onChange={(e) => setNewFieldValue(e.target.value)}
+                    onValidationChange={(valid) => setIsFieldValid(valid)}
+                    helperText="Validation Regex active en direct. Saisie requise conforme aux normes OT."
+                  />
+                </div>
+              ) : (
+                <div>
+                  <label className="text-[10px] font-mono text-slate-400 block mb-1">Valeur standard :</label>
+                  <input
+                    type="text"
+                    placeholder="ex: AXA-2026-X14, Contrat #8942-A"
+                    value={newFieldValue}
+                    onChange={(e) => setNewFieldValue(e.target.value)}
+                    className="w-full px-3 py-2 rounded-lg text-xs bg-white dark:bg-black/50 border border-slate-200 dark:border-white/10 text-slate-900 dark:text-white outline-none focus:border-orange-500"
+                  />
+                </div>
+              )}
+
+              <div className="flex items-center justify-end gap-2 pt-2 border-t border-white/5">
+                <button
+                  type="button"
+                  onClick={() => setIsAddingField(false)}
+                  className="px-3 py-1.5 rounded-lg text-xs text-slate-400 hover:text-white transition-colors cursor-pointer"
+                >
+                  Annuler
+                </button>
+                <button
+                  type="submit"
+                  disabled={!isFieldValid || !newFieldName.trim()}
+                  className={`px-4 py-1.5 rounded-lg text-xs font-bold transition-all ${
+                    !isFieldValid || !newFieldName.trim()
+                      ? "bg-slate-700 text-slate-400 cursor-not-allowed opacity-60"
+                      : "bg-orange-500 hover:bg-orange-600 text-white cursor-pointer shadow-md shadow-orange-500/20"
+                  }`}
+                >
+                  Enregistrer le champ
+                </button>
+              </div>
             </form>
           )}
 
           {/* List of custom fields */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-            {customFields.map(field => (
-              <div 
-                key={field.id}
-                className="flex items-center justify-between p-3 rounded-lg bg-slate-50 dark:bg-white/[0.03] border border-slate-200 dark:border-white/10 group hover:border-orange-500/40 transition-colors"
-              >
-                <div>
-                  <span className="text-[10px] font-mono uppercase tracking-wider text-slate-400 block">
-                    {field.name}
-                  </span>
-                  <span className="text-xs font-mono font-semibold text-slate-800 dark:text-white mt-0.5 block">
-                    {field.value}
-                  </span>
-                </div>
-                <button
-                  onClick={() => handleDeleteCustomField(field.id)}
-                  className="opacity-0 group-hover:opacity-100 p-1 rounded text-slate-400 hover:text-rose-500 transition-opacity text-xs"
-                  title="Supprimer ce champ"
+            {customFields.map(field => {
+              const isTech = ['ip', 'mac', 'iot_code', 'api_key', 'port', 'vlan'].includes(field.type);
+              return (
+                <div 
+                  key={field.id}
+                  className={`flex items-center justify-between p-3 rounded-lg border group transition-all ${
+                    isTech 
+                      ? "bg-yellow-500/[0.04] border-yellow-500/30 hover:border-yellow-500/70 shadow-[0_0_8px_rgba(250,204,21,0.08)]" 
+                      : "bg-slate-50 dark:bg-white/[0.03] border-slate-200 dark:border-white/10 hover:border-orange-500/40"
+                  }`}
                 >
-                  ✕
-                </button>
-              </div>
-            ))}
+                  <div>
+                    <div className="flex items-center gap-1.5">
+                      {isTech && <ShieldAlert className="w-3.5 h-3.5 text-yellow-500" />}
+                      <span className="text-[10px] font-mono uppercase tracking-wider text-slate-400">
+                        {field.name}
+                      </span>
+                      {isTech && (
+                        <span className="text-[8px] font-mono font-bold px-1.5 py-0.2 rounded bg-yellow-500/20 text-yellow-600 dark:text-yellow-400 border border-yellow-500/40 uppercase">
+                          {field.type}
+                        </span>
+                      )}
+                    </div>
+                    <span className="text-xs font-mono font-semibold text-slate-800 dark:text-white mt-1 block">
+                      {field.type === 'api_key' ? '•••••••••••••••• (Masqué)' : field.value}
+                    </span>
+                  </div>
+                  <button
+                    onClick={() => handleDeleteCustomField(field.id)}
+                    className="opacity-0 group-hover:opacity-100 p-1.5 rounded text-slate-400 hover:text-rose-500 transition-opacity text-xs cursor-pointer"
+                    title="Supprimer ce champ"
+                  >
+                    ✕
+                  </button>
+                </div>
+              );
+            })}
           </div>
         </div>
       )}

@@ -445,3 +445,30 @@ button[class*="bg-purple-"] svg.lucide,
   color: #ffffff;
 }
 
+/* ==========================================================================
+   TECHNICAL INDUSTRIAL INPUT — SÉCURITÉ COGNITIVE & SIGNAL JAUNE ÉLECTRIQUE
+   Style d'avertissement cognitif pour champs d'infrastructure critique (IP, MAC, IoT)
+   ========================================================================== */
+
+.input-technical-warning {
+  border-color: #facc15 !important;
+  box-shadow: 0 0 12px rgba(250, 204, 21, 0.22);
+  transition: all 180ms ease-in-out;
+}
+
+.input-technical-warning:focus {
+  border-color: #eab308 !important;
+  box-shadow: 0 0 16px rgba(234, 179, 8, 0.4);
+}
+
+.input-technical-invalid {
+  border-color: #ef4444 !important;
+  box-shadow: 0 0 14px rgba(239, 68, 68, 0.35) !important;
+}
+
+.input-technical-valid {
+  border-color: #22c55e !important;
+  box-shadow: 0 0 10px rgba(34, 197, 94, 0.2) !important;
+}
+
+
