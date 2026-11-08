@@ -39,6 +39,7 @@ const CockpitConsoleView = lazy(() => import("./components/CockpitConsoleView").
 const VaultView = lazy(() => import("./components/VaultView").then(m => ({ default: m.VaultView })));
 const EsgGrafanaView = lazy(() => import("./components/EsgGrafanaView").then(m => ({ default: m.EsgGrafanaView })));
 const ArtifactsIdeStudio = lazy(() => import("./pages/ArtifactsIdeStudio"));
+const AutonomousRobotics = lazy(() => import("./components/AutonomousRobotics").then(m => ({ default: m.AutonomousRobotics })));
 import { useGlobalState } from "./hooks/useGlobalState";
 import { initAuth, googleSignIn, logout, db } from "./firebase";
 import { doc, setDoc } from "firebase/firestore";
@@ -612,6 +613,14 @@ export default function App() {
             onUpgrade={handleUpgradeTier}
             currentSubscriptionTier={state?.subscriptionTier}
           />
+        );
+      case "robotics":
+        return (
+          <Suspense fallback={<div className="p-12 text-center text-slate-400"><Loader2 className="w-8 h-8 animate-spin mx-auto text-orange-500 mb-2" />Chargement de la Flotte Robotique...</div>}>
+            <div className="p-2 sm:p-4 max-w-[1700px] mx-auto">
+              <AutonomousRobotics />
+            </div>
+          </Suspense>
         );
       case "cockpit":
       case "digital-twin":

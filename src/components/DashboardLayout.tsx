@@ -37,7 +37,13 @@ import {
   Smartphone,
   ExternalLink,
   PanelLeftClose,
-  PanelLeftOpen
+  PanelLeftOpen,
+  Bot,
+  Factory,
+  BatteryCharging,
+  Workflow,
+  ShieldAlert,
+  PlugZap
 } from "lucide-react";
 
 import { useLanguage } from "../App";
@@ -247,6 +253,59 @@ export const SENSORIUM_SERVICE_SUITE: SidebarServiceGroup[] = [
       { id: "strat-1", label: "Strategic Objectives (OKRs)", page: "strategy", keywords: "okr kpi tracking strategic vision performance" },
       { id: "strat-2", label: "SENSORIUM Brand Identity", page: "brand-vision", keywords: "brand vision guidelines identity logo presskit" },
       { id: "ad-campaigns", label: "Campaigns & Visibility", page: "ad-campaigns", keywords: "campaigns billboard communication ads" }
+    ]
+  },
+  {
+    id: "grp-robotics",
+    name: "Autonomous Robotics & Drones",
+    icon: Bot,
+    items: [
+      { id: "rob-fleet", label: "Flotte Robots Mobiles (AMR / AGV)", page: "robotics", badge: "AMR", badgeType: "live", keywords: "amr agv autonomous mobile robots fleet lidar nav path obstacle obstacle slam" },
+      { id: "rob-drones", label: "Drones d'Inspection Thermique & Ronde", page: "robotics", badge: "Drone", badgeType: "ia", keywords: "drone thermal inspection patrol uav aerial surveillance rondes" },
+      { id: "rob-dock", label: "Stations de Recharge & Docks Inductifs", page: "robotics", badge: "BESS", badgeType: "default", keywords: "dock recharge inductive wireless battery charging station" },
+      { id: "rob-estop", label: "Sécurité Homme-Machine (E-Stop ISO 13849)", page: "robotics", badge: "Safety", badgeType: "fips", keywords: "estop safety emergency stop human machine collaborative iso arret" }
+    ]
+  },
+  {
+    id: "grp-mes-industry",
+    name: "Industrie 4.0 & Lignes MES",
+    icon: Factory,
+    items: [
+      { id: "inf-mes", label: "Lignes de Production MES (Cadence OEE)", page: "infrastructure", badge: "MES", badgeType: "live", keywords: "mes manufacturing execution system oee trs production lines cadence ateliers" },
+      { id: "inf-schedule", label: "Planning de Maintenance Usine (Gantt)", page: "infrastructure", badge: "Gantt", badgeType: "default", keywords: "maintenance schedule mes gantt planning arrets usine interventions" },
+      { id: "cmms-kpi-ot", label: "Indicateurs MTBF / MTTR & TCO", page: "infrastructure", badge: "MTBF", badgeType: "live", keywords: "mtbf mttr tco reliability machine availability disponibilite pannes" },
+      { id: "inf-maps-floorplan", label: "Implantation Usine Google Maps 2D", page: "infrastructure", badge: "Maps", badgeType: "svg", keywords: "google maps building floorplan cadastre usine campus batiments" }
+    ]
+  },
+  {
+    id: "grp-smart-energy",
+    name: "Smart Grid & Net-Zero BESS",
+    icon: BatteryCharging,
+    items: [
+      { id: "energy-bess", label: "Systèmes BESS & Batteries Mégawatts", page: "esg-carbon", badge: "BESS", badgeType: "live", keywords: "bess battery storage megawatt grid power backup stockage batterie" },
+      { id: "energy-pue", label: "Calculateur PUE & Effacement Électrique", page: "esg-carbon", badge: "PUE 1.12", badgeType: "ia", keywords: "pue energy efficiency datacenter demand response effacement delestage" },
+      { id: "energy-csrd", label: "Bilan Carbone Scopes 1-2-3 (CSRD)", page: "esg-carbon", badge: "CSRD", badgeType: "fips", keywords: "csrd carbon accounting ghg protocol scope 1 2 3 esg emissions ges" }
+    ]
+  },
+  {
+    id: "grp-ot-cyber",
+    name: "Cybersécurité Industrielle (OT/IT)",
+    icon: ShieldAlert,
+    items: [
+      { id: "ot-ids", label: "Sonde IDS Protocoles (Modbus / BACnet / OPC)", page: "security", badge: "OT-DPI", badgeType: "live", keywords: "ot ids modbus bacnet opcua deep packet inspection industrial cyber automates" },
+      { id: "ot-killswitch", label: "Air-Gap Kill Switch d'Urgence OT", page: "security", badge: "Air-Gap", badgeType: "fips", keywords: "air gap kill switch emergency isolate scada plc isolement reseau" },
+      { id: "ot-segment", label: "Micro-Segmentation Automates (IEC 62443)", page: "zerotrust", badge: "IEC 62443", badgeType: "fips", keywords: "purdue model segmentation zone conduit plc automation zonage" }
+    ]
+  },
+  {
+    id: "grp-integrations",
+    name: "Connecteurs ERP & Bus Industriel",
+    icon: Workflow,
+    items: [
+      { id: "int-sap", label: "Passerelle SAP S/4HANA & BAPI Direct", page: "settings", badge: "SAP ERP", badgeType: "live", keywords: "sap erp s4hana bapi rfc idoc integration enterprise connecteur" },
+      { id: "int-oracle", label: "Passerelle Oracle Database & Cloud OCI", page: "settings", badge: "Oracle Bridge", badgeType: "default", keywords: "oracle erp oci db database bridge connector passerelle" },
+      { id: "int-scada", label: "Passerelle Schneider & Siemens Desigo", page: "settings", badge: "SCADA", badgeType: "live", keywords: "schneider ecostruxure siemens desigo scada bms gateway automate" },
+      { id: "int-mqtt", label: "Bus MQTT Sparkplug B & OPC-UA (100k msg/s)", page: "telemetry", badge: "Sparkplug", badgeType: "stream", keywords: "mqtt sparkplug b opc ua high speed broker stream ingestion" }
     ]
   },
   {

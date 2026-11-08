@@ -310,3 +310,5 @@ export const AutonomousRobotics: React.FC<AutonomousRoboticsProps> = ({ onExplor
     </section>
   );
 };
+
+export default AutonomousRobotics;
