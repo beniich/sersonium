@@ -590,11 +590,39 @@ sensorium_system_uptime_seconds ${snapshot.uptimeSeconds}
     });
     app.use(vite.middlewares);
   } else {
-    // Production static serving
+    // Service Worker auto-cleanup & unregister to prevent blank screen / stale chunk crashes
+    app.get(["/sw.js", "/registerSW.js"], (_req: express.Request, res: express.Response) => {
+      res.setHeader("Cache-Control", "no-store, no-cache, must-revalidate, proxy-revalidate");
+      res.setHeader("Content-Type", "application/javascript");
+      res.send(`
+        self.addEventListener('install', () => self.skipWaiting());
+        self.addEventListener('activate', (e) => {
+          e.waitUntil(
+            caches.keys().then((keys) => Promise.all(keys.map((k) => caches.delete(k))))
+              .then(() => self.registration.unregister())
+              .then(() => self.clients.matchAll())
+              .then((clients) => clients.forEach((c) => c.navigate(c.url)))
+          );
+        });
+      `);
+    });
+
+    // Production static serving with clean cache policies
     const publicPath = path.join(process.cwd(), "public");
-    app.use(express.static(distPath));
+    app.use(express.static(distPath, {
+      setHeaders: (res, filePath) => {
+        if (filePath.endsWith(".html")) {
+          res.setHeader("Cache-Control", "no-cache, no-store, must-revalidate");
+          res.setHeader("Pragma", "no-cache");
+          res.setHeader("Expires", "0");
+        }
+      }
+    }));
     app.use(express.static(publicPath));
-    app.get("*", (req: express.Request, res: express.Response) => {
+    app.get("*", (_req: express.Request, res: express.Response) => {
+      res.setHeader("Cache-Control", "no-cache, no-store, must-revalidate");
+      res.setHeader("Pragma", "no-cache");
+      res.setHeader("Expires", "0");
       res.sendFile(distIndexHtml);
     });
   }
