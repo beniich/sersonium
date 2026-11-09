@@ -55,12 +55,23 @@ export const TIER_QUOTA_CONFIGS: Record<SubscriptionTier, QuotaTierConfig> = {
   },
 };
 
-const DEFAULT_CONSUMED: Record<SubscriptionTier, { tokensMonth: number; tokensDay: number; reqMin: number; entitlements: number }> = {
+const DEFAULT_FALLBACK_QUOTA = { tokensMonth: 1_500, tokensDay: 850, reqMin: 3, entitlements: 14 };
+
+const DEFAULT_CONSUMED: Record<string, { tokensMonth: number; tokensDay: number; reqMin: number; entitlements: number }> = {
   free: { tokensMonth: 1_500, tokensDay: 850, reqMin: 3, entitlements: 14 },
   silver: { tokensMonth: 28_000, tokensDay: 8_400, reqMin: 8, entitlements: 240 },
   pro: { tokensMonth: 450_000, tokensDay: 48_500, reqMin: 24, entitlements: 3_820 },
   enterprise: { tokensMonth: 12_500_000, tokensDay: 180_000, reqMin: 68, entitlements: 14_900 },
 };
+
+function normalizeTier(raw?: any): SubscriptionTier {
+  if (!raw) return "free";
+  const str = String(raw).toLowerCase().trim();
+  if (str === "silver" || str === "starter") return "silver";
+  if (str === "pro" || str === "hypervision") return "pro";
+  if (str === "enterprise" || str === "sovereign") return "enterprise";
+  return "free";
+}
 
 export interface QuotaState {
   tier: SubscriptionTier;
@@ -83,12 +94,18 @@ export interface QuotaState {
   daysUntilReset: number;
 }
 
-export function useSubscriptionQuota(propTier?: SubscriptionTier) {
+export function useSubscriptionQuota(propTier?: SubscriptionTier | string) {
   const getActiveTier = useCallback((): SubscriptionTier => {
-    if (propTier) return propTier;
+    if (propTier) {
+      return normalizeTier(propTier);
+    }
     if (typeof window !== "undefined") {
-      const saved = (localStorage.getItem("sensorium_subscription_tier") || "").toLowerCase();
-      if (saved in TIER_QUOTA_CONFIGS) return saved as SubscriptionTier;
+      try {
+        const saved = localStorage.getItem("sensorium_subscription_tier");
+        if (saved) return normalizeTier(saved);
+      } catch {
+        // ignore
+      }
     }
     return "free";
   }, [propTier]);
@@ -99,19 +116,32 @@ export function useSubscriptionQuota(propTier?: SubscriptionTier) {
   const storageKey = `sensorium_quota_${tier}`;
 
   // Read stored consumption or default
+  // Safety: merge with defaults to guard against stale / incomplete localStorage data
   const getStoredUsage = useCallback(() => {
+    const defaults = DEFAULT_CONSUMED[tier] || DEFAULT_CONSUMED.free || DEFAULT_FALLBACK_QUOTA;
     if (typeof window === "undefined") {
-      return DEFAULT_CONSUMED[tier];
+      return defaults;
     }
     try {
       const stored = localStorage.getItem(storageKey);
       if (stored) {
-        return JSON.parse(stored);
+        const parsed = JSON.parse(stored);
+        if (
+          parsed &&
+          typeof parsed === "object" &&
+          typeof parsed.tokensMonth === "number" &&
+          typeof parsed.tokensDay === "number" &&
+          typeof parsed.reqMin === "number" &&
+          typeof parsed.entitlements === "number"
+        ) {
+          return parsed;
+        }
+        return { ...defaults, ...(parsed || {}) };
       }
     } catch {
-      // fallback
+      try { localStorage.removeItem(storageKey); } catch { /* ignore */ }
     }
-    return DEFAULT_CONSUMED[tier];
+    return defaults;
   }, [tier, storageKey]);
 
   const [usage, setUsage] = useState(getStoredUsage);
@@ -143,66 +173,83 @@ export function useSubscriptionQuota(propTier?: SubscriptionTier) {
   }, [getActiveTier, getStoredUsage]);
 
   const config = TIER_QUOTA_CONFIGS[tier] || TIER_QUOTA_CONFIGS.free;
+  const defaults = DEFAULT_CONSUMED[tier] || DEFAULT_CONSUMED.free || DEFAULT_FALLBACK_QUOTA;
 
   // Save changes
   const saveUsage = useCallback((newUsage: typeof usage) => {
     setUsage(newUsage);
     if (typeof window !== "undefined") {
-      localStorage.setItem(storageKey, JSON.stringify(newUsage));
+      try {
+        localStorage.setItem(storageKey, JSON.stringify(newUsage));
+      } catch { /* ignore */ }
       window.dispatchEvent(new CustomEvent("sensorium:quota_updated", { detail: { tier, usage: newUsage } }));
     }
   }, [storageKey, tier]);
 
   // Action: Consume tokens (e.g. Gemini inference or report)
   const consumeTokens = useCallback((amount: number = 350, reason: string = "INFERENCE"): { success: boolean; remaining: number } => {
-    const nextMonth = usage.tokensMonth + amount;
-    const nextDay = usage.tokensDay + amount;
-    const nextReq = Math.min(config.requestsPerMinute, usage.reqMin + 1);
+    const curUsage = {
+      tokensMonth: typeof usage?.tokensMonth === "number" ? usage.tokensMonth : defaults.tokensMonth,
+      tokensDay: typeof usage?.tokensDay === "number" ? usage.tokensDay : defaults.tokensDay,
+      reqMin: typeof usage?.reqMin === "number" ? usage.reqMin : defaults.reqMin,
+      entitlements: typeof usage?.entitlements === "number" ? usage.entitlements : defaults.entitlements,
+    };
+    const nextMonth = curUsage.tokensMonth + amount;
+    const nextDay = curUsage.tokensDay + amount;
+    const nextReq = Math.min(config.requestsPerMinute, curUsage.reqMin + 1);
 
     if (nextMonth > config.monthlyTokens) {
-      return { success: false, remaining: Math.max(0, config.monthlyTokens - usage.tokensMonth) };
+      return { success: false, remaining: Math.max(0, config.monthlyTokens - curUsage.tokensMonth) };
     }
 
     const updated = {
-      ...usage,
+      ...curUsage,
       tokensMonth: nextMonth,
       tokensDay: nextDay,
       reqMin: nextReq,
     };
     saveUsage(updated);
     return { success: true, remaining: config.monthlyTokens - nextMonth };
-  }, [usage, config, saveUsage]);
+  }, [usage, config, defaults, saveUsage]);
 
   // Action: Increment request
   const recordApiCall = useCallback((count: number = 1) => {
+    const curReq = typeof usage?.reqMin === "number" ? usage.reqMin : defaults.reqMin;
     const updated = {
-      ...usage,
-      reqMin: Math.min(config.requestsPerMinute, usage.reqMin + count),
+      ...(usage || defaults),
+      reqMin: Math.min(config.requestsPerMinute, curReq + count),
     };
     saveUsage(updated);
-  }, [usage, config, saveUsage]);
+  }, [usage, config, defaults, saveUsage]);
 
   // Action: Reset usage back to defaults
   const resetQuotas = useCallback(() => {
-    const defaults = DEFAULT_CONSUMED[tier];
     saveUsage(defaults);
-  }, [tier, saveUsage]);
+  }, [defaults, saveUsage]);
 
   // Calculation of percentages and limits
-  const monthlyTokensUsed = usage.tokensMonth;
+  // Defensive fallback: guard against any stale usage object missing expected keys
+  const safeUsage = {
+    tokensMonth: (typeof usage?.tokensMonth === "number" && !isNaN(usage.tokensMonth)) ? usage.tokensMonth : defaults.tokensMonth,
+    tokensDay:   (typeof usage?.tokensDay === "number" && !isNaN(usage.tokensDay)) ? usage.tokensDay : defaults.tokensDay,
+    reqMin:      (typeof usage?.reqMin === "number" && !isNaN(usage.reqMin)) ? usage.reqMin : defaults.reqMin,
+    entitlements: (typeof usage?.entitlements === "number" && !isNaN(usage.entitlements)) ? usage.entitlements : defaults.entitlements,
+  };
+
+  const monthlyTokensUsed = safeUsage.tokensMonth;
   const monthlyTokensLimit = config.monthlyTokens;
   const monthlyTokensRemaining = Math.max(0, monthlyTokensLimit - monthlyTokensUsed);
   const monthlyTokensPercent = Math.min(100, Math.round((monthlyTokensUsed / monthlyTokensLimit) * 100));
 
-  const dailyTokensUsed = usage.tokensDay;
+  const dailyTokensUsed = safeUsage.tokensDay;
   const dailyTokensLimit = config.dailyTokens;
   const dailyTokensPercent = Math.min(100, Math.round((dailyTokensUsed / dailyTokensLimit) * 100));
 
-  const requestsInWindow = usage.reqMin;
+  const requestsInWindow = safeUsage.reqMin;
   const requestsLimit = config.requestsPerMinute;
   const requestsPercent = Math.min(100, Math.round((requestsInWindow / requestsLimit) * 100));
 
-  const entitlementsUsed = usage.entitlements;
+  const entitlementsUsed = safeUsage.entitlements;
   const entitlementsLimit = config.entitlementLimit;
   const entitlementsPercent = entitlementsLimit === -1 ? 0 : Math.min(100, Math.round((entitlementsUsed / entitlementsLimit) * 100));
 
