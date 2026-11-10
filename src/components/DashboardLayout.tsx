@@ -77,6 +77,25 @@ export interface SidebarServiceGroup {
 
 export const SENSORIUM_SERVICE_SUITE: SidebarServiceGroup[] = [
   {
+    id: "grp-showcase",
+    name: "Vitrine Publique & Documentation",
+    icon: Globe,
+    items: [
+      { id: "showcase-portal", label: "Portail Vitrine Principal", page: "portal", badge: "Web", badgeType: "default", keywords: "vitrine site public accueil web landing portail" },
+      { id: "showcase-solutions", label: "Solutions Métiers & Bâtiment", page: "site-viewer", badge: "Solutions", badgeType: "live", keywords: "solutions tertiaire usine datacenter hopitaux batiments" },
+      { id: "showcase-sectors", label: "Secteurs d'Activité Spécialisés", page: "site-viewer", badge: "Secteurs", badgeType: "default", keywords: "secteurs industrie finance banques sante tertiaire" },
+      { id: "showcase-pillars", label: "6 Piliers & Topologie Industrielle", page: "site-viewer", badge: "6 Piliers", badgeType: "ia", keywords: "6 piliers architecture edge ai streaming ztna conformite" },
+      { id: "showcase-demo", label: "Démonstrateur Interactif", page: "site-viewer", badge: "Sandbox", badgeType: "live", keywords: "demo demonstrateur bac a sable test interactif" },
+      { id: "showcase-roi", label: "Simulateur ROI & Gains Énergie", page: "site-viewer", badge: "ROI", badgeType: "live", keywords: "roi rentabilite economies opex tco retour investissement" },
+      { id: "showcase-pricing", label: "Grille Tarifaire & Forfaits", page: "pricing", badge: "Tarifs", badgeType: "default", keywords: "tarifs plans abonnements free starter pro enterprise pricing" },
+      { id: "showcase-devs", label: "Documentation Développeurs & APIs", page: "site-viewer", badge: "API Docs", badgeType: "ia", keywords: "developers api rest graphql kafka avro webhooks dev docs" },
+      { id: "showcase-security", label: "Livre Blanc Cybersécurité", page: "site-viewer", badge: "DORA/FIPS", badgeType: "fips", keywords: "securite livre blanc whitepaper dora fips anssi rgpd soc2" },
+      { id: "showcase-reviews", label: "Témoignages & Études de Cas", page: "site-viewer", badge: "Clients", badgeType: "default", keywords: "temoignages etudes de cas retours clients axa caisse depots" },
+      { id: "showcase-lifecycle", label: "Cycle de Vie & Jumeau CAFM", page: "site-viewer", badge: "Jumeau", badgeType: "default", keywords: "cycle de vie jumeau lifecycle bim cafm gmao" },
+      { id: "showcase-legal", label: "Mentions Légales & Gouvernance", page: "site-viewer", badge: "Légal", badgeType: "default", keywords: "mentions legales cgu regles conformite rgpd souverainete" }
+    ]
+  },
+  {
     id: "grp-overview",
     name: "Overview & ERP",
     icon: Layers,

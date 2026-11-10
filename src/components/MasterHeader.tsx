@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Menu, Sun, Moon, Crown, UserPlus } from 'lucide-react';
+import { Menu, Sun, Moon, Crown, UserPlus, Globe } from 'lucide-react';
 import { useRbac } from '@/hooks/useRbac';
 import { useConnectionHealth } from '@/hooks/useConnectionHealth';
 import { useTheme } from '../App';
@@ -103,6 +103,16 @@ export const MasterHeader: React.FC<MasterHeaderProps> = ({
 
       {/* ZONE 3 : THÈME, PROFIL, QUOTAS, ABONNEMENT & INSCRIPTION */}
       <div className="flex items-center gap-1.5 sm:gap-2">
+        {/* Bouton de bascule Vitrine & Documentation */}
+        <button
+          onClick={() => navigate('/site-viewer')}
+          className="hidden md:flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-slate-800/80 hover:bg-slate-700/80 border border-slate-700/60 text-slate-300 hover:text-white text-xs font-semibold transition-all cursor-pointer shadow-xs active:scale-95"
+          title="Explorer le Site Vitrine, Solutions & Documentation SENSORIUM"
+        >
+          <Globe size={13} className="text-orange-400" />
+          <span className="hidden lg:inline">Vitrine &amp; Solutions</span>
+        </button>
+
         {/* Bouton d'Abonnement explicite */}
         <button
           onClick={() => navigate('/pricing')}

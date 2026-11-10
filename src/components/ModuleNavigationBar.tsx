@@ -9,13 +9,17 @@ export interface ModuleTab {
 }
 
 export const MODULE_TABS: ModuleTab[] = [
+  { id: "site-viewer", label: "🌐 Vitrine & Solutions", path: "/site-viewer" },
   { id: "ov-glass", label: "✨ Vision Dashboard", path: "/dashboard" },
   { id: "ov-general", label: "Vue Globale ERP", path: "/dashboard" },
   { id: "ov-asset-hub", label: "Fiche Actifs 360°", path: "/dashboard" },
   { id: "cockpit", label: "Jumeau 3D", path: "/cockpit" },
+  { id: "robotics", label: "🤖 Flotte AMR", path: "/robotics" },
+  { id: "esg-carbon", label: "⚡ Énergie BESS", path: "/compliance/esg" },
   { id: "compute", label: "Silicon X1", path: "/compute" },
-  { id: "ov-telemetry", label: "Télémétrie", path: "/dashboard" },
   { id: "compliance", label: "Conformité DORA", path: "/compliance/dora" },
+  { id: "pricing", label: "💎 Tarifs & Forfaits", path: "/pricing" },
+  { id: "ov-telemetry", label: "Télémétrie", path: "/dashboard" },
   { id: "ov-cafm", label: "GMAO & Actifs", path: "/dashboard" },
   { id: "ov-erp-portlets", label: "Command Center", path: "/dashboard" },
   { id: "ov-perf", label: "Métriques", path: "/dashboard" },

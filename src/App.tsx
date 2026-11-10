@@ -40,6 +40,7 @@ const VaultView = lazy(() => import("./components/VaultView").then(m => ({ defau
 const EsgGrafanaView = lazy(() => import("./components/EsgGrafanaView").then(m => ({ default: m.EsgGrafanaView })));
 const ArtifactsIdeStudio = lazy(() => import("./pages/ArtifactsIdeStudio"));
 const AutonomousRobotics = lazy(() => import("./components/AutonomousRobotics").then(m => ({ default: m.AutonomousRobotics })));
+const ShowcaseViewer = lazy(() => import("./components/ShowcaseViewer"));
 import { useGlobalState } from "./hooks/useGlobalState";
 import { initAuth, googleSignIn, logout, db } from "./firebase";
 import { doc, setDoc } from "firebase/firestore";
@@ -101,8 +102,11 @@ export default function App() {
     const lower = pathname.toLowerCase();
     const seg = lower.replace(/^\//, "").split("/")[0];
     // Default root "/" or "/portal" or "/website" or "/vitrine" is the Website
-    if (!seg || seg === "portal" || seg === "website" || seg === "site" || seg === "vitrine") {
+    if (!seg || seg === "portal" || seg === "website" || seg === "vitrine") {
       return "portal";
+    }
+    if (seg === "site-viewer" || seg === "showcase" || seg === "solutions" || seg === "demo" || seg === "roi" || seg === "developers") {
+      return "site-viewer";
     }
     if (seg === "dashboard" || seg === "cafm") {
       return "overview";
@@ -691,6 +695,22 @@ export default function App() {
             />
           </div>
         );
+      case "site-viewer":
+      case "showcase":
+        return (
+          <Suspense fallback={<div className="p-12 text-center text-slate-400"><Loader2 className="w-8 h-8 animate-spin mx-auto text-orange-500 mb-2" />Chargement de la Vitrine Publique...</div>}>
+            <div className="p-0 sm:p-2 lg:p-4 max-w-[1800px] mx-auto min-h-[calc(100vh-100px)]">
+              <ShowcaseViewer 
+                initialPageId={activeItemId.replace(/^showcase-/, "")}
+                isDark={isDark}
+                onNavigateToCockpit={() => {
+                  setActivePage("overview");
+                  setActiveItemId("ov-general");
+                }}
+              />
+            </div>
+          </Suspense>
+        );
       default: return <OverviewPage {...commonProps} />;
     }
   };
@@ -716,6 +736,24 @@ export default function App() {
             onUpgradeTier={handleUpgradeTier}
           />
         </div>
+      );
+    }
+
+    // 🌐 TIER 1.5 : Showcase Viewer (Intégration Vitrine & Documentation HTML)
+    if (activePage === "site-viewer" || activePage === "showcase") {
+      return (
+        <Suspense fallback={<div className="p-12 text-center text-slate-400"><Loader2 className="w-8 h-8 animate-spin mx-auto text-orange-500 mb-2" />Chargement de la Vitrine Publique...</div>}>
+          <div className="p-0 sm:p-2 lg:p-4 max-w-[1800px] mx-auto min-h-[calc(100vh-100px)]">
+            <ShowcaseViewer 
+              initialPageId={activeItemId.replace(/^showcase-/, "")}
+              isDark={isDark}
+              onNavigateToCockpit={() => {
+                setActivePage("overview");
+                setActiveItemId("ov-general");
+              }}
+            />
+          </div>
+        </Suspense>
       );
     }
 
@@ -782,15 +820,27 @@ export default function App() {
                 activeTab={activeItemId}
                 activePage={activePage}
                 onSelectTab={(id) => {
-                  if (id === "cockpit") {
+                  if (id === "site-viewer") {
+                    setActivePage("site-viewer");
+                    setActiveItemId("showcase-solutions");
+                  } else if (id === "cockpit") {
                     setActivePage("cockpit");
                     setActiveItemId("spider-cockpit");
+                  } else if (id === "robotics") {
+                    setActivePage("robotics");
+                    setActiveItemId("rob-fleet");
+                  } else if (id === "esg-carbon") {
+                    setActivePage("esg-carbon");
+                    setActiveItemId("energy-bess");
                   } else if (id === "compute") {
                     setActivePage("compute");
                     setActiveItemId("compute-1");
                   } else if (id === "compliance") {
                     setActivePage("compliance");
                     setActiveItemId("res-dora");
+                  } else if (id === "pricing") {
+                    setActivePage("pricing");
+                    setActiveItemId("showcase-pricing");
                   } else {
                     setActiveItemId(id);
                     setActivePage("overview");
