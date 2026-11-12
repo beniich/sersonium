@@ -1186,165 +1186,256 @@ echo "✅ Agent SENSORIUM UEM installe et actif pour $TERMINAL_ID!"
             </form>
           )}
 
-          {/* ── Onglet 3 : Confirmation & Facture ── */}
+          {/* ── Onglet 3 : Confirmation & Facture Premium ── */}
           {activeTab === "confirm" && generatedInvoice && (
-            <div className="space-y-5 text-xs">
-              {/* En-tête de confirmation */}
-              <div className="flex items-center gap-3 p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/30">
-                <div className="w-10 h-10 rounded-full bg-emerald-500/20 flex items-center justify-center shrink-0">
-                  <CheckCircle2 size={22} className="text-emerald-400" />
-                </div>
-                <div>
-                  <h3 className="text-base font-bold text-white">Abonnement Activé</h3>
-                  <p className="text-slate-400 text-xs">
-                    Organisation <span className="text-orange-300 font-semibold">{formData.name}</span> enregistrée sur SENSORIUM.
-                  </p>
-                </div>
-              </div>
+            <div className="text-xs -m-6 relative overflow-hidden">
 
-              {/* Compte Gmail confirmé */}
-              <div className="flex items-center gap-3 p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/30">
-                {googleUser?.photoURL ? (
-                  <img src={googleUser.photoURL} alt="Avatar" className="w-10 h-10 rounded-full border-2 border-emerald-400" />
-                ) : (
-                  <div className="w-10 h-10 rounded-full bg-gradient-to-br from-indigo-500 to-orange-500 flex items-center justify-center text-white font-bold">
-                    {initials}
-                  </div>
-                )}
-                <div className="flex-1 min-w-0">
-                  <p className="font-semibold text-white">{googleUser?.displayName}</p>
-                  <p className="text-slate-400 text-[11px]">{googleUser?.email}</p>
-                </div>
-                <span className="px-2 py-1 rounded-full bg-emerald-500/20 text-emerald-300 text-[10px] font-bold border border-emerald-500/30 flex items-center gap-1">
-                  <Check size={10} /> Compte Certifié
-                </span>
-              </div>
+              {/* ── Arrière-plan décoratif ── */}
+              <div className="absolute inset-0 bg-gradient-to-br from-slate-950 via-indigo-950/40 to-slate-950 pointer-events-none" />
+              {/* Grille de points */}
+              <div className="absolute inset-0 opacity-[0.04] pointer-events-none"
+                style={{ backgroundImage: "radial-gradient(circle, #f97316 1px, transparent 1px)", backgroundSize: "28px 28px" }} />
+              {/* Lumières d'ambiance */}
+              <div className="absolute top-0 left-1/4 w-72 h-72 bg-orange-500/8 rounded-full blur-3xl pointer-events-none" />
+              <div className="absolute bottom-0 right-1/4 w-64 h-64 bg-indigo-500/8 rounded-full blur-3xl pointer-events-none" />
+              {/* Ligne décorative supérieure */}
+              <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-orange-500/50 to-transparent" />
 
-              {/* Facture certifiée */}
-              <div className="bg-slate-950/50 rounded-xl border border-slate-700 overflow-hidden">
-                <div className="flex items-center justify-between p-4 border-b border-slate-800 bg-gradient-to-r from-orange-500/10 to-amber-500/10">
-                  <div className="flex items-center gap-2">
-                    <Receipt size={16} className="text-orange-400" />
-                    <span className="font-bold text-white">Facture Fiscale Certifiée</span>
-                  </div>
-                  <span className="font-mono text-orange-300 font-bold text-sm">{generatedInvoice.invoiceId}</span>
-                </div>
+              <div className="relative z-10 p-6 space-y-5">
 
-                <div className="p-4 space-y-3">
-                  <div className="grid grid-cols-2 gap-3 text-xs">
-                    <div>
-                      <p className="text-slate-500 mb-0.5">Client</p>
-                      <p className="text-white font-semibold">{generatedInvoice.clientName}</p>
+                {/* ── Bandeau succès + profil Gmail ── */}
+                <div className="flex items-center justify-between gap-4 p-4 rounded-2xl
+                  bg-gradient-to-r from-emerald-950/60 to-teal-950/40
+                  border border-emerald-500/25 shadow-lg shadow-emerald-900/20">
+                  <div className="flex items-center gap-3">
+                    <div className="w-9 h-9 rounded-full bg-emerald-500/20 border border-emerald-400/30
+                      flex items-center justify-center shrink-0">
+                      <CheckCircle2 size={18} className="text-emerald-400" />
                     </div>
                     <div>
-                      <p className="text-slate-500 mb-0.5">Email</p>
-                      <p className="text-white">{generatedInvoice.email}</p>
-                    </div>
-                    <div>
-                      <p className="text-slate-500 mb-0.5">Tenant ID</p>
-                      <p className="text-cyan-300 font-mono">{generatedInvoice.tenantId}</p>
-                    </div>
-                    <div>
-                      <p className="text-slate-500 mb-0.5">Date</p>
-                      <p className="text-white">{generatedInvoice.date}</p>
-                    </div>
-                    <div>
-                      <p className="text-slate-500 mb-0.5">Référence Transaction</p>
-                      <p className="text-slate-300 font-mono text-[10px]">{generatedInvoice.transactionRef}</p>
-                    </div>
-                    <div>
-                      <p className="text-slate-500 mb-0.5">Conformité</p>
-                      <p className="text-emerald-300">{generatedInvoice.doraReference}</p>
+                      <p className="font-bold text-white text-sm">Abonnement Activé</p>
+                      <p className="text-emerald-400/80 text-[11px]">
+                        {formData.name} · {planConfig.label}
+                      </p>
                     </div>
                   </div>
+                  {/* Avatar Gmail */}
+                  <div className="flex items-center gap-2.5 shrink-0">
+                    {googleUser?.photoURL ? (
+                      <img src={googleUser.photoURL} alt="Avatar"
+                        className="w-8 h-8 rounded-full border-2 border-emerald-400/50 shadow-sm" />
+                    ) : (
+                      <div className="w-8 h-8 rounded-full bg-gradient-to-br from-indigo-500 to-orange-500
+                        flex items-center justify-center text-white font-bold text-xs">
+                        {initials}
+                      </div>
+                    )}
+                    <div className="text-right hidden sm:block">
+                      <p className="text-white font-semibold text-[11px]">{googleUser?.displayName}</p>
+                      <span className="inline-flex items-center gap-0.5 text-emerald-400 text-[10px]">
+                        <Check size={9} /> Gmail Certifié
+                      </span>
+                    </div>
+                  </div>
+                </div>
 
-                  {/* Montants */}
-                  <div className="bg-slate-900/80 rounded-lg p-3 space-y-1.5 border border-slate-800 text-xs">
-                    <div className="flex justify-between text-slate-400">
-                      <span>Forfait {generatedInvoice.plan} (HT)</span>
-                      <span className="text-white font-semibold">{generatedInvoice.amountHtEur.toFixed(2)} €</span>
-                    </div>
-                    <div className="flex justify-between text-slate-400">
-                      <span>TVA 20%</span>
-                      <span className="text-white">{generatedInvoice.tvaEur.toFixed(2)} €</span>
-                    </div>
-                    <div className="flex justify-between font-bold border-t border-slate-700 pt-1.5 mt-1">
-                      <span className="text-white">Total TTC</span>
+                {/* ── FACTURE PREMIUM ── */}
+                <div className="rounded-2xl overflow-hidden border border-slate-600/50 shadow-2xl shadow-black/40">
+
+                  {/* En-tête facture — fond dégradé sombre premium */}
+                  <div className="relative bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 p-5 overflow-hidden">
+                    {/* Motif diagonal */}
+                    <div className="absolute inset-0 opacity-[0.03]"
+                      style={{ backgroundImage: "repeating-linear-gradient(45deg, #f97316 0, #f97316 1px, transparent 0, transparent 50%)", backgroundSize: "12px 12px" }} />
+                    {/* Accent orange droit */}
+                    <div className="absolute right-0 top-0 bottom-0 w-1 bg-gradient-to-b from-orange-400 via-amber-500 to-orange-600" />
+
+                    <div className="relative flex items-start justify-between">
+                      {/* Logo & Marque */}
+                      <div>
+                        <div className="flex items-center gap-2 mb-2">
+                          <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-orange-500 to-amber-600
+                            flex items-center justify-center shadow-md shadow-orange-500/30">
+                            <Zap size={16} className="text-white" />
+                          </div>
+                          <div>
+                            <p className="font-black text-white text-sm tracking-wide">SENSORIUM</p>
+                            <p className="text-orange-400/80 text-[9px] font-mono tracking-widest">UEM ENTERPRISE SUITE</p>
+                          </div>
+                        </div>
+                        <p className="text-slate-400 text-[10px] leading-relaxed max-w-[180px]">
+                          Plateforme AIOps & Zero-Trust<br/>Conformité DORA · Résilience IT
+                        </p>
+                      </div>
+
+                      {/* Numéro facture */}
                       <div className="text-right">
-                        <span className="text-orange-300 text-sm">{generatedInvoice.amountTtcEur.toFixed(2)} €</span>
-                        <span className="text-slate-400 text-[10px] ml-2">/ {generatedInvoice.amountTtcMad.toFixed(0)} MAD</span>
+                        <p className="text-slate-500 text-[10px] uppercase tracking-widest mb-1">Facture</p>
+                        <p className="font-black text-white text-xl tracking-tight font-mono">
+                          {generatedInvoice.invoiceId}
+                        </p>
+                        <div className="mt-1.5 inline-flex items-center gap-1 px-2 py-0.5 rounded-full
+                          bg-emerald-500/15 border border-emerald-500/30">
+                          <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                          <span className="text-emerald-300 text-[10px] font-semibold">PAYÉE</span>
+                        </div>
                       </div>
                     </div>
                   </div>
 
-                  {/* Tokens alloués */}
-                  <div className="flex items-center gap-3 p-3 rounded-lg bg-orange-500/10 border border-orange-500/30">
-                    <Zap size={18} className="text-orange-400 shrink-0" />
-                    <div>
-                      <p className="font-bold text-orange-300">{generatedInvoice.tokensAllocated.toLocaleString("fr-FR")} Tokens IA alloués</p>
-                      <p className="text-slate-400 text-[11px]">{generatedInvoice.endpointsCount}</p>
+                  {/* Séparateur ondulé */}
+                  <div className="h-px bg-gradient-to-r from-orange-500/0 via-orange-500/40 to-orange-500/0" />
+
+                  {/* Corps de la facture */}
+                  <div className="bg-gradient-to-b from-slate-900/95 to-slate-950/95 p-5 space-y-4">
+
+                    {/* Infos client & transaction */}
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="space-y-3">
+                        <div>
+                          <p className="text-slate-500 text-[9px] uppercase tracking-widest mb-1">Facturé à</p>
+                          <p className="text-white font-bold text-sm leading-tight">{generatedInvoice.clientName}</p>
+                          <p className="text-slate-400 text-[11px]">{generatedInvoice.email}</p>
+                          <p className="text-cyan-400 font-mono text-[10px] mt-0.5">{generatedInvoice.tenantId}</p>
+                        </div>
+                      </div>
+                      <div className="space-y-1.5 text-right">
+                        <div>
+                          <p className="text-slate-500 text-[9px] uppercase tracking-widest mb-1">Détails</p>
+                          <p className="text-white text-[11px] font-semibold">{generatedInvoice.date}</p>
+                          <p className="text-slate-400 text-[10px] font-mono break-all">{generatedInvoice.transactionRef}</p>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Ligne de produit */}
+                    <div className="rounded-xl overflow-hidden border border-slate-700/50">
+                      {/* Entête tableau */}
+                      <div className="grid grid-cols-12 bg-slate-800/60 px-3 py-2 text-[9px] uppercase tracking-widest text-slate-500">
+                        <span className="col-span-7">Description</span>
+                        <span className="col-span-2 text-right">Qté</span>
+                        <span className="col-span-3 text-right">Montant HT</span>
+                      </div>
+                      {/* Ligne produit */}
+                      <div className="grid grid-cols-12 px-3 py-3 items-center bg-slate-900/40">
+                        <div className="col-span-7">
+                          <p className="text-white font-semibold text-[11px]">{generatedInvoice.plan}</p>
+                          <p className="text-orange-400/80 text-[10px] font-mono">
+                            ⚡ {generatedInvoice.tokensAllocated.toLocaleString("fr-FR")} Tokens IA / mois
+                          </p>
+                          <p className="text-slate-500 text-[10px]">{generatedInvoice.endpointsCount}</p>
+                        </div>
+                        <span className="col-span-2 text-right text-slate-400 text-[11px]">1</span>
+                        <span className="col-span-3 text-right text-white font-bold text-[11px]">
+                          {generatedInvoice.amountHtEur.toFixed(2)} €
+                        </span>
+                      </div>
+                      {/* Conformité DORA */}
+                      <div className="px-3 py-2 bg-slate-800/20 border-t border-slate-700/30">
+                        <p className="text-emerald-400/70 text-[10px] flex items-center gap-1">
+                          <Shield size={9} /> {generatedInvoice.doraReference}
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* Totaux */}
+                    <div className="rounded-xl bg-slate-800/30 border border-slate-700/40 overflow-hidden">
+                      <div className="px-4 py-2 flex justify-between text-[11px] border-b border-slate-700/30">
+                        <span className="text-slate-400">Sous-total HT</span>
+                        <span className="text-white">{generatedInvoice.amountHtEur.toFixed(2)} €</span>
+                      </div>
+                      <div className="px-4 py-2 flex justify-between text-[11px] border-b border-slate-700/30">
+                        <span className="text-slate-400">TVA (20%)</span>
+                        <span className="text-white">{generatedInvoice.tvaEur.toFixed(2)} €</span>
+                      </div>
+                      <div className="px-4 py-3 flex justify-between items-center bg-gradient-to-r from-orange-500/10 to-amber-500/5">
+                        <div>
+                          <span className="text-white font-black text-sm">Total TTC</span>
+                          <span className="text-slate-500 text-[10px] ml-2">/ mois</span>
+                        </div>
+                        <div className="text-right">
+                          <span className="text-orange-300 font-black text-xl">
+                            {generatedInvoice.amountTtcEur.toFixed(2)} €
+                          </span>
+                          <p className="text-slate-400 text-[10px] font-mono">
+                            ≈ {generatedInvoice.amountTtcMad.toFixed(0)} MAD
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Pied de facture */}
+                    <div className="flex items-center justify-between pt-1 border-t border-slate-800">
+                      <p className="text-slate-600 text-[9px] font-mono">
+                        SENSORIUM SAS · ICE 002345678000045 · IF 12345678
+                      </p>
+                      <div className="flex items-center gap-1">
+                        <div className="w-4 h-4 rounded bg-emerald-500/20 border border-emerald-500/30 flex items-center justify-center">
+                          <Check size={9} className="text-emerald-400" />
+                        </div>
+                        <span className="text-emerald-400/70 text-[9px]">Certifiée & conforme</span>
+                      </div>
                     </div>
                   </div>
                 </div>
-              </div>
 
-              {/* Téléchargement des agents */}
-              <div>
-                <h4 className="text-sm font-semibold text-white mb-3 flex items-center gap-2">
-                  <Download size={14} className="text-cyan-400" />
-                  Télécharger les Agents UEM pré-configurés
-                </h4>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                {/* ── Téléchargements agents ── */}
+                <div className="space-y-2.5">
+                  <p className="text-slate-400 text-[11px] flex items-center gap-1.5 font-medium">
+                    <Download size={12} className="text-cyan-400" />
+                    Agents UEM pré-configurés pour <span className="text-cyan-300">{formData.tenantId}</span>
+                  </p>
+                  <div className="grid grid-cols-2 gap-2.5">
+                    <button
+                      onClick={() => handleDownload(`install-sensorium-${formData.tenantId}.bat`, generatedBatContent, "application/x-bat")}
+                      className="flex items-center justify-center gap-1.5 py-2.5 rounded-xl
+                        bg-gradient-to-r from-orange-600/90 to-amber-600/90 hover:from-orange-500 hover:to-amber-500
+                        text-white font-semibold text-[11px] transition-all shadow-lg shadow-orange-900/30
+                        border border-orange-500/30"
+                    >
+                      <Laptop size={13} /> Windows (.BAT)
+                    </button>
+                    <button
+                      onClick={() => handleDownload(`install-sensorium-${formData.tenantId}.sh`, generatedShContent, "application/x-sh")}
+                      className="flex items-center justify-center gap-1.5 py-2.5 rounded-xl
+                        bg-gradient-to-r from-cyan-700/90 to-sky-700/90 hover:from-cyan-600 hover:to-sky-600
+                        text-white font-semibold text-[11px] transition-all shadow-lg shadow-cyan-900/30
+                        border border-cyan-500/30"
+                    >
+                      <Terminal size={13} /> Linux / macOS (.SH)
+                    </button>
+                  </div>
+                </div>
+
+                {/* ── Actions ── */}
+                <div className="flex items-center gap-2 pt-1">
                   <button
-                    onClick={() =>
-                      handleDownload(
-                        `install-sensorium-${formData.tenantId}.bat`,
-                        generatedBatContent,
-                        "application/x-bat"
-                      )
-                    }
-                    className="flex items-center justify-center gap-2 py-3 rounded-xl bg-gradient-to-r from-orange-600 to-orange-700 hover:from-orange-500 hover:to-orange-600 text-white font-semibold text-xs transition shadow-md shadow-orange-600/20"
+                    onClick={() => { onClose(); window.location.hash = "#dashboard"; }}
+                    className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl
+                      bg-gradient-to-r from-indigo-600 to-indigo-700 hover:from-indigo-500 hover:to-indigo-600
+                      text-white font-semibold text-[11px] transition shadow-lg shadow-indigo-900/30
+                      border border-indigo-500/30"
                   >
-                    <Laptop size={15} /> Télécharger Agent Windows (.BAT)
+                    <ExternalLink size={12} /> Console de Flotte
                   </button>
                   <button
-                    onClick={() =>
-                      handleDownload(
-                        `install-sensorium-${formData.tenantId}.sh`,
-                        generatedShContent,
-                        "application/x-sh"
-                      )
-                    }
-                    className="flex items-center justify-center gap-2 py-3 rounded-xl bg-gradient-to-r from-cyan-600 to-cyan-700 hover:from-cyan-500 hover:to-cyan-600 text-white font-semibold text-xs transition shadow-md shadow-cyan-600/20"
+                    onClick={() => setActiveTab("form")}
+                    className="flex items-center gap-1.5 px-4 py-2.5 rounded-xl
+                      bg-slate-800/80 hover:bg-slate-700 text-slate-300 font-medium text-[11px] transition
+                      border border-slate-700/50"
                   >
-                    <Terminal size={15} /> Télécharger Agent Linux / macOS (.SH)
+                    Modifier
+                  </button>
+                  <button
+                    onClick={onClose}
+                    className="flex items-center gap-1.5 px-4 py-2.5 rounded-xl
+                      bg-emerald-700/80 hover:bg-emerald-600 text-white font-semibold text-[11px] transition
+                      border border-emerald-500/30 shadow-sm shadow-emerald-900/20"
+                  >
+                    Terminer
                   </button>
                 </div>
-              </div>
 
-              {/* Actions rapides */}
-              <div className="flex items-center gap-3 pt-1">
-                <button
-                  onClick={() => {
-                    onClose();
-                    window.location.hash = "#dashboard";
-                  }}
-                  className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-xs transition"
-                >
-                  <ExternalLink size={13} /> Accéder à la Console de Flotte
-                </button>
-                <button
-                  onClick={() => setActiveTab("form")}
-                  className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-medium text-xs transition"
-                >
-                  Modifier la config
-                </button>
-                <button
-                  onClick={onClose}
-                  className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-emerald-700 hover:bg-emerald-600 text-white font-semibold text-xs transition"
-                >
-                  Terminer
-                </button>
               </div>
             </div>
           )}
