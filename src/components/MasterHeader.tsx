@@ -8,6 +8,8 @@ import ConnectionBadge from './ConnectionBadge';
 import SubscriptionQuotaCounter from './SubscriptionQuotaCounter';
 import UserProfileModal from './UserProfileModal';
 import { SensoriumAuthModal } from './SensoriumAuthModal';
+import { GoogleLogoIcon } from './ShowcaseViewer';
+import authService from '../services/auth.service';
 
 export interface MasterHeaderProps {
   onOpenMenu?: () => void;
@@ -27,6 +29,22 @@ export const MasterHeader: React.FC<MasterHeaderProps> = ({
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [authDefaultTab, setAuthDefaultTab] = useState<'register' | 'login'>('register');
+  const [isGoogleLoggingIn, setIsGoogleLoggingIn] = useState(false);
+
+  const handleGoogleQuickLogin = async () => {
+    try {
+      setIsGoogleLoggingIn(true);
+      await authService.loginWithGoogle();
+      window.dispatchEvent(new CustomEvent("sensorium:profile_updated"));
+    } catch (e) {
+      console.warn("[MasterHeader] Google login error:", e);
+      // Ouvre la modale d'auth en secours
+      setAuthDefaultTab('login');
+      setIsAuthModalOpen(true);
+    } finally {
+      setIsGoogleLoggingIn(false);
+    }
+  };
 
   // Initiales locales pour profil souverain (zero fuite vers serveurs tiers)
   const initials = currentUser?.name
@@ -121,6 +139,19 @@ export const MasterHeader: React.FC<MasterHeaderProps> = ({
         >
           <Crown size={13} className="text-orange-400" />
           <span className="hidden sm:inline">Abonnement</span>
+        </button>
+
+        {/* Bouton Connexion Google SSO officiel */}
+        <button
+          onClick={handleGoogleQuickLogin}
+          disabled={isGoogleLoggingIn}
+          className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-white/10 hover:bg-white/20 border border-white/20 text-white text-xs font-semibold transition-all cursor-pointer shadow-xs active:scale-95"
+          title="Se connecter avec votre compte Google / Gmail"
+        >
+          <GoogleLogoIcon size={14} />
+          <span className="hidden sm:inline">
+            {isGoogleLoggingIn ? "Connexion..." : currentUser?.email?.includes("@") ? "Google Connecté" : "Connexion Google"}
+          </span>
         </button>
 
         {/* Bouton d'Inscription & Connexion explicite */}
