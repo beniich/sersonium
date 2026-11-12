@@ -19,10 +19,18 @@ import {
   FileCode,
   AlertCircle,
   Sparkles,
-  Zap
+  Zap,
+  Receipt,
+  CreditCard,
+  ArrowRight,
+  ExternalLink,
+  Crown,
+  PartyPopper,
+  Star
 } from "lucide-react";
-import { auth, db } from "../firebase";
+import { auth, db, googleSignIn } from "../firebase";
 import { doc, setDoc } from "firebase/firestore";
+import { GoogleLogoIcon } from "./ShowcaseViewer";
 
 export interface ClientRegistrationData {
   tenantId: string;
@@ -40,6 +48,23 @@ export interface ClientRegistrationData {
   enableDlp: boolean;
 }
 
+export interface GeneratedInvoice {
+  invoiceId: string;
+  transactionRef: string;
+  date: string;
+  clientName: string;
+  tenantId: string;
+  email: string;
+  plan: string;
+  amountHtEur: number;
+  tvaEur: number;
+  amountTtcEur: number;
+  amountTtcMad: number;
+  tokensAllocated: number;
+  endpointsCount: string;
+  doraReference: string;
+}
+
 interface ClientRegistrationModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -51,15 +76,18 @@ export const PLAN_DETAILS: Record<"STARTER" | "PRO" | "ENTERPRISE", {
   label: string;
   tier: "free" | "silver" | "enterprise";
   price: string;
+  priceEurHt: number;
   tokens: number;
   tokensLabel: string;
   endpoints: string;
   doraCoverage: string;
+  isPopular?: boolean;
 }> = {
   STARTER: {
     label: "FREE Starter",
     tier: "free",
     price: "0 €/mois",
+    priceEurHt: 0,
     tokens: 10_000,
     tokensLabel: "10 000 Tokens IA / mois",
     endpoints: "Jusqu'à 5 terminaux UEM",
@@ -68,7 +96,8 @@ export const PLAN_DETAILS: Record<"STARTER" | "PRO" | "ENTERPRISE", {
   PRO: {
     label: "SILVER Professional",
     tier: "silver",
-    price: "29 €/mois (~315 MAD)",
+    price: "29 €/mois (~316 MAD)",
+    priceEurHt: 29,
     tokens: 250_000,
     tokensLabel: "250 000 Tokens IA / mois",
     endpoints: "Jusqu'à 50 terminaux managés",
@@ -78,10 +107,12 @@ export const PLAN_DETAILS: Record<"STARTER" | "PRO" | "ENTERPRISE", {
     label: "GOLD Enterprise",
     tier: "enterprise",
     price: "99 €/mois (~1 080 MAD)",
+    priceEurHt: 99,
     tokens: 2_000_000,
     tokensLabel: "2 000 000 Tokens IA (2 Millions)",
     endpoints: "Terminaux illimités (500+)",
-    doraCoverage: "AIOps autonome, WAF L7 & SLA 99.999%"
+    doraCoverage: "AIOps autonome, WAF L7 & SLA 99.999%",
+    isPopular: true
   }
 };
 
@@ -112,16 +143,111 @@ export const ClientRegistrationModal: React.FC<ClientRegistrationModalProps> = (
     enableDlp: true,
   });
 
+  // Profil Google Gmail Connecté
+  const [googleUser, setGoogleUser] = useState<{
+    uid: string;
+    email: string;
+    displayName: string;
+    photoURL?: string;
+  } | null>(() => {
+    if (auth?.currentUser) {
+      return {
+        uid: auth.currentUser.uid,
+        email: auth.currentUser.email || "",
+        displayName: auth.currentUser.displayName || "",
+        photoURL: auth.currentUser.photoURL || undefined
+      };
+    }
+    if (typeof localStorage !== "undefined") {
+      try {
+        const cached = localStorage.getItem("sensorium_auth_user");
+        if (cached) {
+          const parsed = JSON.parse(cached);
+          if (parsed.email) {
+            return {
+              uid: parsed.userId || `usr-${Date.now()}`,
+              email: parsed.email,
+              displayName: parsed.displayName || parsed.name || "",
+              photoURL: parsed.photoUrl
+            };
+          }
+        }
+      } catch {
+        // ignore
+      }
+    }
+    return null;
+  });
+
+  const [isGoogleSigningIn, setIsGoogleSigningIn] = useState(false);
+  const [generatedInvoice, setGeneratedInvoice] = useState<GeneratedInvoice | null>(null);
+  const [activeTab, setActiveTab] = useState<"auth-select" | "form" | "confirm">(
+    googleUser ? "form" : "auth-select"
+  );
+  const [copiedKey, setCopiedKey] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
   useEffect(() => {
     if (initialPlan) {
       setFormData(prev => ({ ...prev, plan: initialPlan }));
     }
   }, [initialPlan]);
 
-  const [copiedKey, setCopiedKey] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState<"form" | "preview" | "installers">("form");
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [successMessage, setSuccessMessage] = useState<string | null>(null);
+  // Synchronisation avec l'état d'authentification Firebase
+  useEffect(() => {
+    const unsubscribe = auth.onAuthStateChanged((user) => {
+      if (user) {
+        setGoogleUser({
+          uid: user.uid,
+          email: user.email || "",
+          displayName: user.displayName || "",
+          photoURL: user.photoURL || undefined
+        });
+        // Pré-remplissage intelligent si nom par défaut
+        if (formData.name === "Banque Atlantique Cameroun" && user.displayName) {
+          const orgName = `${user.displayName} Org`;
+          const slug = user.displayName.toUpperCase().replace(/[^A-Z0-9]/g, "-").substring(0, 12);
+          setFormData(prev => ({
+            ...prev,
+            name: orgName,
+            tenantId: slug ? `TEN-${slug}` : prev.tenantId,
+            terminalPrefix: slug ? `${slug.substring(0, 4)}-PC-` : prev.terminalPrefix,
+          }));
+        }
+      }
+    });
+    return () => unsubscribe();
+  }, [formData.name]);
+
+  const handleGoogleSignIn = async () => {
+    try {
+      setIsGoogleSigningIn(true);
+      const res = await googleSignIn();
+      if (res?.user) {
+        const user = res.user;
+        setGoogleUser({
+          uid: user.uid,
+          email: user.email || "",
+          displayName: user.displayName || "",
+          photoURL: user.photoURL || undefined
+        });
+        const nameGuess = user.displayName || user.email?.split("@")[0] || "Entreprise";
+        const orgName = `${nameGuess.charAt(0).toUpperCase() + nameGuess.slice(1)} Smart Fleet`;
+        const slug = nameGuess.toUpperCase().replace(/[^A-Z0-9]/g, "-").substring(0, 12);
+        setFormData(prev => ({
+          ...prev,
+          name: orgName,
+          tenantId: `TEN-${slug}`,
+          terminalPrefix: `${slug.substring(0, 4)}-PC-`,
+        }));
+        window.dispatchEvent(new CustomEvent("sensorium:profile_updated"));
+      }
+    } catch (err) {
+      console.warn("[ClientRegistrationModal] Google Auth warning:", err);
+    } finally {
+      setIsGoogleSigningIn(false);
+    }
+  };
 
   // URL API calculée
   const computedServerUrl = useMemo(() => {
@@ -199,11 +325,11 @@ if %ERRORLEVEL% EQU 0 (
 (
 echo @echo off
 echo cd /d "%INSTALL_DIR%"
-echo node index.js ^>^> "%INSTALL_DIR%\\agent.log" 2^>^&1
+echo node index.js ^>> "%INSTALL_DIR%\\agent.log" 2^>&1
 ) > "%INSTALL_DIR%\\start-agent.bat"
 
 echo [4/4] Creation du service de surveillance...
-sc create %SERVICE_NAME% binPath= "cmd /c \"%INSTALL_DIR%\\start-agent.bat\"" start= auto DisplayName= "SENSORIUM UEM Agent (${formData.name})"
+sc create %SERVICE_NAME% binPath= "cmd /c \\"%INSTALL_DIR%\\start-agent.bat\\"" start= auto DisplayName= "SENSORIUM UEM Agent (${formData.name})"
 sc description %SERVICE_NAME% "Agent de securite de flotte endpoint connecte a ${computedServerUrl}"
 sc start %SERVICE_NAME%
 
@@ -248,7 +374,7 @@ curl -fsSL "$SERVER_URL/agent/binary/index.js" -o "$INSTALL_DIR/index.js"
 chmod 750 "$INSTALL_DIR/index.js"
 
 echo "[2/4] Configuration..."
-cat > "$INSTALL_DIR/agent.config.json" << EOF
+cat > "$INSTALL_DIR/agent.config.json" <<EOF
 {
   "serverUrl": "$SERVER_URL",
   "agentKey": "$AGENT_KEY",
@@ -263,7 +389,7 @@ chmod 600 "$INSTALL_DIR/agent.config.json"
 
 echo "[3/4] Creation du service systemd..."
 NODE_BIN=$(which node || echo "/usr/bin/node")
-cat > "/etc/systemd/system/\${SERVICE_NAME}.service" << EOF
+cat > "/etc/systemd/system/\${SERVICE_NAME}.service" <<EOF
 [Unit]
 Description=SENSORIUM UEM Endpoint Agent (${formData.name})
 After=network.target
@@ -335,14 +461,20 @@ echo "✅ Agent SENSORIUM UEM installe et actif pour $TERMINAL_ID!"
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
-    setSuccessMessage(null);
+
+    // Si pas de compte Google, déclencher l'auth d'abord
+    if (!googleUser) {
+      await handleGoogleSignIn();
+      setIsSubmitting(false);
+      return;
+    }
 
     const planConfig = PLAN_DETAILS[formData.plan] || PLAN_DETAILS.ENTERPRISE;
     const mappedTier = planConfig.tier;
 
     try {
-      // 1. Tenter l'enregistrement sur le backend SENSORIUM
-      const res = await fetch("/api/v1/uem/policies", {
+      // 1. Tenter l'enregistrement sur le backend SENSORIUM (non bloquant)
+      await fetch("/api/v1/uem/policies", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -361,7 +493,7 @@ echo "✅ Agent SENSORIUM UEM installe et actif pour $TERMINAL_ID!"
         }),
       }).catch(() => null);
 
-      // 2. Attribution et initialisation du tokenQuota
+      // 2. Attribution et initialisation du tokenQuota en localStorage
       const initialQuota = {
         tokensMonth: 0,
         tokensDay: 0,
@@ -407,10 +539,38 @@ echo "✅ Agent SENSORIUM UEM installe et actif pour $TERMINAL_ID!"
         );
       }
 
-      // 3. Enregistrement en temps réel dans Firestore (users/{userId}) si utilisateur connecté
+      // 3. Génération de la facture fiscale
+      const invoiceNum = Math.floor(1000 + Math.random() * 9000);
+      const invoiceId = `FAC-${new Date().getFullYear()}-${invoiceNum}`;
+      const uid = googleUser.uid;
+      const transactionRef = `TXN-GMAIL-${uid.slice(0, 8).toUpperCase()}-${Date.now()}`;
+      const amountHtEur = planConfig.priceEurHt;
+      const tvaEur = Math.round(amountHtEur * 0.20 * 100) / 100;
+      const amountTtcEur = amountHtEur + tvaEur;
+      const amountTtcMad = Math.round(amountTtcEur * 10.9 * 100) / 100;
+
+      const invoice: GeneratedInvoice = {
+        invoiceId,
+        transactionRef,
+        date: new Date().toLocaleDateString("fr-FR", { year: "numeric", month: "long", day: "numeric" }),
+        clientName: googleUser.displayName || formData.name,
+        tenantId: formData.tenantId,
+        email: googleUser.email,
+        plan: planConfig.label,
+        amountHtEur,
+        tvaEur,
+        amountTtcEur,
+        amountTtcMad,
+        tokensAllocated: planConfig.tokens,
+        endpointsCount: planConfig.endpoints,
+        doraReference: "Article 24 - Conformité DORA"
+      };
+
+      // 4. Enregistrement Firestore (users/{userId}) et facture
       try {
         const currentUser = auth?.currentUser;
         if (currentUser && db) {
+          // Profil et quota
           await setDoc(
             doc(db, `users/${currentUser.uid}`),
             {
@@ -428,25 +588,42 @@ echo "✅ Agent SENSORIUM UEM installe et actif pour $TERMINAL_ID!"
             },
             { merge: true }
           );
+          // Facture certifiée
+          await setDoc(
+            doc(db, `users/${currentUser.uid}/invoices/${invoiceId}`),
+            {
+              ...invoice,
+              createdAt: new Date().toISOString(),
+              status: "paid",
+              currency: "EUR",
+              doraCompliant: true,
+            }
+          );
         }
       } catch (firestoreErr) {
         console.warn("[ClientRegistration] Firestore sync warning:", firestoreErr);
       }
 
+      setGeneratedInvoice(invoice);
+
       if (onClientRegistered) {
         onClientRegistered(formData);
       }
 
-      setSuccessMessage(
-        `Organisation "${formData.name}" enregistrée avec succès ! Quota initialisé : ${planConfig.tokensLabel}.`
-      );
-      setActiveTab("installers");
+      setActiveTab("confirm");
     } finally {
       setIsSubmitting(false);
     }
   };
 
   if (!isOpen) return null;
+
+  const planConfig = PLAN_DETAILS[formData.plan] || PLAN_DETAILS.ENTERPRISE;
+
+  // Initiales de l'avatar
+  const initials = googleUser?.displayName
+    ? googleUser.displayName.split(" ").map(w => w[0]).join("").substring(0, 2).toUpperCase()
+    : "?";
 
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-in fade-in duration-200">
@@ -465,7 +642,7 @@ echo "✅ Agent SENSORIUM UEM installe et actif pour $TERMINAL_ID!"
                 </span>
               </h2>
               <p className="text-xs text-slate-400">
-                Configurez l'adresse IP, le DNS du serveur et générez l'installeur pré-configuré pour ce client.
+                Configurez votre abonnement, liez votre compte Gmail et générez l'installeur pré-configuré.
               </p>
             </div>
           </div>
@@ -480,56 +657,220 @@ echo "✅ Agent SENSORIUM UEM installe et actif pour $TERMINAL_ID!"
         {/* Tab Navigation */}
         <div className="flex border-b border-slate-800 bg-slate-950/30 px-5 pt-3 gap-2">
           <button
-            onClick={() => setActiveTab("form")}
+            onClick={() => setActiveTab("auth-select")}
+            className={`pb-3 px-3 text-xs font-semibold border-b-2 transition flex items-center gap-1.5 ${
+              activeTab === "auth-select"
+                ? "border-indigo-500 text-indigo-400"
+                : "border-transparent text-slate-400 hover:text-slate-200"
+            }`}
+          >
+            <GoogleLogoIcon size={14} /> 1. Compte Gmail &amp; Forfait
+          </button>
+          <button
+            onClick={() => googleUser ? setActiveTab("form") : undefined}
             className={`pb-3 px-3 text-xs font-semibold border-b-2 transition flex items-center gap-1.5 ${
               activeTab === "form"
                 ? "border-orange-500 text-orange-400"
-                : "border-transparent text-slate-400 hover:text-slate-200"
+                : googleUser
+                  ? "border-transparent text-slate-400 hover:text-slate-200"
+                  : "border-transparent text-slate-600 cursor-not-allowed"
             }`}
           >
-            <Sliders size={14} /> 1. Configuration Client &amp; Réseau
+            <Sliders size={14} /> 2. Configuration Réseau
           </button>
           <button
-            onClick={() => setActiveTab("preview")}
+            onClick={() => generatedInvoice ? setActiveTab("confirm") : undefined}
             className={`pb-3 px-3 text-xs font-semibold border-b-2 transition flex items-center gap-1.5 ${
-              activeTab === "preview"
-                ? "border-orange-500 text-orange-400"
-                : "border-transparent text-slate-400 hover:text-slate-200"
-            }`}
-          >
-            <FileCode size={14} /> 2. Aperçu JSON de l'Agent
-          </button>
-          <button
-            onClick={() => setActiveTab("installers")}
-            className={`pb-3 px-3 text-xs font-semibold border-b-2 transition flex items-center gap-1.5 ${
-              activeTab === "installers"
+              activeTab === "confirm"
                 ? "border-emerald-500 text-emerald-400"
-                : "border-transparent text-slate-400 hover:text-slate-200"
+                : generatedInvoice
+                  ? "border-transparent text-slate-400 hover:text-slate-200"
+                  : "border-transparent text-slate-600 cursor-not-allowed"
             }`}
           >
-            <Download size={14} /> 3. Installeurs Générés (.BAT / .SH)
+            <Receipt size={14} /> 3. Confirmation &amp; Facture
           </button>
         </div>
 
-        {/* Success Alert Banner */}
-        {successMessage && (
-          <div className="mx-6 mt-4 p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-300 text-xs flex items-center justify-between">
-            <span className="flex items-center gap-2">
-              <CheckCircle2 size={16} className="text-emerald-400" /> {successMessage}
-            </span>
-            <button
-              onClick={() => setSuccessMessage(null)}
-              className="text-emerald-400 hover:text-white"
-            >
-              <X size={14} />
-            </button>
-          </div>
-        )}
-
         {/* Body Container */}
         <div className="p-6 overflow-y-auto space-y-6">
+
+          {/* ── Onglet 1 : Auth Gmail & Sélecteur de Forfait ── */}
+          {activeTab === "auth-select" && (
+            <div className="space-y-6 text-xs">
+              {/* Bloc Google Auth */}
+              <div className="bg-slate-950/50 rounded-xl p-5 border border-slate-800 space-y-4">
+                <div className="flex items-center gap-2 text-sm font-semibold text-white border-b border-slate-800/80 pb-3">
+                  <GoogleLogoIcon size={18} />
+                  <span>Associer votre compte Gmail / Google Workspace</span>
+                </div>
+
+                {!googleUser ? (
+                  <div className="flex flex-col items-center gap-4 py-4">
+                    <p className="text-slate-400 text-center max-w-sm">
+                      Connectez votre compte Gmail pour sécuriser votre abonnement, générer vos factures certifiées et synchroniser vos quotas de tokens IA.
+                    </p>
+                    <button
+                      onClick={handleGoogleSignIn}
+                      disabled={isGoogleSigningIn}
+                      className="flex items-center gap-3 px-6 py-3 rounded-xl bg-white hover:bg-gray-50 text-gray-800 font-semibold text-sm shadow-md border border-gray-200 transition disabled:opacity-70"
+                    >
+                      {isGoogleSigningIn ? (
+                        <RefreshCw size={18} className="animate-spin text-blue-500" />
+                      ) : (
+                        <GoogleLogoIcon size={20} />
+                      )}
+                      {isGoogleSigningIn ? "Connexion en cours..." : "Se connecter avec Google"}
+                    </button>
+                    <p className="text-[11px] text-slate-500">
+                      Connexion sécurisée via OAuth 2.0 • Vos données restent privées
+                    </p>
+                  </div>
+                ) : (
+                  <div className="flex items-center gap-4 p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/30">
+                    {googleUser.photoURL ? (
+                      <img
+                        src={googleUser.photoURL}
+                        alt="Avatar"
+                        className="w-12 h-12 rounded-full border-2 border-emerald-400 object-cover"
+                      />
+                    ) : (
+                      <div className="w-12 h-12 rounded-full bg-gradient-to-br from-indigo-500 to-orange-500 flex items-center justify-center text-white font-bold text-lg">
+                        {initials}
+                      </div>
+                    )}
+                    <div className="flex-1 min-w-0">
+                      <p className="font-bold text-white text-sm">{googleUser.displayName || "Utilisateur"}</p>
+                      <p className="text-slate-300 text-xs">{googleUser.email}</p>
+                      <span className="inline-flex items-center gap-1 mt-1 px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 text-[10px] font-semibold border border-emerald-500/30">
+                        <Check size={10} /> Gmail Vérifié &amp; Certifié
+                      </span>
+                    </div>
+                    <button
+                      onClick={handleGoogleSignIn}
+                      className="text-xs text-slate-400 hover:text-white underline underline-offset-2"
+                    >
+                      Changer
+                    </button>
+                  </div>
+                )}
+              </div>
+
+              {/* Sélecteur de Forfait */}
+              <div className="space-y-3">
+                <h3 className="text-sm font-semibold text-white flex items-center gap-2">
+                  <Sparkles size={16} className="text-orange-400" />
+                  Choisissez votre Forfait &amp; Quota de Tokens IA
+                </h3>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                  {(["STARTER", "PRO", "ENTERPRISE"] as const).map((plan) => {
+                    const p = PLAN_DETAILS[plan];
+                    const isSelected = formData.plan === plan;
+                    return (
+                      <button
+                        key={plan}
+                        type="button"
+                        onClick={() => setFormData(prev => ({ ...prev, plan }))}
+                        className={`relative p-4 rounded-xl border-2 text-left transition-all ${
+                          isSelected
+                            ? "border-orange-500 bg-orange-500/10 shadow-lg shadow-orange-500/20"
+                            : "border-slate-700 bg-slate-950/40 hover:border-slate-600"
+                        }`}
+                      >
+                        {p.isPopular && (
+                          <span className="absolute -top-2.5 right-3 px-2 py-0.5 rounded-full bg-gradient-to-r from-orange-500 to-amber-500 text-white text-[10px] font-bold flex items-center gap-1">
+                            <Star size={8} /> Recommandé
+                          </span>
+                        )}
+                        <div className="flex items-center justify-between mb-2">
+                          <span className={`font-bold text-sm ${isSelected ? "text-orange-300" : "text-white"}`}>
+                            {p.label}
+                          </span>
+                          {isSelected && <Check size={16} className="text-orange-400" />}
+                        </div>
+                        <p className={`text-lg font-black mb-1 ${isSelected ? "text-orange-400" : "text-slate-200"}`}>
+                          {p.price}
+                        </p>
+                        <div className="space-y-1 text-[11px] text-slate-400">
+                          <p className="flex items-center gap-1 text-orange-300 font-semibold">
+                            <Zap size={10} /> {p.tokensLabel}
+                          </p>
+                          <p className="flex items-center gap-1">
+                            <Wifi size={10} /> {p.endpoints}
+                          </p>
+                          <p className="flex items-center gap-1">
+                            <Shield size={10} /> {p.doraCoverage}
+                          </p>
+                        </div>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Bouton Continuer */}
+              <div className="flex items-center justify-end gap-3 pt-2">
+                <button
+                  type="button"
+                  onClick={onClose}
+                  className="px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-medium text-xs transition"
+                >
+                  Annuler
+                </button>
+                <button
+                  type="button"
+                  onClick={async () => {
+                    if (!googleUser) {
+                      await handleGoogleSignIn();
+                    } else {
+                      setActiveTab("form");
+                    }
+                  }}
+                  disabled={isGoogleSigningIn}
+                  className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-orange-500 to-amber-600 hover:from-orange-600 hover:to-amber-700 text-white font-semibold text-xs transition shadow-lg shadow-orange-500/25 disabled:opacity-50"
+                >
+                  {isGoogleSigningIn ? (
+                    <RefreshCw size={14} className="animate-spin" />
+                  ) : (
+                    <ArrowRight size={14} />
+                  )}
+                  {!googleUser ? "Se connecter et Continuer" : "Continuer vers la Configuration →"}
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* ── Onglet 2 : Configuration Réseau (form) ── */}
           {activeTab === "form" && (
             <form onSubmit={handleSubmit} className="space-y-6 text-xs">
+
+              {/* Profil Gmail lié en haut */}
+              {googleUser && (
+                <div className="flex items-center gap-3 p-3 rounded-xl bg-indigo-500/10 border border-indigo-500/30">
+                  {googleUser.photoURL ? (
+                    <img src={googleUser.photoURL} alt="Avatar" className="w-9 h-9 rounded-full border border-indigo-400" />
+                  ) : (
+                    <div className="w-9 h-9 rounded-full bg-gradient-to-br from-indigo-500 to-orange-500 flex items-center justify-center text-white font-bold text-sm">
+                      {initials}
+                    </div>
+                  )}
+                  <div className="flex-1 min-w-0">
+                    <p className="font-semibold text-white text-xs">{googleUser.displayName}</p>
+                    <p className="text-slate-400 text-[11px]">{googleUser.email}</p>
+                  </div>
+                  <span className="px-2 py-0.5 rounded-full bg-indigo-500/20 text-indigo-300 text-[10px] font-semibold border border-indigo-500/30 flex items-center gap-1">
+                    <Check size={10} /> Compte lié
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => setActiveTab("auth-select")}
+                    className="text-[10px] text-slate-400 hover:text-white underline"
+                  >
+                    Changer
+                  </button>
+                </div>
+              )}
+
               {/* ── Section 1 : Informations Client ── */}
               <div className="bg-slate-950/40 rounded-xl p-4 border border-slate-800 space-y-4">
                 <div className="flex items-center gap-2 text-sm font-semibold text-white border-b border-slate-800/80 pb-2">
@@ -570,47 +911,37 @@ echo "✅ Agent SENSORIUM UEM installe et actif pour $TERMINAL_ID!"
 
                   <div>
                     <label className="block text-slate-300 font-medium mb-1">
-                      Formule / Souscription &amp; Quota IA
+                      Formule Sélectionnée
                     </label>
-                    <select
-                      value={formData.plan}
-                      onChange={(e) =>
-                        setFormData({ ...formData, plan: e.target.value as any })
-                      }
-                      className="w-full px-3 py-2 rounded-lg bg-slate-900 border border-slate-700 text-white focus:outline-none focus:border-orange-500 font-medium"
+                    <div
+                      className="w-full px-3 py-2 rounded-lg bg-slate-900/50 border border-orange-500/40 text-orange-300 font-semibold cursor-pointer text-xs"
+                      onClick={() => setActiveTab("auth-select")}
                     >
-                      <option value="STARTER">FREE Starter — 0 €/mois (10 000 Tokens IA)</option>
-                      <option value="PRO">SILVER Professional — 29 €/mois (250 000 Tokens IA)</option>
-                      <option value="ENTERPRISE">GOLD Enterprise — 99 €/mois (2 000 000 Tokens IA)</option>
-                    </select>
+                      {planConfig.label} — {planConfig.tokensLabel}
+                    </div>
                   </div>
                 </div>
 
-                {/* Badge Récapitulatif du Quota de Tokens du Forfait sélectionné */}
-                {(() => {
-                  const cfg = PLAN_DETAILS[formData.plan] || PLAN_DETAILS.ENTERPRISE;
-                  return (
-                    <div className="mt-3 p-3 rounded-xl bg-gradient-to-r from-slate-900/90 to-slate-950 border border-orange-500/30 flex flex-wrap items-center justify-between gap-3 text-xs">
-                      <div className="flex items-center gap-2">
-                        <span className="p-1.5 rounded-lg bg-orange-500/20 text-orange-400">
-                          <Sparkles size={14} />
-                        </span>
-                        <div>
-                          <span className="font-bold text-white">{cfg.label}</span>
-                          <span className="text-slate-400 ml-2">({cfg.price})</span>
-                          <p className="text-[11px] text-orange-300 font-mono mt-0.5">
-                            ⚡ {cfg.tokensLabel} • {cfg.endpoints}
-                          </p>
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <span className="px-2.5 py-1 rounded-full bg-emerald-500/10 text-emerald-300 border border-emerald-500/20 text-[10px] font-semibold">
-                          🛡️ {cfg.doraCoverage}
-                        </span>
-                      </div>
+                {/* Badge Récapitulatif du Quota de Tokens */}
+                <div className="mt-3 p-3 rounded-xl bg-gradient-to-r from-slate-900/90 to-slate-950 border border-orange-500/30 flex flex-wrap items-center justify-between gap-3 text-xs">
+                  <div className="flex items-center gap-2">
+                    <span className="p-1.5 rounded-lg bg-orange-500/20 text-orange-400">
+                      <Sparkles size={14} />
+                    </span>
+                    <div>
+                      <span className="font-bold text-white">{planConfig.label}</span>
+                      <span className="text-slate-400 ml-2">({planConfig.price})</span>
+                      <p className="text-[11px] text-orange-300 font-mono mt-0.5">
+                        ⚡ {planConfig.tokensLabel} • {planConfig.endpoints}
+                      </p>
                     </div>
-                  );
-                })()}
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className="px-2.5 py-1 rounded-full bg-emerald-500/10 text-emerald-300 border border-emerald-500/20 text-[10px] font-semibold">
+                      🛡️ {planConfig.doraCoverage}
+                    </span>
+                  </div>
+                </div>
               </div>
 
               {/* ── Section 2 : Configuration Réseau & Serveur ── */}
@@ -823,110 +1154,146 @@ echo "✅ Agent SENSORIUM UEM installe et actif pour $TERMINAL_ID!"
               </div>
 
               {/* Bouton d'action */}
-              <div className="flex items-center justify-end gap-3 pt-2">
+              <div className="flex items-center justify-between gap-3 pt-2">
                 <button
                   type="button"
-                  onClick={onClose}
-                  className="px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-medium text-xs transition"
+                  onClick={() => setActiveTab("auth-select")}
+                  className="flex items-center gap-1.5 text-xs text-slate-400 hover:text-white transition"
                 >
-                  Annuler
+                  ← Retour au forfait
                 </button>
-                <button
-                  type="submit"
-                  disabled={isSubmitting}
-                  className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-orange-500 to-amber-600 hover:from-orange-600 hover:to-amber-700 text-white font-semibold text-xs transition shadow-lg shadow-orange-500/25 disabled:opacity-50"
-                >
-                  {isSubmitting ? (
-                    <RefreshCw size={14} className="animate-spin" />
-                  ) : (
-                    <CheckCircle2 size={14} />
-                  )}
-                  Enregistrer le Client &amp; Générer les Installeurs
-                </button>
+                <div className="flex items-center gap-3">
+                  <button
+                    type="button"
+                    onClick={onClose}
+                    className="px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-medium text-xs transition"
+                  >
+                    Annuler
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={isSubmitting}
+                    className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-orange-500 to-amber-600 hover:from-orange-600 hover:to-amber-700 text-white font-semibold text-xs transition shadow-lg shadow-orange-500/25 disabled:opacity-50"
+                  >
+                    {isSubmitting ? (
+                      <RefreshCw size={14} className="animate-spin" />
+                    ) : (
+                      <CheckCircle2 size={14} />
+                    )}
+                    {isSubmitting ? "Finalisation en cours..." : "Finaliser l'Abonnement &amp; Générer la Facture"}
+                  </button>
+                </div>
               </div>
             </form>
           )}
 
-          {/* ── Onglet 2 : Prévisualisation JSON de l'agent ── */}
-          {activeTab === "preview" && (
-            <div className="space-y-4 text-xs">
-              <div className="flex items-center justify-between">
-                <p className="text-slate-300">
-                  Fichier <code className="text-cyan-400 font-mono">agent.config.json</code> qui sera déployé sur chaque poste de <strong className="text-white">{formData.name}</strong> :
-                </p>
-                <button
-                  onClick={() =>
-                    copyToClipboard(
-                      JSON.stringify(
-                        {
-                          serverUrl: computedServerUrl,
-                          agentKey: formData.agentKey,
-                          tenantId: formData.tenantId,
-                          terminalId: `${formData.terminalPrefix}HOSTNAME`,
-                          agentVersion: "1.0.0",
-                          pollIntervalMs: formData.pollIntervalSeconds * 1000,
-                          logFile: "agent.log",
-                        },
-                        null,
-                        2
-                      ),
-                      "json"
-                    )
-                  }
-                  className="flex items-center gap-1 text-slate-400 hover:text-white"
-                >
-                  {copiedKey === "json" ? <Check size={14} className="text-emerald-400" /> : <Copy size={14} />}
-                  <span>Copier le JSON</span>
-                </button>
-              </div>
-
-              <pre className="bg-slate-950 p-4 rounded-xl border border-slate-800 text-emerald-400 font-mono text-xs overflow-auto">
-{JSON.stringify(
-  {
-    serverUrl: computedServerUrl,
-    agentKey: formData.agentKey,
-    tenantId: formData.tenantId,
-    terminalId: `${formData.terminalPrefix}[HOSTNAME]`,
-    agentVersion: "1.0.0",
-    pollIntervalMs: formData.pollIntervalSeconds * 1000,
-    logFile: "agent.log",
-  },
-  null,
-  2
-)}
-              </pre>
-
-              <div className="p-3 rounded-lg bg-blue-500/10 border border-blue-500/20 text-blue-300 text-xs">
-                💡 L'agent utilisera automatiquement l'adresse <strong className="text-white">{computedServerUrl}</strong> configurée pour faire remonter son inventaire et récupérer ses ordres en toute transparence.
-              </div>
-            </div>
-          )}
-
-          {/* ── Onglet 3 : Téléchargement des Installeurs ── */}
-          {activeTab === "installers" && (
+          {/* ── Onglet 3 : Confirmation & Facture ── */}
+          {activeTab === "confirm" && generatedInvoice && (
             <div className="space-y-5 text-xs">
-              <div className="p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-300 flex items-start gap-3">
-                <CheckCircle2 size={18} className="shrink-0 mt-0.5 text-emerald-400" />
-                <div>
-                  <p className="font-semibold text-emerald-200">
-                    Installeurs configurés pour "{formData.name}" (Tenant : {formData.tenantId})
-                  </p>
-                  <p className="mt-0.5 text-emerald-400/90">
-                    Ces scripts intègrent directement l'adresse de votre serveur ({computedServerUrl}) ainsi que la clé de sécurité.
-                  </p>
+              {/* En-tête de succès */}
+              <div className="text-center py-4">
+                <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gradient-to-br from-emerald-500 to-teal-500 shadow-lg shadow-emerald-500/30 mb-3">
+                  <PartyPopper size={28} className="text-white" />
+                </div>
+                <h3 className="text-xl font-black text-white mb-1">Abonnement Activé !</h3>
+                <p className="text-slate-400 text-sm">
+                  Votre organisation <span className="text-orange-300 font-semibold">{formData.name}</span> est désormais enregistrée sur SENSORIUM.
+                </p>
+              </div>
+
+              {/* Compte Gmail confirmé */}
+              <div className="flex items-center gap-3 p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/30">
+                {googleUser?.photoURL ? (
+                  <img src={googleUser.photoURL} alt="Avatar" className="w-10 h-10 rounded-full border-2 border-emerald-400" />
+                ) : (
+                  <div className="w-10 h-10 rounded-full bg-gradient-to-br from-indigo-500 to-orange-500 flex items-center justify-center text-white font-bold">
+                    {initials}
+                  </div>
+                )}
+                <div className="flex-1 min-w-0">
+                  <p className="font-semibold text-white">{googleUser?.displayName}</p>
+                  <p className="text-slate-400 text-[11px]">{googleUser?.email}</p>
+                </div>
+                <span className="px-2 py-1 rounded-full bg-emerald-500/20 text-emerald-300 text-[10px] font-bold border border-emerald-500/30 flex items-center gap-1">
+                  <Check size={10} /> Compte Certifié
+                </span>
+              </div>
+
+              {/* Facture certifiée */}
+              <div className="bg-slate-950/50 rounded-xl border border-slate-700 overflow-hidden">
+                <div className="flex items-center justify-between p-4 border-b border-slate-800 bg-gradient-to-r from-orange-500/10 to-amber-500/10">
+                  <div className="flex items-center gap-2">
+                    <Receipt size={16} className="text-orange-400" />
+                    <span className="font-bold text-white">Facture Fiscale Certifiée</span>
+                  </div>
+                  <span className="font-mono text-orange-300 font-bold text-sm">{generatedInvoice.invoiceId}</span>
+                </div>
+
+                <div className="p-4 space-y-3">
+                  <div className="grid grid-cols-2 gap-3 text-xs">
+                    <div>
+                      <p className="text-slate-500 mb-0.5">Client</p>
+                      <p className="text-white font-semibold">{generatedInvoice.clientName}</p>
+                    </div>
+                    <div>
+                      <p className="text-slate-500 mb-0.5">Email</p>
+                      <p className="text-white">{generatedInvoice.email}</p>
+                    </div>
+                    <div>
+                      <p className="text-slate-500 mb-0.5">Tenant ID</p>
+                      <p className="text-cyan-300 font-mono">{generatedInvoice.tenantId}</p>
+                    </div>
+                    <div>
+                      <p className="text-slate-500 mb-0.5">Date</p>
+                      <p className="text-white">{generatedInvoice.date}</p>
+                    </div>
+                    <div>
+                      <p className="text-slate-500 mb-0.5">Référence Transaction</p>
+                      <p className="text-slate-300 font-mono text-[10px]">{generatedInvoice.transactionRef}</p>
+                    </div>
+                    <div>
+                      <p className="text-slate-500 mb-0.5">Conformité</p>
+                      <p className="text-emerald-300">{generatedInvoice.doraReference}</p>
+                    </div>
+                  </div>
+
+                  {/* Montants */}
+                  <div className="bg-slate-900/80 rounded-lg p-3 space-y-1.5 border border-slate-800 text-xs">
+                    <div className="flex justify-between text-slate-400">
+                      <span>Forfait {generatedInvoice.plan} (HT)</span>
+                      <span className="text-white font-semibold">{generatedInvoice.amountHtEur.toFixed(2)} €</span>
+                    </div>
+                    <div className="flex justify-between text-slate-400">
+                      <span>TVA 20%</span>
+                      <span className="text-white">{generatedInvoice.tvaEur.toFixed(2)} €</span>
+                    </div>
+                    <div className="flex justify-between font-bold border-t border-slate-700 pt-1.5 mt-1">
+                      <span className="text-white">Total TTC</span>
+                      <div className="text-right">
+                        <span className="text-orange-300 text-sm">{generatedInvoice.amountTtcEur.toFixed(2)} €</span>
+                        <span className="text-slate-400 text-[10px] ml-2">/ {generatedInvoice.amountTtcMad.toFixed(0)} MAD</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Tokens alloués */}
+                  <div className="flex items-center gap-3 p-3 rounded-lg bg-orange-500/10 border border-orange-500/30">
+                    <Zap size={18} className="text-orange-400 shrink-0" />
+                    <div>
+                      <p className="font-bold text-orange-300">{generatedInvoice.tokensAllocated.toLocaleString("fr-FR")} Tokens IA alloués</p>
+                      <p className="text-slate-400 text-[11px]">{generatedInvoice.endpointsCount}</p>
+                    </div>
+                  </div>
                 </div>
               </div>
 
-              {/* Boutons de téléchargement direct */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div className="p-4 rounded-xl bg-slate-950/60 border border-slate-800 space-y-3">
-                  <div className="flex items-center gap-2 font-semibold text-white">
-                    <Laptop size={16} className="text-orange-400" />
-                    <span>Installeur Windows (.bat)</span>
-                  </div>
-                  <p className="text-slate-400 text-[11px]">
-                    Installe le service Windows en tâche de fond pour Windows 10/11 et Windows Server.
-                  </p>
+              {/* Téléchargement des agents */}
+              <div>
+                <h4 className="text-sm font-semibold text-white mb-3 flex items-center gap-2">
+                  <Download size={14} className="text-cyan-400" />
+                  Télécharger les Agents UEM pré-configurés
+                </h4>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <button
                     onClick={() =>
                       handleDownload(
@@ -935,20 +1302,10 @@ echo "✅ Agent SENSORIUM UEM installe et actif pour $TERMINAL_ID!"
                         "application/x-bat"
                       )
                     }
-                    className="w-full flex items-center justify-center gap-2 py-2.5 rounded-lg bg-orange-600 hover:bg-orange-500 text-white font-semibold transition shadow-md shadow-orange-600/20"
+                    className="flex items-center justify-center gap-2 py-3 rounded-xl bg-gradient-to-r from-orange-600 to-orange-700 hover:from-orange-500 hover:to-orange-600 text-white font-semibold text-xs transition shadow-md shadow-orange-600/20"
                   >
-                    <Download size={14} /> Télécharger le fichier .BAT
+                    <Laptop size={15} /> Télécharger Agent Windows (.BAT)
                   </button>
-                </div>
-
-                <div className="p-4 rounded-xl bg-slate-950/60 border border-slate-800 space-y-3">
-                  <div className="flex items-center gap-2 font-semibold text-white">
-                    <Terminal size={16} className="text-cyan-400" />
-                    <span>Installeur Linux / macOS (.sh)</span>
-                  </div>
-                  <p className="text-slate-400 text-[11px]">
-                    Configure un daemon systemd permanent sous Ubuntu, Debian, CentOS ou macOS.
-                  </p>
                   <button
                     onClick={() =>
                       handleDownload(
@@ -957,27 +1314,36 @@ echo "✅ Agent SENSORIUM UEM installe et actif pour $TERMINAL_ID!"
                         "application/x-sh"
                       )
                     }
-                    className="w-full flex items-center justify-center gap-2 py-2.5 rounded-lg bg-cyan-600 hover:bg-cyan-500 text-white font-semibold transition shadow-md shadow-cyan-600/20"
+                    className="flex items-center justify-center gap-2 py-3 rounded-xl bg-gradient-to-r from-cyan-600 to-cyan-700 hover:from-cyan-500 hover:to-cyan-600 text-white font-semibold text-xs transition shadow-md shadow-cyan-600/20"
                   >
-                    <Download size={14} /> Télécharger le script .SH
+                    <Terminal size={15} /> Télécharger Agent Linux / macOS (.SH)
                   </button>
                 </div>
               </div>
 
-              {/* Commande 1 ligne PowerShell */}
-              <div className="space-y-2">
-                <div className="flex items-center justify-between text-slate-300">
-                  <span className="font-semibold">Ou déploiement en 1 seule ligne PowerShell Administrateur :</span>
-                  <button
-                    onClick={() => copyToClipboard(oneLinerPowerShell, "ps1")}
-                    className="text-orange-400 hover:underline flex items-center gap-1"
-                  >
-                    {copiedKey === "ps1" ? <Check size={12} /> : <Copy size={12} />} Copier
-                  </button>
-                </div>
-                <div className="bg-slate-950 p-3 rounded-lg border border-slate-800 font-mono text-[11px] text-emerald-400 break-all select-all">
-                  {oneLinerPowerShell}
-                </div>
+              {/* Actions rapides */}
+              <div className="flex items-center gap-3 pt-1">
+                <button
+                  onClick={() => {
+                    onClose();
+                    window.location.hash = "#dashboard";
+                  }}
+                  className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-xs transition"
+                >
+                  <ExternalLink size={13} /> Accéder à la Console de Flotte
+                </button>
+                <button
+                  onClick={() => setActiveTab("form")}
+                  className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-medium text-xs transition"
+                >
+                  Modifier la config
+                </button>
+                <button
+                  onClick={onClose}
+                  className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-emerald-700 hover:bg-emerald-600 text-white font-semibold text-xs transition"
+                >
+                  Terminer
+                </button>
               </div>
             </div>
           )}
@@ -987,6 +1353,9 @@ echo "✅ Agent SENSORIUM UEM installe et actif pour $TERMINAL_ID!"
         <div className="flex items-center justify-between p-4 border-t border-slate-800 bg-slate-950/50 text-xs">
           <div className="text-slate-500 font-mono">
             Tenant actif : <span className="text-slate-300 font-bold">{formData.tenantId}</span>
+            {generatedInvoice && (
+              <span className="ml-3 text-emerald-400">• {generatedInvoice.invoiceId}</span>
+            )}
           </div>
           <button
             onClick={onClose}
