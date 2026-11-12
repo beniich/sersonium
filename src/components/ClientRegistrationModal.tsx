@@ -25,7 +25,6 @@ import {
   ArrowRight,
   ExternalLink,
   Crown,
-  PartyPopper,
   Star
 } from "lucide-react";
 import { auth, db, googleSignIn } from "../firebase";
@@ -1190,15 +1189,17 @@ echo "✅ Agent SENSORIUM UEM installe et actif pour $TERMINAL_ID!"
           {/* ── Onglet 3 : Confirmation & Facture ── */}
           {activeTab === "confirm" && generatedInvoice && (
             <div className="space-y-5 text-xs">
-              {/* En-tête de succès */}
-              <div className="text-center py-4">
-                <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gradient-to-br from-emerald-500 to-teal-500 shadow-lg shadow-emerald-500/30 mb-3">
-                  <PartyPopper size={28} className="text-white" />
+              {/* En-tête de confirmation */}
+              <div className="flex items-center gap-3 p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/30">
+                <div className="w-10 h-10 rounded-full bg-emerald-500/20 flex items-center justify-center shrink-0">
+                  <CheckCircle2 size={22} className="text-emerald-400" />
                 </div>
-                <h3 className="text-xl font-black text-white mb-1">Abonnement Activé !</h3>
-                <p className="text-slate-400 text-sm">
-                  Votre organisation <span className="text-orange-300 font-semibold">{formData.name}</span> est désormais enregistrée sur SENSORIUM.
-                </p>
+                <div>
+                  <h3 className="text-base font-bold text-white">Abonnement Activé</h3>
+                  <p className="text-slate-400 text-xs">
+                    Organisation <span className="text-orange-300 font-semibold">{formData.name}</span> enregistrée sur SENSORIUM.
+                  </p>
+                </div>
               </div>
 
               {/* Compte Gmail confirmé */}
