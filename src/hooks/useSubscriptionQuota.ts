@@ -14,21 +14,21 @@ export interface QuotaTierConfig {
 
 export const TIER_QUOTA_CONFIGS: Record<SubscriptionTier, QuotaTierConfig> = {
   free: {
-    name: "Free Trial",
+    name: "FREE Starter",
     monthlyTokens: 10_000,
-    dailyTokens: 5_000,
+    dailyTokens: 2_500,
     requestsPerMinute: 10,
-    entitlementLimit: 100,
+    entitlementLimit: 5,
     badgeColor: "text-slate-400",
     badgeBg: "bg-slate-500/10",
     borderClass: "border-slate-500/20",
   },
   silver: {
-    name: "Starter / Silver",
-    monthlyTokens: 100_000,
-    dailyTokens: 30_000,
+    name: "SILVER Professional",
+    monthlyTokens: 250_000,
+    dailyTokens: 35_000,
     requestsPerMinute: 30,
-    entitlementLimit: 2_000,
+    entitlementLimit: 50,
     badgeColor: "text-blue-400",
     badgeBg: "bg-blue-500/10",
     borderClass: "border-blue-500/20",
@@ -38,30 +38,30 @@ export const TIER_QUOTA_CONFIGS: Record<SubscriptionTier, QuotaTierConfig> = {
     monthlyTokens: 1_000_000,
     dailyTokens: 150_000,
     requestsPerMinute: 100,
-    entitlementLimit: 10_000,
+    entitlementLimit: 200,
     badgeColor: "text-orange-400",
     badgeBg: "bg-orange-500/10",
     borderClass: "border-orange-500/20",
   },
   enterprise: {
-    name: "Sovereign Enterprise",
-    monthlyTokens: 100_000_000,
-    dailyTokens: 1_000_000,
+    name: "GOLD Enterprise",
+    monthlyTokens: 2_000_000,
+    dailyTokens: 350_000,
     requestsPerMinute: 300,
-    entitlementLimit: -1, // Unlimited
-    badgeColor: "text-purple-400",
-    badgeBg: "bg-purple-500/10",
-    borderClass: "border-purple-500/20",
+    entitlementLimit: -1, // Unlimited (500+)
+    badgeColor: "text-amber-400",
+    badgeBg: "bg-amber-500/10",
+    borderClass: "border-amber-500/20",
   },
 };
 
 const DEFAULT_FALLBACK_QUOTA = { tokensMonth: 1_500, tokensDay: 850, reqMin: 3, entitlements: 14 };
 
 const DEFAULT_CONSUMED: Record<string, { tokensMonth: number; tokensDay: number; reqMin: number; entitlements: number }> = {
-  free: { tokensMonth: 1_500, tokensDay: 850, reqMin: 3, entitlements: 14 },
-  silver: { tokensMonth: 28_000, tokensDay: 8_400, reqMin: 8, entitlements: 240 },
-  pro: { tokensMonth: 450_000, tokensDay: 48_500, reqMin: 24, entitlements: 3_820 },
-  enterprise: { tokensMonth: 12_500_000, tokensDay: 180_000, reqMin: 68, entitlements: 14_900 },
+  free: { tokensMonth: 1_500, tokensDay: 500, reqMin: 2, entitlements: 3 },
+  silver: { tokensMonth: 28_000, tokensDay: 4_200, reqMin: 8, entitlements: 24 },
+  pro: { tokensMonth: 180_000, tokensDay: 18_500, reqMin: 24, entitlements: 95 },
+  enterprise: { tokensMonth: 18_500, tokensDay: 3_200, reqMin: 12, entitlements: 140 }, // 1 981 500 restants sur 2M
 };
 
 function normalizeTier(raw?: any): SubscriptionTier {
@@ -156,22 +156,6 @@ export function useSubscriptionQuota(propTier?: SubscriptionTier | string) {
     setUsage(getStoredUsage());
   }, [tier, getStoredUsage]);
 
-  // Listen to cross-component quota updates
-  useEffect(() => {
-    const handleUpdate = () => {
-      const current = getActiveTier();
-      setTier(current);
-      setUsage(getStoredUsage());
-    };
-
-    window.addEventListener("sensorium:quota_updated", handleUpdate);
-    window.addEventListener("storage", handleUpdate);
-    return () => {
-      window.removeEventListener("sensorium:quota_updated", handleUpdate);
-      window.removeEventListener("storage", handleUpdate);
-    };
-  }, [getActiveTier, getStoredUsage]);
-
   const config = TIER_QUOTA_CONFIGS[tier] || TIER_QUOTA_CONFIGS.free;
   const defaults = DEFAULT_CONSUMED[tier] || DEFAULT_CONSUMED.free || DEFAULT_FALLBACK_QUOTA;
 
@@ -211,6 +195,31 @@ export function useSubscriptionQuota(propTier?: SubscriptionTier | string) {
     saveUsage(updated);
     return { success: true, remaining: config.monthlyTokens - nextMonth };
   }, [usage, config, defaults, saveUsage]);
+
+  // Listen to cross-component quota updates & token consumption events
+  useEffect(() => {
+    const handleUpdate = () => {
+      const current = getActiveTier();
+      setTier(current);
+      setUsage(getStoredUsage());
+    };
+
+    const handleConsumeEvent = (e: Event) => {
+      const customEvt = e as CustomEvent<{ amount?: number; reason?: string }>;
+      const amount = customEvt.detail?.amount ?? 1500;
+      const reason = customEvt.detail?.reason ?? "AUDIT_PREDICTIF_IA";
+      consumeTokens(amount, reason);
+    };
+
+    window.addEventListener("sensorium:quota_updated", handleUpdate);
+    window.addEventListener("sensorium:consume_tokens", handleConsumeEvent);
+    window.addEventListener("storage", handleUpdate);
+    return () => {
+      window.removeEventListener("sensorium:quota_updated", handleUpdate);
+      window.removeEventListener("sensorium:consume_tokens", handleConsumeEvent);
+      window.removeEventListener("storage", handleUpdate);
+    };
+  }, [getActiveTier, getStoredUsage, consumeTokens]);
 
   // Action: Increment request
   const recordApiCall = useCallback((count: number = 1) => {

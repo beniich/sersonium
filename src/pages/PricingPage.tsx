@@ -43,6 +43,7 @@ import { logAuditEvent } from "../hooks/useGlobalState";
 import PayPalSmartButton from "../components/PayPalSmartButton";
 import PageHeaderBanner from "../components/PageHeaderBanner";
 import SubscriptionQuotaCounter from "../components/SubscriptionQuotaCounter";
+import ClientRegistrationModal from "../components/ClientRegistrationModal";
 
 interface PricingPageProps {
   state: GlobalState;
@@ -74,6 +75,27 @@ export default function PricingPage({
   const [activeFaq, setActiveFaq] = useState<number | null>(null);
   const [isVerifyingPayment, setIsVerifyingPayment] = useState(false);
   const [verificationStep, setVerificationStep] = useState<string>("");
+
+  // Modal d'enregistrement client reliée au forfait sélectionné
+  const [isRegistrationOpen, setIsRegistrationOpen] = useState(false);
+  const [registrationPlan, setRegistrationPlan] = useState<"STARTER" | "PRO" | "ENTERPRISE">("ENTERPRISE");
+
+  // Simulateur / Calculateur de Tokens interactif
+  const [simEndpoints, setSimEndpoints] = useState<number>(20);
+  const [simAuditsPerMonth, setSimAuditsPerMonth] = useState<number>(6);
+
+  const estimatedTokens = Math.max(1000, simEndpoints * simAuditsPerMonth * 1500);
+  const recommendedPlan: "STARTER" | "PRO" | "ENTERPRISE" =
+    estimatedTokens <= 10_000 && simEndpoints <= 5
+      ? "STARTER"
+      : estimatedTokens <= 250_000 && simEndpoints <= 50
+      ? "PRO"
+      : "ENTERPRISE";
+
+  const handleOpenRegistration = (plan: "STARTER" | "PRO" | "ENTERPRISE") => {
+    setRegistrationPlan(plan);
+    setIsRegistrationOpen(true);
+  };
 
   // Current active tier from global state (free, silver, pro, enterprise)
   const currentTier: SubscriptionTier = state?.subscriptionTier || "free";
@@ -480,12 +502,119 @@ export default function PricingPage({
           />
         </div>
 
+        {/* Simulateur / Calculateur de Tokens Interactif */}
+        <div className="max-w-4xl mx-auto w-full bg-slate-900/90 backdrop-blur-xl border border-orange-500/30 rounded-3xl p-6 sm:p-8 shadow-2xl space-y-6">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-800 pb-4">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-orange-500 to-amber-500 flex items-center justify-center text-white shadow-lg shadow-orange-500/25">
+                <Sliders size={20} />
+              </div>
+              <div>
+                <h3 className="text-lg font-bold text-white flex items-center gap-2">
+                  {language === "fr" ? "Simulateur Prédictif de Tokens IA & Terminaux" : "Predictive AI Tokens & Endpoint Calculator"}
+                  <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-orange-500/20 text-orange-400 border border-orange-500/30">
+                    Gemini Flash
+                  </span>
+                </h3>
+                <p className="text-xs text-slate-400">
+                  {language === "fr" 
+                    ? "Estimez votre consommation mensuelle selon la taille de votre flotte et le rythme d'audits DORA." 
+                    : "Estimate your monthly token burn based on fleet size and DORA audit frequency."}
+                </p>
+              </div>
+            </div>
+
+            {/* Recommandation en direct */}
+            <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-orange-500/10 border border-orange-500/30 text-xs text-orange-300">
+              <Sparkles size={14} className="text-orange-400" />
+              <span>
+                {language === "fr" ? "Forfait conseillé :" : "Recommended :"} <strong className="text-white uppercase font-mono">{recommendedPlan}</strong>
+              </span>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {/* Curseur 1: Terminaux managés */}
+            <div className="space-y-2">
+              <div className="flex justify-between items-center text-xs">
+                <span className="text-slate-300 font-medium">
+                  {language === "fr" ? "Terminaux UEM / Capteurs IoT :" : "Managed UEM Endpoints / IoT :"}
+                </span>
+                <span className="font-mono text-orange-400 font-bold bg-slate-950 px-2 py-0.5 rounded-md border border-slate-800">
+                  {simEndpoints} {language === "fr" ? "postes" : "units"}
+                </span>
+              </div>
+              <input 
+                type="range"
+                min="1"
+                max="250"
+                value={simEndpoints}
+                onChange={(e) => setSimEndpoints(Number(e.target.value))}
+                className="w-full h-2 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-[#f97316]"
+              />
+              <div className="flex justify-between text-[10px] text-slate-500 font-mono">
+                <span>1 poste</span>
+                <span>50 (PME)</span>
+                <span>250+ (Enterprise)</span>
+              </div>
+            </div>
+
+            {/* Curseur 2: Fréquence des audits IA */}
+            <div className="space-y-2">
+              <div className="flex justify-between items-center text-xs">
+                <span className="text-slate-300 font-medium">
+                  {language === "fr" ? "Audits IA prédictifs / poste / mois :" : "Predictive AI Audits / Unit / Mo :"}
+                </span>
+                <span className="font-mono text-amber-400 font-bold bg-slate-950 px-2 py-0.5 rounded-md border border-slate-800">
+                  {simAuditsPerMonth} {language === "fr" ? "audits (~1 500 tokens/audit)" : "audits (~1,500 tokens/audit)"}
+                </span>
+              </div>
+              <input 
+                type="range"
+                min="1"
+                max="30"
+                value={simAuditsPerMonth}
+                onChange={(e) => setSimAuditsPerMonth(Number(e.target.value))}
+                className="w-full h-2 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-amber-500"
+              />
+              <div className="flex justify-between text-[10px] text-slate-500 font-mono">
+                <span>1 / mois</span>
+                <span>10 / mois</span>
+                <span>30 / mois (Quotidien)</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Résultat Calculateur & CTA */}
+          <div className="p-4 rounded-2xl bg-slate-950/70 border border-slate-800 flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div>
+              <div className="text-[11px] text-slate-400 uppercase tracking-wider font-semibold">
+                {language === "fr" ? "Besoin Estimé en Tokens Mensuels" : "Estimated Monthly AI Tokens"}
+              </div>
+              <div className="text-2xl sm:text-3xl font-extrabold text-white font-mono flex items-baseline gap-2">
+                <span>{estimatedTokens.toLocaleString()}</span>
+                <span className="text-xs text-orange-400 font-sans font-normal">Tokens IA / mois</span>
+              </div>
+            </div>
+
+            <button
+              type="button"
+              onClick={() => handleOpenRegistration(recommendedPlan)}
+              className="w-full sm:w-auto px-5 py-2.5 rounded-xl bg-gradient-to-r from-orange-500 to-amber-600 hover:from-orange-600 hover:to-amber-700 text-white font-bold text-xs transition shadow-lg shadow-orange-500/25 flex items-center justify-center gap-2 cursor-pointer"
+            >
+              <Sparkles size={14} />
+              <span>{language === "fr" ? `Souscrire Formule ${recommendedPlan === "STARTER" ? "Free" : recommendedPlan === "PRO" ? "Silver" : "Gold"}` : `Subscribe ${recommendedPlan} Plan`}</span>
+              <ArrowRight size={14} />
+            </button>
+          </div>
+        </div>
+
         {/* 3 Core SaaS Tiers Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-stretch">
 
-          {/* 1. TIER LITE */}
+          {/* 1. FREE STARTER */}
           <div className={`relative bg-[#111827]/80 backdrop-blur-xl rounded-3xl p-7 flex flex-col justify-between border transition-all duration-300 hover:bg-[#111827] hover:-translate-y-1 ${
-            currentTier === "silver"
+            currentTier === "free"
               ? "border-[#f97316] shadow-[0_0_30px_rgba(249,115,22,0.2)] ring-1 ring-[#f97316]"
               : "border-slate-800"
           }`}>
@@ -493,14 +622,14 @@ export default function PricingPage({
               <div className="flex justify-between items-start">
                 <div>
                   <div className="inline-block text-[11px] font-mono font-bold uppercase tracking-wider text-slate-400 mb-1">
-                    {language === "fr" ? "PME & PROJETS PILOTES" : "SMB & POC"}
+                    {language === "fr" ? "DÉCOUVERTE & ESSAI" : "DISCOVERY & TRIAL"}
                   </div>
-                  <h3 className="text-2xl font-bold text-white">Tier Lite</h3>
+                  <h3 className="text-2xl font-bold text-white">FREE Starter</h3>
                   <p className="text-xs text-slate-400 mt-1.5 min-h-[32px]">
-                    {language === "fr" ? "Supervision essentielle pour 1 bâtiment et flotte IoT standard." : "Essential facility monitoring for 1 asset and IoT fleet."}
+                    {language === "fr" ? "Découverte essentielle, jusqu'à 5 postes et jumeau 3D démo." : "Essential onboarding, up to 5 endpoints and demo 3D twin."}
                   </p>
                 </div>
-                {currentTier === "silver" && (
+                {currentTier === "free" && (
                   <span className="text-[10px] font-mono font-bold px-2.5 py-1 rounded-full bg-[#f97316]/20 text-[#f97316] border border-[#f97316]/40">
                     {language === "fr" ? "ACTUEL" : "ACTIVE"}
                   </span>
@@ -509,89 +638,66 @@ export default function PricingPage({
 
               {/* Price */}
               <div className="flex items-baseline gap-1.5 pt-2">
-                <span className="text-4xl font-extrabold text-white">
-                  {billingCycle === "monthly" ? "149 €" : "119 €"}
-                </span>
+                <span className="text-4xl font-extrabold text-white">0 €</span>
                 <span className="text-sm text-slate-400 font-medium">/{language === "fr" ? "mois" : "mo"}</span>
               </div>
 
               {/* Action Button */}
-              {currentTier === "silver" ? (
-                <div className="w-full py-3 px-4 rounded-xl bg-slate-800/80 text-[#f97316] text-xs font-bold text-center border border-[#f97316]/30">
-                  {language === "fr" ? "Forfait Actuel" : "Current Plan"}
-                </div>
-              ) : (
-                <div className="space-y-2">
-                  <button
-                    type="button"
-                    onClick={() => handlePayPalSuccess({ subscriptionId: "mock_lite_tx_" + Date.now(), planId: "P-44Y462991D576054FNKY3PKI" })}
-                    className="w-full py-3 px-4 rounded-xl bg-slate-800 hover:bg-slate-700 text-white text-xs font-bold transition-all border border-slate-700 cursor-pointer shadow-sm flex items-center justify-center gap-2"
-                  >
-                    <span>{language === "fr" ? "Démarrer l'Essai Lite" : "Start Lite Trial"}</span>
-                    <ArrowRight className="w-4 h-4 text-slate-400" />
-                  </button>
-                  <div className="p-2 rounded-xl bg-[#0b0f17]/80 border border-slate-800">
-                    <PayPalSmartButton 
-                      planId="P-44Y462991D576054FNKY3PKI" 
-                      onSuccess={handlePayPalSuccess} 
-                      isDark={true} 
-                    />
-                  </div>
-                </div>
-              )}
+              <div className="space-y-2">
+                <button
+                  type="button"
+                  onClick={() => handleOpenRegistration("STARTER")}
+                  className="w-full py-3 px-4 rounded-xl bg-slate-800 hover:bg-slate-700 text-white text-xs font-bold transition-all border border-slate-700 cursor-pointer shadow-sm flex items-center justify-center gap-2"
+                >
+                  <span>{language === "fr" ? "Souscrire Formule Free" : "Subscribe Free Starter"}</span>
+                  <ArrowRight className="w-4 h-4 text-slate-400" />
+                </button>
+              </div>
 
               {/* Features List */}
               <ul className="space-y-3 pt-5 border-t border-slate-800 text-xs">
                 <li className="flex items-start gap-2.5 text-slate-300">
                   <Check className="w-4 h-4 text-[#f97316] shrink-0 mt-0.5" />
-                  <span><strong>1 Bâtiment</strong> {language === "fr" ? "(1 Tenant isolé)" : "(1 isolated tenant)"}</span>
+                  <span><strong>10 000 Tokens IA / mois</strong> {language === "fr" ? "(inclus)" : "(included)"}</span>
                 </li>
                 <li className="flex items-start gap-2.5 text-slate-300">
                   <Check className="w-4 h-4 text-[#f97316] shrink-0 mt-0.5" />
-                  <span><strong>5 Utilisateurs</strong> {language === "fr" ? "avec rôles RBAC standards" : "with standard RBAC roles"}</span>
+                  <span><strong>Jusqu'à 5 terminaux UEM</strong> {language === "fr" ? "managés" : "managed"}</span>
                 </li>
                 <li className="flex items-start gap-2.5 text-slate-300">
                   <Check className="w-4 h-4 text-[#f97316] shrink-0 mt-0.5" />
-                  <span>{language === "fr" ? "Dashboard CAFM & Télémétrie IoT basique" : "CAFM Dashboard & Basic IoT Telemetry"}</span>
+                  <span><strong>Jumeau 3D en mode démo</strong> {language === "fr" ? "temps réel" : "real-time"}</span>
                 </li>
                 <li className="flex items-start gap-2.5 text-slate-300">
                   <Check className="w-4 h-4 text-[#f97316] shrink-0 mt-0.5" />
-                  <span>{language === "fr" ? "Plans d'étage 2D interactifs" : "Interactive 2D Floorplans"}</span>
-                </li>
-                <li className="flex items-start gap-2.5 text-slate-500">
-                  <X className="w-4 h-4 text-slate-600 shrink-0 mt-0.5" />
-                  <span>{language === "fr" ? "Jumeau Numérique 3D Three.js" : "Three.js 3D Digital Twin"}</span>
-                </li>
-                <li className="flex items-start gap-2.5 text-slate-500">
-                  <X className="w-4 h-4 text-slate-600 shrink-0 mt-0.5" />
-                  <span>{language === "fr" ? "Conformité DORA & Audit opposable" : "DORA Compliance & Opposable Audit"}</span>
+                  <span><strong>Rapports d'audit trimestriels</strong> {language === "fr" ? "PDF/Excel" : "PDF/Excel"}</span>
                 </li>
               </ul>
             </div>
           </div>
 
-          {/* 2. TIER PRO (Featured & Highlighted) */}
+          {/* 2. SILVER PROFESSIONAL */}
           <div className={`relative bg-[#1e293b]/90 backdrop-blur-2xl rounded-3xl p-7 xl:p-8 flex flex-col justify-between border-2 border-[#f97316] shadow-[0_0_40px_rgba(249,115,22,0.25)] z-20 group transform lg:-translate-y-2 ${
-            currentTier === "pro" ? "ring-2 ring-[#fb923c]" : ""
+            currentTier === "silver" ? "ring-2 ring-[#fb923c]" : ""
           }`}>
             {/* "Most Popular" floating badge */}
             <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 bg-gradient-to-r from-[#f97316] to-[#ea580c] text-white font-extrabold text-[11px] px-4 py-1 rounded-full shadow-[0_0_20px_rgba(249,115,22,0.5)] whitespace-nowrap uppercase tracking-wider flex items-center gap-1.5">
               <Sparkles className="w-3.5 h-3.5" />
-              <span>{language === "fr" ? "LE PLUS POPULAIRE (ETI)" : "MOST POPULAR (MID-MARKET)"}</span>
+              <span>{language === "fr" ? "LE PLUS POPULAIRE (PME & INDUSTRIE)" : "MOST POPULAR (SMB & INDUSTRY)"}</span>
             </div>
 
             <div className="space-y-5">
               <div className="flex justify-between items-start pt-2">
                 <div>
                   <div className="inline-block text-[11px] font-mono font-bold uppercase tracking-wider text-[#fb923c] mb-1">
-                    {language === "fr" ? "STANDARD INDUSTRIEL" : "ENTERPRISE STANDARD"}
+                    {language === "fr" ? "STANDARD INDUSTRIEL" : "INDUSTRY STANDARD"}
                   </div>
-                  <h3 className="text-3xl font-extrabold text-white">Tier Pro</h3>
+                  <h3 className="text-3xl font-extrabold text-white">SILVER Professional</h3>
                   <p className="text-xs text-slate-300 mt-1.5 min-h-[32px]">
-                    {language === "fr" ? "La suite complète : Jumeau 3D, UEM, DORA et AIOps temps réel." : "Full suite: 3D Twin, UEM, DORA and real-time AIOps."}
+                    {language === "fr" ? "Flotte managée jusqu'à 50 postes, Zero-Trust et audits DORA réguliers." : "Managed fleet up to 50 units, Zero-Trust and regular DORA audits."}
                   </p>
                 </div>
-                {currentTier === "pro" && (
+                {currentTier === "silver" && (
                   <span className="text-[10px] font-mono font-bold px-2.5 py-1 rounded-full bg-[#f97316]/20 text-[#f97316] border border-[#f97316]/50">
                     {language === "fr" ? "ACTUEL" : "ACTIVE"}
                   </span>
@@ -601,165 +707,131 @@ export default function PricingPage({
               {/* Price */}
               <div className="flex items-baseline gap-1.5 pt-1">
                 <span className="text-5xl font-black text-white">
-                  {billingCycle === "monthly" ? "699 €" : "559 €"}
+                  {billingCycle === "monthly" ? "29 €" : "23 €"}
                 </span>
                 <span className="text-sm text-slate-300 font-medium">/{language === "fr" ? "mois" : "mo"}</span>
+                <span className="text-xs text-orange-400 font-mono ml-1">(~315 MAD)</span>
               </div>
 
-              {/* Action Button / PayPal Gateway */}
+              {/* Action Button */}
               <div className="space-y-2 pt-1">
-                {currentTier === "pro" ? (
-                  <div className="w-full py-3 px-4 rounded-xl bg-[#f97316]/20 text-[#f97316] text-xs font-bold text-center border border-[#f97316]/50 flex items-center justify-center gap-2">
-                    <CheckCircle className="w-4 h-4" />
-                    <span>{language === "fr" ? "Abonnement Pro Actif" : "Pro Plan Active"}</span>
-                  </div>
-                ) : isVerifyingPayment ? (
-                  <div className="p-3 rounded-xl bg-orange-500/20 border border-orange-500/40 text-orange-200 text-xs font-mono flex flex-col items-center justify-center gap-2 animate-pulse">
-                    <RefreshCw className="w-4 h-4 animate-spin text-[#f97316]" />
-                    <span className="text-[11px] text-center font-sans font-medium">{verificationStep}</span>
-                  </div>
-                ) : payPalPaymentSuccess ? (
-                  <div className="p-3 rounded-xl bg-emerald-500/20 border border-emerald-500/40 text-emerald-300 text-xs font-bold flex flex-col items-center justify-center gap-1">
-                    <div className="flex items-center gap-1.5">
-                      <CheckCircle2 className="w-4 h-4 text-emerald-400" />
-                      <span>{language === "fr" ? "Abonnement Validé & Actif !" : "Subscription Confirmed & Active!"}</span>
-                    </div>
-                    {payPalTxId && (
-                      <span className="text-[10px] font-mono text-emerald-400/80">ID: {payPalTxId.slice(0, 20)}</span>
-                    )}
-                  </div>
-                ) : (
-                  <div className="space-y-2">
-                    <button
-                      type="button"
-                      onClick={() => handlePayPalSuccess({ subscriptionId: "mock_pro_tx_" + Date.now(), planId: "P-44Y462991D576054FNKY3PKI" })}
-                      className="w-full py-3.5 px-4 rounded-xl bg-gradient-to-r from-[#f97316] to-[#ea580c] hover:from-[#ea580c] hover:to-[#c2410c] text-white text-xs font-bold tracking-wide transition-all shadow-[0_0_25px_rgba(249,115,22,0.4)] cursor-pointer flex items-center justify-center gap-2"
-                    >
-                      <Sparkles className="w-4 h-4 text-white" />
-                      <span>{language === "fr" ? "Démarrer l'Essai Pro (14 jours)" : "Start Pro 14-Day Trial"}</span>
-                    </button>
-                    
-                    <div className="p-2 rounded-xl bg-[#0b0f17]/90 border border-slate-700">
-                      <PayPalSmartButton 
-                        planId="P-44Y462991D576054FNKY3PKI" 
-                        onSuccess={handlePayPalSuccess} 
-                        isDark={true} 
-                      />
-                    </div>
-                  </div>
-                )}
+                <button
+                  type="button"
+                  onClick={() => handleOpenRegistration("PRO")}
+                  className="w-full py-3.5 px-4 rounded-xl bg-gradient-to-r from-[#f97316] to-[#ea580c] hover:from-[#ea580c] hover:to-[#c2410c] text-white text-xs font-bold tracking-wide transition-all shadow-[0_0_25px_rgba(249,115,22,0.4)] cursor-pointer flex items-center justify-center gap-2"
+                >
+                  <Sparkles className="w-4 h-4 text-white" />
+                  <span>{language === "fr" ? "Souscrire Formule Silver" : "Subscribe Silver Plan"}</span>
+                </button>
+                
+                <div className="p-2 rounded-xl bg-[#0b0f17]/90 border border-slate-700">
+                  <PayPalSmartButton 
+                    planId="P-44Y462991D576054FNKY3PKI" 
+                    onSuccess={handlePayPalSuccess} 
+                    isDark={true} 
+                  />
+                </div>
               </div>
 
               {/* Features List */}
               <ul className="space-y-3 pt-5 border-t border-slate-700 text-xs">
                 <li className="flex items-start gap-2.5 text-white font-medium">
                   <CheckCircle className="w-4 h-4 text-[#f97316] shrink-0 mt-0.5" />
-                  <span><strong>10 Bâtiments</strong> {language === "fr" ? "(3 Tenants isolés)" : "(3 isolated tenants)"}</span>
+                  <span><strong>250 000 Tokens IA / mois</strong> {language === "fr" ? "(inclus)" : "(included)"}</span>
                 </li>
                 <li className="flex items-start gap-2.5 text-white font-medium">
                   <CheckCircle className="w-4 h-4 text-[#f97316] shrink-0 mt-0.5" />
-                  <span><strong>25 Utilisateurs</strong> {language === "fr" ? "+ rôles directeurs, CVC & ESG" : "+ manager, HVAC & ESG roles"}</span>
+                  <span><strong>Jusqu'à 50 terminaux managés</strong> {language === "fr" ? "(UEM)" : "(UEM)"}</span>
                 </li>
                 <li className="flex items-start gap-2.5 text-white font-medium">
                   <CheckCircle className="w-4 h-4 text-[#f97316] shrink-0 mt-0.5" />
-                  <span><strong>Jumeau Numérique 3D Three.js</strong> {language === "fr" ? "complet avec calques" : "full with thermal layers"}</span>
+                  <span><strong>Agent C++ résilient</strong> {language === "fr" ? "Windows/Linux" : "Windows/Linux"}</span>
                 </li>
                 <li className="flex items-start gap-2.5 text-white font-medium">
                   <CheckCircle className="w-4 h-4 text-[#f97316] shrink-0 mt-0.5" />
-                  <span><strong>Gestion UEM</strong> {language === "fr" ? "+ ingestion 1,4 M req/s" : "+ 1.4M req/s ingestion"}</span>
+                  <span><strong>Zero-Trust USB/BT</strong> {language === "fr" ? "& Pare-feu strict" : "& Strict firewall"}</span>
                 </li>
                 <li className="flex items-start gap-2.5 text-white font-medium">
                   <CheckCircle className="w-4 h-4 text-[#f97316] shrink-0 mt-0.5" />
-                  <span><strong>Conformité DORA</strong> {language === "fr" ? "& rapports CSRD en 1 clic" : "& 1-click CSRD reports"}</span>
-                </li>
-                <li className="flex items-start gap-2.5 text-white font-medium">
-                  <CheckCircle className="w-4 h-4 text-[#f97316] shrink-0 mt-0.5" />
-                  <span><strong>AIOps Prédictif</strong> {language === "fr" ? "(remédiation pannes < 1,5s)" : "(<1.5s fault remediation)"}</span>
+                  <span><strong>Audits DORA réguliers</strong> {language === "fr" ? "& rapports CSRD" : "& CSRD reports"}</span>
                 </li>
               </ul>
             </div>
           </div>
 
-          {/* 3. TIER ENTERPRISE */}
+          {/* 3. GOLD ENTERPRISE */}
           <div className={`relative bg-[#111827]/80 backdrop-blur-xl rounded-3xl p-7 flex flex-col justify-between border transition-all duration-300 hover:bg-[#111827] hover:-translate-y-1 ${
             currentTier === "enterprise"
-              ? "border-[#f97316] shadow-[0_0_30px_rgba(249,115,22,0.2)] ring-1 ring-[#f97316]"
+              ? "border-amber-400 shadow-[0_0_30px_rgba(251,191,36,0.2)] ring-1 ring-amber-400"
               : "border-slate-800"
           }`}>
             <div className="space-y-5">
               <div className="flex justify-between items-start">
                 <div>
-                  <div className="inline-block text-[11px] font-mono font-bold uppercase tracking-wider text-slate-400 mb-1">
-                    {language === "fr" ? "GRANDS COMPTES & SANTÉ" : "LARGE ENTERPRISE & GOV"}
+                  <div className="inline-block text-[11px] font-mono font-bold uppercase tracking-wider text-amber-400 mb-1">
+                    {language === "fr" ? "GRANDS COMPTES & SOUVERAINETÉ" : "LARGE ENTERPRISE & GOV"}
                   </div>
-                  <h3 className="text-2xl font-bold text-white">Tier Enterprise</h3>
+                  <h3 className="text-3xl font-extrabold text-white">GOLD Enterprise</h3>
                   <p className="text-xs text-slate-400 mt-1.5 min-h-[32px]">
-                    {language === "fr" ? "Déploiement souverain sur-mesure, On-Premise & SLA 99,99%." : "Sovereign on-premise appliance & 99.99% SLA."}
+                    {language === "fr" ? "Moteur AIOps autonome, WAF Couche 7 et SLA 99.999% garanti." : "Autonomous AIOps engine, Layer 7 WAF and 99.999% SLA."}
                   </p>
                 </div>
                 {currentTier === "enterprise" && (
-                  <span className="text-[10px] font-mono font-bold px-2.5 py-1 rounded-full bg-[#f97316]/20 text-[#f97316] border border-[#f97316]/40">
+                  <span className="text-[10px] font-mono font-bold px-2.5 py-1 rounded-full bg-amber-500/20 text-amber-400 border border-amber-500/40">
                     {language === "fr" ? "ACTUEL" : "ACTIVE"}
                   </span>
                 )}
               </div>
 
               {/* Price */}
-              <div className="flex items-baseline gap-1.5 pt-2">
-                <span className="text-3xl font-extrabold text-white">
-                  {language === "fr" ? "Sur devis" : "Custom Quote"}
+              <div className="flex items-baseline gap-1.5 pt-1">
+                <span className="text-5xl font-black text-white">
+                  {billingCycle === "monthly" ? "99 €" : "79 €"}
                 </span>
-                <span className="text-xs text-slate-400 font-medium">({language === "fr" ? "dès 2 500 €/m" : "from €2,500/mo"})</span>
+                <span className="text-sm text-slate-300 font-medium">/{language === "fr" ? "mois" : "mo"}</span>
+                <span className="text-xs text-amber-400 font-mono ml-1">(~1 080 MAD)</span>
               </div>
 
               {/* Action Button */}
-              {currentTier === "enterprise" ? (
-                <div className="w-full py-3 px-4 rounded-xl bg-slate-800/80 text-[#f97316] text-xs font-bold text-center border border-[#f97316]/30">
-                  {language === "fr" ? "Forfait Actuel" : "Current Plan"}
+              <div className="space-y-2 pt-1">
+                <button
+                  type="button"
+                  onClick={() => handleOpenRegistration("ENTERPRISE")}
+                  className="w-full py-3.5 px-4 rounded-xl bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-600 hover:to-orange-700 text-white text-xs font-bold transition-all border border-amber-500/40 cursor-pointer shadow-lg shadow-amber-500/20 flex items-center justify-center gap-2"
+                >
+                  <Crown className="w-4 h-4 text-amber-200" />
+                  <span>{language === "fr" ? "Souscrire Formule Gold" : "Subscribe Gold Plan"}</span>
+                </button>
+                <div className="p-2 rounded-xl bg-[#0b0f17]/80 border border-slate-800">
+                  <PayPalSmartButton 
+                    planId="P-2PN232575Y225210YNKY3QZQ" 
+                    onSuccess={handlePayPalSuccess} 
+                    isDark={true} 
+                  />
                 </div>
-              ) : (
-                <div className="space-y-2">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      if (onSelectTab) onSelectTab("inf-6");
-                    }}
-                    className="w-full py-3 px-4 rounded-xl bg-transparent hover:bg-[#f97316]/10 text-[#f97316] text-xs font-bold transition-all border border-[#f97316]/60 cursor-pointer shadow-sm flex items-center justify-center gap-2"
-                  >
-                    <Briefcase className="w-4 h-4 text-[#f97316]" />
-                    <span>{language === "fr" ? "Contacter la Direction Commerciale" : "Contact Enterprise Sales"}</span>
-                  </button>
-                  <div className="p-2 rounded-xl bg-[#0b0f17]/80 border border-slate-800">
-                    <PayPalSmartButton 
-                      planId="P-2PN232575Y225210YNKY3QZQ" 
-                      onSuccess={handlePayPalSuccess} 
-                      isDark={true} 
-                    />
-                  </div>
-                </div>
-              )}
+              </div>
 
               {/* Features List */}
               <ul className="space-y-3 pt-5 border-t border-slate-800 text-xs">
                 <li className="flex items-start gap-2.5 text-slate-300">
-                  <Check className="w-4 h-4 text-[#f97316] shrink-0 mt-0.5" />
-                  <span><strong>Multi-tenant illimité</strong> {language === "fr" ? "& parcs illimités" : "& unlimited assets"}</span>
+                  <Check className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
+                  <span><strong>2 000 000 Tokens IA / mois (2 Millions)</strong></span>
                 </li>
                 <li className="flex items-start gap-2.5 text-slate-300">
-                  <Check className="w-4 h-4 text-[#f97316] shrink-0 mt-0.5" />
-                  <span><strong>On-Premise / SecNumCloud / HDS</strong> {language === "fr" ? "(zéro cloud US)" : "(zero US cloud)"}</span>
+                  <Check className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
+                  <span><strong>Terminaux illimités (500+)</strong></span>
                 </li>
                 <li className="flex items-start gap-2.5 text-slate-300">
-                  <Check className="w-4 h-4 text-[#f97316] shrink-0 mt-0.5" />
-                  <span><strong>SSO SAML / Okta / Azure AD</strong> {language === "fr" ? "& FIPS 140-3" : "& FIPS 140-3"}</span>
+                  <Check className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
+                  <span><strong>Moteur AIOps autonome</strong> {language === "fr" ? "(remédiation < 1,5s)" : "(<1.5s remediation)"}</span>
                 </li>
                 <li className="flex items-start gap-2.5 text-slate-300">
-                  <Check className="w-4 h-4 text-[#f97316] shrink-0 mt-0.5" />
-                  <span><strong>SLA 99,99% garanti</strong> {language === "fr" ? "avec astreinte 24/7" : "with 24/7 on-call engineers"}</span>
+                  <Check className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
+                  <span><strong>Passerelles Zero-Trust SSO/mTLS &amp; WAF Couche 7</strong></span>
                 </li>
                 <li className="flex items-start gap-2.5 text-slate-300">
-                  <Check className="w-4 h-4 text-[#f97316] shrink-0 mt-0.5" />
-                  <span><strong>Licence OEM / Marque Blanche</strong> {language === "fr" ? "pour intégrateurs" : "for integrators"}</span>
+                  <Check className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
+                  <span><strong>SLA 99.999% garanti</strong> {language === "fr" ? "avec astreinte 24/7" : "with 24/7 on-call"}</span>
                 </li>
               </ul>
             </div>
@@ -1103,6 +1175,13 @@ export default function PricingPage({
             </a>
           </div>
         </div>
+
+        {/* Modal d'enregistrement client dédiée */}
+        <ClientRegistrationModal
+          isOpen={isRegistrationOpen}
+          onClose={() => setIsRegistrationOpen(false)}
+          initialPlan={registrationPlan}
+        />
 
       </div>
     </div>

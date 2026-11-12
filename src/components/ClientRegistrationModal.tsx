@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import {
   Building2,
   Server,
@@ -17,8 +17,12 @@ import {
   Wifi,
   Laptop,
   FileCode,
-  AlertCircle
+  AlertCircle,
+  Sparkles,
+  Zap
 } from "lucide-react";
+import { auth, db } from "../firebase";
+import { doc, setDoc } from "firebase/firestore";
 
 export interface ClientRegistrationData {
   tenantId: string;
@@ -40,12 +44,52 @@ interface ClientRegistrationModalProps {
   isOpen: boolean;
   onClose: () => void;
   onClientRegistered?: (client: ClientRegistrationData) => void;
+  initialPlan?: "STARTER" | "PRO" | "ENTERPRISE";
 }
+
+export const PLAN_DETAILS: Record<"STARTER" | "PRO" | "ENTERPRISE", {
+  label: string;
+  tier: "free" | "silver" | "enterprise";
+  price: string;
+  tokens: number;
+  tokensLabel: string;
+  endpoints: string;
+  doraCoverage: string;
+}> = {
+  STARTER: {
+    label: "FREE Starter",
+    tier: "free",
+    price: "0 €/mois",
+    tokens: 10_000,
+    tokensLabel: "10 000 Tokens IA / mois",
+    endpoints: "Jusqu'à 5 terminaux UEM",
+    doraCoverage: "Audit trimestriel standard"
+  },
+  PRO: {
+    label: "SILVER Professional",
+    tier: "silver",
+    price: "29 €/mois (~315 MAD)",
+    tokens: 250_000,
+    tokensLabel: "250 000 Tokens IA / mois",
+    endpoints: "Jusqu'à 50 terminaux managés",
+    doraCoverage: "Audits DORA réguliers & Zero-Trust"
+  },
+  ENTERPRISE: {
+    label: "GOLD Enterprise",
+    tier: "enterprise",
+    price: "99 €/mois (~1 080 MAD)",
+    tokens: 2_000_000,
+    tokensLabel: "2 000 000 Tokens IA (2 Millions)",
+    endpoints: "Terminaux illimités (500+)",
+    doraCoverage: "AIOps autonome, WAF L7 & SLA 99.999%"
+  }
+};
 
 export const ClientRegistrationModal: React.FC<ClientRegistrationModalProps> = ({
   isOpen,
   onClose,
   onClientRegistered,
+  initialPlan = "ENTERPRISE"
 }) => {
   // Détection de l'hôte actuel par défaut
   const defaultHost = typeof window !== "undefined" ? window.location.hostname || "192.168.1.50" : "192.168.1.50";
@@ -55,7 +99,7 @@ export const ClientRegistrationModal: React.FC<ClientRegistrationModalProps> = (
   const [formData, setFormData] = useState<ClientRegistrationData>({
     name: "Banque Atlantique Cameroun",
     tenantId: "CMR-BAC-01",
-    plan: "ENTERPRISE",
+    plan: initialPlan,
     serverProtocol: defaultProto,
     serverHost: defaultHost,
     serverPort: defaultPort,
@@ -67,6 +111,12 @@ export const ClientRegistrationModal: React.FC<ClientRegistrationModalProps> = (
     strictFirewall: true,
     enableDlp: true,
   });
+
+  useEffect(() => {
+    if (initialPlan) {
+      setFormData(prev => ({ ...prev, plan: initialPlan }));
+    }
+  }, [initialPlan]);
 
   const [copiedKey, setCopiedKey] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<"form" | "preview" | "installers">("form");
@@ -287,6 +337,9 @@ echo "✅ Agent SENSORIUM UEM installe et actif pour $TERMINAL_ID!"
     setIsSubmitting(true);
     setSuccessMessage(null);
 
+    const planConfig = PLAN_DETAILS[formData.plan] || PLAN_DETAILS.ENTERPRISE;
+    const mappedTier = planConfig.tier;
+
     try {
       // 1. Tenter l'enregistrement sur le backend SENSORIUM
       const res = await fetch("/api/v1/uem/policies", {
@@ -308,11 +361,85 @@ echo "✅ Agent SENSORIUM UEM installe et actif pour $TERMINAL_ID!"
         }),
       }).catch(() => null);
 
+      // 2. Attribution et initialisation du tokenQuota
+      const initialQuota = {
+        tokensMonth: 0,
+        tokensDay: 0,
+        reqMin: 0,
+        entitlements: 0,
+      };
+
+      if (typeof window !== "undefined") {
+        try {
+          localStorage.setItem("sensorium_subscription_tier", mappedTier);
+          localStorage.setItem(`sensorium_quota_${mappedTier}`, JSON.stringify(initialQuota));
+          localStorage.setItem(
+            `sensorium_client_${formData.tenantId}`,
+            JSON.stringify({
+              name: formData.name,
+              tenantId: formData.tenantId,
+              plan: formData.plan,
+              tier: mappedTier,
+              tokenQuota: {
+                totalMonthly: planConfig.tokens,
+                tokensRemaining: planConfig.tokens,
+                tokensUsed: 0,
+              },
+              registeredAt: new Date().toISOString(),
+            })
+          );
+        } catch {
+          // ignore
+        }
+
+        window.dispatchEvent(
+          new CustomEvent("sensorium:quota_updated", {
+            detail: {
+              tier: mappedTier,
+              usage: initialQuota,
+              tokenQuota: {
+                totalMonthly: planConfig.tokens,
+                tokensRemaining: planConfig.tokens,
+                tokensUsed: 0,
+              },
+            },
+          })
+        );
+      }
+
+      // 3. Enregistrement en temps réel dans Firestore (users/{userId}) si utilisateur connecté
+      try {
+        const currentUser = auth?.currentUser;
+        if (currentUser && db) {
+          await setDoc(
+            doc(db, `users/${currentUser.uid}`),
+            {
+              organizationName: formData.name,
+              tenantId: formData.tenantId,
+              plan: formData.plan,
+              subscriptionTier: mappedTier,
+              tokenQuota: {
+                totalMonthly: planConfig.tokens,
+                tokensRemaining: planConfig.tokens,
+                tokensUsed: 0,
+                lastAllocatedAt: new Date().toISOString(),
+              },
+              updatedAt: new Date().toISOString(),
+            },
+            { merge: true }
+          );
+        }
+      } catch (firestoreErr) {
+        console.warn("[ClientRegistration] Firestore sync warning:", firestoreErr);
+      }
+
       if (onClientRegistered) {
         onClientRegistered(formData);
       }
 
-      setSuccessMessage(`Le client "${formData.name}" a été enregistré avec succès ! Téléchargez son installeur.`);
+      setSuccessMessage(
+        `Organisation "${formData.name}" enregistrée avec succès ! Quota initialisé : ${planConfig.tokensLabel}.`
+      );
       setActiveTab("installers");
     } finally {
       setIsSubmitting(false);
@@ -443,21 +570,47 @@ echo "✅ Agent SENSORIUM UEM installe et actif pour $TERMINAL_ID!"
 
                   <div>
                     <label className="block text-slate-300 font-medium mb-1">
-                      Formule / Souscription
+                      Formule / Souscription &amp; Quota IA
                     </label>
                     <select
                       value={formData.plan}
                       onChange={(e) =>
                         setFormData({ ...formData, plan: e.target.value as any })
                       }
-                      className="w-full px-3 py-2 rounded-lg bg-slate-900 border border-slate-700 text-white focus:outline-none focus:border-orange-500"
+                      className="w-full px-3 py-2 rounded-lg bg-slate-900 border border-slate-700 text-white focus:outline-none focus:border-orange-500 font-medium"
                     >
-                      <option value="STARTER">Starter (Jusqu'à 10 postes)</option>
-                      <option value="PRO">Professional (Flotte jusqu'à 100 postes)</option>
-                      <option value="ENTERPRISE">Enterprise CAFM (Flotte Illimitée)</option>
+                      <option value="STARTER">FREE Starter — 0 €/mois (10 000 Tokens IA)</option>
+                      <option value="PRO">SILVER Professional — 29 €/mois (250 000 Tokens IA)</option>
+                      <option value="ENTERPRISE">GOLD Enterprise — 99 €/mois (2 000 000 Tokens IA)</option>
                     </select>
                   </div>
                 </div>
+
+                {/* Badge Récapitulatif du Quota de Tokens du Forfait sélectionné */}
+                {(() => {
+                  const cfg = PLAN_DETAILS[formData.plan] || PLAN_DETAILS.ENTERPRISE;
+                  return (
+                    <div className="mt-3 p-3 rounded-xl bg-gradient-to-r from-slate-900/90 to-slate-950 border border-orange-500/30 flex flex-wrap items-center justify-between gap-3 text-xs">
+                      <div className="flex items-center gap-2">
+                        <span className="p-1.5 rounded-lg bg-orange-500/20 text-orange-400">
+                          <Sparkles size={14} />
+                        </span>
+                        <div>
+                          <span className="font-bold text-white">{cfg.label}</span>
+                          <span className="text-slate-400 ml-2">({cfg.price})</span>
+                          <p className="text-[11px] text-orange-300 font-mono mt-0.5">
+                            ⚡ {cfg.tokensLabel} • {cfg.endpoints}
+                          </p>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <span className="px-2.5 py-1 rounded-full bg-emerald-500/10 text-emerald-300 border border-emerald-500/20 text-[10px] font-semibold">
+                          🛡️ {cfg.doraCoverage}
+                        </span>
+                      </div>
+                    </div>
+                  );
+                })()}
               </div>
 
               {/* ── Section 2 : Configuration Réseau & Serveur ── */}

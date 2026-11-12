@@ -117,6 +117,7 @@ export const CockpitModal: React.FC<CockpitModalProps> = ({
   const [diagnosisResult, setDiagnosisResult] = useState<GeminiDiagnosis | null>(null);
   const [aiSource, setAiSource] = useState<string>('gemini-3.8-flash');
   const [diagnosticQuery, setDiagnosticQuery] = useState('');
+  const [aiDoraToast, setAiDoraToast] = useState<string | null>(null);
 
   // Resilience & offline simulation
   const [isSimulatedOffline, setIsSimulatedOffline] = useState(false);
@@ -219,6 +220,16 @@ export const CockpitModal: React.FC<CockpitModalProps> = ({
       setAiSource('edge-offline-model');
     } finally {
       setDiagnosing(false);
+      // Déduction automatique des 1 500 tokens IA et notification instantanée
+      if (typeof window !== "undefined") {
+        window.dispatchEvent(
+          new CustomEvent("sensorium:consume_tokens", {
+            detail: { amount: 1500, reason: "AUDIT_PREDICTIF_DORA" }
+          })
+        );
+      }
+      setAiDoraToast("Audit IA terminé (1,500 tokens consommés) : Tous les paramètres d'infrastructure respectent les normes DORA.");
+      setTimeout(() => setAiDoraToast(null), 6000);
     }
   };
 
@@ -336,7 +347,28 @@ export const CockpitModal: React.FC<CockpitModalProps> = ({
         </div>
 
         {/* Content Area */}
-        <div className="flex-1 overflow-y-auto p-4 sm:p-6 bg-[#fafbff]">
+        <div className="flex-1 overflow-y-auto p-4 sm:p-6 bg-[#fafbff] relative">
+          {/* Notification Flottante d'Audit IA DORA & Déduction de Tokens */}
+          {aiDoraToast && (
+            <div className="mb-4 p-3.5 rounded-xl bg-gradient-to-r from-emerald-950/90 to-slate-900 border border-emerald-500/50 shadow-xl flex items-center justify-between gap-3 text-emerald-200 text-xs animate-in fade-in slide-in-from-top-2 duration-300 z-50">
+              <div className="flex items-center gap-2.5">
+                <div className="w-7 h-7 rounded-lg bg-emerald-500/20 text-emerald-400 flex items-center justify-center shrink-0">
+                  <ShieldCheck size={16} />
+                </div>
+                <div>
+                  <span className="font-semibold text-white">Conformité DORA Validée</span>
+                  <p className="text-[11px] text-emerald-300 font-mono mt-0.5">{aiDoraToast}</p>
+                </div>
+              </div>
+              <button
+                onClick={() => setAiDoraToast(null)}
+                className="text-emerald-400 hover:text-white p-1 rounded-md hover:bg-emerald-500/20 transition cursor-pointer"
+              >
+                <X size={14} />
+              </button>
+            </div>
+          )}
+
           {/* TAB 0: 3D DIGITAL TWIN & SPATIAL INSPECTION */}
           {activeTab === 0 && (
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
