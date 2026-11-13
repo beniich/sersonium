@@ -60,7 +60,7 @@ export class ConnectionManager {
   private queuedActions: QueuedAction[] = [];
   private listeners = new Set<(state: ConnectionState) => void>();
   private heartbeatInterval: any = null;
-  private forceSimulation: boolean = typeof localStorage !== "undefined" && localStorage.getItem("sensorium_simulation_mode") === "true";
+  private forceSimulation: boolean = typeof localStorage !== "undefined" ? localStorage.getItem("sensorium_simulation_mode") === "true" : false;
 
   private constructor() {
     this.loadQueuedActions();
@@ -134,6 +134,12 @@ export class ConnectionManager {
     if (typeof window === "undefined") return;
     window.addEventListener("online", () => this.handleNetworkChange(true));
     window.addEventListener("offline", () => this.handleNetworkChange(false));
+    window.addEventListener("sensorium:mode_changed", (e: any) => {
+      if (typeof e.detail?.isSimulation === "boolean") {
+        this.forceSimulation = e.detail.isSimulation;
+        this.handleNetworkChange(!e.detail.isSimulation && (typeof navigator !== "undefined" ? navigator.onLine : true));
+      }
+    });
   }
 
   /**

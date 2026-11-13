@@ -12,9 +12,12 @@ import {
   Wrench, 
   FileCheck,
   Eye,
-  EyeOff
+  EyeOff,
+  RefreshCw
 } from 'lucide-react';
 import rbacService, { RbacRole } from '../services/rbac.service';
+import { googleSignIn } from '../firebase';
+import { GoogleLogoIcon } from './ShowcaseViewer';
 
 export interface SensoriumAuthModalProps {
   isOpen: boolean;
@@ -36,6 +39,37 @@ export const SensoriumAuthModal: React.FC<SensoriumAuthModalProps> = ({
     return await rbacService.loginWithEmail(email, pass);
   };
   const [activeTab, setActiveTab] = useState<'register' | 'login' | 'demo'>(defaultTab);
+  const [isGoogleLoading, setIsGoogleLoading] = useState(false);
+
+  const handleGoogleAuth = async () => {
+    try {
+      setIsGoogleLoading(true);
+      setError(null);
+      const res = await googleSignIn();
+      if (res?.user) {
+        const u = res.user;
+        const userData = {
+          name: u.displayName || u.email?.split('@')[0] || 'Utilisateur',
+          email: u.email || '',
+          company: 'SENSORIUM Fleet',
+          role: 'ADMIN' as RbacRole,
+        };
+        localStorage.setItem('sensorium_registered_user', JSON.stringify(userData));
+        localStorage.setItem('sensorium_simulation_mode', 'false');
+        window.dispatchEvent(new CustomEvent('sensorium:mode_changed', { detail: { isSimulation: false } }));
+        setSuccessMessage('Connexion Google réussie !');
+        setTimeout(() => {
+          setIsGoogleLoading(false);
+          onSuccess(userData);
+          onClose();
+        }, 500);
+      }
+    } catch (err: any) {
+      setIsGoogleLoading(false);
+      console.warn('[SensoriumAuthModal] Google Sign-In warning:', err);
+      setError(err?.message || 'Erreur lors de la connexion Google.');
+    }
+  };
 
   // Formulaire d'inscription (Registration)
   const [regName, setRegName] = useState('');
@@ -294,7 +328,24 @@ export const SensoriumAuthModal: React.FC<SensoriumAuthModalProps> = ({
           
           {/* TAB 1 : FORMULAIRE D'INSCRIPTION (REGISTRATION) */}
           {activeTab === 'register' && (
-            <form onSubmit={handleRegister} className="space-y-4 text-xs">
+            <div className="space-y-4">
+              <button
+                type="button"
+                onClick={handleGoogleAuth}
+                disabled={isGoogleLoading}
+                className="w-full flex items-center justify-center gap-2.5 py-2.5 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-800 font-semibold text-xs shadow-xs transition-all cursor-pointer disabled:opacity-60"
+              >
+                {isGoogleLoading ? <RefreshCw className="w-4 h-4 animate-spin text-orange-500" /> : <GoogleLogoIcon size={16} />}
+                <span>{isGoogleLoading ? "Connexion Google..." : "S'inscrire rapidement avec Google"}</span>
+              </button>
+
+              <div className="flex items-center gap-2 text-slate-400 text-[10px] uppercase font-bold tracking-wider justify-center">
+                <span className="h-px bg-slate-200 flex-1" />
+                <span>ou formulaire manuel</span>
+                <span className="h-px bg-slate-200 flex-1" />
+              </div>
+
+              <form onSubmit={handleRegister} className="space-y-4 text-xs">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
                 <div>
                   <label className="block text-slate-700 font-semibold mb-1">
@@ -413,11 +464,29 @@ export const SensoriumAuthModal: React.FC<SensoriumAuthModalProps> = ({
                 <ArrowRight className="w-4 h-4" />
               </button>
             </form>
+          </div>
           )}
 
           {/* TAB 2 : FORMULAIRE DE CONNEXION (LOGIN) */}
           {activeTab === 'login' && (
-            <form onSubmit={handleLogin} className="space-y-4 text-xs">
+            <div className="space-y-4">
+              <button
+                type="button"
+                onClick={handleGoogleAuth}
+                disabled={isGoogleLoading}
+                className="w-full flex items-center justify-center gap-2.5 py-2.5 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-800 font-semibold text-xs shadow-xs transition-all cursor-pointer disabled:opacity-60"
+              >
+                {isGoogleLoading ? <RefreshCw className="w-4 h-4 animate-spin text-orange-500" /> : <GoogleLogoIcon size={16} />}
+                <span>{isGoogleLoading ? "Connexion Google..." : "Se connecter avec Google"}</span>
+              </button>
+
+              <div className="flex items-center gap-2 text-slate-400 text-[10px] uppercase font-bold tracking-wider justify-center">
+                <span className="h-px bg-slate-200 flex-1" />
+                <span>ou identifiants classiques</span>
+                <span className="h-px bg-slate-200 flex-1" />
+              </div>
+
+              <form onSubmit={handleLogin} className="space-y-4 text-xs">
               <div>
                 <label className="block text-slate-700 font-semibold mb-1">
                   Email professionnel
@@ -477,6 +546,7 @@ export const SensoriumAuthModal: React.FC<SensoriumAuthModalProps> = ({
                 <ArrowRight className="w-4 h-4 text-orange-400" />
               </button>
             </form>
+          </div>
           )}
 
           {/* TAB 3 : ACCÈS DÉMO RAPIDE CERTIFIÉ */}

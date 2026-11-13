@@ -357,6 +357,13 @@ export default function App() {
         setUser(user);
         setAuthLoading(false);
         if (user) {
+          // Désactiver le mode simulation dès qu'un compte est connecté pour passer en Mode Live Cloud
+          setIsSimulationMode(false);
+          if (typeof localStorage !== "undefined") {
+            localStorage.setItem("sensorium_simulation_mode", "false");
+          }
+          window.dispatchEvent(new CustomEvent("sensorium:mode_changed", { detail: { isSimulation: false } }));
+
           rbacService.syncFromAuthUser({
             userId: user.uid,
             email: user.email || "user@gmail.com",
@@ -380,9 +387,13 @@ export default function App() {
     };
   }, []);
 
-  // Bascule dynamique : Mode Production (Live) vs Mode Simulation (Sandbox)
+  // Bascule dynamique : Mode Production (Live) par défaut vs Mode Simulation (Sandbox)
   const [isSimulationMode, setIsSimulationMode] = useState<boolean>(() => {
-    return typeof localStorage !== "undefined" && localStorage.getItem("sensorium_simulation_mode") === "true";
+    if (typeof localStorage !== "undefined") {
+      const stored = localStorage.getItem("sensorium_simulation_mode");
+      if (stored !== null) return stored === "true";
+    }
+    return false; // Par défaut : Mode LIVE (Cloud réel), pas Mode Mock
   });
   const isMockMode = isSimulationMode;
 
@@ -457,7 +468,14 @@ export default function App() {
   const handleSignIn = async () => {
     setAuthError(null);
     try {
-      await googleSignIn();
+      const res = await googleSignIn();
+      if (res?.user) {
+        setIsSimulationMode(false);
+        if (typeof localStorage !== "undefined") {
+          localStorage.setItem("sensorium_simulation_mode", "false");
+        }
+        window.dispatchEvent(new CustomEvent("sensorium:mode_changed", { detail: { isSimulation: false } }));
+      }
     } catch (err: any) {
       console.error("Google Sign-In Error:", err);
       if (err.code === 'auth/popup-closed-by-user') {

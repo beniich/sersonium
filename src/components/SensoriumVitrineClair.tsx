@@ -23,9 +23,13 @@ import {
   LayoutDashboard,
   Sparkles,
   UserCheck,
-  LogOut
+  LogOut,
+  Receipt
 } from 'lucide-react';
 import type { User } from 'firebase/auth';
+import { logout } from '../firebase';
+import authService from '../services/auth.service';
+import { GoogleLogoIcon } from './ShowcaseViewer';
 import { PageEnergie } from './vitrine/PageEnergie';
 import { PageSecurite } from './vitrine/PageSecurite';
 import { PageConformite } from './vitrine/PageConformite';
@@ -66,6 +70,8 @@ export const SensoriumVitrineClair: React.FC<SensoriumVitrineClairProps> = ({
   // Gestion d'authentification et Inscription (Registration Guard)
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [authModalTab, setAuthModalTab] = useState<'register' | 'login' | 'demo'>('register');
+  const [isLoggingIn, setIsLoggingIn] = useState(false);
+  const [isUserDropdownOpen, setIsUserDropdownOpen] = useState(false);
   const [registeredUser, setRegisteredUser] = useState<{ name: string; email: string; company?: string; role?: string } | null>(() => {
     if (typeof window !== 'undefined') {
       try {
@@ -76,9 +82,40 @@ export const SensoriumVitrineClair: React.FC<SensoriumVitrineClairProps> = ({
     return null;
   });
 
+  // Profil effectif connecté (priorité à Firebase Auth, sinon compte enregistré)
+  const effectiveUser = user ? {
+    name: user.displayName || user.email?.split('@')[0] || 'Utilisateur',
+    email: user.email || '',
+    photoURL: user.photoURL,
+    company: registeredUser?.company || 'SENSORIUM Client',
+    isGoogle: true
+  } : registeredUser ? {
+    name: registeredUser.name,
+    email: registeredUser.email,
+    photoURL: null,
+    company: registeredUser.company,
+    isGoogle: false
+  } : null;
+
+  // Connexion Google OAuth SSO sans redirection automatique vers le dashboard
+  const handleGoogleLogin = async () => {
+    try {
+      setIsLoggingIn(true);
+      if (onSignIn) {
+        await onSignIn();
+      } else {
+        await authService.loginWithGoogle();
+      }
+    } catch (err) {
+      console.warn("[Vitrine] Google login error:", err);
+    } finally {
+      setIsLoggingIn(false);
+    }
+  };
+
   // Sas d'accès au dashboard : si pas encore enregistré / connecté, ouvrir la modale d'inscription
   const handleRequireAuthOrEnter = (tab: 'register' | 'login' | 'demo' = 'register') => {
-    if (registeredUser || user) {
+    if (effectiveUser) {
       onEnterDashboard();
     } else {
       setAuthModalTab(tab);
@@ -90,13 +127,22 @@ export const SensoriumVitrineClair: React.FC<SensoriumVitrineClairProps> = ({
     if (userData) {
       setRegisteredUser(userData);
     }
-    onEnterDashboard();
+    // L'utilisateur reste sur la vitrine avec son compte authentifié
   };
 
-  const handleUserLogout = () => {
+  const handleUserLogout = async () => {
+    try {
+      await logout();
+    } catch {}
+    try {
+      authService.logout();
+    } catch {}
     localStorage.removeItem('sensorium_registered_user');
     localStorage.removeItem('sensorium_user_session');
+    localStorage.removeItem('sensorium_auth_user');
     setRegisteredUser(null);
+    setIsUserDropdownOpen(false);
+    window.dispatchEvent(new CustomEvent('sensorium:profile_updated'));
   };
 
   const navigateTo = (page: VitrinePage) => {
@@ -176,35 +222,83 @@ export const SensoriumVitrineClair: React.FC<SensoriumVitrineClairProps> = ({
 
             {/* Direct Dashboard Link */}
             <button
-              onClick={() => handleRequireAuthOrEnter(registeredUser ? 'login' : 'register')}
+              onClick={onEnterDashboard}
               className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-gradient-to-r from-orange-50 to-amber-50 border border-orange-200 text-[#e0822d] font-bold text-xs hover:from-[#e0822d] hover:to-orange-600 hover:text-white transition-all shadow-xs cursor-pointer group"
-              title="Accéder au dashboard opérationnel complet (inscription / connexion requise)"
+              title="Accéder au dashboard opérationnel complet"
             >
               <LayoutDashboard className="w-3.5 h-3.5 group-hover:scale-110 transition-transform" />
-              <span>{registeredUser ? 'Mon Dashboard' : 'Dashboard'}</span>
+              <span>{effectiveUser ? 'Mon Dashboard' : 'Dashboard'}</span>
               <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse ml-0.5" />
             </button>
           </nav>
 
           {/* Right Action: Inscription / Connexion / Dashboard / Démo */}
           <div className="flex items-center gap-2">
-            {registeredUser ? (
-              /* Utilisateur Enregistré / Connecté */
-              <div className="flex items-center gap-2">
-                <div className="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-full bg-orange-50 border border-orange-200 text-xs">
-                  <UserCheck className="w-3.5 h-3.5 text-orange-600 shrink-0" />
-                  <span className="font-bold text-slate-800 truncate max-w-[120px]">{registeredUser.name}</span>
-                  {registeredUser.company && (
-                    <span className="text-[10px] text-slate-500 font-medium hidden xl:inline">({registeredUser.company})</span>
+            {effectiveUser ? (
+              /* Utilisateur Connecté (Firebase Google ou Enregistré) */
+              <div className="relative flex items-center gap-2">
+                <button
+                  onClick={() => setIsUserDropdownOpen(!isUserDropdownOpen)}
+                  className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-orange-50 hover:bg-orange-100/80 border border-orange-200 text-xs transition-all cursor-pointer shadow-xs"
+                >
+                  {effectiveUser.photoURL ? (
+                    <img
+                      src={effectiveUser.photoURL}
+                      alt="Avatar"
+                      className="w-5 h-5 rounded-full object-cover border border-orange-300"
+                    />
+                  ) : (
+                    <UserCheck className="w-3.5 h-3.5 text-orange-600 shrink-0" />
                   )}
-                  <button
-                    onClick={handleUserLogout}
-                    title="Se déconnecter"
-                    className="text-slate-400 hover:text-red-500 ml-1 transition-colors cursor-pointer"
-                  >
-                    <LogOut className="w-3 h-3" />
-                  </button>
-                </div>
+                  <span className="font-bold text-slate-800 truncate max-w-[120px]">{effectiveUser.name}</span>
+                  <ChevronDown className="w-3 h-3 text-slate-400" />
+                </button>
+
+                {/* Dropdown Menu Utilisateur */}
+                {isUserDropdownOpen && (
+                  <div className="absolute right-0 top-full mt-2 w-64 rounded-2xl bg-white border border-slate-200 shadow-2xl p-2 z-50 animate-in fade-in slide-in-from-top-1 duration-150 text-left">
+                    <div className="p-3 border-b border-slate-100 mb-1">
+                      <p className="text-xs font-bold text-slate-900 truncate">{effectiveUser.name}</p>
+                      <p className="text-[10px] text-slate-500 font-mono truncate">{effectiveUser.email}</p>
+                      <span className="inline-block mt-1 text-[9px] px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 font-semibold">
+                        ✓ Compte Vérifié &amp; Connecté
+                      </span>
+                    </div>
+
+                    <button
+                      onClick={() => {
+                        setIsUserDropdownOpen(false);
+                        onEnterDashboard();
+                      }}
+                      className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs text-slate-700 hover:text-slate-950 hover:bg-slate-50 transition cursor-pointer text-left"
+                    >
+                      <LayoutDashboard size={14} className="text-orange-500" />
+                      <span>Tableau de Bord &amp; Cockpit</span>
+                    </button>
+
+                    <button
+                      onClick={() => {
+                        setIsUserDropdownOpen(false);
+                        if (onOpenPricing) onOpenPricing();
+                        else window.location.href = "/pricing";
+                      }}
+                      className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs text-slate-700 hover:text-slate-950 hover:bg-slate-50 transition cursor-pointer text-left"
+                    >
+                      <Receipt size={14} className="text-cyan-600" />
+                      <span>Factures &amp; Quotas IA</span>
+                    </button>
+
+                    <div className="border-t border-slate-100 my-1" />
+
+                    <button
+                      onClick={handleUserLogout}
+                      className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs text-rose-600 hover:bg-rose-50 transition cursor-pointer text-left"
+                    >
+                      <LogOut size={14} />
+                      <span>Se Déconnecter</span>
+                    </button>
+                  </div>
+                )}
 
                 <button
                   onClick={onEnterDashboard}
@@ -215,19 +309,22 @@ export const SensoriumVitrineClair: React.FC<SensoriumVitrineClairProps> = ({
                 </button>
               </div>
             ) : (
-              /* Visiteur Non Enregistré : Inscription & Connexion */
+              /* Visiteur Non Connecté : Bouton Connexion avec Google & Bouton Dashboard */
               <div className="flex items-center gap-2">
                 <button
-                  onClick={() => handleRequireAuthOrEnter('login')}
-                  className="hidden sm:inline-flex items-center gap-1 text-xs font-semibold text-slate-700 hover:text-orange-600 px-3 py-2 rounded-full hover:bg-slate-50 transition-colors cursor-pointer"
+                  onClick={handleGoogleLogin}
+                  disabled={isLoggingIn}
+                  className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-800 hover:text-orange-600 px-3 py-1.5 rounded-full bg-white border border-slate-200 hover:border-orange-300 shadow-xs transition-all cursor-pointer disabled:opacity-50"
+                  title="Se connecter avec votre compte Google / Gmail"
                 >
-                  Connexion
+                  <GoogleLogoIcon size={14} />
+                  <span>{isLoggingIn ? "Connexion..." : "Connexion"}</span>
                 </button>
 
                 <button
-                  onClick={() => handleRequireAuthOrEnter('register')}
+                  onClick={onEnterDashboard}
                   className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-full bg-slate-900 hover:bg-slate-800 text-white font-['Manrope'] font-bold text-xs shadow-sm hover:shadow-md transition-all cursor-pointer"
-                  title="Créer un compte entreprise et accéder au Dashboard"
+                  title="Accéder au Dashboard opérationnel"
                 >
                   <LayoutDashboard className="w-3.5 h-3.5 text-orange-400" />
                   <span>Accéder au Dashboard</span>
@@ -272,12 +369,35 @@ export const SensoriumVitrineClair: React.FC<SensoriumVitrineClairProps> = ({
               </button>
             ))}
             <div className="pt-3 border-t border-slate-100 space-y-2">
+              {!effectiveUser ? (
+                <button
+                  onClick={() => { setMobileMenuOpen(false); handleGoogleLogin(); }}
+                  disabled={isLoggingIn}
+                  className="w-full flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl bg-white border border-slate-200 text-slate-800 font-bold text-xs shadow-sm"
+                >
+                  <GoogleLogoIcon size={16} />
+                  <span>{isLoggingIn ? "Connexion..." : "Connexion avec Google"}</span>
+                </button>
+              ) : (
+                <div className="flex items-center justify-between p-2.5 rounded-xl bg-orange-50 border border-orange-200 text-xs">
+                  <div className="truncate">
+                    <p className="font-bold text-slate-800">{effectiveUser.name}</p>
+                    <p className="text-[10px] text-slate-500">{effectiveUser.email}</p>
+                  </div>
+                  <button
+                    onClick={() => { setMobileMenuOpen(false); handleUserLogout(); }}
+                    className="text-xs text-rose-600 font-semibold hover:underline"
+                  >
+                    Déconnexion
+                  </button>
+                </div>
+              )}
               <button
-                onClick={() => { setMobileMenuOpen(false); handleRequireAuthOrEnter(registeredUser ? 'login' : 'register'); }}
+                onClick={() => { setMobileMenuOpen(false); onEnterDashboard(); }}
                 className="w-full flex items-center justify-center gap-2 py-3 px-4 rounded-xl bg-slate-900 text-white font-bold text-xs shadow-md"
               >
                 <LayoutDashboard className="w-4 h-4 text-orange-400" />
-                <span>{registeredUser ? `Mon Dashboard (${registeredUser.name})` : 'Inscription / Connexion Dashboard'}</span>
+                <span>{effectiveUser ? `Mon Dashboard (${effectiveUser.name})` : 'Accéder au Dashboard'}</span>
               </button>
               <div className="flex items-center justify-between pt-1">
                 <span className="text-xs text-slate-400">Langue</span>
@@ -435,13 +555,13 @@ export const SensoriumVitrineClair: React.FC<SensoriumVitrineClairProps> = ({
                     </button>
 
                     <button
-                      onClick={() => handleRequireAuthOrEnter(registeredUser ? 'login' : 'register')}
+                      onClick={onEnterDashboard}
                       className="inline-flex items-center gap-2.5 px-6 py-3 rounded-full bg-slate-900 hover:bg-slate-800 text-white font-['Manrope'] font-semibold text-xs shadow-md hover:shadow-lg transition-all cursor-pointer group"
                     >
                       <div className="w-5 h-5 rounded-full bg-orange-500 flex items-center justify-center text-white">
                         <LayoutDashboard className="w-3 h-3 group-hover:scale-110 transition-transform" />
                       </div>
-                      <span>{registeredUser ? 'Ouvrir mon Dashboard' : 'Créer un compte & Ouvrir le Dashboard'}</span>
+                      <span>{effectiveUser ? 'Ouvrir mon Dashboard' : 'Accéder au Dashboard'}</span>
                     </button>
                   </div>
 
@@ -1065,16 +1185,16 @@ export const SensoriumVitrineClair: React.FC<SensoriumVitrineClairProps> = ({
       {/* Bouton d'accès rapide flottant au Dashboard */}
       <div className="fixed bottom-6 right-6 z-40">
         <button
-          onClick={() => handleRequireAuthOrEnter(registeredUser ? 'login' : 'register')}
+          onClick={onEnterDashboard}
           className="flex items-center gap-2.5 px-4 py-3 rounded-full bg-slate-900/95 hover:bg-slate-900 text-white text-xs font-bold shadow-2xl border border-slate-700/80 backdrop-blur-md hover:scale-105 transition-all group cursor-pointer"
-          title="Basculer vers le Dashboard exécutif (inscription / connexion requise)"
+          title="Basculer vers le Dashboard exécutif"
         >
           <div className="relative">
             <LayoutDashboard className="w-4 h-4 text-orange-400 group-hover:rotate-6 transition-transform" />
             <span className="absolute -top-1 -right-1 w-2 h-2 rounded-full bg-emerald-500 animate-ping" />
             <span className="absolute -top-1 -right-1 w-2 h-2 rounded-full bg-emerald-500" />
           </div>
-          <span>{registeredUser ? 'Mon Dashboard Live' : 'S\'inscrire au Dashboard'}</span>
+          <span>{effectiveUser ? 'Mon Dashboard Live' : 'Accéder au Dashboard'}</span>
           <ArrowRight className="w-3.5 h-3.5 text-orange-400 group-hover:translate-x-0.5 transition-transform" />
         </button>
       </div>
