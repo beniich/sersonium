@@ -6,6 +6,8 @@
 import { Router, Request, Response } from "express";
 import { SubscriptionBridgeService } from "../../services/subscriptionBridge.service.js";
 import { rawPrisma } from "../../db/prisma.js";
+import { authenticateToken } from "../../middlewares/auth.middleware.js";
+import { AuthenticatedRequest } from "../../types/auth.js";
 
 const router = Router();
 
@@ -72,13 +74,28 @@ router.get("/plans", async (_req: Request, res: Response) => {
 
 /**
  * GET /api/v1/bridge/subscription-status
- * Statut d'accès au cockpit pour un utilisateur
+ * Statut d'accès au cockpit pour un utilisateur authentifié
+ * Vérification stricte du Jeton de session / Bearer Token
  */
-router.get("/subscription-status", async (req: Request, res: Response) => {
+router.get("/subscription-status", authenticateToken, async (req: AuthenticatedRequest, res: Response) => {
   try {
-    const uid = req.query.uid as string;
+    const uid = (req.query.uid as string) || req.user?.firebaseUid || req.user?.userId || req.user?.email;
     if (!uid) {
-      res.status(400).json({ success: false, error: "Identifiant uid requis" });
+      res.status(400).json({ success: false, error: "Identifiant uid ou session requis" });
+      return;
+    }
+
+    // Sécurité : un utilisateur standard ne peut sonder que son propre statut
+    const currentUserId = req.user?.userId;
+    const currentEmail = req.user?.email;
+    const currentFirebaseUid = req.user?.firebaseUid;
+    const isAdmin = req.user?.role === "admin";
+
+    if (!isAdmin && uid !== currentUserId && uid !== currentEmail && uid !== currentFirebaseUid) {
+      res.status(403).json({
+        success: false,
+        error: "Accès refusé : Impossible de consulter le statut d'un compte tiers."
+      });
       return;
     }
 

@@ -25,8 +25,14 @@ export class SubscriptionBridgeService {
    */
   static async checkAccessByUid(firebaseUid: string): Promise<AccessCheckResult> {
     try {
-      const user = await rawPrisma.user.findUnique({
-        where: { firebaseUid },
+      const user = await rawPrisma.user.findFirst({
+        where: {
+          OR: [
+            { firebaseUid },
+            { id: firebaseUid },
+            { email: firebaseUid }
+          ]
+        },
         include: {
           organization: {
             include: {

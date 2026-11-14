@@ -28,6 +28,7 @@ import { executeSecurityAction } from "../../controllers/security.controller.js"
 import { requireActiveSubscription } from "../../middlewares/subscriptionGate.middleware.js";
 import { authenticateToken } from "../../middlewares/auth.middleware.js";
 import { requireTenant } from "../../middlewares/tenant.middleware.js";
+import { checkAndDeductTokens } from "../../middlewares/tokenQuota.middleware.js";
 
 const router = Router();
 
@@ -64,7 +65,7 @@ router.use("/uem/installer", uemAgentRoutes);
 router.use(csrfProtection);
 
 // =========================================================================
-// COCKPIT PROTECTED ROUTES (Requiert Auth + Tenant + Abonnement Actif)
+// COCKPIT PROTECTED ROUTES (Requiert Auth + Tenant + Abonnement Actif + Quota Tokens)
 // Résout la faille du "Saut du Paywall" et assure l'étanchéité complète.
 // =========================================================================
 const cockpitAccess = [authenticateToken, requireTenant, requireActiveSubscription("STARTER")];
@@ -108,15 +109,17 @@ router.use("/traffic", cockpitAccess, trafficRoutes);
 // Sprint 3: Security & WAF
 router.use("/security/waf", cockpitAccess, wafRoutes);
 
-// Sprint 4: Compute & AI (Gemini Log Analysis & Diagnostics - Protégé Cockpit)
+// Sprint 4: Compute & AI (Gemini Log Analysis & Diagnostics - Protégé Cockpit avec déduction de tokens)
 router.use("/ai", (req, res, next) => {
   if (req.path === "/execute" && req.method === "POST") {
     return next();
   }
-  // All other AI endpoints require full Cockpit Auth + Subscription Gate
+  // Exécution de la chaîne complète : Auth -> Tenant -> Subscription -> Token Quota
   authenticateToken(req, res, () => {
     requireTenant(req, res, () => {
-      requireActiveSubscription("STARTER")(req, res, next);
+      requireActiveSubscription("STARTER")(req, res, () => {
+        checkAndDeductTokens(1500, "AI_INFERENCE")(req, res, next);
+      });
     });
   });
 }, aiRoutes);
@@ -131,7 +134,7 @@ router.use("/compliance", cockpitAccess, complianceRoutes);
 router.use("/grounding", cockpitAccess, groundingRoutes);
 
 // IoT Telemetry Stream (Télémétrie unifiée & Ingestion Kafka protégée)
-router.use("/iot", iotRoutes);
+router.use("/iot", cockpitAccess, iotRoutes);
 
 // Master Control Panel (Tableau de Bord Exécutif CEO/CTO)
 router.use("/master-control", cockpitAccess, masterControlRoutes);
@@ -139,7 +142,7 @@ router.use("/master-control", cockpitAccess, masterControlRoutes);
 // UEM — Unified Endpoint Management Cockpit (gestion terminaux, commandes à distance, politiques DLP)
 router.use("/uem", cockpitAccess, uemCockpitRoutes);
 
-// Security Actions
-router.post("/security/action", executeSecurityAction);
+// Security Actions (Protégé par Auth)
+router.post("/security/action", authenticateToken, requireTenant, executeSecurityAction);
 
 export default router;

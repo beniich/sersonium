@@ -4,9 +4,10 @@
  * et exige une authentification et un abonnement actif avant de déverrouiller le Cockpit.
  */
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import type { User } from 'firebase/auth';
 import { useSubscriptionGate, SubscriptionTier } from './useSubscriptionGate';
+import { Zap, ShieldAlert, KeyRound, Sparkles } from 'lucide-react';
 
 interface SubscriptionGuardProps {
   user: User | null | undefined;
@@ -36,6 +37,15 @@ export const SubscriptionGuard: React.FC<SubscriptionGuardProps> = ({
   const [licenseInput, setLicenseInput] = useState('');
   const [licenseError, setLicenseError] = useState<string | null>(null);
   const [isVerifyingLicense, setIsVerifyingLicense] = useState(false);
+  const [quotaExhaustedDetails, setQuotaExhaustedDetails] = useState<{ message?: string; currentBalance?: number; required?: number } | null>(null);
+
+  useEffect(() => {
+    const handleQuotaExhausted = (e: any) => {
+      setQuotaExhaustedDetails(e.detail || { message: "Quota mensuel de tokens IA épuisé." });
+    };
+    window.addEventListener('sensorium:quota_exhausted', handleQuotaExhausted);
+    return () => window.removeEventListener('sensorium:quota_exhausted', handleQuotaExhausted);
+  }, []);
 
   // 1. Écran de chargement pendant la vérification du statut
   if (isLoading) {
@@ -49,7 +59,40 @@ export const SubscriptionGuard: React.FC<SubscriptionGuardProps> = ({
     );
   }
 
-  // 2. Si l'accès est autorisé et l'abonnement actif : On affiche l'application protégée !
+  // 2. Alerte de Quota de Tokens Épuisé
+  if (quotaExhaustedDetails) {
+    return (
+      <div className="w-full min-h-[600px] flex flex-col items-center justify-center p-8 bg-[#07090e] text-white">
+        <div className="max-w-md w-full bg-slate-900/90 border border-amber-500/30 rounded-2xl p-6 text-center shadow-2xl backdrop-blur-xl">
+          <div className="w-14 h-14 mx-auto rounded-2xl bg-amber-500/20 border border-amber-500/40 flex items-center justify-center text-amber-400 mb-4">
+            <Zap className="w-7 h-7" />
+          </div>
+          <h2 className="text-xl font-bold font-['Space_Grotesk'] text-white mb-2">
+            Quota de Tokens IA Épuisé
+          </h2>
+          <p className="text-sm text-slate-300 mb-6 leading-relaxed">
+            {quotaExhaustedDetails.message || "Votre solde de jetons d'inférence est insuffisant pour poursuivre les opérations."}
+          </p>
+          <div className="flex flex-col gap-3">
+            <a
+              href="/pricing"
+              className="w-full py-3 px-4 rounded-xl font-bold text-xs uppercase tracking-wider bg-gradient-to-r from-amber-500 to-orange-500 text-black hover:opacity-90 transition-all text-center"
+            >
+              Recharger des Tokens / Changer de Forfait
+            </a>
+            <button
+              onClick={() => setQuotaExhaustedDetails(null)}
+              className="w-full py-2.5 px-4 rounded-xl text-xs font-semibold bg-white/5 hover:bg-white/10 text-slate-300 transition-all"
+            >
+              Fermer cet avertissement
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // 3. Si l'accès est autorisé et l'abonnement actif : On affiche l'application protégée !
   if (hasAccessToCockpit) {
     return <>{children}</>;
   }

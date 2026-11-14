@@ -12,6 +12,7 @@ import ModuleNavigationBar from "./components/ModuleNavigationBar";
 import { AppProvider, useAppContext } from "./contexts/AppContext";
 import Breadcrumbs from "./components/navigation/Breadcrumbs";
 import { ToastProvider } from "./components/ToastNotification";
+import authService from "./services/auth.service";
 
 // Lazy-load dashboard pages to make initial website load ultra-fast and reduce main bundle
 const OverviewPage = lazy(() => import("./pages/OverviewPage"));
@@ -426,13 +427,22 @@ export default function App() {
     }
   };
 
-  const handleEnterDashboard = (targetPage: string = "overview") => {
+  const handleEnterDashboard = async (targetPage: string = "overview") => {
+    // Vérification de sécurité : Tout accès au Dashboard/Cockpit requiert une authentification préalable
+    if (!user && !authService.isAuthenticated()) {
+      await handleSignIn();
+      return;
+    }
     setActivePage(targetPage);
     setActiveItemId(targetPage === "cockpit" ? "spider-cockpit" : "ov-general");
     navigate(targetPage === "overview" ? "/dashboard" : `/${targetPage}`);
   };
 
-  const handleEnterMockMode = () => {
+  const handleEnterMockMode = async () => {
+    if (!user && !authService.isAuthenticated()) {
+      await handleSignIn();
+      return;
+    }
     handleEnterDashboard("overview");
   };
 

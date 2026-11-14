@@ -6,8 +6,9 @@
 import { useState, useEffect, useCallback } from 'react';
 import type { User } from 'firebase/auth';
 import axios from 'axios';
+import authService from '../services/auth.service';
 
-// Intercepteur global Axios : détecte 402 PAYMENT_REQUIRED et émet l'événement modal
+// Intercepteur global Axios : détecte 402 PAYMENT_REQUIRED, 429 QUOTA_EXCEEDED et 401 SESSION_EXPIRED
 if (typeof window !== 'undefined') {
   axios.interceptors.response.use(
     (response) => response,
@@ -19,6 +20,23 @@ if (typeof window !== 'undefined') {
               code: 'PAYMENT_REQUIRED',
               message: 'Accès au Cockpit réservé aux abonnements actifs.'
             }
+          })
+        );
+      }
+      if (error?.response?.status === 429 && error?.response?.data?.error?.code === 'TOKEN_QUOTA_EXCEEDED') {
+        window.dispatchEvent(
+          new CustomEvent('sensorium:quota_exhausted', {
+            detail: error.response.data?.error || {
+              code: 'TOKEN_QUOTA_EXCEEDED',
+              message: 'Quota de jetons IA/API mensuel épuisé. Veuillez recharger votre solde.'
+            }
+          })
+        );
+      }
+      if (error?.response?.status === 401 && error?.response?.data?.error?.code === 'TOKEN_EXPIRED') {
+        window.dispatchEvent(
+          new CustomEvent('sensorium:session_expired', {
+            detail: { message: 'Session expirée. Veuillez vous reconnecter.' }
           })
         );
       }
@@ -89,26 +107,9 @@ export function useSubscriptionGate(user: User | null | undefined) {
     const isTrialActive = trialExpires ? Date.now() < new Date(trialExpires).getTime() : false;
     const hasTrialAccess = isTrialActive;
 
-    if (!user) {
-      // BUG #2 CORRIGÉ : suppression du bypass localhost automatique
-      // Seul un tier explicitement choisi ET non expiré donne accès
-      if (hasValidLocalTier || hasTrialAccess) {
-        const demoTier = (hasValidLocalTier ? savedTier : 'STARTER') as SubscriptionTier;
-        setSubState({
-          status: 'active',
-          tier: demoTier,
-          planName: isTrialActive ? 'Essai Démo (14 jours)' : 'Accès Local Configuré',
-          hasAccessToCockpit: true,
-          has3dDigitalTwin: demoTier === 'PRO' || demoTier === 'ENTERPRISE',
-          hasRealtimeKafka: demoTier === 'PRO' || demoTier === 'ENTERPRISE',
-          hasZtnaHardware: demoTier === 'ENTERPRISE',
-          tokenBalance: demoTier === 'ENTERPRISE' ? 9999 : demoTier === 'PRO' ? 5000 : 1000,
-          expiresAt: trialExpires || null,
-          isLoading: false,
-        });
-        return;
-      }
+    const effectiveUser = user || (authService.isAuthenticated() ? { uid: authService.getSession().user?.userId, email: authService.getSession().user?.email } : null);
 
+    if (!effectiveUser) {
       setSubState({
         status: 'none',
         tier: 'FREE',
@@ -125,11 +126,30 @@ export function useSubscriptionGate(user: User | null | undefined) {
     }
 
     try {
-      // Interroger l'API du pont d'abonnement SENSORIUM
-      const res = await fetch(`/api/v1/bridge/subscription-status?uid=${encodeURIComponent(user.uid)}`, {
-        headers: {
-          'Content-Type': 'application/json',
-        },
+      // Obtenir le Bearer Token (Firebase ID Token ou JWT Session Sensorium)
+      let bearerToken = '';
+      try {
+        if (user && typeof (user as any).getIdToken === 'function') {
+          bearerToken = await (user as any).getIdToken();
+        }
+      } catch {
+        // fallback
+      }
+      if (!bearerToken) {
+        bearerToken = authService.getAccessToken() || '';
+      }
+
+      const headers: Record<string, string> = {
+        'Content-Type': 'application/json',
+      };
+      if (bearerToken) {
+        headers['Authorization'] = `Bearer ${bearerToken}`;
+      }
+
+      const uidToQuery = effectiveUser.uid || user?.uid || '';
+      const res = await fetch(`/api/v1/bridge/subscription-status?uid=${encodeURIComponent(uidToQuery)}`, {
+        headers,
+        credentials: 'include',
       });
 
       if (res.ok) {
@@ -151,19 +171,20 @@ export function useSubscriptionGate(user: User | null | undefined) {
           isLoading: false,
         });
       } else {
-        // BUG #3 CORRIGÉ : fallback API en échec → accès REFUSÉ (free) et non plus pro
-        const localTier = (localStorage.getItem('sensorium_subscription_tier') || 'free').toUpperCase() as SubscriptionTier;
-        const hasAccess = localTier !== 'FREE';
+        // En cas d'échec d'autorisation API (401, 402, 403), accès formellement refusé
+        const trialExpires = localStorage.getItem('sensorium_trial_expires_at');
+        const isTrialActive = trialExpires ? Date.now() < new Date(trialExpires).getTime() : false;
+
         setSubState({
-          status: hasAccess ? 'active' : 'none',
-          tier: localTier as SubscriptionTier,
-          planName: localTier === 'ENTERPRISE' ? 'Sovereign Fleet' : localTier === 'PRO' ? 'Hypervision Twin' : localTier === 'STARTER' || localTier === 'SILVER' ? 'BIM Foundation' : 'Offre Découverte',
-          hasAccessToCockpit: hasAccess,
-          has3dDigitalTwin: localTier === 'PRO' || localTier === 'ENTERPRISE',
-          hasRealtimeKafka: localTier === 'PRO' || localTier === 'ENTERPRISE',
-          hasZtnaHardware: localTier === 'ENTERPRISE',
-          tokenBalance: hasAccess ? 1000 : 0,
-          expiresAt: null,
+          status: isTrialActive ? 'trialing' : 'none',
+          tier: isTrialActive ? 'STARTER' : 'FREE',
+          planName: isTrialActive ? 'Essai Démo (14 jours)' : 'Offre Découverte',
+          hasAccessToCockpit: isTrialActive,
+          has3dDigitalTwin: false,
+          hasRealtimeKafka: false,
+          hasZtnaHardware: false,
+          tokenBalance: isTrialActive ? 1000 : 0,
+          expiresAt: isTrialActive ? trialExpires : null,
           isLoading: false,
         });
       }

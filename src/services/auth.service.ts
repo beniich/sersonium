@@ -378,6 +378,14 @@ class AuthService {
     return response;
   }
 
+  public isAuthenticated(): boolean {
+    return Boolean(this.accessToken && this.user);
+  }
+
+  public getAccessToken(): string | null {
+    return this.accessToken;
+  }
+
   public getSession(): AuthSessionState {
     return {
       accessToken: this.accessToken,
