@@ -50,7 +50,8 @@ async function startServer() {
   const productionAllowedOrigins = [
     "https://app.sensorium.cloud",
     "https://sensorium.cloud",
-    "https://api.sensorium.cloud"
+    "https://api.sensorium.cloud",
+    "https://sersonium.cloudindustrie.com"
   ];
 
   const localDevOrigins = [
