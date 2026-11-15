@@ -65,12 +65,14 @@ export class SubscriptionBridgeService {
       const org = user.organization;
       const activeSub = org.subscriptions?.[0];
 
+      const tier = (activeSub?.plan?.code || org.plan || "FREE").toUpperCase();
+      const isPaidTier = tier !== "FREE";
+
       // Vérification double : via la relation Subscription ou via les champs rétrocompatibles de l'Organization
-      const isLegacyActive = org.subscriptionStatus === "active" && org.plan !== "FREE";
-      const isModernActive = activeSub != null && activeSub.status === "active";
+      const isLegacyActive = org.subscriptionStatus === "active" && isPaidTier;
+      const isModernActive = activeSub != null && activeSub.status === "active" && isPaidTier;
 
       const hasAccess = isModernActive || isLegacyActive;
-      const tier = activeSub?.plan?.code || org.plan || "FREE";
       const planName = activeSub?.plan?.name || (tier === "PRO" ? "Hypervision Twin" : tier === "ENTERPRISE" ? "Sovereign Fleet" : "BIM Foundation");
 
       return {

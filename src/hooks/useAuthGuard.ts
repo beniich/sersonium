@@ -104,3 +104,4 @@ export function useAuthGuard(user: User | null | undefined) {
     refreshSubscription,
   };
 }
+
