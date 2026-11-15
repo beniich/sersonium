@@ -88,16 +88,16 @@ jobs:
         uses: docker/build-push-action@v5
         with:
           context: .
-          load: true
           push: false
           tags: sensorium/app:latest
+          outputs: type=docker,dest=/tmp/sensorium-app.tar
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
       - name: Trivy Vulnerability Scanner
         uses: aquasecurity/trivy-action@master
         with:
-          image-ref: 'sensorium/app:latest'
+          input: '/tmp/sensorium-app.tar'
           format: 'table'
           exit-code: '0'
           severity: 'CRITICAL,HIGH'
