@@ -15,7 +15,7 @@ interface StoragePageProps {
 }
 
 const TABS = [
-  { id: "db-1", label: "R2 Buckets" },
+  { id: "db-1", label: "MinIO & R2 Buckets" },
   { id: "db-2", label: "D1 SQL" },
   { id: "db-3", label: "Images" },
   { id: "db-4", label: "Stream" }
@@ -190,8 +190,11 @@ export default function StoragePage({ state, isDark, activeItemId = "db-1", onSe
 
           <div className="rounded-xl border border-slate-200 dark:border-neutral-800 bg-white dark:bg-neutral-900/60 shadow-xs overflow-hidden">
             <div className="px-4 py-3 border-b border-slate-200 dark:border-neutral-800 bg-slate-50/70 dark:bg-neutral-900/50 flex justify-between items-center">
-              <h3 className="text-sm font-bold text-slate-800 dark:text-white">R2 Storage Buckets</h3>
-              <span className="text-xs text-slate-500 dark:text-neutral-500 font-mono">S3-Compatible API</span>
+              <div className="flex items-center gap-2">
+                <h3 className="text-sm font-bold text-slate-800 dark:text-white">MinIO Sovereign Object Store & Buckets</h3>
+                <span className="px-2 py-0.5 text-[10px] font-semibold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 rounded-full">MinIO Connected</span>
+              </div>
+              <span className="text-xs text-slate-500 dark:text-neutral-500 font-mono">S3-Compatible High-Performance API</span>
             </div>
             <div className="overflow-x-auto">
               <table className="w-full text-left text-xs font-mono">
