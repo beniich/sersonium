@@ -170,88 +170,77 @@ export const SensoriumVitrineClair: React.FC<SensoriumVitrineClairProps> = ({
   };
 
   return (
-    <div className="min-h-screen bg-white text-slate-900 font-['Inter',sans-serif] selection:bg-[#e0822d]/20 selection:text-[#e0822d] relative antialiased">
+    <div className="min-h-screen w-full max-w-[100vw] overflow-x-hidden bg-white text-slate-900 font-['Inter',sans-serif] selection:bg-[#e0822d]/20 selection:text-[#e0822d] relative antialiased">
 
       {/* ═══════════════════════════════════════════════════════════
           1. HEADER / NAVBAR
       ════════════════════════════════════════════════════════════ */}
       <header className="sticky top-0 w-full z-50 bg-white/95 backdrop-blur-md border-b border-slate-100 shadow-xs">
-        <div className="max-w-7xl mx-auto px-4 sm:px-8 h-20 flex items-center justify-between gap-4">
+        <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 h-18 sm:h-20 flex items-center justify-between gap-2 sm:gap-4">
 
           {/* Logo SENSORIUM CAFM PRO */}
-          <div className="flex items-center gap-3 cursor-pointer" onClick={() => scrollTo('accueil')}>
-            <div className="w-10 h-10 rounded-xl flex items-center justify-center bg-white shadow-xs border border-slate-200 overflow-hidden p-1 shrink-0">
+          <div className="flex items-center gap-2.5 sm:gap-3 cursor-pointer shrink-0" onClick={() => scrollTo('accueil')}>
+            <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl flex items-center justify-center bg-white shadow-xs border border-slate-200 overflow-hidden p-1 shrink-0">
               <img src="/logo-icon.png" alt="SENSORIUM Icon" className="w-full h-full object-contain" />
             </div>
-            <div className="flex flex-col text-left">
-              <span className="font-['Manrope'] font-extrabold text-base tracking-tight text-slate-900 leading-none">
+            <div className="flex flex-col text-left shrink-0">
+              <span className="font-['Manrope'] font-extrabold text-sm sm:text-base tracking-tight text-slate-900 leading-none whitespace-nowrap">
                 SENSORIUM
               </span>
-              <span className="text-[10px] tracking-[0.25em] font-semibold text-slate-500 uppercase mt-0.5">
+              <span className="text-[9px] sm:text-[10px] tracking-[0.25em] font-semibold text-slate-500 uppercase mt-0.5 whitespace-nowrap">
                 CAFM PRO
               </span>
             </div>
           </div>
 
           {/* Navigation Links */}
-          <nav className="hidden lg:flex items-center gap-6 text-[13px] font-medium text-slate-600">
-            <button onClick={() => navigateTo('accueil')} className={`${activePage === 'accueil' ? 'text-slate-900 font-semibold border-b-2 border-[#e0822d]' : 'hover:text-slate-900 transition-colors'} cursor-pointer pb-1`}>
+          <nav className="hidden xl:flex items-center gap-3.5 2xl:gap-5 text-xs 2xl:text-[13px] font-medium text-slate-600 shrink-0">
+            <button onClick={() => navigateTo('accueil')} className={`whitespace-nowrap ${activePage === 'accueil' ? 'text-slate-900 font-semibold border-b-2 border-[#e0822d]' : 'hover:text-slate-900 transition-colors'} cursor-pointer pb-1`}>
               Accueil
             </button>
-            <button onClick={() => navigateTo('plateforme')} className={`flex items-center gap-1 ${activePage === 'plateforme' ? 'text-slate-900 font-semibold border-b-2 border-[#e0822d]' : 'hover:text-slate-900 transition-colors'} cursor-pointer pb-1`}>
+            <button onClick={() => navigateTo('plateforme')} className={`whitespace-nowrap flex items-center gap-1 ${activePage === 'plateforme' ? 'text-slate-900 font-semibold border-b-2 border-[#e0822d]' : 'hover:text-slate-900 transition-colors'} cursor-pointer pb-1`}>
               Plateforme <ChevronDown className="w-3 h-3 text-slate-400 mt-0.5" />
             </button>
-            <button onClick={() => navigateTo('fonctionnalites')} className={`${activePage === 'fonctionnalites' ? 'text-slate-900 font-semibold border-b-2 border-[#e0822d]' : 'hover:text-slate-900 transition-colors'} cursor-pointer pb-1`}>
+            <button onClick={() => navigateTo('fonctionnalites')} className={`whitespace-nowrap ${activePage === 'fonctionnalites' ? 'text-slate-900 font-semibold border-b-2 border-[#e0822d]' : 'hover:text-slate-900 transition-colors'} cursor-pointer pb-1`}>
               Fonctionnalités
             </button>
-            <button onClick={() => navigateTo('securite')} className={`flex items-center gap-1 ${activePage === 'securite' ? 'text-slate-900 font-semibold border-b-2 border-[#e0822d]' : 'hover:text-slate-900 transition-colors'} cursor-pointer pb-1`}>
+            <button onClick={() => navigateTo('securite')} className={`whitespace-nowrap flex items-center gap-1 ${activePage === 'securite' ? 'text-slate-900 font-semibold border-b-2 border-[#e0822d]' : 'hover:text-slate-900 transition-colors'} cursor-pointer pb-1`}>
               Sécurité <ChevronDown className="w-3 h-3 text-slate-400 mt-0.5" />
             </button>
-            <button onClick={() => navigateTo('conformite')} className={`flex items-center gap-1 ${activePage === 'conformite' ? 'text-slate-900 font-semibold border-b-2 border-[#e0822d]' : 'hover:text-slate-900 transition-colors'} cursor-pointer pb-1`}>
+            <button onClick={() => navigateTo('conformite')} className={`whitespace-nowrap flex items-center gap-1 ${activePage === 'conformite' ? 'text-slate-900 font-semibold border-b-2 border-[#e0822d]' : 'hover:text-slate-900 transition-colors'} cursor-pointer pb-1`}>
               Conformité <ChevronDown className="w-3 h-3 text-slate-400 mt-0.5" />
             </button>
-            <button onClick={() => navigateTo('cloud')} className={`flex items-center gap-1 ${activePage === 'cloud' ? 'text-slate-900 font-semibold border-b-2 border-[#e0822d]' : 'hover:text-slate-900 transition-colors'} cursor-pointer pb-1`}>
+            <button onClick={() => navigateTo('cloud')} className={`whitespace-nowrap flex items-center gap-1 ${activePage === 'cloud' ? 'text-slate-900 font-semibold border-b-2 border-[#e0822d]' : 'hover:text-slate-900 transition-colors'} cursor-pointer pb-1`}>
               Cloud <ChevronDown className="w-3 h-3 text-slate-400 mt-0.5" />
             </button>
-            <button onClick={() => navigateTo('apropos')} className={`flex items-center gap-1 ${activePage === 'apropos' ? 'text-slate-900 font-semibold border-b-2 border-[#e0822d]' : 'hover:text-slate-900 transition-colors'} cursor-pointer pb-1`}>
+            <button onClick={() => navigateTo('apropos')} className={`whitespace-nowrap flex items-center gap-1 ${activePage === 'apropos' ? 'text-slate-900 font-semibold border-b-2 border-[#e0822d]' : 'hover:text-slate-900 transition-colors'} cursor-pointer pb-1`}>
               À propos <ChevronDown className="w-3 h-3 text-slate-400 mt-0.5" />
             </button>
-            <button onClick={() => navigateTo('contact')} className={`${activePage === 'contact' ? 'text-slate-900 font-semibold border-b-2 border-[#e0822d]' : 'hover:text-slate-900 transition-colors'} cursor-pointer pb-1`}>
+            <button onClick={() => navigateTo('contact')} className={`whitespace-nowrap ${activePage === 'contact' ? 'text-slate-900 font-semibold border-b-2 border-[#e0822d]' : 'hover:text-slate-900 transition-colors'} cursor-pointer pb-1`}>
               Contact
-            </button>
-
-            {/* Direct Dashboard Link */}
-            <button
-              onClick={onEnterDashboard}
-              className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-gradient-to-r from-orange-50 to-amber-50 border border-orange-200 text-[#e0822d] font-bold text-xs hover:from-[#e0822d] hover:to-orange-600 hover:text-white transition-all shadow-xs cursor-pointer group"
-              title="Accéder au dashboard opérationnel complet"
-            >
-              <LayoutDashboard className="w-3.5 h-3.5 group-hover:scale-110 transition-transform" />
-              <span>{effectiveUser ? 'Mon Dashboard' : 'Dashboard'}</span>
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse ml-0.5" />
             </button>
           </nav>
 
           {/* Right Action: Inscription / Connexion / Dashboard / Démo */}
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
             {effectiveUser ? (
               /* Utilisateur Connecté (Firebase Google ou Enregistré) */
-              <div className="relative flex items-center gap-2">
+              <div className="relative flex items-center gap-1.5 sm:gap-2 shrink-0">
                 <button
                   onClick={() => setIsUserDropdownOpen(!isUserDropdownOpen)}
-                  className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-orange-50 hover:bg-orange-100/80 border border-orange-200 text-xs transition-all cursor-pointer shadow-xs"
+                  className="flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-3 py-1.5 rounded-full bg-orange-50 hover:bg-orange-100/80 border border-orange-200 text-xs transition-all cursor-pointer shadow-xs whitespace-nowrap"
                 >
                   {effectiveUser.photoURL ? (
                     <img
                       src={effectiveUser.photoURL}
                       alt="Avatar"
-                      className="w-5 h-5 rounded-full object-cover border border-orange-300"
+                      className="w-5 h-5 rounded-full object-cover border border-orange-300 shrink-0"
                     />
                   ) : (
                     <UserCheck className="w-3.5 h-3.5 text-orange-600 shrink-0" />
                   )}
-                  <span className="font-bold text-slate-800 truncate max-w-[120px]">{effectiveUser.name}</span>
-                  <ChevronDown className="w-3 h-3 text-slate-400" />
+                  <span className="font-bold text-slate-800 truncate max-w-[90px] sm:max-w-[120px]">{effectiveUser.name}</span>
+                  <ChevronDown className="w-3 h-3 text-slate-400 shrink-0" />
                 </button>
 
                 {/* Dropdown Menu Utilisateur */}
@@ -302,56 +291,56 @@ export const SensoriumVitrineClair: React.FC<SensoriumVitrineClairProps> = ({
 
                 <button
                   onClick={onEnterDashboard}
-                  className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-slate-900 hover:bg-slate-800 text-white font-['Manrope'] font-bold text-xs shadow-sm hover:shadow-md transition-all cursor-pointer"
+                  className="inline-flex items-center gap-1.5 px-3 sm:px-4 py-2 rounded-full bg-slate-900 hover:bg-slate-800 text-white font-['Manrope'] font-bold text-xs shadow-sm hover:shadow-md transition-all cursor-pointer whitespace-nowrap"
                 >
-                  <LayoutDashboard className="w-3.5 h-3.5 text-orange-400" />
+                  <LayoutDashboard className="w-3.5 h-3.5 text-orange-400 shrink-0" />
                   <span>Mon Dashboard</span>
                 </button>
               </div>
             ) : (
               /* Visiteur Non Connecté : Bouton Connexion avec Google & Bouton Dashboard */
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
                 <button
                   onClick={handleGoogleLogin}
                   disabled={isLoggingIn}
-                  className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-800 hover:text-orange-600 px-3 py-1.5 rounded-full bg-white border border-slate-200 hover:border-orange-300 shadow-xs transition-all cursor-pointer disabled:opacity-50"
+                  className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-800 hover:text-orange-600 px-2.5 sm:px-3 py-1.5 rounded-full bg-white border border-slate-200 hover:border-orange-300 shadow-xs transition-all cursor-pointer disabled:opacity-50 whitespace-nowrap"
                   title="Se connecter avec votre compte Google / Gmail"
                 >
-                  <GoogleLogoIcon size={14} />
-                  <span>{isLoggingIn ? "Connexion..." : "Connexion"}</span>
+                  <GoogleLogoIcon size={14} className="shrink-0" />
+                  <span className="hidden sm:inline">{isLoggingIn ? "Connexion..." : "Connexion"}</span>
                 </button>
 
                 <button
                   onClick={onEnterDashboard}
-                  className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-full bg-slate-900 hover:bg-slate-800 text-white font-['Manrope'] font-bold text-xs shadow-sm hover:shadow-md transition-all cursor-pointer"
+                  className="inline-flex items-center gap-1.5 px-3 sm:px-3.5 py-2 rounded-full bg-slate-900 hover:bg-slate-800 text-white font-['Manrope'] font-bold text-xs shadow-sm hover:shadow-md transition-all cursor-pointer whitespace-nowrap"
                   title="Accéder au Dashboard opérationnel"
                 >
-                  <LayoutDashboard className="w-3.5 h-3.5 text-orange-400" />
-                  <span>Accéder au Dashboard</span>
+                  <LayoutDashboard className="w-3.5 h-3.5 text-orange-400 shrink-0" />
+                  <span>Dashboard</span>
                 </button>
               </div>
             )}
 
             <button
               onClick={() => setIsDemoModalOpen(true)}
-              className="hidden lg:inline-flex px-4 py-2 rounded-full bg-[#e0822d] hover:bg-[#c66e20] text-white font-['Manrope'] font-semibold text-xs tracking-wide shadow-sm shadow-orange-500/20 hover:shadow-md transition-all cursor-pointer"
+              className="hidden 2xl:inline-flex px-3.5 py-2 rounded-full bg-[#e0822d] hover:bg-[#c66e20] text-white font-['Manrope'] font-semibold text-xs tracking-wide shadow-sm shadow-orange-500/20 hover:shadow-md transition-all cursor-pointer whitespace-nowrap"
             >
               Démo
             </button>
 
             {/* Language Switcher */}
             <div
-              className="hidden sm:flex items-center gap-1 text-xs font-semibold text-slate-600 pl-1 cursor-pointer hover:text-slate-900 select-none"
+              className="hidden sm:flex items-center gap-1 text-xs font-semibold text-slate-600 pl-1 cursor-pointer hover:text-slate-900 select-none whitespace-nowrap"
               onClick={() => setActiveLang(activeLang === 'FR' ? 'EN' : 'FR')}
             >
               <span>{activeLang}</span>
-              <ChevronDown className="w-3.5 h-3.5 text-slate-400" />
+              <ChevronDown className="w-3.5 h-3.5 text-slate-400 shrink-0" />
             </div>
 
             {/* Mobile Menu Toggle */}
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="lg:hidden p-2 text-slate-600 hover:text-slate-900 cursor-pointer"
+              className="xl:hidden p-2 text-slate-600 hover:text-slate-900 cursor-pointer shrink-0"
               aria-label="Menu"
             >
               {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
@@ -362,7 +351,7 @@ export const SensoriumVitrineClair: React.FC<SensoriumVitrineClairProps> = ({
 
         {/* Mobile Navigation Drawer */}
         {mobileMenuOpen && (
-          <div className="lg:hidden px-6 py-4 bg-white border-b border-slate-100 space-y-3 text-left animate-in slide-in-from-top-2 duration-150">
+          <div className="xl:hidden px-6 py-4 bg-white border-b border-slate-100 space-y-3 text-left animate-in slide-in-from-top-2 duration-150">
             {(['accueil', 'plateforme', 'fonctionnalites', 'securite', 'conformite', 'cloud', 'apropos', 'contact'] as VitrinePage[]).map((page) => (
               <button key={page} onClick={() => navigateTo(page)} className={`block text-sm w-full text-left py-1 capitalize ${activePage === page ? 'font-semibold text-orange-600' : 'text-slate-600'}`}>
                 {page === 'fonctionnalites' ? 'Fonctionnalités' : page === 'apropos' ? 'À propos' : page.charAt(0).toUpperCase() + page.slice(1)}
@@ -568,7 +557,7 @@ export const SensoriumVitrineClair: React.FC<SensoriumVitrineClairProps> = ({
                 </div>
 
                 {/* Right Column: Master Hero Visual (7 cols) */}
-                <div className="lg:col-span-7 relative">
+                <div className="lg:col-span-7 relative min-w-0 max-w-full">
                   <div className="relative rounded-2xl overflow-hidden shadow-2xl border border-slate-200/80 bg-slate-900 group">
                     <img
                       src="/banners/banner-1.png"
@@ -1183,19 +1172,20 @@ export const SensoriumVitrineClair: React.FC<SensoriumVitrineClairProps> = ({
       />
 
       {/* Bouton d'accès rapide flottant au Dashboard */}
-      <div className="fixed bottom-6 right-6 z-40">
+      <div className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-40 max-w-[calc(100vw-2rem)]">
         <button
           onClick={onEnterDashboard}
-          className="flex items-center gap-2.5 px-4 py-3 rounded-full bg-slate-900/95 hover:bg-slate-900 text-white text-xs font-bold shadow-2xl border border-slate-700/80 backdrop-blur-md hover:scale-105 transition-all group cursor-pointer"
+          className="flex items-center gap-2 sm:gap-2.5 px-3.5 sm:px-4 py-2.5 sm:py-3 rounded-full bg-slate-900/95 hover:bg-slate-900 text-white text-xs font-bold shadow-2xl border border-slate-700/80 backdrop-blur-md hover:scale-105 transition-all group cursor-pointer whitespace-nowrap"
           title="Basculer vers le Dashboard exécutif"
         >
-          <div className="relative">
+          <div className="relative shrink-0">
             <LayoutDashboard className="w-4 h-4 text-orange-400 group-hover:rotate-6 transition-transform" />
             <span className="absolute -top-1 -right-1 w-2 h-2 rounded-full bg-emerald-500 animate-ping" />
             <span className="absolute -top-1 -right-1 w-2 h-2 rounded-full bg-emerald-500" />
           </div>
-          <span>{effectiveUser ? 'Mon Dashboard Live' : 'Accéder au Dashboard'}</span>
-          <ArrowRight className="w-3.5 h-3.5 text-orange-400 group-hover:translate-x-0.5 transition-transform" />
+          <span className="hidden xs:inline sm:inline">{effectiveUser ? 'Mon Dashboard Live' : 'Accéder au Dashboard'}</span>
+          <span className="xs:hidden sm:hidden">Dashboard</span>
+          <ArrowRight className="w-3.5 h-3.5 text-orange-400 group-hover:translate-x-0.5 transition-transform shrink-0" />
         </button>
       </div>
 

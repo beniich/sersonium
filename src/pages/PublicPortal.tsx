@@ -159,7 +159,7 @@ export default function PublicPortal({
   };
 
   return (
-    <div className={`min-h-screen bg-slate-50 dark:bg-[#070709] text-slate-900 dark:text-slate-100 flex flex-col font-['Inter'] selection:bg-orange-500/30 selection:text-orange-600 transition-colors duration-200 ${isEmbedded ? 'rounded-2xl overflow-hidden' : ''}`}>
+    <div className={`min-h-screen w-full max-w-[100vw] overflow-x-hidden bg-slate-50 dark:bg-[#070709] text-slate-900 dark:text-slate-100 flex flex-col font-['Inter'] selection:bg-orange-500/30 selection:text-orange-600 transition-colors duration-200 ${isEmbedded ? 'rounded-2xl overflow-hidden' : ''}`}>
 
       {/* Top Tactile Header (shown for technical views, hidden on vitrine-clair & cockpit) */}
       {currentView !== 'cockpit' && currentView !== 'vitrine-clair' && (
