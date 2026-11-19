@@ -1,5 +1,5 @@
 // src/components/AgentOrbit.tsx
-// Interface orbitale SENSORIUM — Système complet "Run Agent" avec progression, logs temps réel et micro-interactions
+// Interface orbitale SENSORIUM — Moteur "Run Agent" avec simulation d'appel API asynchrone (async/await, gestion succès/erreur & télémétrie HTTP)
 
 import React, { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "motion/react";
@@ -31,7 +31,7 @@ const groupsData: Group[] = [
     position: "top-left",
     agents: [
       { id: "r1", name: "Trend Scout", icon: "🔍", description: "Scans emerging trends across platforms in real-time.", status: "active" },
-      { id: "r2", name: "Audience Listener", icon: "🟠", highlighted: true, description: "Monitors audience sentiment and engagement signals.", status: "running" },
+      { id: "r2", name: "Audience Listener", icon: "🟠", highlighted: true, description: "Monitors audience sentiment and engagement signals.", status: "idle" },
       { id: "r3", name: "Comment Miner", icon: "💬", description: "Extracts insights from comments and replies.", status: "idle" },
       { id: "r4", name: "Competitor Watch", icon: "👁️", description: "Tracks competitor content and performance.", status: "active" },
       { id: "r5", name: "Post Writer", icon: "✍️", description: "Generates high-converting post drafts.", status: "idle" },
@@ -44,7 +44,7 @@ const groupsData: Group[] = [
     count: 6,
     position: "top-right",
     agents: [
-      { id: "c1", name: "Visual Designer", icon: "🎨", highlighted: true, description: "Generates brand-aligned visual assets.", status: "running" },
+      { id: "c1", name: "Visual Designer", icon: "🎨", highlighted: true, description: "Generates brand-aligned visual assets.", status: "idle" },
       { id: "c2", name: "Carousel Builder", icon: "🎠", description: "Creates multi-slide carousels optimized for engagement.", status: "idle" },
       { id: "c3", name: "Voiceover", icon: "🎙️", description: "Produces natural-sounding voiceovers.", status: "idle" },
       { id: "c4", name: "Video Editor", icon: "🎬", description: "Edits and optimizes short-form videos.", status: "active" },
@@ -59,7 +59,7 @@ const groupsData: Group[] = [
     position: "middle-left",
     agents: [
       { id: "l1", name: "Post Analyst", icon: "📊", description: "Analyzes post performance and suggests improvements.", status: "active" },
-      { id: "l2", name: "Revenue Tracker", icon: "💰", highlighted: true, description: "Tracks revenue attribution from content.", status: "running" },
+      { id: "l2", name: "Revenue Tracker", icon: "💰", highlighted: true, description: "Tracks revenue attribution from content.", status: "idle" },
       { id: "l3", name: "Call Tracker", icon: "📞", description: "Logs and analyzes sales calls.", status: "idle" },
       { id: "l4", name: "Email Analyst", icon: "📧", description: "Measures email campaign effectiveness.", status: "idle" },
       { id: "l5", name: "Weekly Report", icon: "📈", description: "Generates automated weekly performance reports.", status: "idle" },
@@ -73,7 +73,7 @@ const groupsData: Group[] = [
     position: "middle-right",
     agents: [
       { id: "p1", name: "Scheduler", icon: "📅", description: "Optimizes posting times across platforms.", status: "active" },
-      { id: "p2", name: "TikTok Poster", icon: "🎵", highlighted: true, description: "Publishes and optimizes TikTok content.", status: "running" },
+      { id: "p2", name: "TikTok Poster", icon: "🎵", highlighted: true, description: "Publishes and optimizes TikTok content.", status: "idle" },
       { id: "p3", name: "Reels Poster", icon: "📱", description: "Handles Instagram Reels publishing.", status: "idle" },
       { id: "p4", name: "Shorts Poster", icon: "▶️", description: "Manages YouTube Shorts distribution.", status: "idle" },
       { id: "p5", name: "X Poster", icon: "𝕏", description: "Posts and engages on X (Twitter).", status: "active" },
@@ -87,7 +87,7 @@ const groupsData: Group[] = [
     position: "bottom-left",
     agents: [
       { id: "s1", name: "Lead Scorer", icon: "🎯", description: "Scores and prioritizes incoming leads.", status: "active" },
-      { id: "s2", name: "Call Booker", icon: "📞", highlighted: true, description: "Books qualified calls automatically.", status: "running" },
+      { id: "s2", name: "Call Booker", icon: "📞", highlighted: true, description: "Books qualified calls automatically.", status: "idle" },
       { id: "s3", name: "Reminder", icon: "⏰", description: "Sends smart follow-up reminders.", status: "idle" },
       { id: "s4", name: "Follow-up", icon: "🔄", description: "Handles multi-step follow-up sequences.", status: "idle" },
       { id: "s5", name: "Payment Link", icon: "💳", description: "Generates and tracks payment links.", status: "idle" },
@@ -100,7 +100,7 @@ const groupsData: Group[] = [
     count: 6,
     position: "bottom-right",
     agents: [
-      { id: "cm1", name: "Comment Replier", icon: "💬", highlighted: true, description: "Replies to comments with brand voice.", status: "running" },
+      { id: "cm1", name: "Comment Replier", icon: "💬", highlighted: true, description: "Replies to comments with brand voice.", status: "idle" },
       { id: "cm2", name: "DM Agent", icon: "💌", description: "Handles direct messages intelligently.", status: "active" },
       { id: "cm3", name: "FAQ Agent", icon: "❓", description: "Answers frequently asked questions.", status: "idle" },
       { id: "cm4", name: "Review Asker", icon: "⭐", description: "Requests reviews at the right moment.", status: "idle" },
@@ -127,6 +127,40 @@ const statusColors: Record<AgentStatus, string> = {
   error: "bg-red-500",
 };
 
+// ============================================
+// 🔥 SIMULATION D'APPEL API RÉEL
+// ============================================
+async function runAgentAPI(agentId: string, agentName: string): Promise<{
+  success: boolean;
+  duration: number;
+  output?: string;
+  error?: string;
+}> {
+  // Simule la latence réseau réaliste (1.8s à 3.5s)
+  const delay = 1800 + Math.random() * 1700;
+  
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      // 85% de chance de succès, 15% d'erreur pour tester les scénarios réels
+      const isSuccess = Math.random() > 0.15;
+
+      if (isSuccess) {
+        resolve({
+          success: true,
+          duration: Math.round(delay),
+          output: `Agent "${agentName}" (${agentId}) executed successfully. Generated 3 artifacts and updated 2 telemetry pipelines.`,
+        });
+      } else {
+        resolve({
+          success: false,
+          duration: Math.round(delay),
+          error: "Upstream service timeout • Rate limit exceeded on cloud model provider",
+        });
+      }
+    }, delay);
+  });
+}
+
 interface AgentOrbitProps {
   isDark?: boolean;
 }
@@ -138,7 +172,8 @@ export default function AgentOrbit({ isDark: initialIsDark = false }: AgentOrbit
   const [isRunning, setIsRunning] = useState<boolean>(false);
   const [progress, setProgress] = useState<number>(0);
   const [runLogs, setRunLogs] = useState<string[]>([]);
-  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const [lastResult, setLastResult] = useState<"success" | "error" | null>(null);
+  const progressIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   useEffect(() => {
     setIsDark(initialIsDark);
@@ -146,23 +181,26 @@ export default function AgentOrbit({ isDark: initialIsDark = false }: AgentOrbit
 
   useEffect(() => {
     return () => {
-      if (intervalRef.current) clearInterval(intervalRef.current);
+      if (progressIntervalRef.current) clearInterval(progressIntervalRef.current);
     };
   }, []);
 
   const handleAgentClick = (agent: Agent, groupTitle: string) => {
+    if (progressIntervalRef.current) clearInterval(progressIntervalRef.current);
     setSelectedAgent({ ...agent, groupTitle });
     setIsRunning(false);
     setProgress(0);
     setRunLogs([]);
+    setLastResult(null);
   };
 
   const closePanel = () => {
+    if (progressIntervalRef.current) clearInterval(progressIntervalRef.current);
     setSelectedAgent(null);
     setIsRunning(false);
     setProgress(0);
     setRunLogs([]);
-    if (intervalRef.current) clearInterval(intervalRef.current);
+    setLastResult(null);
   };
 
   const updateAgentStatus = (agentId: string, newStatus: AgentStatus) => {
@@ -179,58 +217,70 @@ export default function AgentOrbit({ isDark: initialIsDark = false }: AgentOrbit
     }
   };
 
-  const runAgent = () => {
+  const addLog = (message: string) => {
+    setRunLogs((prev) => [...prev, `[${new Date().toLocaleTimeString()}] ${message}`]);
+  };
+
+  // ============================================
+  // 🚀 VRAIE FONCTION RUN (async / await)
+  // ============================================
+  const runAgent = async () => {
     if (!selectedAgent || isRunning) return;
+
+    if (progressIntervalRef.current) clearInterval(progressIntervalRef.current);
 
     setIsRunning(true);
     setProgress(0);
-    setRunLogs([`[${new Date().toLocaleTimeString()}] Starting ${selectedAgent.name}...`]);
+    setLastResult(null);
+    setRunLogs([]);
     updateAgentStatus(selectedAgent.id, "running");
 
-    const steps = [
-      "Initializing agent context...",
-      "Loading knowledge base...",
-      "Connecting to data sources...",
-      "Processing inputs...",
-      "Generating output...",
-      "Validating results...",
-      "Saving artifacts...",
-    ];
+    addLog(`Calling API → POST /api/v1/agents/${selectedAgent.id}/run`);
+    addLog(`Payload: { agent: "${selectedAgent.name}", mode: "async_orchestrated", env: "production" }`);
 
-    let currentStep = 0;
-    if (intervalRef.current) clearInterval(intervalRef.current);
+    // Animation de progression fluide pendant l'attente de l'API (jusqu'à 90%)
+    progressIntervalRef.current = setInterval(() => {
+      setProgress((prev) => {
+        if (prev >= 90) return prev;
+        return prev + Math.random() * 8;
+      });
+    }, 200);
 
-    intervalRef.current = setInterval(() => {
-      currentStep++;
-      const newProgress = Math.min((currentStep / steps.length) * 100, 100);
-      setProgress(newProgress);
+    try {
+      const result = await runAgentAPI(selectedAgent.id, selectedAgent.name);
 
-      if (currentStep <= steps.length) {
-        setRunLogs((prev) => [
-          ...prev,
-          `[${new Date().toLocaleTimeString()}] ${steps[currentStep - 1]}`,
-        ]);
-      }
+      if (progressIntervalRef.current) clearInterval(progressIntervalRef.current);
+      setProgress(100);
 
-      if (currentStep >= steps.length) {
-        if (intervalRef.current) clearInterval(intervalRef.current);
-        setIsRunning(false);
-        setProgress(100);
+      if (result.success) {
+        addLog(`Response 200 OK (${result.duration}ms)`);
+        addLog(`✅ ${result.output}`);
         updateAgentStatus(selectedAgent.id, "success");
-        setRunLogs((prev) => [
-          ...prev,
-          `[${new Date().toLocaleTimeString()}] ✅ Agent completed successfully`,
-        ]);
+        setLastResult("success");
+      } else {
+        addLog(`Response 500 Error (${result.duration}ms)`);
+        addLog(`❌ ${result.error}`);
+        updateAgentStatus(selectedAgent.id, "error");
+        setLastResult("error");
       }
-    }, 700);
+    } catch (err: any) {
+      if (progressIntervalRef.current) clearInterval(progressIntervalRef.current);
+      setProgress(100);
+      addLog(`Network Error: Failed to fetch (${err?.message || "Connection refused"})`);
+      updateAgentStatus(selectedAgent.id, "error");
+      setLastResult("error");
+    } finally {
+      setIsRunning(false);
+    }
   };
 
   const resetAgent = () => {
     if (!selectedAgent) return;
-    if (intervalRef.current) clearInterval(intervalRef.current);
+    if (progressIntervalRef.current) clearInterval(progressIntervalRef.current);
     setIsRunning(false);
     setProgress(0);
     setRunLogs([]);
+    setLastResult(null);
     updateAgentStatus(selectedAgent.id, "idle");
   };
 
@@ -246,7 +296,7 @@ export default function AgentOrbit({ isDark: initialIsDark = false }: AgentOrbit
           {isDark ? "☀️ Light" : "🌙 Dark"}
         </button>
 
-        {/* Animated SVG lines */}
+        {/* SVG lines */}
         <svg className="absolute inset-0 w-full h-full pointer-events-none" viewBox="0 0 1000 820" fill="none">
           <motion.path
             d="M500 80 C500 180 500 280 500 380 C500 480 500 580 500 720"
@@ -255,28 +305,19 @@ export default function AgentOrbit({ isDark: initialIsDark = false }: AgentOrbit
             strokeLinecap="round"
             initial={{ pathLength: 0, opacity: 0 }}
             animate={{ pathLength: 1, opacity: 0.7 }}
-            transition={{ duration: 1.6, ease: "easeInOut" }}
+            transition={{ duration: 1.6 }}
           />
           {["M180 200 H420", "M580 200 H820", "M180 410 H420", "M580 410 H820", "M180 620 H420", "M580 620 H820"].map((d, i) => (
-            <motion.path
-              key={i}
-              d={d}
-              stroke="#f97316"
-              strokeWidth="1.5"
+            <motion.path key={i} d={d} stroke="#f97316" strokeWidth="1.5"
               initial={{ pathLength: 0, opacity: 0 }}
               animate={{ pathLength: 1, opacity: 0.4 }}
               transition={{ duration: 1.2, delay: 0.3 + i * 0.08 }}
             />
           ))}
           {[200, 410, 620].map((y, i) => (
-            <motion.circle
-              key={y}
-              cx="500"
-              cy={y}
-              r="5"
-              fill="#f97316"
+            <motion.circle key={y} cx="500" cy={y} r="5" fill="#f97316"
               animate={{ scale: [1, 1.6, 1], opacity: [0.8, 0.3, 0.8] }}
-              transition={{ duration: 2.2, repeat: Infinity, delay: i * 0.35, ease: "easeInOut" }}
+              transition={{ duration: 2.2, repeat: Infinity, delay: i * 0.35 }}
             />
           ))}
           <defs>
@@ -293,7 +334,6 @@ export default function AgentOrbit({ isDark: initialIsDark = false }: AgentOrbit
           className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-20 flex flex-col items-center"
           initial={{ opacity: 0, scale: 0.6 }}
           animate={{ opacity: 1, scale: 1 }}
-          transition={{ type: "spring", stiffness: 140, damping: 16 }}
         >
           <div className="mb-3 px-4 py-1.5 bg-black dark:bg-white text-white dark:text-black text-xs font-medium rounded-full shadow-lg">
             You
@@ -306,7 +346,7 @@ export default function AgentOrbit({ isDark: initialIsDark = false }: AgentOrbit
               <path d="M12 2L14.5 9H22L16 13.5L18.5 21L12 16.5L5.5 21L8 13.5L2 9H9.5L12 2Z" />
             </svg>
           </motion.div>
-          <div className="absolute -bottom-6 left-1/2 -translate-x-1/2 whitespace-nowrap text-xs font-medium text-gray-500 dark:text-gray-400">
+          <div className="absolute -bottom-6 left-1/2 -translate-x-1/2 text-xs font-medium text-gray-500 dark:text-gray-400">
             Claude Code
           </div>
         </motion.div>
@@ -317,13 +357,13 @@ export default function AgentOrbit({ isDark: initialIsDark = false }: AgentOrbit
             key={group.id}
             initial={{ opacity: 0, scale: 0.85, y: 30 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
-            transition={{ type: "spring", stiffness: 120, damping: 18, delay: 0.15 + groupIndex * 0.08 }}
+            transition={{ delay: 0.15 + groupIndex * 0.08 }}
             whileHover={{ scale: 1.03, y: -6 }}
             className={`absolute w-64 bg-white dark:bg-gray-800 rounded-2xl shadow-lg border border-gray-100 dark:border-gray-700 p-4 ${positionClasses[group.position]}`}
           >
             <div className="flex items-center justify-between mb-3">
               <h3 className="font-semibold text-gray-800 dark:text-gray-100 text-sm">{group.title}</h3>
-              <span className="text-xs text-gray-400 dark:text-gray-500">{group.count} agents</span>
+              <span className="text-xs text-gray-400">{group.count} agents</span>
             </div>
             <ul className="space-y-1.5">
               {group.agents.map((agent) => (
@@ -337,18 +377,16 @@ export default function AgentOrbit({ isDark: initialIsDark = false }: AgentOrbit
                       : "text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700/50"
                   }`}
                 >
-                  <span className="text-base leading-none">{agent.icon || "•"}</span>
+                  <span className="text-base leading-none">{agent.icon}</span>
                   <span className="truncate flex-1">{agent.name}</span>
                   {agent.status === "running" && (
-                    <motion.span
-                      className="w-1.5 h-1.5 rounded-full bg-orange-400"
+                    <motion.span className="w-1.5 h-1.5 rounded-full bg-orange-400"
                       animate={{ scale: [1, 1.5, 1] }}
                       transition={{ repeat: Infinity, duration: 1.2 }}
                     />
                   )}
-                  {agent.status === "success" && (
-                    <span className="text-emerald-500 text-xs font-bold">✓</span>
-                  )}
+                  {agent.status === "success" && <span className="text-emerald-500 text-xs font-bold">✓</span>}
+                  {agent.status === "error" && <span className="text-red-500 text-xs font-bold">✕</span>}
                 </motion.li>
               ))}
             </ul>
@@ -366,7 +404,6 @@ export default function AgentOrbit({ isDark: initialIsDark = false }: AgentOrbit
                 onClick={closePanel}
                 className="absolute inset-0 bg-black/20 dark:bg-black/40 z-40"
               />
-
               <motion.div
                 initial={{ x: "100%" }}
                 animate={{ x: 0 }}
@@ -374,10 +411,9 @@ export default function AgentOrbit({ isDark: initialIsDark = false }: AgentOrbit
                 transition={{ type: "spring", stiffness: 260, damping: 28 }}
                 className="absolute top-0 right-0 h-full w-[380px] bg-white dark:bg-gray-900 shadow-2xl z-50 border-l border-gray-200 dark:border-gray-700 flex flex-col"
               >
-                {/* Header */}
                 <div className="flex items-center justify-between p-5 border-b border-gray-100 dark:border-gray-800">
                   <div>
-                    <p className="text-xs text-gray-400 dark:text-gray-500 mb-0.5">{selectedAgent.groupTitle}</p>
+                    <p className="text-xs text-gray-400 mb-0.5">{selectedAgent.groupTitle}</p>
                     <h2 className="text-lg font-semibold text-gray-900 dark:text-white flex items-center gap-2">
                       <span>{selectedAgent.icon}</span>
                       {selectedAgent.name}
@@ -391,15 +427,12 @@ export default function AgentOrbit({ isDark: initialIsDark = false }: AgentOrbit
                   </button>
                 </div>
 
-                {/* Content */}
                 <div className="flex-1 p-5 overflow-y-auto">
-                  <p className="text-sm text-gray-600 dark:text-gray-300 leading-relaxed mb-6">
-                    {selectedAgent.description}
-                  </p>
+                  <p className="text-sm text-gray-600 dark:text-gray-300 mb-6">{selectedAgent.description}</p>
 
                   {/* Status */}
                   <div className="flex items-center justify-between p-3 rounded-xl bg-gray-50 dark:bg-gray-800 mb-5">
-                    <span className="text-sm text-gray-500 dark:text-gray-400">Status</span>
+                    <span className="text-sm text-gray-500">Status</span>
                     <div className="flex items-center gap-2">
                       <span className={`w-2 h-2 rounded-full ${statusColors[selectedAgent.status || "idle"]}`} />
                       <span className="text-sm font-medium capitalize text-gray-800 dark:text-gray-200">
@@ -408,33 +441,30 @@ export default function AgentOrbit({ isDark: initialIsDark = false }: AgentOrbit
                     </div>
                   </div>
 
-                  {/* Progress bar (visible when running or just finished) */}
+                  {/* Progress */}
                   {(isRunning || progress > 0) && (
                     <div className="mb-5">
-                      <div className="flex justify-between text-xs text-gray-500 dark:text-gray-400 mb-1.5">
-                        <span>{isRunning ? "Running..." : "Completed"}</span>
+                      <div className="flex justify-between text-xs text-gray-500 mb-1.5">
+                        <span>{isRunning ? "Calling API..." : lastResult === "success" ? "Completed" : "Failed"}</span>
                         <span>{Math.round(progress)}%</span>
                       </div>
                       <div className="h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
                         <motion.div
-                          className="h-full bg-gradient-to-r from-orange-500 to-orange-400"
+                          className={`h-full ${lastResult === "error" ? "bg-red-500" : "bg-gradient-to-r from-orange-500 to-orange-400"}`}
                           initial={{ width: 0 }}
                           animate={{ width: `${progress}%` }}
-                          transition={{ duration: 0.3 }}
                         />
                       </div>
                     </div>
                   )}
 
-                  {/* Action buttons */}
+                  {/* Buttons */}
                   <div className="grid grid-cols-2 gap-3 mb-6">
                     <button
                       onClick={runAgent}
                       disabled={isRunning}
-                      className={`py-2.5 px-4 rounded-xl text-white text-sm font-medium transition-all flex items-center justify-center gap-2 cursor-pointer ${
-                        isRunning
-                          ? "bg-orange-400 cursor-not-allowed"
-                          : "bg-orange-500 hover:bg-orange-600"
+                      className={`py-2.5 px-4 rounded-xl text-white text-sm font-medium flex items-center justify-center gap-2 transition-all cursor-pointer ${
+                        isRunning ? "bg-orange-400 cursor-not-allowed" : "bg-orange-500 hover:bg-orange-600"
                       }`}
                     >
                       {isRunning ? (
@@ -442,41 +472,38 @@ export default function AgentOrbit({ isDark: initialIsDark = false }: AgentOrbit
                           <motion.span
                             className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full"
                             animate={{ rotate: 360 }}
-                            transition={{ repeat: Infinity, duration: 0.8, ease: "linear" }}
+                            transition={{ repeat: Infinity, duration: 0.7, ease: "linear" }}
                           />
-                          Running...
+                          Calling API...
                         </>
                       ) : (
                         "▶ Run Agent"
                       )}
                     </button>
-
                     <button
                       onClick={resetAgent}
                       disabled={isRunning}
-                      className="py-2.5 px-4 rounded-xl bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-800 dark:text-gray-200 text-sm font-medium transition-colors disabled:opacity-50 cursor-pointer"
+                      className="py-2.5 px-4 rounded-xl bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-800 dark:text-gray-200 text-sm font-medium disabled:opacity-50 cursor-pointer"
                     >
                       Reset
                     </button>
                   </div>
 
-                  {/* Live Logs */}
+                  {/* Logs */}
                   {runLogs.length > 0 && (
-                    <div className="mt-2">
-                      <h4 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">
-                        Execution Log
-                      </h4>
-                      <div className="bg-gray-50 dark:bg-gray-800/80 rounded-xl p-3 max-h-48 overflow-y-auto font-mono text-xs space-y-1">
+                    <div>
+                      <h4 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">API Logs</h4>
+                      <div className="bg-gray-50 dark:bg-gray-800/80 rounded-xl p-3 max-h-52 overflow-y-auto font-mono text-xs space-y-1.5">
                         {runLogs.map((log, i) => (
                           <motion.div
                             key={i}
                             initial={{ opacity: 0, x: -6 }}
                             animate={{ opacity: 1, x: 0 }}
-                            className={`${
-                              log.includes("✅") 
-                                ? "text-emerald-600 dark:text-emerald-400 font-bold" 
-                                : "text-gray-600 dark:text-gray-300"
-                            }`}
+                            className={
+                              log.includes("✅") ? "text-emerald-600 dark:text-emerald-400 font-bold" :
+                              log.includes("❌") || log.includes("Error") ? "text-red-500 font-bold" :
+                              "text-gray-600 dark:text-gray-300"
+                            }
                           >
                             {log}
                           </motion.div>
@@ -484,23 +511,6 @@ export default function AgentOrbit({ isDark: initialIsDark = false }: AgentOrbit
                       </div>
                     </div>
                   )}
-
-                  {/* Quick Actions */}
-                  <div className="pt-5 mt-5 border-t border-gray-100 dark:border-gray-800">
-                    <h4 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">
-                      Quick Actions
-                    </h4>
-                    <div className="space-y-1">
-                      {["View Full Logs", "Export Config", "Schedule Run", "Open in Studio"].map((action) => (
-                        <button
-                          key={action}
-                          className="w-full text-left px-3 py-2 rounded-lg text-sm text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors cursor-pointer"
-                        >
-                          {action}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
                 </div>
               </motion.div>
             </>
