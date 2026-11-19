@@ -306,7 +306,7 @@ export const SensoriumVitrineClair: React.FC<SensoriumVitrineClairProps> = ({
                   className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-800 hover:text-orange-600 px-2.5 sm:px-3 py-1.5 rounded-full bg-white border border-slate-200 hover:border-orange-300 shadow-xs transition-all cursor-pointer disabled:opacity-50 whitespace-nowrap"
                   title="Se connecter avec votre compte Google / Gmail"
                 >
-                  <GoogleLogoIcon size={14} className="shrink-0" />
+                  <GoogleLogoIcon size={14} />
                   <span className="hidden sm:inline">{isLoggingIn ? "Connexion..." : "Connexion"}</span>
                 </button>
 

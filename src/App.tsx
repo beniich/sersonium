@@ -42,6 +42,7 @@ const EsgGrafanaView = lazy(() => import("./components/EsgGrafanaView").then(m =
 const ArtifactsIdeStudio = lazy(() => import("./pages/ArtifactsIdeStudio"));
 const AutonomousRobotics = lazy(() => import("./components/AutonomousRobotics").then(m => ({ default: m.AutonomousRobotics })));
 const ShowcaseViewer = lazy(() => import("./components/ShowcaseViewer"));
+const AgentOrbit = lazy(() => import("./components/AgentOrbit"));
 import { useGlobalState } from "./hooks/useGlobalState";
 import { initAuth, googleSignIn, logout, db } from "./firebase";
 import { doc, setDoc } from "firebase/firestore";
@@ -126,6 +127,9 @@ export default function App() {
     }
     if (seg === "manage") {
       return "master-control";
+    }
+    if (seg === "agent-orbit" || seg === "orbit" || seg === "agents") {
+      return "agent-orbit";
     }
     if (lower.includes("/compliance/esg")) {
       return "esg-carbon";
@@ -635,6 +639,14 @@ export default function App() {
       case "telemetry": return <KafkaMonitor {...commonProps} />;
       case "realtime": return <RealTimeDashboard initialConfig={{ mode: "simulation", siteProfile: "datacenter" }} />;
       case "iam": return <IamAdminPage isDark={isDark} />;
+      case "agent-orbit":
+        return (
+          <Suspense fallback={<div className="p-12 text-center text-slate-400"><Loader2 className="w-8 h-8 animate-spin mx-auto text-orange-500 mb-2" />Chargement de l'Agent Orbit...</div>}>
+            <div className="p-4 sm:p-6 max-w-[1400px] mx-auto">
+              <AgentOrbit isDark={isDark} />
+            </div>
+          </Suspense>
+        );
       case "ai-studio":
       case "artifacts-ide":
         return (
