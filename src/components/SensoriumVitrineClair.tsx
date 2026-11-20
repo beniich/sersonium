@@ -176,25 +176,25 @@ export const SensoriumVitrineClair: React.FC<SensoriumVitrineClairProps> = ({
           1. HEADER / NAVBAR
       ════════════════════════════════════════════════════════════ */}
       <header className="sticky top-0 w-full z-50 bg-white/95 backdrop-blur-md border-b border-slate-100 shadow-xs">
-        <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 h-18 sm:h-20 flex items-center justify-between gap-2 sm:gap-4">
+        <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-2">
 
           {/* Logo SENSORIUM CAFM PRO */}
-          <div className="flex items-center gap-2.5 sm:gap-3 cursor-pointer shrink-0" onClick={() => scrollTo('accueil')}>
-            <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl flex items-center justify-center bg-white shadow-xs border border-slate-200 overflow-hidden p-1 shrink-0">
+          <div className="flex items-center gap-2 cursor-pointer shrink-0" onClick={() => scrollTo('accueil')}>
+            <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl flex items-center justify-center bg-white shadow-xs border border-slate-200 overflow-hidden p-1 shrink-0">
               <img src="/logo-icon.png" alt="SENSORIUM Icon" className="w-full h-full object-contain" />
             </div>
             <div className="flex flex-col text-left shrink-0">
-              <span className="font-['Manrope'] font-extrabold text-sm sm:text-base tracking-tight text-slate-900 leading-none whitespace-nowrap">
+              <span className="font-['Manrope'] font-extrabold text-sm tracking-tight text-slate-900 leading-none whitespace-nowrap">
                 SENSORIUM
               </span>
-              <span className="text-[9px] sm:text-[10px] tracking-[0.25em] font-semibold text-slate-500 uppercase mt-0.5 whitespace-nowrap">
+              <span className="text-[9px] tracking-[0.2em] font-semibold text-slate-500 uppercase mt-0.5 whitespace-nowrap">
                 CAFM PRO
               </span>
             </div>
           </div>
 
-          {/* Navigation Links */}
-          <nav className="hidden xl:flex items-center gap-3.5 2xl:gap-5 text-xs 2xl:text-[13px] font-medium text-slate-600 shrink-0">
+          {/* Navigation Links — desktop only (≥ xl = 1280px) */}
+          <nav className="hidden xl:flex flex-1 items-center justify-center gap-3 2xl:gap-5 text-xs font-medium text-slate-600">
             <button onClick={() => navigateTo('accueil')} className={`whitespace-nowrap ${activePage === 'accueil' ? 'text-slate-900 font-semibold border-b-2 border-[#e0822d]' : 'hover:text-slate-900 transition-colors'} cursor-pointer pb-1`}>
               Accueil
             </button>
@@ -221,29 +221,25 @@ export const SensoriumVitrineClair: React.FC<SensoriumVitrineClairProps> = ({
             </button>
           </nav>
 
-          {/* Right Action: Inscription / Connexion / Dashboard / Démo */}
-          <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
+          {/* Right Actions */}
+          <div className="flex items-center gap-1.5 shrink-0">
+
+            {/* ── Desktop actions (≥ xl) ── */}
             {effectiveUser ? (
-              /* Utilisateur Connecté (Firebase Google ou Enregistré) */
-              <div className="relative flex items-center gap-1.5 sm:gap-2 shrink-0">
+              <div className="relative hidden xl:flex items-center gap-2 shrink-0">
                 <button
                   onClick={() => setIsUserDropdownOpen(!isUserDropdownOpen)}
-                  className="flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-3 py-1.5 rounded-full bg-orange-50 hover:bg-orange-100/80 border border-orange-200 text-xs transition-all cursor-pointer shadow-xs whitespace-nowrap"
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-orange-50 hover:bg-orange-100/80 border border-orange-200 text-xs transition-all cursor-pointer shadow-xs"
                 >
                   {effectiveUser.photoURL ? (
-                    <img
-                      src={effectiveUser.photoURL}
-                      alt="Avatar"
-                      className="w-5 h-5 rounded-full object-cover border border-orange-300 shrink-0"
-                    />
+                    <img src={effectiveUser.photoURL} alt="Avatar" className="w-5 h-5 rounded-full object-cover border border-orange-300 shrink-0" />
                   ) : (
                     <UserCheck className="w-3.5 h-3.5 text-orange-600 shrink-0" />
                   )}
-                  <span className="font-bold text-slate-800 truncate max-w-[90px] sm:max-w-[120px]">{effectiveUser.name}</span>
+                  <span className="font-bold text-slate-800 truncate max-w-[110px]">{effectiveUser.name}</span>
                   <ChevronDown className="w-3 h-3 text-slate-400 shrink-0" />
                 </button>
 
-                {/* Dropdown Menu Utilisateur */}
                 {isUserDropdownOpen && (
                   <div className="absolute right-0 top-full mt-2 w-64 rounded-2xl bg-white border border-slate-200 shadow-2xl p-2 z-50 animate-in fade-in slide-in-from-top-1 duration-150 text-left">
                     <div className="p-3 border-b border-slate-100 mb-1">
@@ -253,98 +249,86 @@ export const SensoriumVitrineClair: React.FC<SensoriumVitrineClairProps> = ({
                         ✓ Compte Vérifié &amp; Connecté
                       </span>
                     </div>
-
-                    <button
-                      onClick={() => {
-                        setIsUserDropdownOpen(false);
-                        onEnterDashboard();
-                      }}
-                      className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs text-slate-700 hover:text-slate-950 hover:bg-slate-50 transition cursor-pointer text-left"
-                    >
+                    <button onClick={() => { setIsUserDropdownOpen(false); onEnterDashboard(); }}
+                      className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs text-slate-700 hover:bg-slate-50 transition cursor-pointer text-left">
                       <LayoutDashboard size={14} className="text-orange-500" />
                       <span>Tableau de Bord &amp; Cockpit</span>
                     </button>
-
-                    <button
-                      onClick={() => {
-                        setIsUserDropdownOpen(false);
-                        if (onOpenPricing) onOpenPricing();
-                        else window.location.href = "/pricing";
-                      }}
-                      className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs text-slate-700 hover:text-slate-950 hover:bg-slate-50 transition cursor-pointer text-left"
-                    >
+                    <button onClick={() => { setIsUserDropdownOpen(false); if (onOpenPricing) onOpenPricing(); else window.location.href = "/pricing"; }}
+                      className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs text-slate-700 hover:bg-slate-50 transition cursor-pointer text-left">
                       <Receipt size={14} className="text-cyan-600" />
                       <span>Factures &amp; Quotas IA</span>
                     </button>
-
                     <div className="border-t border-slate-100 my-1" />
-
-                    <button
-                      onClick={handleUserLogout}
-                      className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs text-rose-600 hover:bg-rose-50 transition cursor-pointer text-left"
-                    >
+                    <button onClick={handleUserLogout}
+                      className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs text-rose-600 hover:bg-rose-50 transition cursor-pointer text-left">
                       <LogOut size={14} />
                       <span>Se Déconnecter</span>
                     </button>
                   </div>
                 )}
 
-                <button
-                  onClick={onEnterDashboard}
-                  className="inline-flex items-center gap-1.5 px-3 sm:px-4 py-2 rounded-full bg-slate-900 hover:bg-slate-800 text-white font-['Manrope'] font-bold text-xs shadow-sm hover:shadow-md transition-all cursor-pointer whitespace-nowrap"
-                >
+                <button onClick={onEnterDashboard}
+                  className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-slate-900 hover:bg-slate-800 text-white font-['Manrope'] font-bold text-xs shadow-sm hover:shadow-md transition-all cursor-pointer whitespace-nowrap">
                   <LayoutDashboard className="w-3.5 h-3.5 text-orange-400 shrink-0" />
                   <span>Mon Dashboard</span>
                 </button>
               </div>
             ) : (
-              /* Visiteur Non Connecté : Bouton Connexion avec Google & Bouton Dashboard */
-              <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
-                <button
-                  onClick={handleGoogleLogin}
-                  disabled={isLoggingIn}
-                  className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-800 hover:text-orange-600 px-2.5 sm:px-3 py-1.5 rounded-full bg-white border border-slate-200 hover:border-orange-300 shadow-xs transition-all cursor-pointer disabled:opacity-50 whitespace-nowrap"
-                  title="Se connecter avec votre compte Google / Gmail"
-                >
+              <div className="hidden xl:flex items-center gap-1.5 shrink-0">
+                <button onClick={handleGoogleLogin} disabled={isLoggingIn}
+                  className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-800 hover:text-orange-600 px-3 py-1.5 rounded-full bg-white border border-slate-200 hover:border-orange-300 shadow-xs transition-all cursor-pointer disabled:opacity-50 whitespace-nowrap"
+                  title="Se connecter avec votre compte Google / Gmail">
                   <GoogleLogoIcon size={14} />
-                  <span className="hidden sm:inline">{isLoggingIn ? "Connexion..." : "Connexion"}</span>
+                  <span>{isLoggingIn ? "Connexion..." : "Connexion"}</span>
                 </button>
-
-                <button
-                  onClick={onEnterDashboard}
-                  className="inline-flex items-center gap-1.5 px-3 sm:px-3.5 py-2 rounded-full bg-slate-900 hover:bg-slate-800 text-white font-['Manrope'] font-bold text-xs shadow-sm hover:shadow-md transition-all cursor-pointer whitespace-nowrap"
-                  title="Accéder au Dashboard opérationnel"
-                >
+                <button onClick={onEnterDashboard}
+                  className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-full bg-slate-900 hover:bg-slate-800 text-white font-['Manrope'] font-bold text-xs shadow-sm hover:shadow-md transition-all cursor-pointer whitespace-nowrap"
+                  title="Accéder au Dashboard opérationnel">
                   <LayoutDashboard className="w-3.5 h-3.5 text-orange-400 shrink-0" />
                   <span>Dashboard</span>
                 </button>
               </div>
             )}
 
+            {/* Bouton Démo — desktop uniquement */}
             <button
               onClick={() => setIsDemoModalOpen(true)}
-              className="hidden 2xl:inline-flex px-3.5 py-2 rounded-full bg-[#e0822d] hover:bg-[#c66e20] text-white font-['Manrope'] font-semibold text-xs tracking-wide shadow-sm shadow-orange-500/20 hover:shadow-md transition-all cursor-pointer whitespace-nowrap"
+              className="hidden xl:inline-flex px-3.5 py-2 rounded-full bg-[#e0822d] hover:bg-[#c66e20] text-white font-['Manrope'] font-semibold text-xs tracking-wide shadow-sm shadow-orange-500/20 hover:shadow-md transition-all cursor-pointer whitespace-nowrap"
             >
               Démo
             </button>
 
-            {/* Language Switcher */}
+            {/* Language Switcher — desktop uniquement */}
             <div
-              className="hidden sm:flex items-center gap-1 text-xs font-semibold text-slate-600 pl-1 cursor-pointer hover:text-slate-900 select-none whitespace-nowrap"
+              className="hidden xl:flex items-center gap-1 text-xs font-semibold text-slate-600 pl-1 cursor-pointer hover:text-slate-900 select-none whitespace-nowrap"
               onClick={() => setActiveLang(activeLang === 'FR' ? 'EN' : 'FR')}
             >
               <span>{activeLang}</span>
               <ChevronDown className="w-3.5 h-3.5 text-slate-400 shrink-0" />
             </div>
 
-            {/* Mobile Menu Toggle */}
-            <button
-              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="xl:hidden p-2 text-slate-600 hover:text-slate-900 cursor-pointer shrink-0"
-              aria-label="Menu"
-            >
-              {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
-            </button>
+            {/* ── Mobile: icônes compactes + hamburger (< xl) ── */}
+            <div className="flex xl:hidden items-center gap-1 shrink-0">
+              {/* Bouton Dashboard compact (icône seule) */}
+              <button
+                onClick={onEnterDashboard}
+                className="p-2 rounded-lg bg-slate-900 text-white hover:bg-slate-800 transition cursor-pointer"
+                title="Accéder au Dashboard"
+              >
+                <LayoutDashboard className="w-4 h-4 text-orange-400" />
+              </button>
+
+              {/* Hamburger */}
+              <button
+                onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+                className="p-2 text-slate-600 hover:text-slate-900 cursor-pointer shrink-0"
+                aria-label="Menu"
+              >
+                {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+              </button>
+            </div>
+
           </div>
 
         </div>
