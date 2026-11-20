@@ -33,6 +33,7 @@ interface PublicPortalProps {
   onSignIn: () => void;
   onSignOut?: () => void;
   onEnterMockMode?: () => void;
+  onEnterDemoMode?: () => void;
   onLaunchDashboard?: () => void;
   onLaunchCockpit?: () => void;
   onNavigateToSection?: (page: string, itemId: string) => void;
@@ -51,6 +52,7 @@ export default function PublicPortal({
   onSignIn,
   onSignOut,
   onEnterMockMode,
+  onEnterDemoMode,
   onLaunchCockpit,
   onNavigateToSection: _onNavigateToSection,
   state: _globalState,
@@ -155,6 +157,16 @@ export default function PublicPortal({
       onEnterMockMode();
     } else if (onSignIn) {
       onSignIn();
+    }
+  };
+
+  const handleEnterDemo = () => {
+    if (onEnterDemoMode) {
+      onEnterDemoMode();
+    } else if (onEnterMockMode) {
+      onEnterMockMode();
+    } else {
+      handleEnterDashboard();
     }
   };
 
@@ -274,6 +286,7 @@ export default function PublicPortal({
         <SensoriumVitrineClair
           onSignIn={onSignIn}
           onEnterDashboard={handleEnterDashboard}
+          onEnterDemo={handleEnterDemo}
           onNavigate={handleNavigate}
           onLaunchCockpit={() => onLaunchCockpit ? onLaunchCockpit() : handleNavigate('cockpit')}
           onOpenPricing={() => handleNavigate('pricing')}

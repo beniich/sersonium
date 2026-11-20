@@ -252,6 +252,37 @@ class AuthService {
   }
 
   /**
+   * Connexion instantanée en Mode Démo (Sans authentification externe)
+   */
+  public loginAsDemo(role: string = "admin"): AuthUser {
+    const demoUser: AuthUser = {
+      userId: "demo-user-sensorium",
+      email: "demo@sensorium.cloudindustrie.com",
+      displayName: "Visiteur Démo",
+      role,
+      tenantId: "tenant-demo-sensorium",
+      organizationName: "SENSORIUM Démo Corp",
+      permissions: ["*"]
+    };
+    this.setSession(demoUser, "sensorium_demo_session_token");
+    if (typeof localStorage !== "undefined") {
+      localStorage.setItem("sensorium_simulation_mode", "true");
+      localStorage.setItem("sensorium_subscription_tier", "pro");
+      localStorage.setItem("sensorium_registered_user", JSON.stringify({
+        name: demoUser.displayName,
+        email: demoUser.email,
+        company: demoUser.organizationName,
+        role: "Administrateur Démo"
+      }));
+    }
+    if (typeof window !== "undefined") {
+      window.dispatchEvent(new CustomEvent("sensorium:mode_changed", { detail: { isSimulation: true } }));
+      window.dispatchEvent(new CustomEvent("sensorium:profile_updated"));
+    }
+    return demoUser;
+  }
+
+  /**
    * Refresh the active session using HTTP-Only Refresh Token Cookie
    */
   public async refresh(): Promise<string | null> {

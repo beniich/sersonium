@@ -42,6 +42,7 @@ type VitrinePage = 'accueil' | 'plateforme' | 'fonctionnalites' | 'securite' | '
 interface SensoriumVitrineClairProps {
   onSignIn?: () => void;
   onEnterDashboard: () => void;
+  onEnterDemo?: () => void;
   onNavigate?: (path: any) => void;
   onLaunchCockpit?: () => void;
   onOpenPricing?: () => void;
@@ -53,6 +54,7 @@ interface SensoriumVitrineClairProps {
 export const SensoriumVitrineClair: React.FC<SensoriumVitrineClairProps> = ({
   onSignIn,
   onEnterDashboard,
+  onEnterDemo,
   onNavigate,
   onLaunchCockpit,
   onOpenPricing,
@@ -120,6 +122,22 @@ export const SensoriumVitrineClair: React.FC<SensoriumVitrineClairProps> = ({
     } else {
       setAuthModalTab(tab);
       setIsAuthModalOpen(true);
+    }
+  };
+
+  // Accès immédiat et fluide au Dashboard Démo (sans inscription ni attente)
+  const handleLaunchDemo = () => {
+    authService.loginAsDemo();
+    setRegisteredUser({
+      name: "Visiteur Démo",
+      email: "demo@sensorium.cloudindustrie.com",
+      company: "SENSORIUM Démo Corp",
+      role: "Administrateur Démo"
+    });
+    if (onEnterDemo) {
+      onEnterDemo();
+    } else {
+      onEnterDashboard();
     }
   };
 
@@ -291,12 +309,14 @@ export const SensoriumVitrineClair: React.FC<SensoriumVitrineClairProps> = ({
               </div>
             )}
 
-            {/* Bouton Démo — desktop uniquement */}
+            {/* Bouton Démo — desktop */}
             <button
-              onClick={() => setIsDemoModalOpen(true)}
-              className="hidden xl:inline-flex px-3.5 py-2 rounded-full bg-[#e0822d] hover:bg-[#c66e20] text-white font-['Manrope'] font-semibold text-xs tracking-wide shadow-sm shadow-orange-500/20 hover:shadow-md transition-all cursor-pointer whitespace-nowrap"
+              onClick={handleLaunchDemo}
+              className="hidden xl:inline-flex items-center gap-1.5 px-3.5 py-2 rounded-full bg-gradient-to-r from-[#e0822d] to-amber-500 hover:brightness-110 text-white font-['Manrope'] font-bold text-xs tracking-wide shadow-sm shadow-orange-500/25 hover:shadow-md transition-all cursor-pointer whitespace-nowrap"
+              title="Tester immédiatement l'application en mode Démo complet"
             >
-              Démo
+              <Sparkles className="w-3.5 h-3.5 text-amber-200" />
+              <span>Accès Démo</span>
             </button>
 
             {/* Language Switcher — desktop uniquement */}
@@ -309,7 +329,17 @@ export const SensoriumVitrineClair: React.FC<SensoriumVitrineClairProps> = ({
             </div>
 
             {/* ── Mobile: icônes compactes + hamburger (< xl) ── */}
-            <div className="flex xl:hidden items-center gap-1 shrink-0">
+            <div className="flex xl:hidden items-center gap-1.5 shrink-0">
+              {/* Bouton Démo compact */}
+              <button
+                onClick={handleLaunchDemo}
+                className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-orange-500/10 hover:bg-orange-500/20 text-orange-600 font-bold text-[11px] border border-orange-300/60 transition cursor-pointer"
+                title="Accès Démo Immédiat"
+              >
+                <Sparkles className="w-3 h-3 text-orange-600" />
+                <span>Démo</span>
+              </button>
+
               {/* Bouton Dashboard compact (icône seule) */}
               <button
                 onClick={onEnterDashboard}
@@ -342,6 +372,14 @@ export const SensoriumVitrineClair: React.FC<SensoriumVitrineClairProps> = ({
               </button>
             ))}
             <div className="pt-3 border-t border-slate-100 space-y-2">
+              {/* Accès Démo Immédiat en tête de tiroir */}
+              <button
+                onClick={() => { setMobileMenuOpen(false); handleLaunchDemo(); }}
+                className="w-full flex items-center justify-center gap-2 py-3 px-4 rounded-xl bg-gradient-to-r from-orange-500 to-amber-500 text-white font-bold text-xs shadow-md shadow-orange-500/20 cursor-pointer"
+              >
+                <Sparkles className="w-4 h-4 text-amber-200" />
+                <span>⚡ Accès Démo Immédiat (Sans inscription)</span>
+              </button>
               {!effectiveUser ? (
                 <button
                   onClick={() => { setMobileMenuOpen(false); handleGoogleLogin(); }}
@@ -520,10 +558,11 @@ export const SensoriumVitrineClair: React.FC<SensoriumVitrineClairProps> = ({
                   {/* 2 Action Buttons */}
                   <div className="flex flex-wrap items-center gap-3 pt-3">
                     <button
-                      onClick={() => setIsDemoModalOpen(true)}
-                      className="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-[#e0822d] hover:bg-[#c66e20] text-white font-['Manrope'] font-semibold text-xs tracking-wide shadow-md shadow-orange-500/25 hover:shadow-lg transition-all cursor-pointer"
+                      onClick={handleLaunchDemo}
+                      className="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-gradient-to-r from-orange-500 to-amber-500 hover:brightness-110 text-white font-['Manrope'] font-bold text-xs tracking-wide shadow-md shadow-orange-500/25 hover:shadow-lg transition-all cursor-pointer"
                     >
-                      <span>Demander une démo</span>
+                      <Sparkles className="w-4 h-4 text-amber-200" />
+                      <span>Accéder en Démo Directe</span>
                       <ArrowRight className="w-4 h-4" />
                     </button>
 
@@ -1058,6 +1097,34 @@ export const SensoriumVitrineClair: React.FC<SensoriumVitrineClairProps> = ({
                   <h3 className="font-['Manrope'] font-bold text-xl text-slate-900">Demander une démonstration</h3>
                   <p className="text-xs text-slate-500">Découvrez SENSORIUM CAFM PRO avec un expert produit</p>
                 </div>
+              </div>
+
+              {/* Accès Démo Immédiat en 1 clic */}
+              <div className="mb-6 p-4 rounded-2xl bg-gradient-to-r from-orange-50 via-amber-50 to-orange-50/60 border border-orange-200 shadow-xs">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                  <div>
+                    <p className="text-xs font-bold text-slate-900 flex items-center gap-1.5">
+                      <Sparkles className="w-4 h-4 text-orange-600" />
+                      Accès Démo Immédiat
+                    </p>
+                    <p className="text-[11px] text-slate-600 mt-0.5">
+                      Explorez le Dashboard complet en direct sans attente (Cockpit 3D, Agent Orbit, GMAO).
+                    </p>
+                  </div>
+                  <button
+                    onClick={() => { setIsDemoModalOpen(false); handleLaunchDemo(); }}
+                    type="button"
+                    className="shrink-0 px-4 py-2 rounded-xl bg-gradient-to-r from-orange-500 to-amber-500 hover:brightness-110 text-white font-bold text-xs shadow-md transition-all cursor-pointer flex items-center justify-center gap-1.5"
+                  >
+                    <span>Lancer la Démo</span>
+                    <ArrowRight className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+              </div>
+
+              <div className="relative flex items-center justify-center my-4">
+                <div className="border-t border-slate-200 w-full" />
+                <span className="bg-white px-2 text-[10px] uppercase font-semibold text-slate-400 absolute">ou échanger avec un expert</span>
               </div>
 
               {demoSubmitted ? (

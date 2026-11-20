@@ -107,7 +107,11 @@ export default function App() {
     if (!seg || seg === "portal" || seg === "website" || seg === "vitrine") {
       return "portal";
     }
-    if (seg === "site-viewer" || seg === "showcase" || seg === "solutions" || seg === "demo" || seg === "roi" || seg === "developers") {
+    if (seg === "demo") {
+      authService.loginAsDemo();
+      return "overview";
+    }
+    if (seg === "site-viewer" || seg === "showcase" || seg === "solutions" || seg === "roi" || seg === "developers") {
       return "site-viewer";
     }
     if (seg === "dashboard" || seg === "cafm") {
@@ -431,10 +435,21 @@ export default function App() {
     }
   };
 
+  const handleEnterDemoMode = (targetPage: string = "overview") => {
+    authService.loginAsDemo();
+    setIsSimulationMode(true);
+    if (typeof localStorage !== "undefined") {
+      localStorage.setItem("sensorium_simulation_mode", "true");
+    }
+    setActivePage(targetPage);
+    setActiveItemId(targetPage === "cockpit" ? "spider-cockpit" : "ov-general");
+    navigate(targetPage === "overview" ? "/dashboard" : `/${targetPage}`);
+  };
+
   const handleEnterDashboard = async (targetPage: string = "overview") => {
-    // Vérification de sécurité : Tout accès au Dashboard/Cockpit requiert une authentification préalable
+    // Si l'utilisateur n'est pas connecté, accès fluide et direct au Dashboard Démo
     if (!user && !authService.isAuthenticated()) {
-      await handleSignIn();
+      handleEnterDemoMode(targetPage);
       return;
     }
     setActivePage(targetPage);
@@ -443,11 +458,7 @@ export default function App() {
   };
 
   const handleEnterMockMode = async () => {
-    if (!user && !authService.isAuthenticated()) {
-      await handleSignIn();
-      return;
-    }
-    handleEnterDashboard("overview");
+    handleEnterDemoMode("overview");
   };
 
   // Persist subscription tier to Firestore when user upgrades
@@ -559,7 +570,8 @@ export default function App() {
           <PublicPortal
             onSignIn={handleSignIn}
             onSignOut={logout}
-            onEnterMockMode={() => handleEnterDashboard("overview")}
+            onEnterMockMode={() => handleEnterDemoMode("overview")}
+            onEnterDemoMode={() => handleEnterDemoMode("overview")}
             onLaunchDashboard={() => handleEnterDashboard("overview")}
             onLaunchCockpit={() => handleEnterDashboard("cockpit")}
             onNavigateToSection={handleNavigateFromPortal}
@@ -764,6 +776,7 @@ export default function App() {
             onSignIn={handleSignIn}
             onSignOut={logout}
             onEnterMockMode={handleEnterMockMode}
+            onEnterDemoMode={() => handleEnterDemoMode("overview")}
             onNavigateToSection={handleNavigateFromPortal}
             isDark={isDark}
             toggleTheme={toggleTheme}
