@@ -8,6 +8,7 @@ import React, { useState, useEffect } from 'react';
 import type { User } from 'firebase/auth';
 import { useSubscriptionGate, SubscriptionTier } from './useSubscriptionGate';
 import { Zap, ShieldAlert, KeyRound, Sparkles } from 'lucide-react';
+import TrialService from '../services/trial.service';
 
 interface SubscriptionGuardProps {
   user: User | null | undefined;
@@ -272,31 +273,17 @@ export const SubscriptionGuard: React.FC<SubscriptionGuardProps> = ({
           )}
         </div>
 
-        {/* Accès Découverte Immédiat / Essai 14 jours — BUG #6 CORRIGÉ : expiration réelle */}
+        {/* Accès Découverte Immédiat / Pass Gratuit 10 Jours (Tous les Services Débloqués) */}
         <div className="flex items-center gap-3">
           <button
             onClick={() => {
-              const trialAlreadyUsed = localStorage.getItem('sensorium_trial_expires_at');
-              if (trialAlreadyUsed && Date.now() < new Date(trialAlreadyUsed).getTime()) {
-                // Essai encore actif : recharger
-                refreshSubscription();
-                return;
-              }
-              if (trialAlreadyUsed && Date.now() >= new Date(trialAlreadyUsed).getTime()) {
-                // Essai expiré
-                alert('Votre essai de 14 jours a expiré. Veuillez souscrire à un plan payant.');
-                return;
-              }
-              // Premier essai : stocker la date d’expiration (14 jours)
-              const expiresAt = new Date(Date.now() + 14 * 24 * 3600 * 1000).toISOString();
-              localStorage.setItem('sensorium_trial_expires_at', expiresAt);
-              localStorage.setItem('sensorium_subscription_tier', 'starter');
-              if (onSelectPlan) onSelectPlan('STARTER');
+              TrialService.activate10DayFreeTrial();
+              if (onSelectPlan) onSelectPlan('ENTERPRISE');
               refreshSubscription();
             }}
-            className="text-xs text-indigo-400 hover:text-indigo-300 underline underline-offset-4 flex items-center gap-1 font-['Space_Grotesk'] transition-colors"
+            className="text-xs text-indigo-400 hover:text-indigo-300 underline underline-offset-4 flex items-center gap-1 font-['Space_Grotesk'] transition-colors cursor-pointer"
           >
-            <span>✨ Activer un essai Démo 14 jours (Accès Starter — 1 utilisation par appareil)</span>
+            <span>🎁 Activer le Pass Gratuit 10 Jours (Accès Illimité à TOUS les Services Enterprise)</span>
           </button>
         </div>
 

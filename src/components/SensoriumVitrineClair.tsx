@@ -29,6 +29,7 @@ import {
 import type { User } from 'firebase/auth';
 import { logout } from '../firebase';
 import authService from '../services/auth.service';
+import TrialService from '../services/trial.service';
 import { GoogleLogoIcon } from './ShowcaseViewer';
 import { PageEnergie } from './vitrine/PageEnergie';
 import { PageSecurite } from './vitrine/PageSecurite';
@@ -125,14 +126,15 @@ export const SensoriumVitrineClair: React.FC<SensoriumVitrineClairProps> = ({
     }
   };
 
-  // Accès immédiat et fluide au Dashboard Démo (sans inscription ni attente)
+  // Accès immédiat et fluide au Dashboard Démo avec Pass 10 Jours Enterprise débloqué
   const handleLaunchDemo = () => {
+    TrialService.activate10DayFreeTrial();
     authService.loginAsDemo();
     setRegisteredUser({
-      name: "Visiteur Démo",
+      name: "Visiteur Démo (Pass 10 Jours)",
       email: "demo@sensorium.cloudindustrie.com",
       company: "SENSORIUM Démo Corp",
-      role: "Administrateur Démo"
+      role: "Administrateur Enterprise (Essai 10 Jours)"
     });
     if (onEnterDemo) {
       onEnterDemo();
@@ -189,6 +191,20 @@ export const SensoriumVitrineClair: React.FC<SensoriumVitrineClairProps> = ({
 
   return (
     <div className="min-h-screen w-full max-w-[100vw] overflow-x-hidden bg-white text-slate-900 font-['Inter',sans-serif] selection:bg-[#e0822d]/20 selection:text-[#e0822d] relative antialiased">
+
+      {/* ── BANNIÈRE PASS DÉCOUVERTE 10 JOURS TOUS SERVICES ── */}
+      <div className="w-full bg-gradient-to-r from-slate-950 via-slate-900 to-slate-950 text-white px-3 py-2 text-center text-xs border-b border-orange-500/25 flex flex-wrap items-center justify-center gap-2 sm:gap-3">
+        <span className="flex items-center gap-1.5 font-medium">
+          <Sparkles className="w-3.5 h-3.5 text-amber-400 animate-pulse shrink-0" />
+          <span>Offre Spéciale : <strong>10 Jours d'accès gratuit</strong> à TOUS les services (Cockpit 3D, 36 Agents IA, GMAO, Télémétrie)</span>
+        </span>
+        <button
+          onClick={handleLaunchDemo}
+          className="px-3 py-1 rounded-full bg-gradient-to-r from-orange-500 to-amber-500 hover:brightness-110 font-bold text-[11px] shadow-sm transition-all cursor-pointer whitespace-nowrap"
+        >
+          Activer mon Pass 10 Jours →
+        </button>
+      </div>
 
       {/* ═══════════════════════════════════════════════════════════
           1. HEADER / NAVBAR
@@ -309,14 +325,14 @@ export const SensoriumVitrineClair: React.FC<SensoriumVitrineClairProps> = ({
               </div>
             )}
 
-            {/* Bouton Démo — desktop */}
+            {/* Bouton Pass 10 Jours Gratuit — desktop */}
             <button
               onClick={handleLaunchDemo}
               className="hidden xl:inline-flex items-center gap-1.5 px-3.5 py-2 rounded-full bg-gradient-to-r from-[#e0822d] to-amber-500 hover:brightness-110 text-white font-['Manrope'] font-bold text-xs tracking-wide shadow-sm shadow-orange-500/25 hover:shadow-md transition-all cursor-pointer whitespace-nowrap"
-              title="Tester immédiatement l'application en mode Démo complet"
+              title="Activer 10 jours d'accès gratuit à tous les services"
             >
               <Sparkles className="w-3.5 h-3.5 text-amber-200" />
-              <span>Accès Démo</span>
+              <span>Pass 10 Jours Gratuit</span>
             </button>
 
             {/* Language Switcher — desktop uniquement */}
@@ -330,14 +346,14 @@ export const SensoriumVitrineClair: React.FC<SensoriumVitrineClairProps> = ({
 
             {/* ── Mobile: icônes compactes + hamburger (< xl) ── */}
             <div className="flex xl:hidden items-center gap-1.5 shrink-0">
-              {/* Bouton Démo compact */}
+              {/* Bouton Pass 10 Jours compact */}
               <button
                 onClick={handleLaunchDemo}
-                className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-orange-500/10 hover:bg-orange-500/20 text-orange-600 font-bold text-[11px] border border-orange-300/60 transition cursor-pointer"
-                title="Accès Démo Immédiat"
+                className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-orange-500/10 hover:bg-orange-500/20 text-orange-600 font-bold text-[11px] border border-orange-300/60 transition cursor-pointer whitespace-nowrap"
+                title="Pass Gratuit 10 Jours"
               >
                 <Sparkles className="w-3 h-3 text-orange-600" />
-                <span>Démo</span>
+                <span>Pass 10J</span>
               </button>
 
               {/* Bouton Dashboard compact (icône seule) */}
@@ -372,13 +388,13 @@ export const SensoriumVitrineClair: React.FC<SensoriumVitrineClairProps> = ({
               </button>
             ))}
             <div className="pt-3 border-t border-slate-100 space-y-2">
-              {/* Accès Démo Immédiat en tête de tiroir */}
+              {/* Accès Pass Gratuit 10 Jours en tête de tiroir */}
               <button
                 onClick={() => { setMobileMenuOpen(false); handleLaunchDemo(); }}
                 className="w-full flex items-center justify-center gap-2 py-3 px-4 rounded-xl bg-gradient-to-r from-orange-500 to-amber-500 text-white font-bold text-xs shadow-md shadow-orange-500/20 cursor-pointer"
               >
                 <Sparkles className="w-4 h-4 text-amber-200" />
-                <span>⚡ Accès Démo Immédiat (Sans inscription)</span>
+                <span>🎁 Activer le Pass Gratuit 10 Jours (Tous Services)</span>
               </button>
               {!effectiveUser ? (
                 <button

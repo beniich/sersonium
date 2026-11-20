@@ -20,6 +20,7 @@ import { useLanguage } from "../App";
 import { GlobalState, SubscriptionTier } from "../types";
 import { logAuditEvent } from "../hooks/useGlobalState";
 import PayPalSmartButton from "./PayPalSmartButton";
+import TrialService from "../services/trial.service";
 
 interface SubscriptionPricingModalProps {
   isOpen: boolean;
@@ -171,6 +172,38 @@ export default function SubscriptionPricingModal({
                   </span>
                 </button>
               </div>
+            </div>
+
+            {/* Bannière Pass Découverte 10 Jours Gratuit */}
+            <div className="p-4 rounded-2xl bg-gradient-to-r from-orange-500/10 via-amber-500/10 to-orange-500/10 border border-orange-500/30 flex flex-col sm:flex-row items-center justify-between gap-3 shadow-xs">
+              <div className="flex items-center gap-3 text-left">
+                <div className="w-10 h-10 rounded-xl bg-orange-500/20 text-orange-500 flex items-center justify-center shrink-0">
+                  <Sparkles className="w-5 h-5 text-amber-500 animate-pulse" />
+                </div>
+                <div>
+                  <h4 className="font-bold text-sm text-slate-900 dark:text-white flex items-center gap-2">
+                    {language === "fr" ? "Pass Découverte 10 Jours Gratuit" : "10-Day Free Discovery Pass"}
+                    <span className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 font-mono font-bold">
+                      {language === "fr" ? "TOUS SERVICES" : "ALL SERVICES"}
+                    </span>
+                  </h4>
+                  <p className="text-xs text-slate-500 dark:text-neutral-400">
+                    {language === "fr" 
+                      ? "Débloquez immédiatement tous les services Enterprise (Cockpit 3D, 36 Agents IA, Télémétrie Kafka, GMAO) pendant 10 jours."
+                      : "Instantly unlock all Enterprise services (3D Cockpit, 36 AI Agents, Kafka Telemetry, CAFM) for 10 days."}
+                  </p>
+                </div>
+              </div>
+              <button
+                onClick={() => {
+                  TrialService.activate10DayFreeTrial();
+                  if (onUpgradeSuccess) onUpgradeSuccess("enterprise");
+                  onClose();
+                }}
+                className="px-4 py-2 rounded-xl bg-gradient-to-r from-orange-500 to-amber-500 hover:brightness-110 text-white font-bold text-xs shadow-md transition-all cursor-pointer shrink-0 whitespace-nowrap"
+              >
+                {language === "fr" ? "Activer les 10 Jours Gratuits →" : "Activate 10 Days Free →"}
+              </button>
             </div>
 
             {/* Pricing Cards Grid */}

@@ -252,31 +252,39 @@ class AuthService {
   }
 
   /**
-   * Connexion instantanée en Mode Démo (Sans authentification externe)
+   * Connexion instantanée en Mode Démo avec Pass Gratuit 10 Jours (Accès Enterprise illimité à tous les services)
    */
   public loginAsDemo(role: string = "admin"): AuthUser {
     const demoUser: AuthUser = {
       userId: "demo-user-sensorium",
       email: "demo@sensorium.cloudindustrie.com",
-      displayName: "Visiteur Démo",
+      displayName: "Visiteur Démo (Pass 10 Jours)",
       role,
       tenantId: "tenant-demo-sensorium",
       organizationName: "SENSORIUM Démo Corp",
       permissions: ["*"]
     };
     this.setSession(demoUser, "sensorium_demo_session_token");
+    const expiresAt = new Date(Date.now() + 10 * 24 * 3600 * 1000).toISOString();
+
     if (typeof localStorage !== "undefined") {
       localStorage.setItem("sensorium_simulation_mode", "true");
-      localStorage.setItem("sensorium_subscription_tier", "pro");
+      localStorage.setItem("sensorium_trial_expires_at", expiresAt);
+      localStorage.setItem("sensorium_subscription_tier", "enterprise");
+      localStorage.setItem("sensorium_user_tier", "enterprise");
       localStorage.setItem("sensorium_registered_user", JSON.stringify({
         name: demoUser.displayName,
         email: demoUser.email,
         company: demoUser.organizationName,
-        role: "Administrateur Démo"
+        role: "Administrateur Enterprise (Essai 10 Jours)"
       }));
     }
     if (typeof window !== "undefined") {
       window.dispatchEvent(new CustomEvent("sensorium:mode_changed", { detail: { isSimulation: true } }));
+      window.dispatchEvent(new CustomEvent("sensorium:subscription_changed", {
+        detail: { tier: "enterprise", planName: "Pass Découverte 10 Jours (Tous Services Débloqués)", expiresAt }
+      }));
+      window.dispatchEvent(new CustomEvent("sensorium:quota_updated", { detail: { tier: "enterprise" } }));
       window.dispatchEvent(new CustomEvent("sensorium:profile_updated"));
     }
     return demoUser;

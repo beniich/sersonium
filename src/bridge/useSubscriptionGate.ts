@@ -102,10 +102,26 @@ export function useSubscriptionGate(user: User | null | undefined) {
     const savedTier = (localStorage.getItem('sensorium_subscription_tier') || '').toUpperCase() as SubscriptionTier;
     const hasValidLocalTier = savedTier === 'STARTER' || savedTier === 'SILVER' || savedTier === 'PRO' || savedTier === 'ENTERPRISE';
 
-    // Vérifier si un essai est toujours valide
+    // Vérifier si le Pass Découverte 10 jours ou un essai est toujours valide
     const trialExpires = localStorage.getItem('sensorium_trial_expires_at');
     const isTrialActive = trialExpires ? Date.now() < new Date(trialExpires).getTime() : false;
-    const hasTrialAccess = isTrialActive;
+
+    // Si Pass Découverte 10 Jours actif ou tier Enterprise local : déblocage immédiat de 100% des services
+    if (isTrialActive || savedTier === 'ENTERPRISE') {
+      setSubState({
+        status: isTrialActive ? 'trialing' : 'active',
+        tier: 'ENTERPRISE',
+        planName: isTrialActive ? 'Pass Découverte 10 Jours (Tous Services Débloqués)' : 'Plan Enterprise Gold',
+        hasAccessToCockpit: true,
+        has3dDigitalTwin: true,
+        hasRealtimeKafka: true,
+        hasZtnaHardware: true,
+        tokenBalance: 2000000,
+        expiresAt: trialExpires,
+        isLoading: false,
+      });
+      return;
+    }
 
     const effectiveUser = user || (authService.isAuthenticated() ? { uid: authService.getSession().user?.userId, email: authService.getSession().user?.email } : null);
 
@@ -177,13 +193,13 @@ export function useSubscriptionGate(user: User | null | undefined) {
 
         setSubState({
           status: isTrialActive ? 'trialing' : 'none',
-          tier: isTrialActive ? 'STARTER' : 'FREE',
-          planName: isTrialActive ? 'Essai Démo (14 jours)' : 'Offre Découverte',
+          tier: isTrialActive ? 'ENTERPRISE' : 'FREE',
+          planName: isTrialActive ? 'Pass Découverte 10 Jours (Tous Services Débloqués)' : 'Offre Découverte',
           hasAccessToCockpit: isTrialActive,
-          has3dDigitalTwin: false,
-          hasRealtimeKafka: false,
-          hasZtnaHardware: false,
-          tokenBalance: isTrialActive ? 1000 : 0,
+          has3dDigitalTwin: isTrialActive,
+          hasRealtimeKafka: isTrialActive,
+          hasZtnaHardware: isTrialActive,
+          tokenBalance: isTrialActive ? 2000000 : 0,
           expiresAt: isTrialActive ? trialExpires : null,
           isLoading: false,
         });

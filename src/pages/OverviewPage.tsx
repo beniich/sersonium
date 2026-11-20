@@ -19,7 +19,8 @@ import {
   MapPin,
   Layers,
   Compass,
-  LayoutDashboard
+  LayoutDashboard,
+  Sparkles
 } from "lucide-react";
 import GeoAssetHeatMap from "../components/GeoAssetHeatMap";
 import InteractiveFloorPlan from "../components/InteractiveFloorPlan";
@@ -36,6 +37,7 @@ import ServicesShowcaseRibbon from "../components/ServicesShowcaseRibbon";
 import SubscriptionQuotaCounter from "../components/SubscriptionQuotaCounter";
 import ExecutiveGlassDashboard from "../components/ExecutiveGlassDashboard";
 import AgentOrbit from "../components/AgentOrbit";
+import TrialService from "../services/trial.service";
 import { MODULE_TABS } from "../components/ModuleNavigationBar";
 import { User } from "firebase/auth";
 
@@ -132,7 +134,26 @@ export default function OverviewPage({
               Supervision orchestrée des 36 agents IA (Research, Content, The loop, Publish, Sales, Community)
             </p>
           </div>
-          <div className="flex items-center gap-2 shrink-0">
+          <div className="flex flex-wrap items-center gap-2 shrink-0">
+            {/* Badge Pass 10 Jours Actif ou Bouton d'activation */}
+            {TrialService.hasActiveTrial() ? (
+              <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-gradient-to-r from-amber-500/15 via-orange-500/15 to-amber-500/15 border border-amber-500/35 text-amber-600 dark:text-amber-300 text-xs font-semibold shadow-xs">
+                <Sparkles className="w-3.5 h-3.5 text-amber-500 animate-pulse shrink-0" />
+                <span>Pass 10 Jours Actif : <strong>{TrialService.getTrialStatus().formattedTime}</strong> (Tous Services Enterprise)</span>
+              </div>
+            ) : (
+              <button
+                onClick={() => {
+                  TrialService.activate10DayFreeTrial();
+                  window.location.reload();
+                }}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-gradient-to-r from-orange-500 to-amber-500 hover:brightness-110 text-white font-bold text-xs shadow-xs transition cursor-pointer"
+              >
+                <Sparkles className="w-3.5 h-3.5 text-amber-200 shrink-0" />
+                <span>Activer Pass Gratuit 10 Jours</span>
+              </button>
+            )}
+
             <button
               onClick={() => handleTabChange("ov-general")}
               className="px-3.5 py-1.5 rounded-xl border border-slate-200 dark:border-slate-700 text-xs font-semibold text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition cursor-pointer"

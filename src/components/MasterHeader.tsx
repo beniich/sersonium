@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Menu, Sun, Moon, Crown, UserPlus, Globe } from 'lucide-react';
+import { Menu, Sun, Moon, Crown, UserPlus, Globe, Sparkles } from 'lucide-react';
 import { useRbac } from '@/hooks/useRbac';
 import { useConnectionHealth } from '@/hooks/useConnectionHealth';
 import { useTheme } from '../App';
@@ -10,6 +10,7 @@ import UserProfileModal from './UserProfileModal';
 import { SensoriumAuthModal } from './SensoriumAuthModal';
 import { GoogleLogoIcon } from './ShowcaseViewer';
 import authService from '../services/auth.service';
+import TrialService, { TrialStatus } from '../services/trial.service';
 
 export interface MasterHeaderProps {
   onOpenMenu?: () => void;
@@ -30,6 +31,19 @@ export const MasterHeader: React.FC<MasterHeaderProps> = ({
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [authDefaultTab, setAuthDefaultTab] = useState<'register' | 'login'>('register');
   const [isGoogleLoggingIn, setIsGoogleLoggingIn] = useState(false);
+  const [trialStatus, setTrialStatus] = useState<TrialStatus>(() => TrialService.getTrialStatus());
+
+  useEffect(() => {
+    const updateTrial = () => setTrialStatus(TrialService.getTrialStatus());
+    window.addEventListener('sensorium:trial_updated', updateTrial);
+    window.addEventListener('sensorium:subscription_changed', updateTrial);
+    const interval = setInterval(updateTrial, 60000);
+    return () => {
+      window.removeEventListener('sensorium:trial_updated', updateTrial);
+      window.removeEventListener('sensorium:subscription_changed', updateTrial);
+      clearInterval(interval);
+    };
+  }, []);
 
   const handleGoogleQuickLogin = async () => {
     try {
@@ -166,6 +180,31 @@ export const MasterHeader: React.FC<MasterHeaderProps> = ({
           <UserPlus size={13} className="text-orange-400" />
           <span className="hidden sm:inline">Inscription</span>
         </button>
+
+        {/* Pass Découverte Gratuit 10 Jours (Tous Services Débloqués) */}
+        {trialStatus.isTrialActive ? (
+          <div
+            onClick={() => navigate('/pricing')}
+            className="hidden md:inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-gradient-to-r from-amber-500/15 via-orange-500/15 to-amber-500/15 border border-amber-500/35 text-amber-300 text-xs font-semibold cursor-pointer shadow-xs hover:border-amber-400 transition-all select-none"
+            title="Pass Découverte 10 Jours Actif — Tous les services Enterprise sont 100% débloqués"
+          >
+            <Sparkles size={12} className="text-amber-400 animate-pulse shrink-0" />
+            <span className="font-bold">Pass 10 Jours :</span>
+            <span className="font-mono text-[11px] text-amber-200">{trialStatus.formattedTime}</span>
+          </div>
+        ) : (
+          <button
+            onClick={() => {
+              TrialService.activate10DayFreeTrial();
+              setTrialStatus(TrialService.getTrialStatus());
+            }}
+            className="hidden md:inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-gradient-to-r from-orange-500 to-amber-500 hover:brightness-110 text-white text-xs font-bold cursor-pointer shadow-xs transition-all"
+            title="Activer un accès gratuit de 10 jours à tous les services"
+          >
+            <Sparkles size={12} className="text-amber-200 shrink-0" />
+            <span>Pass Gratuit 10 Jours</span>
+          </button>
+        )}
 
         {/* Compteur interactif de quotas d'abonnement & Tokens IA */}
         <SubscriptionQuotaCounter 
