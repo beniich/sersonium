@@ -9,9 +9,10 @@ export interface ModuleTab {
 }
 
 export const MODULE_TABS: ModuleTab[] = [
-  { id: "site-viewer", label: "🌐 Vitrine & Solutions", path: "/site-viewer" },
-  { id: "ov-glass", label: "✨ Vision Dashboard", path: "/dashboard" },
+  { id: "ov-agent-orbit", label: "🤖 36 Agents IA Orbit", path: "/dashboard" },
   { id: "ov-general", label: "Vue Globale ERP", path: "/dashboard" },
+  { id: "ov-glass", label: "✨ Vision Dashboard", path: "/dashboard" },
+  { id: "site-viewer", label: "🌐 Vitrine & Solutions", path: "/site-viewer" },
   { id: "ov-asset-hub", label: "Fiche Actifs 360°", path: "/dashboard" },
   { id: "cockpit", label: "Jumeau 3D", path: "/cockpit" },
   { id: "robotics", label: "🤖 Flotte AMR", path: "/robotics" },
@@ -37,7 +38,7 @@ export interface ModuleNavigationBarProps {
 }
 
 export const ModuleNavigationBar: React.FC<ModuleNavigationBarProps> = ({
-  activeTab = "ov-general",
+  activeTab = "ov-agent-orbit",
   activePage = "overview",
   onSelectTab,
   onOpenAiStudio,

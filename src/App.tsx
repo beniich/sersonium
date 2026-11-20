@@ -148,8 +148,9 @@ export default function App() {
     if (typeof window !== "undefined") {
       const p = window.location.pathname.toLowerCase();
       if (p.includes("executive") || p.includes("glass")) return "ov-glass";
+      if (p.includes("orbit") || p.includes("agent")) return "ov-agent-orbit";
     }
-    return "ov-general";
+    return "ov-agent-orbit";
   });
   const [activePage, setActivePage] = useState<string>(() => pageFromPath(location.pathname));
 
@@ -442,7 +443,7 @@ export default function App() {
       localStorage.setItem("sensorium_simulation_mode", "true");
     }
     setActivePage(targetPage);
-    setActiveItemId(targetPage === "cockpit" ? "spider-cockpit" : "ov-general");
+    setActiveItemId(targetPage === "cockpit" ? "spider-cockpit" : "ov-agent-orbit");
     navigate(targetPage === "overview" ? "/dashboard" : `/${targetPage}`);
   };
 
@@ -453,7 +454,7 @@ export default function App() {
       return;
     }
     setActivePage(targetPage);
-    setActiveItemId(targetPage === "cockpit" ? "spider-cockpit" : "ov-general");
+    setActiveItemId(targetPage === "cockpit" ? "spider-cockpit" : "ov-agent-orbit");
     navigate(targetPage === "overview" ? "/dashboard" : `/${targetPage}`);
   };
 
@@ -540,7 +541,7 @@ export default function App() {
         const overviewPrefixes = ["ov-", "cafm-", "kpi-"];
         const isAlreadyOverviewTab = overviewPrefixes.some(pref => activeItemId.startsWith(pref));
         if (!isAlreadyOverviewTab) {
-          setActiveItemId(location.pathname.includes("/cafm") ? "ov-cafm" : "ov-general");
+          setActiveItemId(location.pathname.includes("/cafm") ? "ov-cafm" : "ov-agent-orbit");
         }
       } else if (newPage === "cockpit") {
         setActiveItemId("spider-cockpit");

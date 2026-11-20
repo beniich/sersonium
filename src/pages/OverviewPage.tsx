@@ -35,6 +35,7 @@ import TelemetryChart from "../components/TelemetryChart";
 import ServicesShowcaseRibbon from "../components/ServicesShowcaseRibbon";
 import SubscriptionQuotaCounter from "../components/SubscriptionQuotaCounter";
 import ExecutiveGlassDashboard from "../components/ExecutiveGlassDashboard";
+import AgentOrbit from "../components/AgentOrbit";
 import { MODULE_TABS } from "../components/ModuleNavigationBar";
 import { User } from "firebase/auth";
 
@@ -56,7 +57,7 @@ interface OverviewPageProps {
 export default function OverviewPage({ 
   state, 
   isDark = true, 
-  activeItemId = "ov-glass", 
+  activeItemId = "ov-agent-orbit", 
   user,
   onSignIn,
   onSelectTab,
@@ -66,7 +67,7 @@ export default function OverviewPage({
   isCompactMode: isCompactModeProp,
   onToggleCompactMode: onToggleCompactModeProp
 }: OverviewPageProps) {
-  const activeTab = MODULE_TABS.some(t => t.id === activeItemId) ? activeItemId : "ov-glass";
+  const activeTab = MODULE_TABS.some(t => t.id === activeItemId) ? activeItemId : "ov-agent-orbit";
 
   const handleTabChange = (tabId: string) => {
     if (onSelectTab) onSelectTab(tabId);
@@ -115,6 +116,37 @@ export default function OverviewPage({
   };
   const effectiveCompactMode = isCompactModeProp !== undefined ? isCompactModeProp : isCompactMode;
   const effectiveToggleCompactMode = onToggleCompactModeProp || toggleCompactMode;
+
+  // 🤖 PREMIER RUBRIQUE : 36 Agents IA — Écosystème Orbit
+  if (activeTab === "ov-agent-orbit") {
+    return (
+      <div className="w-full space-y-4">
+        {/* En-tête contextuel */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-4 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xs">
+          <div>
+            <h1 className="text-xl sm:text-2xl font-['Manrope'] font-extrabold text-slate-900 dark:text-white flex items-center gap-2">
+              <span className="p-2 rounded-xl bg-orange-500/10 text-orange-500 text-lg">🤖</span>
+              36 AI Agents — Écosystème Orbit
+            </h1>
+            <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+              Supervision orchestrée des 36 agents IA (Research, Content, The loop, Publish, Sales, Community)
+            </p>
+          </div>
+          <div className="flex items-center gap-2 shrink-0">
+            <button
+              onClick={() => handleTabChange("ov-general")}
+              className="px-3.5 py-1.5 rounded-xl border border-slate-200 dark:border-slate-700 text-xs font-semibold text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition cursor-pointer"
+            >
+              Vue ERP Classique →
+            </button>
+          </div>
+        </div>
+
+        {/* Composant Orbit 36 Agents */}
+        <AgentOrbit isDark={isDark} />
+      </div>
+    );
+  }
 
   // 🌟 NOUVEAU : Executive Glass Dashboard Haute Fidélité (Mockup Référence direct sans encombrements)
   if (activeTab === "ov-glass") {

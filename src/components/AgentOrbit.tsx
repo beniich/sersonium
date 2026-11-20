@@ -111,12 +111,12 @@ const groupsData: Group[] = [
 ];
 
 const positionClasses: Record<Group["position"], string> = {
-  "top-left": "top-8 left-8",
-  "top-right": "top-8 right-8",
-  "middle-left": "top-1/2 -translate-y-1/2 left-8",
-  "middle-right": "top-1/2 -translate-y-1/2 right-8",
-  "bottom-left": "bottom-8 left-8",
-  "bottom-right": "bottom-8 right-8",
+  "top-left": "top-20 left-6 sm:left-10",
+  "top-right": "top-20 right-6 sm:right-10",
+  "middle-left": "top-1/2 -translate-y-1/2 left-6 sm:left-10",
+  "middle-right": "top-1/2 -translate-y-1/2 right-6 sm:right-10",
+  "bottom-left": "bottom-6 left-6 sm:left-10",
+  "bottom-right": "bottom-6 right-6 sm:right-10",
 };
 
 const statusColors: Record<AgentStatus, string> = {
@@ -286,107 +286,145 @@ export default function AgentOrbit({ isDark: initialIsDark = false }: AgentOrbit
 
   return (
     <div className={`${isDark ? "dark" : ""}`}>
-      <div className="relative w-full h-[820px] bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-950 rounded-3xl overflow-hidden select-none transition-colors duration-500">
+      <div className="relative w-full h-[880px] bg-gradient-to-br from-gray-50 via-slate-50 to-gray-100 dark:from-gray-900 dark:via-slate-950 dark:to-gray-950 rounded-3xl overflow-hidden select-none transition-colors duration-500 border border-slate-200/60 dark:border-slate-800 shadow-sm">
         
+        {/* Title Heading — identical to the uploaded reference */}
+        <div className="absolute top-5 left-6 sm:left-10 z-30 pointer-events-none">
+          <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-900/90 dark:text-white/90 font-['Manrope']">
+            36 AI Agents
+          </h1>
+          <p className="text-xs text-slate-500 dark:text-slate-400 font-medium">
+            Écosystème autonome multi-agents interconnecté
+          </p>
+        </div>
+
         {/* Dark mode toggle */}
         <button
           onClick={() => setIsDark(!isDark)}
-          className="absolute top-5 right-5 z-30 px-3 py-1.5 text-xs font-medium rounded-full bg-white/80 dark:bg-gray-800/80 backdrop-blur border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-200 hover:scale-105 transition-transform cursor-pointer"
+          className="absolute top-5 right-6 sm:right-10 z-30 px-3 py-1.5 text-xs font-medium rounded-full bg-white/80 dark:bg-gray-800/80 backdrop-blur border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-200 hover:scale-105 transition-transform cursor-pointer shadow-xs"
         >
           {isDark ? "☀️ Light" : "🌙 Dark"}
         </button>
 
-        {/* SVG lines */}
-        <svg className="absolute inset-0 w-full h-full pointer-events-none" viewBox="0 0 1000 820" fill="none">
-          <motion.path
-            d="M500 80 C500 180 500 280 500 380 C500 480 500 580 500 720"
-            stroke="url(#lineGradient)"
+        {/* SVG Racetrack & Connection Lines */}
+        <svg className="absolute inset-0 w-full h-full pointer-events-none" viewBox="0 0 1000 880" fill="none">
+          {/* Main Racetrack Loop */}
+          <path
+            d="M 450 110 A 50 50 0 0 1 550 110 L 550 770 A 50 50 0 0 1 450 770 Z"
+            stroke={isDark ? "#334155" : "#0f172a"}
             strokeWidth="2.5"
             strokeLinecap="round"
-            initial={{ pathLength: 0, opacity: 0 }}
-            animate={{ pathLength: 1, opacity: 0.7 }}
-            transition={{ duration: 1.6 }}
           />
-          {["M180 200 H420", "M580 200 H820", "M180 410 H420", "M580 410 H820", "M180 620 H420", "M580 620 H820"].map((d, i) => (
-            <motion.path key={i} d={d} stroke="#f97316" strokeWidth="1.5"
-              initial={{ pathLength: 0, opacity: 0 }}
-              animate={{ pathLength: 1, opacity: 0.4 }}
-              transition={{ duration: 1.2, delay: 0.3 + i * 0.08 }}
-            />
+
+          {/* Animated Energy Flow on Racetrack */}
+          <motion.path
+            d="M 450 110 A 50 50 0 0 1 550 110 L 550 770 A 50 50 0 0 1 450 770 Z"
+            stroke="#f97316"
+            strokeWidth="3"
+            strokeLinecap="round"
+            strokeDasharray="40 180"
+            animate={{ strokeDashoffset: [0, -440] }}
+            transition={{ duration: 6, repeat: Infinity, ease: "linear" }}
+          />
+
+          {/* Horizontal Connector Lines from Cards to Racetrack */}
+          {/* Left Connectors: y=230, y=470, y=710 */}
+          <path d="M 320 230 L 450 230" stroke={isDark ? "#475569" : "#0f172a"} strokeWidth="1.5" />
+          <path d="M 320 470 L 450 470" stroke={isDark ? "#475569" : "#0f172a"} strokeWidth="1.5" />
+          <path d="M 320 710 L 450 710" stroke={isDark ? "#475569" : "#0f172a"} strokeWidth="1.5" />
+
+          {/* Right Connectors: y=230, y=470, y=710 */}
+          <path d="M 550 230 L 680 230" stroke={isDark ? "#475569" : "#0f172a"} strokeWidth="1.5" />
+          <path d="M 550 470 L 680 470" stroke={isDark ? "#475569" : "#0f172a"} strokeWidth="1.5" />
+          <path d="M 550 710 L 680 710" stroke={isDark ? "#475569" : "#0f172a"} strokeWidth="1.5" />
+
+          {/* Connection Junction Nodes (Circles) */}
+          {[230, 470, 710].map((y) => (
+            <React.Fragment key={y}>
+              <circle cx="450" cy={y} r="5" fill={isDark ? "#1e293b" : "#ffffff"} stroke={isDark ? "#f97316" : "#0f172a"} strokeWidth="2" />
+              <circle cx="550" cy={y} r="5" fill={isDark ? "#1e293b" : "#ffffff"} stroke={isDark ? "#f97316" : "#0f172a"} strokeWidth="2" />
+            </React.Fragment>
           ))}
-          {[200, 410, 620].map((y, i) => (
-            <motion.circle key={y} cx="500" cy={y} r="5" fill="#f97316"
-              animate={{ scale: [1, 1.6, 1], opacity: [0.8, 0.3, 0.8] }}
-              transition={{ duration: 2.2, repeat: Infinity, delay: i * 0.35 }}
-            />
-          ))}
-          <defs>
-            <linearGradient id="lineGradient" x1="0%" y1="0%" x2="0%" y2="100%">
-              <stop offset="0%" stopColor="#f97316" stopOpacity="0.3" />
-              <stop offset="50%" stopColor="#f97316" stopOpacity="1" />
-              <stop offset="100%" stopColor="#f97316" stopOpacity="0.3" />
-            </linearGradient>
-          </defs>
+
+          {/* Directional Chevron Arrows on Racetrack */}
+          {/* Left line: going down */}
+          <polygon points="446,310 450,318 454,310" fill="#f97316" />
+          <polygon points="446,580 450,588 454,580" fill="#f97316" />
+          {/* Right line: going up */}
+          <polygon points="546,588 550,580 554,588" fill="#f97316" />
         </svg>
 
-        {/* Center Node */}
-        <motion.div
-          className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-20 flex flex-col items-center"
-          initial={{ opacity: 0, scale: 0.6 }}
-          animate={{ opacity: 1, scale: 1 }}
-        >
-          <div className="mb-3 px-4 py-1.5 bg-black dark:bg-white text-white dark:text-black text-xs font-medium rounded-full shadow-lg">
+        {/* "You" Badge on track */}
+        <div className="absolute top-[320px] left-[550px] -translate-x-1/2 -translate-y-1/2 z-20 pointer-events-none">
+          <div className="px-3.5 py-1 bg-black text-white text-xs font-bold rounded-full shadow-md">
             You
           </div>
+        </div>
+
+        {/* Center Node: Claude Code */}
+        <motion.div
+          className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-20 flex flex-col items-center"
+          initial={{ opacity: 0, scale: 0.8 }}
+          animate={{ opacity: 1, scale: 1 }}
+        >
           <motion.div
-            className="w-20 h-20 rounded-2xl bg-black dark:bg-gray-800 flex items-center justify-center shadow-2xl ring-4 ring-orange-400/40 cursor-pointer"
-            whileHover={{ scale: 1.1, rotate: 6 }}
+            className="w-20 h-20 rounded-2xl bg-black dark:bg-gray-800 flex items-center justify-center shadow-2xl ring-4 ring-orange-500/30 cursor-pointer"
+            whileHover={{ scale: 1.08 }}
           >
-            <svg viewBox="0 0 24 24" className="w-10 h-10 text-orange-400" fill="currentColor">
-              <path d="M12 2L14.5 9H22L16 13.5L18.5 21L12 16.5L5.5 21L8 13.5L2 9H9.5L12 2Z" />
+            {/* Coral/Orange Sunburst (Claude icon) */}
+            <svg viewBox="0 0 24 24" className="w-10 h-10 text-[#d97757]" fill="currentColor">
+              <path d="M12 2C12.55 2 13 2.45 13 3V5C13 5.55 12.55 6 12 6C11.45 6 11 5.55 11 5V3C11 2.45 11.45 2 12 2ZM12 18C12.55 18 13 18.45 13 19V21C13 21.55 12.55 22 12 22C11.45 22 11 21.55 11 21V19C11 18.45 11.45 18 12 18ZM4.93 4.93C5.32 4.54 5.95 4.54 6.34 4.93C6.73 5.32 6.73 5.95 6.34 6.34L4.93 7.75C4.54 8.14 3.91 8.14 3.52 7.75C3.13 7.36 3.13 6.73 3.52 6.34L4.93 4.93ZM17.66 17.66C18.05 17.27 18.68 17.27 19.07 17.66C19.46 18.05 19.46 18.68 19.07 19.07L17.66 20.48C17.27 20.87 16.64 20.87 16.25 20.48C15.86 20.09 15.86 19.46 16.25 19.07L17.66 17.66ZM2 12C2 11.45 2.45 11 3 11H5C5.55 11 6 11.45 6 12C6 12.55 5.55 13 5 13H3C2.45 13 2 12.55 2 12ZM18 12C18 11.45 18.45 11 19 11H21C21.55 11 22 11.45 22 12C22 12.55 21.55 13 21 13H19C18.45 13 18 12.55 18 12ZM4.93 19.07L6.34 17.66C6.73 17.27 7.36 17.27 7.75 17.66C8.14 18.05 8.14 18.68 7.75 19.07L6.34 20.48C5.95 20.87 5.32 20.87 4.93 20.48C4.54 20.09 4.54 19.46 4.93 19.07ZM17.66 6.34L19.07 4.93C19.46 4.54 20.09 4.54 20.48 4.93C20.87 5.32 20.87 5.95 20.48 6.34L19.07 7.75C18.68 8.14 18.05 8.14 17.66 7.75C17.27 7.36 17.27 6.73 17.66 6.34Z" />
             </svg>
           </motion.div>
-          <div className="absolute -bottom-6 left-1/2 -translate-x-1/2 text-xs font-medium text-gray-500 dark:text-gray-400">
+          <div className="mt-2 text-xs font-semibold text-slate-500 dark:text-slate-400">
             Claude Code
           </div>
         </motion.div>
 
-        {/* Agent Cards */}
+        {/* Agent Cards — 6 Groups */}
         {groups.map((group, groupIndex) => (
           <motion.div
             key={group.id}
-            initial={{ opacity: 0, scale: 0.85, y: 30 }}
+            initial={{ opacity: 0, scale: 0.9, y: 20 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
-            transition={{ delay: 0.15 + groupIndex * 0.08 }}
-            whileHover={{ scale: 1.03, y: -6 }}
-            className={`absolute w-64 bg-white dark:bg-gray-800 rounded-2xl shadow-lg border border-gray-100 dark:border-gray-700 p-4 ${positionClasses[group.position]}`}
+            transition={{ delay: 0.1 + groupIndex * 0.06 }}
+            whileHover={{ scale: 1.02 }}
+            className={`absolute w-64 sm:w-72 bg-white dark:bg-gray-800 rounded-2xl shadow-md border border-gray-100 dark:border-gray-700 p-4 ${positionClasses[group.position]}`}
           >
-            <div className="flex items-center justify-between mb-3">
-              <h3 className="font-semibold text-gray-800 dark:text-gray-100 text-sm">{group.title}</h3>
-              <span className="text-xs text-gray-400">{group.count} agents</span>
+            <div className="flex items-center justify-between mb-2.5 pb-1 border-b border-gray-50 dark:border-gray-700/50">
+              <h3 className="font-bold text-gray-900 dark:text-gray-100 text-sm tracking-tight">{group.title}</h3>
+              <span className="text-[11px] text-gray-400 font-medium">{group.count} agents</span>
             </div>
-            <ul className="space-y-1.5">
+            <ul className="space-y-1">
               {group.agents.map((agent) => (
                 <motion.li
                   key={agent.id}
                   onClick={() => handleAgentClick(agent, group.title)}
-                  whileHover={{ x: 4 }}
-                  className={`flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-sm cursor-pointer transition-colors ${
+                  whileHover={{ x: 3 }}
+                  className={`flex items-center justify-between gap-2 px-2.5 py-1.5 rounded-lg text-xs cursor-pointer transition-all ${
                     agent.highlighted
-                      ? "bg-orange-50 dark:bg-orange-500/15 text-orange-700 dark:text-orange-300 font-medium border border-orange-100 dark:border-orange-500/30"
+                      ? "bg-orange-50 dark:bg-orange-500/15 text-orange-800 dark:text-orange-200 font-semibold"
                       : "text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700/50"
                   }`}
                 >
-                  <span className="text-base leading-none">{agent.icon}</span>
-                  <span className="truncate flex-1">{agent.name}</span>
-                  {agent.status === "running" && (
-                    <motion.span className="w-1.5 h-1.5 rounded-full bg-orange-400"
-                      animate={{ scale: [1, 1.5, 1] }}
-                      transition={{ repeat: Infinity, duration: 1.2 }}
-                    />
-                  )}
-                  {agent.status === "success" && <span className="text-emerald-500 text-xs font-bold">✓</span>}
-                  {agent.status === "error" && <span className="text-red-500 text-xs font-bold">✕</span>}
+                  <div className="flex items-center gap-2 truncate">
+                    <span className="text-sm leading-none shrink-0">{agent.icon}</span>
+                    <span className="truncate">{agent.name}</span>
+                  </div>
+                  <div className="flex items-center gap-1.5 shrink-0">
+                    {/* Orange dot for highlighted agents — matching screenshot */}
+                    {agent.highlighted && (
+                      <span className="w-1.5 h-1.5 rounded-full bg-orange-500 shrink-0" />
+                    )}
+                    {agent.status === "running" && (
+                      <motion.span className="w-2 h-2 rounded-full bg-orange-400"
+                        animate={{ scale: [1, 1.4, 1] }}
+                        transition={{ repeat: Infinity, duration: 1 }}
+                      />
+                    )}
+                    {agent.status === "success" && <span className="text-emerald-500 text-xs font-bold">✓</span>}
+                    {agent.status === "error" && <span className="text-red-500 text-xs font-bold">✕</span>}
+                  </div>
                 </motion.li>
               ))}
             </ul>
