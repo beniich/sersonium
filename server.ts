@@ -10,6 +10,7 @@ import http from "http";
 import { Server as SocketIOServer } from "socket.io";
 import { createServer as createViteServer } from "vite";
 import apiRouterV1 from "./server/routes/v1/index.js";
+import orbitRoutes from "./server/routes/orbit.routes.js";
 import { seedDatabase } from "./server/db/seed.js";
 import { kafkaService } from "./server/services/kafka.service.js";
 import { WafService } from "./server/services/waf.service.js";
@@ -149,8 +150,10 @@ sensorium_system_uptime_seconds ${snapshot.uptimeSeconds}
     res.send(prometheusFormat);
   });
 
-  // 2. Montage des APIs V1
+  // 2. Montage des APIs V1 & Orchestrateur 36 Agents Orbit
   app.use("/api/v1", apiRouterV1);
+  app.use("/api", orbitRoutes);
+  app.use("/api/v1/orbit", orbitRoutes);
 
   // Route Webhook PayPal directe avec vérification obligatoire de la signature cryptographique (VULN-01 mitigée)
   app.post("/webhooks/paypal", express.json(), async (req, res) => {
