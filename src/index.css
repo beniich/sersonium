@@ -484,4 +484,62 @@ button[class*="bg-purple-"] svg.lucide,
   box-shadow: 0 0 10px rgba(34, 197, 94, 0.2) !important;
 }
 
+/* ==========================================================================
+   AGENT ORBIT ANIMATIONS (36 AGENTS WORKFLOW LOOP)
+   ========================================================================== */
+
+@keyframes orbit-flow-up {
+  0%, 100% {
+    transform: translateY(0);
+    opacity: 0.65;
+  }
+  50% {
+    transform: translateY(-12px);
+    opacity: 1;
+  }
+}
+
+@keyframes orbit-flow-down {
+  0%, 100% {
+    transform: translateY(0);
+    opacity: 0.65;
+  }
+  50% {
+    transform: translateY(12px);
+    opacity: 1;
+  }
+}
+
+.orbit-arrow-up {
+  animation: orbit-flow-up 2.6s ease-in-out infinite;
+}
+
+.orbit-arrow-down {
+  animation: orbit-flow-down 2.6s ease-in-out infinite;
+}
+
+@keyframes orbit-dot-pulse {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 0.75;
+  }
+  50% {
+    transform: scale(1.45);
+    opacity: 1;
+  }
+}
+
+.orbit-dot-pulse {
+  animation: orbit-dot-pulse 2s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .orbit-arrow-up,
+  .orbit-arrow-down,
+  .orbit-dot-pulse {
+    animation: none;
+  }
+}
+
+
 
