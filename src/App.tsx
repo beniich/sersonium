@@ -923,6 +923,7 @@ export default function App() {
                 }>
                   <AgentOrbit 
                     isDark={isDark} 
+                    user={user}
                     onNavigateToERP={() => {
                       try {
                         sessionStorage.setItem("sensorium_dashboard_mode", "erp");

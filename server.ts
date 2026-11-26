@@ -257,13 +257,13 @@ sensorium_system_uptime_seconds ${snapshot.uptimeSeconds}
         success: true,
         data: {
           kpis: {
-            managedAssets: { value: "1 248", rawValue: 1248, change: "+12%", isPositive: true },
-            availability: { value: "99.99%", rawValue: 99.99, change: "+0.01%", isPositive: true },
-            interventions: { value: "24", rawValue: 24, change: "-8%", isPositive: false },
+            managedAssets: { value: "0", rawValue: 0, change: "+0%", isPositive: true },
+            availability: { value: "100%", rawValue: 100, change: "+0%", isPositive: true },
+            interventions: { value: "0", rawValue: 0, change: "+0%", isPositive: false },
             compliance: { value: "100%", rawValue: 100, change: "+0%", isPositive: true },
-            cloudStorage: { value: "892 GB", rawValue: 892, change: "+18%", isPositive: true }
+            cloudStorage: { value: "0 GB", rawValue: 0, change: "+0%", isPositive: true }
           },
-          systemStatus: { operational: true, availability: "99.99%", statusLabel: "Système opérationnel" },
+          systemStatus: { operational: true, availability: "100%", statusLabel: "Système prêt (Phase T0)" },
           timestamp: new Date().toISOString()
         }
       });
@@ -409,25 +409,30 @@ sensorium_system_uptime_seconds ${snapshot.uptimeSeconds}
     res.json({ success: true, range, data });
   });
 
-  // Telemetry Snapshot for Digital Twin & Cockpit (Aligné sous /api/v1/iot/snapshot selon l'audit)
-  app.get(['/api/v1/iot/snapshot', '/api/telemetry/snapshot', '/api/v1/telemetry/snapshot'], (_req, res) => {
-    res.json({
-      timestamp: Date.now(),
-      metrics: {
-        energyDeltaPercent: -34.8,
-        ashraeBaselineKwh: 14820,
-        currentLoadKwh: 9660,
-        copFactor: 6.22,
-        healthScore: 98.4,
-        carbonAbatedTco2e: 4120,
-        activeEdgeNodes: 14890,
-        ingestionRps: 1420500,
-        edgeLatencyMs: 0.4,
-      },
-      valve: valveState,
-      lighting: lightingState,
-      workOrdersCount: 3,
-    });
+  // Telemetry Snapshot for Digital Twin & Cockpit
+  app.get(['/api/telemetry/snapshot', '/api/v1/telemetry/snapshot'], async (req, res) => {
+    try {
+      const { getTelemetrySnapshot } = await import("./server/controllers/iot.controller.js");
+      return getTelemetrySnapshot(req, res);
+    } catch {
+      res.json({
+        timestamp: Date.now(),
+        metrics: {
+          energyDeltaPercent: 0,
+          ashraeBaselineKwh: 0,
+          currentLoadKwh: 0,
+          copFactor: 0,
+          healthScore: 100,
+          carbonAbatedTco2e: 0,
+          activeEdgeNodes: 0,
+          ingestionRps: 0,
+          edgeLatencyMs: 0,
+        },
+        valve: valveState,
+        lighting: lightingState,
+        workOrdersCount: 0,
+      });
+    }
   });
 
   // Fluid Control: HydroSync Motorized Valve

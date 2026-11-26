@@ -8,6 +8,7 @@ export interface RunsMatrixChartProps {
   liveSuccessRate?: number | null;
   liveAgentsRunning?: number;
   liveFailedCount?: number;
+  isDemoMode?: boolean;
   onOpenRunLog?: () => void;
 }
 
@@ -49,8 +50,9 @@ export function RunsMatrixChart({
   timeframe,
   extraRunsToday = 0,
   liveSuccessRate = null,
-  liveAgentsRunning = 12,
-  liveFailedCount = 1,
+  liveAgentsRunning = 0,
+  liveFailedCount = 0,
+  isDemoMode = false,
   onOpenRunLog,
 }: RunsMatrixChartProps) {
   const [viewMode, setViewMode] = useState<ChartViewMode>('dots');
@@ -60,19 +62,45 @@ export function RunsMatrixChart({
   const containerRef = useRef<HTMLDivElement | null>(null);
   const colRefs = useRef<(HTMLDivElement | null)[]>([]);
 
-  const peakIndex = DEFAULT_COLUMNS.findIndex((c) => c.isPeak);
-  const selectedIndex = activeColIndex ?? pinnedColIndex ?? peakIndex;
-  const selectedCol = DEFAULT_COLUMNS[selectedIndex] ?? DEFAULT_COLUMNS[peakIndex];
+  const columns = React.useMemo<ColumnData[]>(() => {
+    if (isDemoMode) return DEFAULT_COLUMNS;
+    if (extraRunsToday > 0) {
+      return DEFAULT_COLUMNS.map((c) => ({
+        ...c,
+        runs: Math.max(0, Math.round((c.runs / 335) * extraRunsToday)),
+        dots: Math.max(1, Math.round((c.dots / 14) * Math.min(14, extraRunsToday))),
+      }));
+    }
+    return DEFAULT_COLUMNS.map((c) => ({
+      ...c,
+      runs: 0,
+      dots: 1,
+      isPeak: false,
+    }));
+  }, [isDemoMode, extraRunsToday]);
+
+  const peakIndex = columns.findIndex((c) => c.isPeak);
+  const effectivePeakIndex = peakIndex >= 0 ? peakIndex : 10;
+  const selectedIndex = activeColIndex ?? pinnedColIndex ?? effectivePeakIndex;
+  const selectedCol = columns[selectedIndex] ?? columns[effectivePeakIndex] ?? { time: '09:00', runs: 0, dots: 1 };
 
   // Total runs calculation based on timeframe
   const totalRuns = React.useMemo(() => {
+    if (!isDemoMode) {
+      return extraRunsToday;
+    }
     const base = 335 + extraRunsToday;
     if (timeframe === '7d') return 2491 + extraRunsToday * 3;
     if (timeframe === '30d') return 11840 + extraRunsToday * 8;
     return base;
-  }, [timeframe, extraRunsToday]);
+  }, [timeframe, extraRunsToday, isDemoMode]);
 
-  const successRateText = liveSuccessRate !== null ? `${liveSuccessRate}%` : '99.4%';
+  const successRateText = liveSuccessRate !== null 
+    ? `${liveSuccessRate}%` 
+    : (isDemoMode ? '99.4%' : '100%');
+
+  const medianRunText = isDemoMode ? '4.1 s' : (extraRunsToday > 0 ? '4.1 s' : '0.0 s');
+  const peakText = isDemoMode ? '09:25' : (extraRunsToday > 0 ? '09:25' : '--:--');
 
   // Dynamic indicator position calculation
   const indicatorLeft = React.useMemo(() => {
@@ -102,18 +130,20 @@ export function RunsMatrixChart({
             <span className="flex items-center gap-1.5">
               <span className="w-1.5 h-1.5 rounded-full bg-slate-900 dark:bg-white" />
               <strong className="text-slate-900 dark:text-white font-medium">
-                {3088 + (liveAgentsRunning ?? 0)}
+                {isDemoMode ? (3088 + (liveAgentsRunning ?? 0)) : (liveAgentsRunning ?? 0)}
               </strong>{' '}
               live
             </span>
             <span className="flex items-center gap-1.5">
               <span className="w-1.5 h-1.5 rounded-full border border-slate-400 dark:border-slate-500" />
-              <strong className="text-slate-900 dark:text-white font-medium">82</strong> scheduled
+              <strong className="text-slate-900 dark:text-white font-medium">
+                {isDemoMode ? 82 : 0}
+              </strong> scheduled
             </span>
             <span className="flex items-center gap-1.5">
               <span className="w-1.5 h-1.5 rounded-full bg-rose-500" />
               <strong className="text-slate-900 dark:text-white font-medium">
-                {liveFailedCount}
+                {isDemoMode ? (liveFailedCount || 1) : (liveFailedCount || 0)}
               </strong>{' '}
               failed
             </span>
@@ -187,11 +217,15 @@ export function RunsMatrixChart({
               </span>
               <span className="text-xs text-emerald-600 dark:text-emerald-400 font-medium inline-flex items-center gap-0.5">
                 <ArrowUpRight className="w-3.5 h-3.5" />
-                14% last Wednesday
+                {isDemoMode ? "14% last Wednesday" : (extraRunsToday > 0 ? "+100% (Actif)" : "État T0 Prêt")}
               </span>
             </div>
             <p className="text-xs text-[#8E929C] mt-1.5 max-w-[270px] leading-relaxed">
-              Runs since midnight, 82 more scheduled before 24:00
+              {isDemoMode 
+                ? "Runs since midnight, 82 more scheduled before 24:00" 
+                : (extraRunsToday > 0 
+                    ? `${extraRunsToday} exécution(s) enregistrée(s) aujourd'hui` 
+                    : "Phase T0 : Zéro exécution initiale. Prêt pour déclenchement.")}
             </p>
           </div>
 
@@ -205,11 +239,15 @@ export function RunsMatrixChart({
             </div>
             <div className="flex justify-between items-center text-[#8E929C]">
               <span>Median run</span>
-              <span className="font-semibold text-slate-900 dark:text-white font-mono">4.1 s</span>
+              <span className="font-semibold text-slate-900 dark:text-white font-mono">
+                {medianRunText}
+              </span>
             </div>
             <div className="flex justify-between items-center text-[#8E929C]">
               <span>Peak</span>
-              <span className="font-semibold text-slate-900 dark:text-white font-mono">09:25</span>
+              <span className="font-semibold text-slate-900 dark:text-white font-mono">
+                {peakText}
+              </span>
             </div>
           </div>
         </div>
@@ -233,7 +271,7 @@ export function RunsMatrixChart({
             </div>
 
             {/* Render 22 density columns */}
-            {DEFAULT_COLUMNS.map((col, idx) => {
+            {columns.map((col, idx) => {
               const isSelected = selectedIndex === idx;
               const isPinned = pinnedColIndex === idx;
 

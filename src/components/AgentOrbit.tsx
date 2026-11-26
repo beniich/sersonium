@@ -36,8 +36,10 @@ import {
 import { OrbitDiagram } from './orbit/OrbitDiagram';
 import { AgentSidePanel } from './orbit/AgentSidePanel';
 import { CreateAgentModal } from './orbit/CreateAgentModal';
+import { CreateWorkflowModal } from './orbit/CreateWorkflowModal';
 import { RunHistoryView } from './orbit/RunHistoryView';
 import { FieldnoteOverview } from './orbit/FieldnoteOverview';
+import { authService } from '../services/auth.service';
 
 const FILTER_OPTIONS: { value: StatusFilter; label: string; dotClass: string }[] = [
   { value: 'all', label: 'All Agents', dotClass: 'bg-slate-400' },
@@ -54,9 +56,41 @@ type ActiveView = 'orbit' | 'fieldnote' | 'history';
 interface AgentOrbitProps {
   isDark?: boolean;
   onNavigateToERP?: () => void;
+  user?: any;
 }
 
-export default function AgentOrbit({ isDark: isDarkProp = true, onNavigateToERP }: AgentOrbitProps) {
+export default function AgentOrbit({ isDark: isDarkProp = true, onNavigateToERP, user }: AgentOrbitProps) {
+  const isSimulationMode = useMemo(() => {
+    if (typeof window === "undefined") return false;
+    return localStorage.getItem("sensorium_simulation_mode") === "true";
+  }, []);
+
+  const effectiveUser = useMemo(() => {
+    if (user) return user;
+    return authService.getSession().user;
+  }, [user]);
+
+  const userDisplayName = useMemo(() => {
+    if (effectiveUser?.displayName) return effectiveUser.displayName;
+    if (effectiveUser?.email) return effectiveUser.email.split('@')[0];
+    return isSimulationMode ? "Visiteur Démo" : "Opérateur Souverain";
+  }, [effectiveUser, isSimulationMode]);
+
+  const userOrganization = useMemo(() => {
+    if (effectiveUser?.organizationName) return effectiveUser.organizationName;
+    return isSimulationMode ? "SENSORIUM Démo Corp" : "Workspace Souverain";
+  }, [effectiveUser, isSimulationMode]);
+
+  const userInitials = useMemo(() => {
+    const name = userDisplayName.trim();
+    if (!name) return "SO";
+    const parts = name.split(/[\s._-]+/).filter(Boolean);
+    if (parts.length >= 2) {
+      return (parts[0][0] + parts[1][0]).toUpperCase();
+    }
+    return name.slice(0, 2).toUpperCase();
+  }, [userDisplayName]);
+
   // Sync groups state with local storage for high responsiveness
   const [groups, setGroups] = useState<Group[]>(() => {
     try {
@@ -95,6 +129,9 @@ export default function AgentOrbit({ isDark: isDarkProp = true, onNavigateToERP 
   });
 
   const [isCreateOpen, setIsCreateOpen] = useState(false);
+  const [isCreateWorkflowOpen, setIsCreateWorkflowOpen] = useState(false);
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  const searchInputRef = useRef<HTMLInputElement | null>(null);
   const [statusFilter, setStatusFilter] = useState<StatusFilter>('all');
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const filterContainerRef = useRef<HTMLDivElement | null>(null);
@@ -106,10 +143,10 @@ export default function AgentOrbit({ isDark: isDarkProp = true, onNavigateToERP 
       const saved = localStorage.getItem('sensorium_orbit_workflows');
       if (saved) {
         const parsed = JSON.parse(saved);
-        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+        if (Array.isArray(parsed)) return parsed;
       }
     } catch {}
-    return initialWorkflows;
+    return isSimulationMode ? initialWorkflows : [];
   });
 
   const [approvals, setApprovals] = useState<ApprovalItem[]>(() => {
@@ -117,19 +154,53 @@ export default function AgentOrbit({ isDark: isDarkProp = true, onNavigateToERP 
       const saved = localStorage.getItem('sensorium_orbit_approvals');
       if (saved) {
         const parsed = JSON.parse(saved);
-        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+        if (Array.isArray(parsed)) return parsed;
       }
     } catch {}
-    return initialApprovals;
+    return isSimulationMode ? initialApprovals : [];
   });
 
   const [runningWorkflowId, setRunningWorkflowId] = useState<string | null>(null);
   const [decidingApprovalId, setDecidingApprovalId] = useState<string | null>(null);
 
+  // Raccourci clavier global Cmd+K / Ctrl+K pour la recherche
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
+        e.preventDefault();
+        searchInputRef.current?.focus();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
+
   const pendingApprovalsCount = useMemo(
     () => approvals.filter((a) => a.status === 'pending').length,
     [approvals]
   );
+
+  const handleCreateWorkflow = (newWf: WorkflowItem) => {
+    setWorkflows((prev) => [newWf, ...prev]);
+    setToastMessage({
+      title: 'Workflow créé',
+      desc: `Le flux "${newWf.name}" est configuré et prêt pour exécution.`,
+      type: 'success',
+    });
+  };
+
+  const handleLoadDemoData = () => {
+    setWorkflows(initialWorkflows);
+    setApprovals(initialApprovals);
+    if (typeof localStorage !== "undefined") {
+      localStorage.setItem("sensorium_simulation_mode", "true");
+    }
+    setToastMessage({
+      title: 'Données de démonstration chargées',
+      desc: '24 workflows et 5 approbations ZTNA ont été importés pour évaluation.',
+      type: 'success',
+    });
+  };
 
   // Debounced persistence for Fieldnote workflows and approvals
   useEffect(() => {
@@ -638,12 +709,24 @@ export default function AgentOrbit({ isDark: isDarkProp = true, onNavigateToERP 
   };
 
   // Fieldnote: Refresh telemetry
-  const handleRefreshFieldnote = () => {
-    setToastMessage({
-      title: 'Télémétrie actualisée',
-      desc: 'Matrice de densité 24h et statuts de workflows synchronisés.',
-      type: 'success',
-    });
+  const handleRefreshFieldnote = async () => {
+    setIsRefreshing(true);
+    try {
+      const res = await apiClient.get('/api/state').catch(() => null);
+      if (res?.data?.groups) {
+        setGroups(res.data.groups);
+      }
+      if (res?.data?.runHistory) {
+        setRunHistory(res.data.runHistory);
+      }
+      setToastMessage({
+        title: 'Télémétrie actualisée',
+        desc: 'Matrice de flux et statut des agents synchronisés.',
+        type: 'success',
+      });
+    } finally {
+      setTimeout(() => setIsRefreshing(false), 500);
+    }
   };
 
   return (
@@ -892,9 +975,9 @@ export default function AgentOrbit({ isDark: isDarkProp = true, onNavigateToERP 
           <button
             type="button"
             className="w-10 h-10 rounded-full bg-[#1C1E22] text-white flex items-center justify-center shadow-lg border border-white/10 hover:opacity-90 transition font-bold text-xs"
-            title="Administrateur Souverain SENSORIUM"
+            title={`${userDisplayName} (${userOrganization})`}
           >
-            FN
+            {userInitials}
           </button>
         </aside>
         {/* END: Leftmost Icon Dock */}
@@ -904,22 +987,23 @@ export default function AgentOrbit({ isDark: isDarkProp = true, onNavigateToERP 
           <div className="flex flex-col gap-4 overflow-y-auto pr-1">
             {/* Workspace Header */}
             <div className="flex items-center justify-between p-1.5 bg-white dark:bg-[#1a1c20] rounded-2xl shadow-xs border border-black/[0.04] dark:border-white/[0.06]">
-              <div className="flex items-center gap-2">
-                <div className="w-7 h-7 rounded-xl bg-[#1A1C20] dark:bg-white text-white dark:text-[#111317] flex items-center justify-center text-xs font-bold">
-                  F
+              <div className="flex items-center gap-2 min-w-0">
+                <div className="w-7 h-7 rounded-xl bg-[#1A1C20] dark:bg-white text-white dark:text-[#111317] flex items-center justify-center text-xs font-bold shrink-0">
+                  {userInitials.slice(0, 1)}
                 </div>
-                <div className="leading-tight">
-                  <div className="text-xs font-semibold text-slate-900 dark:text-white">Fieldnote</div>
-                  <div className="text-[10px] text-[#8E929C]">Core workspace</div>
+                <div className="leading-tight min-w-0 pr-1">
+                  <div className="text-xs font-semibold text-slate-900 dark:text-white truncate">{userOrganization}</div>
+                  <div className="text-[10px] text-[#8E929C] truncate">{effectiveUser ? "Sovereign Workspace" : "Core workspace"}</div>
                 </div>
               </div>
-              <ChevronDown className="w-3.5 h-3.5 text-[#8E929C]" />
+              <ChevronDown className="w-3.5 h-3.5 text-[#8E929C] shrink-0" />
             </div>
 
             {/* Search Input */}
             <div className="relative">
               <Search className="w-3.5 h-3.5 absolute left-2.5 top-1/2 -translate-y-1/2 text-[#8E929C]" />
               <input
+                ref={searchInputRef}
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
@@ -1029,21 +1113,27 @@ export default function AgentOrbit({ isDark: isDarkProp = true, onNavigateToERP 
                     <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
                     <span className="text-[#8E929C]">Running</span>
                   </div>
-                  <span className="font-semibold text-[11px] text-slate-800 dark:text-slate-200">12</span>
+                  <span className="font-semibold text-[11px] text-slate-800 dark:text-slate-200">
+                    {isSimulationMode ? 12 : stats.runningCount}
+                  </span>
                 </div>
                 <div className="flex items-center justify-between py-0.5 text-slate-700 dark:text-slate-300">
                   <div className="flex items-center gap-2">
                     <span className="w-1.5 h-1.5 rounded-full bg-amber-400" />
                     <span className="text-[#8E929C]">Queued</span>
                   </div>
-                  <span className="font-semibold text-[11px] text-slate-800 dark:text-slate-200">46</span>
+                  <span className="font-semibold text-[11px] text-slate-800 dark:text-slate-200">
+                    {isSimulationMode ? 46 : 0}
+                  </span>
                 </div>
                 <div className="flex items-center justify-between py-0.5 text-slate-700 dark:text-slate-300">
                   <div className="flex items-center gap-2">
                     <span className="w-1.5 h-1.5 rounded-full bg-rose-500" />
                     <span className="text-[#8E929C]">Failed today</span>
                   </div>
-                  <span className="font-semibold text-[11px] text-slate-800 dark:text-slate-200">2</span>
+                  <span className="font-semibold text-[11px] text-slate-800 dark:text-slate-200">
+                    {isSimulationMode ? 2 : stats.errorCount}
+                  </span>
                 </div>
               </div>
             </div>
@@ -1105,19 +1195,19 @@ export default function AgentOrbit({ isDark: isDarkProp = true, onNavigateToERP 
 
           {/* Profile Badge at bottom */}
           <div className="mt-3 pt-2.5 border-t border-slate-200/60 dark:border-white/[0.08] flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <div className="w-7 h-7 rounded-full bg-[#DCE2EA] dark:bg-slate-700 flex items-center justify-center text-[10px] font-bold text-slate-800 dark:text-slate-200">
-                DK
+            <div className="flex items-center gap-2 min-w-0">
+              <div className="w-7 h-7 rounded-full bg-[#DCE2EA] dark:bg-slate-700 flex items-center justify-center text-[10px] font-bold text-slate-800 dark:text-slate-200 shrink-0">
+                {userInitials}
               </div>
-              <div className="leading-tight">
-                <div className="text-xs font-semibold text-slate-900 dark:text-white">Dana Kim</div>
-                <div className="text-[10px] text-[#8E929C]">Operations</div>
+              <div className="leading-tight min-w-0 pr-1">
+                <div className="text-xs font-semibold text-slate-900 dark:text-white truncate">{userDisplayName}</div>
+                <div className="text-[10px] text-[#8E929C] truncate">{effectiveUser?.role || (isSimulationMode ? "Mode Démo" : "Opérateur")}</div>
               </div>
             </div>
             <button
               type="button"
               onClick={() => setShowResetConfirm(true)}
-              className="text-[#8E929C] hover:text-slate-900 dark:hover:text-white"
+              className="text-[#8E929C] hover:text-slate-900 dark:hover:text-white shrink-0"
               title="Options"
             >
               ···
@@ -1136,6 +1226,9 @@ export default function AgentOrbit({ isDark: isDarkProp = true, onNavigateToERP 
               stats={stats}
               runningWorkflowId={runningWorkflowId}
               decidingApprovalId={decidingApprovalId}
+              searchQuery={searchQuery}
+              isDemoMode={isSimulationMode}
+              isRefreshing={isRefreshing}
               onOpenRunLog={() => setActiveView('history')}
               onOpenAllWorkflows={() => setActiveView('fieldnote')}
               onOpenApprovalsQueue={() => {
@@ -1149,8 +1242,9 @@ export default function AgentOrbit({ isDark: isDarkProp = true, onNavigateToERP 
               onDecideApproval={handleDecideApproval}
               onBatchDecideApprovals={handleBatchDecideApprovals}
               onTimeframeChange={(tf) => setTimeframe(tf)}
-              onNewWorkflow={() => setIsCreateOpen(true)}
+              onNewWorkflow={() => setIsCreateWorkflowOpen(true)}
               onRefresh={handleRefreshFieldnote}
+              onLoadDemoData={handleLoadDemoData}
             />
           ) : activeView === 'orbit' ? (
             <div className="w-full">
@@ -1257,6 +1351,13 @@ export default function AgentOrbit({ isDark: isDarkProp = true, onNavigateToERP 
         groups={groups}
         onClose={() => setIsCreateOpen(false)}
         onCreate={handleCreateAgent}
+      />
+
+      {/* Create Workflow Modal */}
+      <CreateWorkflowModal
+        isOpen={isCreateWorkflowOpen}
+        onClose={() => setIsCreateWorkflowOpen(false)}
+        onCreate={handleCreateWorkflow}
       />
     </div>
   );
