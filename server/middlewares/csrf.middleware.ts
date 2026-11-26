@@ -1,7 +1,23 @@
 import { Request, Response, NextFunction } from "express";
 import crypto from "crypto";
 
-const CSRF_SECRET = process.env.CSRF_SECRET || "csrf_protection_secret_2026_super_safe";
+// CSRF secret: fail hard in production if not configured.
+const _csrfIsDev = process.env.NODE_ENV !== "production";
+if (!_csrfIsDev && !process.env.CSRF_SECRET) {
+  throw new Error("FATAL: CSRF_SECRET must be set in production. Refusing to start.");
+}
+const CSRF_SECRET = process.env.CSRF_SECRET || (_csrfIsDev ? "csrf_dev_only_not_for_prod" : "");
+
+/**
+ * Fail-fast assertion for CSRF configuration — called at server startup.
+ */
+export function assertCsrfConfig(): void {
+  if (process.env.NODE_ENV === "production") {
+    if (!process.env.CSRF_SECRET || process.env.CSRF_SECRET.length < 32) {
+      throw new Error("FATAL: CSRF_SECRET must be set and ≥ 32 characters in production.");
+    }
+  }
+}
 export const CSRF_COOKIE_NAME = "XSRF-TOKEN";
 export const CSRF_HEADER_NAME = "x-csrf-token";
 

@@ -13,6 +13,7 @@ import cron from 'node-cron';
 import { RollupService } from '../services/rollup.service.js';
 
 let isWorkerRunning = false;
+let scheduledTasks: cron.ScheduledTask[] = [];
 
 export function startRollupWorker() {
   if (isWorkerRunning) {
@@ -20,10 +21,11 @@ export function startRollupWorker() {
     return;
   }
   isWorkerRunning = true;
+  scheduledTasks = [];
   console.log('[RollupWorker] 🚀 Démarrage du planificateur d\'agrégation télémétriques...');
 
   // ── Rollup MINUTE : toutes les minutes ─────────────────────────────────────
-  cron.schedule('* * * * *', async () => {
+  const taskMinute = cron.schedule('* * * * *', async () => {
     try {
       const result = await RollupService.aggregate('MINUTE');
       if (result.aggregatedCount > 0) {
@@ -36,9 +38,10 @@ export function startRollupWorker() {
     scheduled: true,
     timezone: 'UTC'
   });
+  scheduledTasks.push(taskMinute);
 
   // ── Rollup HOUR : toutes les heures, à la minute 0 ─────────────────────────
-  cron.schedule('0 * * * *', async () => {
+  const taskHour = cron.schedule('0 * * * *', async () => {
     try {
       const result = await RollupService.aggregate('HOUR');
       console.log(`[RollupWorker] ✅ Rollup HOUR: ${result.aggregatedCount} capteurs agrégés.`);
@@ -49,9 +52,10 @@ export function startRollupWorker() {
     scheduled: true,
     timezone: 'UTC'
   });
+  scheduledTasks.push(taskHour);
 
   // ── Rollup DAY : chaque jour à minuit UTC ───────────────────────────────────
-  cron.schedule('0 0 * * *', async () => {
+  const taskDay = cron.schedule('0 0 * * *', async () => {
     try {
       const result = await RollupService.aggregate('DAY');
       console.log(`[RollupWorker] ✅ Rollup DAY: ${result.aggregatedCount} capteurs agrégés.`);
@@ -62,9 +66,10 @@ export function startRollupWorker() {
     scheduled: true,
     timezone: 'UTC'
   });
+  scheduledTasks.push(taskDay);
 
   // ── Purge rétention 7 jours : chaque jour à 01h00 UTC ──────────────────────
-  cron.schedule('0 1 * * *', async () => {
+  const taskPurge = cron.schedule('0 1 * * *', async () => {
     try {
       const deleted = await RollupService.cleanupRawData(7);
       console.log(`[RollupWorker] 🧹 Purge rétention: ${deleted} enregistrements bruts supprimés (>7j).`);
@@ -75,10 +80,24 @@ export function startRollupWorker() {
     scheduled: true,
     timezone: 'UTC'
   });
+  scheduledTasks.push(taskPurge);
 
   console.log('[RollupWorker] 📅 Planificateurs actifs:');
   console.log('  • Rollup MINUTE : toutes les minutes');
   console.log('  • Rollup HOUR   : toutes les heures (xx:00 UTC)');
   console.log('  • Rollup DAY    : chaque jour à 00:00 UTC');
   console.log('  • Purge données : chaque jour à 01:00 UTC (rétention 7j)');
+}
+
+export function stopRollupWorker(): void {
+  for (const task of scheduledTasks) {
+    try {
+      task.stop();
+    } catch {
+      // Ignorer si déjà arrêté
+    }
+  }
+  scheduledTasks = [];
+  isWorkerRunning = false;
+  console.log('[RollupWorker] 🛑 Planificateurs d\'agrégation arrêtés.');
 }

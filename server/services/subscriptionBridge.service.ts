@@ -88,7 +88,20 @@ export class SubscriptionBridgeService {
       };
     } catch (err: any) {
       console.error("[SubscriptionBridgeService] Error:", err);
-      // En cas d'erreur de base de données, ne pas bloquer totalement le mode dev
+      if (process.env.NODE_ENV === "production") {
+        return {
+          hasAccess: false,
+          tier: "FREE",
+          status: "unavailable",
+          planName: "Service Non Disponible",
+          tokenBalance: 0,
+          has3dDigitalTwin: false,
+          hasRealtimeKafka: false,
+          hasZtnaHardware: false,
+          expiresAt: null,
+        };
+      }
+      // En cas d'erreur de base de données, mode secours réservé au développement local
       return {
         hasAccess: true,
         tier: "PRO",

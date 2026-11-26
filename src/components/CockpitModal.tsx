@@ -1,4 +1,5 @@
 import React, { useState, useEffect, lazy, Suspense } from 'react';
+import apiClient from '../services/apiClient';
 import {
   X,
   Maximize2,
@@ -148,13 +149,9 @@ export const CockpitModal: React.FC<CockpitModalProps> = ({
   // Toggle Valve via server
   const handleToggleValve = async () => {
     try {
-      const res = await fetch('/api/controls/valve', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action: 'TOGGLE' }),
-      });
-      const data = await res.json();
-      if (data.valve) setValve(data.valve);
+      const res = await apiClient.post('/api/controls/valve', { action: 'TOGGLE' });
+      const data = res.data;
+      if (data?.valve) setValve(data.valve);
     } catch {
       // Local fallback
       setValve((v) => ({
@@ -171,26 +168,22 @@ export const CockpitModal: React.FC<CockpitModalProps> = ({
   const handleRunDiagnosis = async () => {
     setDiagnosing(true);
     try {
-      const res = await fetch('/api/gemini/diagnose', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          assetId: selectedNode?.name || 'York Chiller Loop B-02',
-          customQuery: diagnosticQuery,
-          telemetryData: {
-            asset: selectedNode?.name || 'York Chiller Loop B-02',
-            chilledWaterLeavingTempC: 7.4,
-            chilledWaterReturnTempC: 12.1,
-            evaporatorPressureBar: 3.8,
-            condenserPressureBar: 10.4,
-            motorVibrationMmSec: 3.12,
-            harmonicRpmFrequencyHz: 49.8,
-            compressorBearingTempC: 68.4,
-          },
-        }),
+      const res = await apiClient.post('/api/gemini/diagnose', {
+        assetId: selectedNode?.name || 'York Chiller Loop B-02',
+        customQuery: diagnosticQuery,
+        telemetryData: {
+          asset: selectedNode?.name || 'York Chiller Loop B-02',
+          chilledWaterLeavingTempC: 7.4,
+          chilledWaterReturnTempC: 12.1,
+          evaporatorPressureBar: 3.8,
+          condenserPressureBar: 10.4,
+          motorVibrationMmSec: 3.12,
+          harmonicRpmFrequencyHz: 49.8,
+          compressorBearingTempC: 68.4,
+        },
       });
-      const data = await res.json();
-      if (data.diagnosis) {
+      const data = res.data;
+      if (data?.diagnosis) {
         setDiagnosisResult(data.diagnosis);
         setAiSource(data.source || 'gemini-3.8-flash');
       }

@@ -336,7 +336,11 @@ export const getAgentSource = async (req: Request, res: Response) => {
 
 // ─── Agent Endpoint Callbacks (Shared Secret Auth via X-Agent-Key header) ─────
 
-const AGENT_API_KEY = process.env.UEM_AGENT_API_KEY || "SENS-AGENT-CMR-SECURE-KEY";
+// Agent API key: required in production. Dev fallback is not secure.
+if (process.env.NODE_ENV === "production" && !process.env.UEM_AGENT_API_KEY) {
+  throw new Error("FATAL: UEM_AGENT_API_KEY must be set in production.");
+}
+const AGENT_API_KEY = process.env.UEM_AGENT_API_KEY || (process.env.NODE_ENV !== "production" ? "SENS-AGENT-DEV-KEY-ONLY" : "");
 
 const verifyAgentKey = (req: Request, res: Response): string | null => {
   const key = req.headers["x-agent-key"] as string;

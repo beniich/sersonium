@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { analyzeLogs, analyzeTelemetry } from "../../controllers/ai.controller.js";
+import { analyzeLogs, analyzeTelemetry, analyzeTenantHealth } from "../../controllers/ai.controller.js";
 import { executeArtifact } from "../../controllers/ai.execution.controller.js";
 import { authenticateToken, requireSubscriptionTier } from "../../middlewares/auth.middleware.js";
 import { requireTenant } from "../../middlewares/tenant.middleware.js";
@@ -14,6 +14,9 @@ const router = Router();
 router.post("/execute", executeArtifact);
 
 router.use(authenticateToken, requireTenant);
+
+// Analyse déterministe & IA prédictive sur les vraies données du tenant
+router.post("/analyze-tenant", analyzeTenantHealth);
 
 // Analyse de logs d'infrastructure via Gemini (Nécessite Entitlement AI_OPS + Rate limiter par tenant)
 router.post(

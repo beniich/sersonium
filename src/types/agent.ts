@@ -77,3 +77,29 @@ export type OrchestratorStats = {
   successRate: number;
   avgDurationMs: number;
 };
+
+export type TimeframeOption = 'today' | '7d' | '30d';
+
+export type WorkflowStatus = 'active' | 'paused' | 'draft';
+
+export type WorkflowItem = {
+  id: string;
+  name: string;
+  icon: string;
+  integrations: string;
+  status: WorkflowStatus;
+  statusLabel: string;
+  isLive?: boolean;
+  sparkline: number[];
+  agentId?: string;
+};
+
+export type ApprovalItem = {
+  id: string;
+  title: string;
+  subtitle: string;
+  ageLabel: string;
+  status: 'pending' | 'approved' | 'declined';
+  locked?: boolean;
+  agentId?: string;
+};

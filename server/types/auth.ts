@@ -22,6 +22,7 @@ export type PermissionType =
 
 export interface UserPayload {
   userId: string;
+  firebaseUid?: string;
   email: string;
   role: RoleType;
   tenantId: string;

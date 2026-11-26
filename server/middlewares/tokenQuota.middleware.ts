@@ -75,7 +75,17 @@ export const checkAndDeductTokens = (cost: number = 1500, reason: string = "API_
       }
     } catch (err: any) {
       console.error("[tokenQuota.middleware] Unexpected error:", err);
-      // Mode tolérant d'urgence pour ne pas casser l'application en cas de glitch DB
+      if (process.env.NODE_ENV === "production") {
+        res.status(503).json({
+          success: false,
+          error: {
+            code: "QUOTA_SERVICE_UNAVAILABLE",
+            message: "Le service de quotas IA est temporairement indisponible."
+          }
+        });
+        return;
+      }
+      // Mode tolérant d'urgence réservé au développement local
       next();
     }
   };

@@ -12,9 +12,11 @@ import { createServer as createViteServer } from "vite";
 import apiRouterV1 from "./server/routes/v1/index.js";
 import orbitRoutes from "./server/routes/orbit.routes.js";
 import { seedDatabase } from "./server/db/seed.js";
+import { rawPrisma } from "./server/db/prisma.js";
 import { kafkaService } from "./server/services/kafka.service.js";
 import { WafService } from "./server/services/waf.service.js";
-import { startRollupWorker } from "./server/workers/rollupWorker.js";
+import { OutboxService } from "./server/services/outbox.service.js";
+import { startRollupWorker, stopRollupWorker } from "./server/workers/rollupWorker.js";
 import { 
   securityHeaders, 
   payloadSanitizer,
@@ -26,6 +28,12 @@ import {
 import { resilienceGuard, canaryHeaderInjector } from "./server/middlewares/resilience.middleware.js";
 
 async function startServer() {
+  // Vérification Fail-Fast des secrets cryptographiques au démarrage
+  const { assertJwtConfig } = await import("./server/config/jwt.js");
+  const { assertCsrfConfig } = await import("./server/middlewares/csrf.middleware.js");
+  assertJwtConfig();
+  assertCsrfConfig();
+
   // Initialize multi-tenant database seed if required
   seedDatabase().catch((err) => console.error("[Server] Seed warning:", err));
 
@@ -638,7 +646,11 @@ sensorium_system_uptime_seconds ${snapshot.uptimeSeconds}
 
   // Initialisation Socket.IO pour le Jumeau Numérique 3D & Telemetry Bridge
   const io = new SocketIOServer(httpServer, {
-    cors: { origin: "*", methods: ["GET", "POST"] },
+    cors: {
+      origin: isDev ? "*" : Array.from(allowedOriginsSet),
+      methods: ["GET", "POST"],
+      credentials: true,
+    },
   });
   app.set("io", io);
 
@@ -693,7 +705,7 @@ sensorium_system_uptime_seconds ${snapshot.uptimeSeconds}
 
   // Bridge de diffusion continue Kafka -> Socket.IO pour les salons de topics actifs
   let telemetryStreamSeq = 0;
-  setInterval(() => {
+  const tIntervalStream = setInterval(() => {
     telemetryStreamSeq++;
     const nowIso = new Date().toISOString().replace("T", " ").slice(0, 19);
 
@@ -722,7 +734,7 @@ sensorium_system_uptime_seconds ${snapshot.uptimeSeconds}
     const pue = +(1.09 + Math.random() * 0.15).toFixed(3);
     const dcPowerPayload = {
       dc_id: `DC-${["PAR", "FRA", "AMS", "STO"][telemetryStreamSeq % 4]}-0${(telemetryStreamSeq % 4) + 1}`,
-      pue: parseFloat(pue),
+      pue,
       load_kw: +(780 + Math.random() * 460).toFixed(1),
       "ups_soc_%": +(88 + Math.random() * 11).toFixed(1),
       delta_kwh: +(Math.random() * 12 - 3).toFixed(2),
@@ -766,7 +778,7 @@ sensorium_system_uptime_seconds ${snapshot.uptimeSeconds}
   }, 2000);
 
   // Diffusion continue haute fréquence (2s) pour la Supervision en Temps Réel du Dashboard Vision (Sprint 2)
-  setInterval(() => {
+  const tIntervalVision = setInterval(() => {
     const cpu = Math.round(25 + Math.random() * 8);
     const ram = Math.round(60 + Math.random() * 5);
     const net = Math.round(40 + Math.random() * 6);
@@ -779,7 +791,7 @@ sensorium_system_uptime_seconds ${snapshot.uptimeSeconds}
   }, 2000);
 
   // Diffusion périodique de télémétrie IoT pour les maquettes 3D
-  setInterval(() => {
+  const tIntervalIoT = setInterval(() => {
     const isAnomaly = Math.random() > 0.85;
     io.emit("telemetry_update", {
       assetId: "pump_01",
@@ -789,6 +801,81 @@ sensorium_system_uptime_seconds ${snapshot.uptimeSeconds}
       timestamp: Date.now()
     });
   }, 4000);
+
+  const telemetryIntervals = [tIntervalStream, tIntervalVision, tIntervalIoT];
+
+  // ─── Gestion de l'Arrêt Propre (Graceful Shutdown) & Anti-Plantage ─────────
+  let isShuttingDown = false;
+  async function gracefulShutdown(signal: string) {
+    if (isShuttingDown) return;
+    isShuttingDown = true;
+    console.log(`\n[Server] 🛑 Signal ${signal} reçu. Arrêt gracieux en cours...`);
+
+    // 1. Arrêter d'émettre la télémétrie périodique
+    for (const interval of telemetryIntervals) {
+      clearInterval(interval);
+    }
+    telemetryIntervals.length = 0;
+
+    // 2. Arrêter les workers de fond
+    try {
+      stopRollupWorker();
+      OutboxService.stopWorker();
+    } catch (wErr) {
+      console.error("[Server] Erreur lors de l'arrêt des workers:", wErr);
+    }
+
+    // 3. Fermer les connexions WebSocket Socket.IO
+    try {
+      io.close();
+      console.log("[Server] ✅ Socket.IO fermé.");
+    } catch (ioErr) {
+      console.error("[Server] Erreur fermeture Socket.IO:", ioErr);
+    }
+
+    // 4. Déconnecter Kafka
+    try {
+      await kafkaService.disconnect();
+    } catch (kErr) {
+      console.error("[Server] Erreur déconnexion Kafka:", kErr);
+    }
+
+    // 5. Fermer le serveur HTTP (ne plus accepter de nouvelles requêtes)
+    httpServer.close(async () => {
+      console.log("[Server] ✅ Serveur HTTP fermé.");
+
+      // 6. Déconnecter la base de données PostgreSQL Prisma
+      try {
+        await rawPrisma.$disconnect();
+        console.log("[Server] ✅ Connexion Prisma PostgreSQL fermée.");
+      } catch (dbErr) {
+        console.error("[Server] Erreur déconnexion Prisma:", dbErr);
+      }
+
+      console.log("[Server] 🏁 Arrêt gracieux terminé avec succès.");
+      process.exit(0);
+    });
+
+    // Timeout de sécurité : forcer la fermeture après 10s si des sockets restent suspendues
+    setTimeout(() => {
+      console.error("[Server] ⚠️ Délai d'arrêt gracieux dépassé (10s), arrêt forcé.");
+      process.exit(1);
+    }, 10000).unref();
+  }
+
+  process.on("SIGTERM", () => gracefulShutdown("SIGTERM"));
+  process.on("SIGINT", () => gracefulShutdown("SIGINT"));
+
+  process.on("unhandledRejection", (reason: any, _promise: Promise<any>) => {
+    console.error("[FATAL] Rejet de promesse non intercepté (unhandledRejection):", reason);
+  });
+
+  process.on("uncaughtException", (error: Error) => {
+    console.error("[FATAL] Exception non interceptée (uncaughtException):", error);
+    if (process.env.NODE_ENV === "production") {
+      gracefulShutdown("uncaughtException").catch(() => process.exit(1));
+    }
+  });
 
   httpServer.listen(PORT, "0.0.0.0", () => {
     console.log(`[Server] Jeton Edge API Platform & WebSocket running on port ${PORT}`);

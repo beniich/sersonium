@@ -1,0 +1,1161 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8"/>
+  <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+  <title>Fieldnote — Tableau de bord d'automatisation des flux</title>
+  <!-- Tailwind CSS CDN avec formulaires & conteneurs -->
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  <!-- Configuration Tailwind -->
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            canvas: '#EAEBEF',
+            panel: '#F7F8FA',
+            subtle: '#8E929C',
+            accent: '#0F1115',
+            badgeYellow: '#E4F475',
+            softBorder: 'rgba(215, 219, 228, 0.7)',
+          },
+          boxShadow: {
+            'soft-card': '0 12px 30px -8px rgba(0, 0, 0, 0.04), 0 4px 12px -2px rgba(0, 0, 0, 0.02), inset 0 1px 1px rgba(255, 255, 255, 0.9)',
+            'soft-inset': 'inset 0 1px 3px rgba(0, 0, 0, 0.05), inset 0 0 0 1px rgba(0, 0, 0, 0.02)',
+            'pill-active': '0 2px 8px rgba(0, 0, 0, 0.06), 0 1px 2px rgba(0, 0, 0, 0.04)',
+            'dock-pill': '0 20px 35px -10px rgba(0, 0, 0, 0.35)',
+          },
+          fontFamily: {
+            sans: ['Inter', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'sans-serif'],
+          }
+        }
+      }
+    }
+  </script>
+  <!-- Styles sur mesure : matrice de points et finitions tactiles -->
+  <style data-purpose="custom-typography-and-effects">
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+    body {
+      background-color: #E7E9ED;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+
+    /* Barre de défilement discrète */
+    ::-webkit-scrollbar {
+      width: 4px;
+      height: 4px;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #D1D5DB;
+      border-radius: 9999px;
+    }
+
+    /* Finition tactile des cartes */
+    .tactile-surface {
+      background: #F8F9FA;
+      border: 1px solid rgba(255, 255, 255, 0.85);
+      outline: 1px solid rgba(200, 205, 215, 0.45);
+    }
+
+    /* Animations d'entrée et interactions du graphique */
+    @keyframes dotEnter {
+      0% {
+        opacity: 0;
+        transform: translateY(6px) scale(0.4);
+      }
+      100% {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+      }
+    }
+
+    .chart-col {
+      position: relative;
+      cursor: pointer;
+      padding: 4px 3px 0;
+      margin: 0 -3px;
+      border-radius: 9999px;
+      transition: opacity 200ms ease, transform 200ms cubic-bezier(0.22, 1, 0.36, 1), background-color 200ms ease;
+    }
+
+    .chart-col .chart-dot {
+      animation: dotEnter 420ms cubic-bezier(0.22, 1, 0.36, 1) backwards;
+      animation-delay: var(--dot-delay, 0ms);
+      transition: transform 200ms cubic-bezier(0.22, 1, 0.36, 1), background-color 200ms ease, opacity 200ms ease, border-radius 220ms ease, height 220ms ease;
+    }
+
+    /* Atténuation des colonnes non survolées */
+    .chart-matrix.is-hovering .chart-col:not(.is-active):not(.is-pinned) {
+      opacity: 0.38;
+    }
+
+    /* Colonne active / survolée */
+    .chart-col.is-active .chart-dot,
+    .chart-col.is-pinned .chart-dot {
+      transform: scale(1.22);
+      background-color: #111317;
+    }
+
+    /* Bague d'ancrage de la sélection */
+    .chart-col.is-pinned::after {
+      content: '';
+      position: absolute;
+      bottom: -8px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 5px;
+      height: 5px;
+      border-radius: 9999px;
+      background-color: #111317;
+      box-shadow: 0 0 0 3px rgba(17, 19, 23, 0.12);
+    }
+
+    /* Déplacement fluide du repère de pic */
+    #chart-peak-indicator {
+      transition: left 240ms cubic-bezier(0.22, 1, 0.36, 1), opacity 200ms ease;
+    }
+
+    /* Mode d'affichage : Barres d'histogramme */
+    .chart-matrix[data-view="bars"] .chart-col {
+      gap: 0px !important;
+    }
+    .chart-matrix[data-view="bars"] .chart-dot {
+      border-radius: 1px;
+      width: 6px;
+      height: 8px;
+    }
+    .chart-matrix[data-view="bars"] .chart-dot:first-child {
+      border-top-left-radius: 9999px;
+      border-top-right-radius: 9999px;
+    }
+    .chart-matrix[data-view="bars"] .chart-dot:last-child {
+      border-bottom-left-radius: 9999px;
+      border-bottom-right-radius: 9999px;
+    }
+
+    /* Mode d'affichage : Points de crête */
+    .chart-matrix[data-view="peaks"] .chart-dot:not(:first-child) {
+      opacity: 0.16;
+      transform: scale(0.65);
+    }
+    .chart-matrix[data-view="peaks"] .chart-dot:first-child {
+      transform: scale(1.25);
+      background-color: #111317;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .chart-col,
+      .chart-col .chart-dot,
+      #chart-peak-indicator {
+        animation: none !important;
+        transition: none !important;
+      }
+    }
+  </style>
+</head>
+<body class="min-h-screen text-[#1B1D21] p-3 md:p-6 flex items-center justify-center select-none">
+<!-- DÉBUT : Cadre de la fenêtre de l'application -->
+<div class="w-full max-w-[1400px] h-[920px] bg-[#E9EBEF] rounded-[32px] p-2.5 shadow-[0_25px_60px_-15px_rgba(0,0,0,0.12),0_0_0_1px_rgba(255,255,255,0.7)] flex flex-col overflow-hidden relative border border-white/60" data-purpose="app-shell">
+  
+  <!-- DÉBUT : Contrôles de fenêtre macOS -->
+  <div class="flex items-center justify-between px-4 pt-2.5 pb-2" data-purpose="window-controls">
+    <div class="flex items-center gap-1.5">
+      <div class="w-3 h-3 rounded-full bg-[#FF5F56] border border-[#E0443E]/40 cursor-pointer hover:opacity-80 transition" title="Fermer"></div>
+      <div class="w-3 h-3 rounded-full bg-[#FFBD2E] border border-[#DEA123]/40 cursor-pointer hover:opacity-80 transition" title="Réduire"></div>
+      <div class="w-3 h-3 rounded-full bg-[#27C93F] border border-[#1AAB29]/40 cursor-pointer hover:opacity-80 transition" title="Agrandir"></div>
+    </div>
+    <div class="text-[11px] font-mono text-subtle/80 tracking-tight hidden sm:block">
+      Fieldnote v2.4 · Hub d'automatisation
+    </div>
+    <div class="w-10"></div>
+  </div>
+  <!-- FIN : Contrôles de fenêtre macOS -->
+
+  <!-- Conteneur principal de l'espace de travail -->
+  <div class="flex-1 flex gap-3 overflow-hidden p-1.5">
+    
+    <!-- DÉBUT : Dock d'icônes latéral gauche -->
+    <aside class="w-14 flex flex-col justify-between items-center py-2 flex-shrink-0" data-purpose="primary-icon-dock">
+      <!-- Capsule supérieure du Dock -->
+      <div class="w-12 bg-[#1C1E22] rounded-full py-4 flex flex-col items-center gap-5 shadow-dock-pill border border-white/10 text-white/50">
+        <!-- Logo de la marque : Courbe S tactile -->
+        <button class="w-8 h-8 rounded-full bg-white/10 hover:bg-white/15 flex items-center justify-center p-1.5 transition group" title="Accueil Fieldnote">
+          <svg class="w-full h-full text-white" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1.2 15.2c-2.3 0-4.2-1.7-4.2-4.2 0-1.8 1.1-3.2 2.7-3.8l.8 1.7c-.9.4-1.5 1.2-1.5 2.1 0 1.3 1 2.3 2.2 2.3 1.2 0 2.2-.8 2.2-2.1 0-.9-.5-1.5-1.4-2.1l-.8-.6c-1.5-1.1-2.4-2.2-2.4-3.7 0-2.1 1.7-3.8 3.9-3.8 2.1 0 3.7 1.4 4 3.3l-1.9.4c-.2-1-1-1.8-2.1-1.8-1.1 0-2 .8-2 1.9 0 .8.5 1.4 1.3 2l.8.6c1.6 1.2 2.6 2.3 2.6 3.9 0 2.3-1.8 4-4.3 4z"/>
+          </svg>
+        </button>
+        <!-- Élément actif : Aperçu -->
+        <button aria-label="Aperçu du tableau de bord" class="w-8 h-8 rounded-xl bg-white/20 text-white flex items-center justify-center transition relative" title="Aperçu">
+          <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24">
+            <path d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" stroke-linecap="round" stroke-linejoin="round"></path>
+          </svg>
+          <span class="absolute -left-1 top-2 w-1.5 h-1.5 rounded-full bg-[#E5FA52]"></span>
+        </button>
+        <!-- Élément : Flux de travail -->
+        <button aria-label="Flux de travail" class="w-8 h-8 rounded-xl hover:bg-white/10 text-white/60 hover:text-white flex items-center justify-center transition" title="Flux de travail">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24">
+            <path d="M13 10V3L4 14h7v7l9-11h-7z" stroke-linecap="round" stroke-linejoin="round"></path>
+          </svg>
+        </button>
+        <!-- Élément : Intégrations -->
+        <button aria-label="Intégrations" class="w-8 h-8 rounded-xl hover:bg-white/10 text-white/60 hover:text-white flex items-center justify-center transition" title="Intégrations & Connecteurs">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24">
+            <path d="M11 4a2 2 0 114 0v1a1 1 0 001 1h3a1 1 0 011 1v3a1 1 0 01-1 1h-1a2 2 0 100 4h1a1 1 0 011 1v3a1 1 0 01-1 1h-3a1 1 0 01-1-1v-1a2 2 0 10-4 0v1a1 1 0 01-1 1H7a1 1 0 01-1-1v-3a1 1 0 00-1-1H4a2 2 0 110-4h1a1 1 0 001-1V7a1 1 0 011-1h3a1 1 0 001-1V4z" stroke-linecap="round" stroke-linejoin="round"></path>
+          </svg>
+        </button>
+        <!-- Élément : Télémétrie & Analyses -->
+        <button aria-label="Analyses" class="w-8 h-8 rounded-xl hover:bg-white/10 text-white/60 hover:text-white flex items-center justify-center transition" title="Télémétrie & Rapports">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24">
+            <path d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" stroke-linecap="round" stroke-linejoin="round"></path>
+          </svg>
+        </button>
+        <!-- Élément : Paramètres -->
+        <button aria-label="Paramètres" class="w-8 h-8 rounded-xl hover:bg-white/10 text-white/60 hover:text-white flex items-center justify-center transition" title="Paramètres du système">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24">
+            <path d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" stroke-linecap="round" stroke-linejoin="round"></path>
+            <path d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" stroke-linecap="round" stroke-linejoin="round"></path>
+          </svg>
+        </button>
+      </div>
+      <!-- Barre verticale décorative et de défilement -->
+      <div class="w-1.5 h-36 bg-black/10 rounded-full my-auto relative flex items-center justify-center cursor-ns-resize group" title="Barre de défilement">
+        <div class="w-3 h-8 bg-white rounded-full shadow-sm border border-black/10 group-hover:scale-105 transition-transform"></div>
+      </div>
+      <!-- Bouton avatar inférieur -->
+      <button class="w-10 h-10 rounded-full bg-[#1C1E22] text-white flex items-center justify-center shadow-lg border border-white/10 hover:opacity-90 transition" title="Profil Fieldnote">
+        <span class="text-xs font-semibold">FN</span>
+      </button>
+    </aside>
+    <!-- FIN : Dock d'icônes latéral gauche -->
+
+    <!-- DÉBUT : Barre latérale secondaire de navigation -->
+    <aside class="w-64 bg-[#F2F4F7]/90 rounded-[28px] p-4 flex flex-col justify-between border border-white shadow-soft-card flex-shrink-0" data-purpose="workspace-nav">
+      <div class="flex flex-col gap-5 overflow-y-auto pr-1">
+        <!-- En-tête de l'espace de travail -->
+        <div class="flex items-center justify-between p-1.5 bg-white rounded-2xl shadow-sm border border-black/[0.04] cursor-pointer hover:bg-white/90 transition">
+          <div class="flex items-center gap-2.5">
+            <div class="w-8 h-8 rounded-xl bg-[#1A1C20] flex items-center justify-center text-white text-xs font-semibold shadow-inner">
+              F
+            </div>
+            <div class="leading-tight">
+              <div class="text-[13px] font-semibold text-[#181A1F]">Fieldnote</div>
+              <div class="text-[10px] text-subtle">Espace principal</div>
+            </div>
+          </div>
+          <button class="p-1 hover:bg-gray-100 rounded-lg text-subtle" title="Changer d'espace">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+              <path d="M8 9l4-4 4 4m0 6l-4 4-4-4" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+            </svg>
+          </button>
+        </div>
+        <!-- Barre de recherche rapide -->
+        <div class="relative">
+          <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-subtle">
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+              <path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+            </svg>
+          </span>
+          <input id="quick-search-input" class="w-full bg-[#E8EAEF]/60 text-xs rounded-xl pl-9 pr-7 py-2 border-transparent focus:border-black/20 focus:bg-white focus:ring-0 placeholder-subtle text-gray-700 transition" placeholder="Rechercher..." type="text"/>
+          <span class="absolute inset-y-0 right-0 pr-2.5 flex items-center pointer-events-none text-[10px] text-subtle font-mono">⌘K</span>
+        </div>
+        <!-- Liens de navigation : Espace de travail -->
+        <div>
+          <div class="text-[10px] font-semibold tracking-wider text-subtle/80 uppercase px-2 mb-1.5">Espace de travail</div>
+          <nav class="space-y-0.5">
+            <!-- Lien actif : Aperçu -->
+            <a class="flex items-center justify-between px-3 py-2 rounded-xl bg-white text-[#111317] font-medium text-xs shadow-pill-active border border-black/[0.04] transition" href="#">
+              <div class="flex items-center gap-2.5">
+                <svg class="w-4 h-4 text-black" fill="none" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24">
+                  <path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" stroke-linecap="round" stroke-linejoin="round"></path>
+                </svg>
+                <span>Aperçu</span>
+              </div>
+            </a>
+            <!-- Lien : Flux de travail -->
+            <a class="flex items-center justify-between px-3 py-2 rounded-xl text-subtle hover:text-[#111317] hover:bg-black/[0.03] transition text-xs font-medium" href="#">
+              <div class="flex items-center gap-2.5">
+                <svg class="w-4 h-4 text-subtle" fill="none" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24">
+                  <path d="M13 10V3L4 14h7v7l9-11h-7z" stroke-linecap="round" stroke-linejoin="round"></path>
+                </svg>
+                <span>Flux de travail</span>
+              </div>
+              <span class="text-[11px] text-subtle font-normal">24</span>
+            </a>
+            <!-- Lien : Approbations -->
+            <a class="flex items-center justify-between px-3 py-2 rounded-xl text-subtle hover:text-[#111317] hover:bg-black/[0.03] transition text-xs font-medium" href="#">
+              <div class="flex items-center gap-2.5">
+                <svg class="w-4 h-4 text-subtle" fill="none" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24">
+                  <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" stroke-linecap="round" stroke-linejoin="round"></path>
+                </svg>
+                <span>Approbations</span>
+              </div>
+              <span id="badge-nav-approvals" class="w-4 h-4 rounded-full bg-[#E5FA52] text-[#121316] font-semibold text-[10px] flex items-center justify-center">3</span>
+            </a>
+            <!-- Lien : Historique des exécutions -->
+            <a class="flex items-center justify-between px-3 py-2 rounded-xl text-subtle hover:text-[#111317] hover:bg-black/[0.03] transition text-xs font-medium" href="#">
+              <div class="flex items-center gap-2.5">
+                <svg class="w-4 h-4 text-subtle" fill="none" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24">
+                  <path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" stroke-linecap="round" stroke-linejoin="round"></path>
+                </svg>
+                <span>Historique d'exécution</span>
+              </div>
+            </a>
+          </nav>
+        </div>
+        <!-- Section : Activité en direct -->
+        <div>
+          <div class="text-[10px] font-semibold tracking-wider text-subtle/80 uppercase px-2 mb-1.5 flex items-center gap-1.5">
+            <span>En direct</span>
+            <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+          </div>
+          <div class="space-y-1 px-2 text-xs">
+            <div class="flex items-center justify-between py-1 text-gray-700">
+              <div class="flex items-center gap-2">
+                <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                <span class="text-subtle font-medium">En cours</span>
+              </div>
+              <span class="font-medium text-[11px] text-gray-800">12</span>
+            </div>
+            <div class="flex items-center justify-between py-1 text-gray-700">
+              <div class="flex items-center gap-2">
+                <span class="w-1.5 h-1.5 rounded-full bg-amber-400"></span>
+                <span class="text-subtle font-medium">En attente</span>
+              </div>
+              <span class="font-medium text-[11px] text-gray-800">46</span>
+            </div>
+            <div class="flex items-center justify-between py-1 text-gray-700">
+              <div class="flex items-center gap-2">
+                <span class="w-1.5 h-1.5 rounded-full bg-rose-500"></span>
+                <span class="text-subtle font-medium">Échecs aujourd'hui</span>
+              </div>
+              <span class="font-medium text-[11px] text-gray-800">2</span>
+            </div>
+          </div>
+        </div>
+        <!-- Section : Dossiers -->
+        <div>
+          <div class="text-[10px] font-semibold tracking-wider text-subtle/80 uppercase px-2 mb-1.5">Dossiers</div>
+          <div class="space-y-1">
+            <!-- Dossier Finance (Ouvert) -->
+            <div class="bg-black/[0.02] rounded-xl p-1.5">
+              <div class="flex items-center justify-between px-2 py-1 text-xs font-medium text-gray-800 cursor-pointer">
+                <div class="flex items-center gap-2">
+                  <svg class="w-3.5 h-3.5 text-subtle" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+                    <path d="M19 9l-7 7-7-7" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+                  </svg>
+                  <svg class="w-3.5 h-3.5 text-subtle" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+                    <path d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+                  </svg>
+                  <span>Finance</span>
+                </div>
+                <span class="text-[10px] text-subtle">11</span>
+              </div>
+              <!-- Sous-dossiers -->
+              <div class="ml-5 mt-1 space-y-1 border-l border-gray-200 pl-2">
+                <div class="text-[11px] text-subtle py-0.5 px-1 hover:text-black flex items-center justify-between cursor-pointer">
+                  <span>Clôture mensuelle</span>
+                  <span class="text-[10px]">5</span>
+                </div>
+                <div class="text-[11px] text-[#111317] font-medium py-1 px-2 rounded-lg bg-white shadow-sm flex items-center justify-between cursor-pointer">
+                  <span class="flex items-center gap-1.5">
+                    <span class="w-1 h-1 rounded-full bg-black"></span>
+                    Rapprochement factures
+                  </span>
+                  <span class="text-[10px] bg-gray-100 px-1 rounded">4</span>
+                </div>
+                <div class="text-[11px] text-subtle py-0.5 px-1 hover:text-black flex items-center justify-between cursor-pointer">
+                  <span>Fournisseurs</span>
+                  <span class="text-[10px]">2</span>
+                </div>
+              </div>
+            </div>
+            <!-- Autres dossiers -->
+            <div class="flex items-center justify-between px-3 py-1.5 text-xs text-subtle hover:text-[#111317] cursor-pointer rounded-lg hover:bg-black/[0.02] transition">
+              <div class="flex items-center gap-2">
+                <svg class="w-3.5 h-3.5 text-subtle" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+                  <path d="M9 5l7 7-7 7" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+                </svg>
+                <svg class="w-3.5 h-3.5 text-subtle" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+                  <path d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+                </svg>
+                <span>Ressources humaines</span>
+              </div>
+              <span class="text-[10px]">6</span>
+            </div>
+            <div class="flex items-center justify-between px-3 py-1.5 text-xs text-subtle hover:text-[#111317] cursor-pointer rounded-lg hover:bg-black/[0.02] transition">
+              <div class="flex items-center gap-2">
+                <svg class="w-3.5 h-3.5 text-subtle" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+                  <path d="M9 5l7 7-7 7" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+                </svg>
+                <svg class="w-3.5 h-3.5 text-subtle" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+                  <path d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+                </svg>
+                <span>IT &amp; Accès</span>
+              </div>
+              <span class="text-[10px]">7</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- Badge profil utilisateur en bas -->
+      <div class="mt-4 pt-3 border-t border-gray-200/60 flex items-center justify-between">
+        <div class="flex items-center gap-2.5">
+          <div class="w-8 h-8 rounded-full bg-[#DCE2EA] flex items-center justify-center text-[11px] font-semibold text-gray-700">
+            DK
+          </div>
+          <div>
+            <div class="text-xs font-semibold text-gray-900 leading-tight">Dana Kim</div>
+            <div class="text-[10px] text-subtle">Opérations</div>
+          </div>
+        </div>
+        <button class="text-subtle hover:text-gray-900 p-1 rounded hover:bg-gray-200/60 transition" title="Options de compte">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+            <path d="M5 12h.01M12 12h.01M19 12h.01" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+          </svg>
+        </button>
+      </div>
+    </aside>
+    <!-- FIN : Barre latérale secondaire de navigation -->
+
+    <!-- DÉBUT : Zone de contenu principale -->
+    <main class="flex-1 flex flex-col gap-4 overflow-y-auto pr-1" data-purpose="primary-workspace">
+      <!-- En-tête de navigation supérieure & filtres -->
+      <header class="flex items-center justify-between pt-1">
+        <div>
+          <div class="text-[10px] tracking-widest font-semibold uppercase text-subtle flex items-center gap-1.5">
+            <span>FIELDNOTE</span>
+            <span>/</span>
+            <span class="text-gray-700">APERÇU</span>
+          </div>
+          <div class="flex items-baseline gap-3 mt-0.5">
+            <h1 class="text-2xl font-bold tracking-tight text-[#111317]">Aperçu</h1>
+            <span class="text-xs text-subtle font-medium">Mercredi 18 novembre · 11:02</span>
+          </div>
+        </div>
+        <!-- Boutons d'action / Filtres -->
+        <div class="flex items-center gap-2.5">
+          <!-- Pilules de sélection temporelle -->
+          <div class="bg-[#E2E4E9] p-1 rounded-full flex items-center text-xs font-medium shadow-inner" id="time-pills">
+            <button class="px-3.5 py-1 rounded-full bg-white text-[#111317] shadow-sm transition active:scale-95" data-range="today">Aujourd'hui</button>
+            <button class="px-3.5 py-1 rounded-full text-subtle hover:text-[#111317] transition active:scale-95" data-range="7d">7 jours</button>
+            <button class="px-3.5 py-1 rounded-full text-subtle hover:text-[#111317] transition active:scale-95" data-range="30d">30 jours</button>
+          </div>
+          <!-- Bouton d'actualisation des métriques -->
+          <button id="btn-refresh" class="w-9 h-9 rounded-full bg-white shadow-soft-card border border-white flex items-center justify-center text-subtle hover:text-black transition active:scale-95 duration-300" title="Actualiser les métriques">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24">
+              <path d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" stroke-linecap="round" stroke-linejoin="round"></path>
+            </svg>
+          </button>
+          <!-- Bouton d'action principal : Nouveau flux -->
+          <button id="btn-new-workflow" class="px-4 py-2 bg-[#141518] hover:bg-black text-white text-xs font-medium rounded-full flex items-center gap-2 shadow-md transition-all active:scale-[0.98]">
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.5" viewbox="0 0 24 24">
+              <path d="M12 4v16m8-8H4" stroke-linecap="round" stroke-linejoin="round"></path>
+            </svg>
+            <span>Nouveau flux</span>
+          </button>
+        </div>
+      </header>
+
+      <!-- DÉBUT : Carte Aperçu supérieur (Exécutions du jour & Graphique) -->
+      <section class="bg-white rounded-[26px] p-5 shadow-soft-card border border-white/80 relative" data-purpose="runs-overview-card">
+        <!-- En-tête de carte & Légende des statuts -->
+        <div class="flex items-center justify-between mb-2">
+          <div class="flex items-center gap-4 text-xs">
+            <span class="font-bold text-sm text-[#111317]">Exécutions aujourd'hui</span>
+            <div class="flex items-center gap-3 text-[11px] text-subtle">
+              <span class="flex items-center gap-1.5"><span class="w-1.5 h-1.5 rounded-full bg-black"></span> <strong class="text-gray-900 font-medium">3088</strong> en direct</span>
+              <span class="flex items-center gap-1.5"><span class="w-1.5 h-1.5 rounded-full border border-gray-400"></span> <strong class="text-gray-900 font-medium">82</strong> planifiées</span>
+              <span class="flex items-center gap-1.5"><span class="w-1.5 h-1.5 rounded-full bg-rose-500"></span> <strong class="text-gray-900 font-medium">1</strong> échec</span>
+              <span class="flex items-center gap-1.5"><span class="w-1.5 h-1.5 rounded-full bg-gray-300"></span> <strong class="text-gray-900 font-medium">0</strong> en attente</span>
+            </div>
+          </div>
+          <!-- Sélecteur de vue & journal des exécutions -->
+          <div class="flex items-center gap-3">
+            <div class="flex items-center bg-[#F2F4F7] p-0.5 rounded-lg border border-black/[0.04]" id="runs-view-toggle">
+              <button aria-label="Vue matrice de points" class="px-2 py-1 rounded bg-white shadow-xs text-black transition" data-view-btn="dots" type="button" title="Matrice de points">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>
+              </button>
+              <button aria-label="Vue histogramme en barres" class="px-2 py-1 rounded text-subtle hover:text-black transition" data-view-btn="bars" type="button" title="Histogramme en barres">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>
+              </button>
+              <button aria-label="Vue points de crête" class="px-2 py-1 rounded text-subtle hover:text-black transition" data-view-btn="peaks" type="button" title="Points de crête">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+              </button>
+            </div>
+            <button class="text-xs text-subtle hover:text-black font-medium flex items-center gap-1 transition group">
+              <span>Ouvrir le journal</span>
+              <svg class="w-3 h-3 group-hover:translate-x-0.5 transition-transform" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path d="M9 5l7 7-7 7" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>
+            </button>
+          </div>
+        </div>
+        <!-- Disposition scindée : KPI & Histogramme de densité -->
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-end pt-1">
+          <!-- Colonne KPI gauche -->
+          <div class="lg:col-span-4 flex flex-col justify-between">
+            <div>
+              <div class="flex items-baseline gap-2">
+                <span id="kpi-runs-count" class="text-6xl font-light tracking-tight text-[#111317]">335</span>
+                <span class="text-xs text-emerald-600 font-medium">↑ 14% vs mercredi dernier</span>
+              </div>
+              <p class="text-xs text-subtle mt-1.5 max-w-[260px] leading-relaxed">
+                Exécutions depuis minuit, 82 supplémentaires planifiées avant 24:00
+              </p>
+            </div>
+            <!-- Liste des métriques de performance -->
+            <div class="mt-6 space-y-2 border-t border-gray-100 pt-3 text-xs">
+              <div class="flex justify-between items-center text-subtle">
+                <span>Taux de réussite</span>
+                <span class="font-medium text-gray-900 font-mono">99,4%</span>
+              </div>
+              <div class="flex justify-between items-center text-subtle">
+                <span>Exécution médiane</span>
+                <span class="font-medium text-gray-900 font-mono">4,1 s</span>
+              </div>
+              <div class="flex justify-between items-center text-subtle">
+                <span>Pic d'activité</span>
+                <span class="font-medium text-gray-900 font-mono">09:25</span>
+              </div>
+            </div>
+          </div>
+          <!-- Colonne droite : Graphique histogramme de densité par points -->
+          <div class="lg:col-span-8 flex flex-col justify-end">
+            <!-- Matrice de points visuelle -->
+            <div class="chart-matrix relative h-44 w-full flex items-end justify-between px-2 pb-5 border-b border-gray-200/80" data-view="dots" id="runs-chart-matrix">
+              <!-- Indicateur de pic à 09:25 -->
+              <div class="absolute left-[48%] top-2 bottom-5 w-px bg-black/60 flex flex-col items-center z-10 pointer-events-none" id="chart-peak-indicator">
+                <div class="w-1.5 h-1.5 rounded-full bg-black -mt-1"></div>
+                <div class="absolute -top-4 text-[9px] font-mono bg-black text-white px-1.5 py-0.5 rounded whitespace-nowrap shadow-sm" id="chart-tooltip-pill">09:25</div>
+              </div>
+              <!-- Colonnes de points (de 00h à 24h) -->
+              <!-- 00 à 03 (Activité basse) -->
+              <div class="chart-col flex flex-col gap-1 items-center" data-runs="3" data-time="00:00"><div class="chart-dot w-1.5 h-1.5 rounded-full bg-black/80"></div></div>
+              <div class="chart-col flex flex-col gap-1 items-center" data-runs="2" data-time="01:00"><div class="chart-dot w-1.5 h-1.5 rounded-full bg-black/80"></div></div>
+              <div class="chart-col flex flex-col gap-1 items-center" data-runs="4" data-time="02:00"><div class="chart-dot w-1.5 h-1.5 rounded-full bg-black/80"></div></div>
+              <div class="chart-col flex flex-col gap-1 items-center" data-runs="3" data-time="03:00"><div class="chart-dot w-1.5 h-1.5 rounded-full bg-black/80"></div></div>
+              <!-- 04 à 06 (Montée matinale) -->
+              <div class="chart-col flex flex-col gap-1 items-center" data-runs="7" data-time="04:00">
+                <div class="chart-dot w-1.5 h-1.5 rounded-full bg-black/80"></div>
+                <div class="chart-dot w-1.5 h-1.5 rounded-full bg-black/80"></div>
+              </div>
+              <div class="chart-col flex flex-col gap-1 items-center" data-runs="26" data-time="05:00">
+                <div class="chart-dot w-1.5 h-1.5 rounded-full bg-black/80"></div>
+                <div class="chart-dot w-1.5 h-1.5 rounded-full bg-black/80"></div>
+                <div class="chart-dot w-1.5 h-1.5 rounded-full bg-black/80"></div>
+                <div class="chart-dot w-1.5 h-1.5 rounded-full bg-black/80"></div>
+                <div class="chart-dot w-1.5 h-1.5 rounded-full bg-black/80"></div>
+                <div class="chart-dot w-1.5 h-1.5 rounded-full bg-black/80"></div>
+                <div class="chart-dot w-1.5 h-1.5 rounded-full bg-black/80"></div>
+                <div class="chart-dot w-1.5 h-1.5 rounded-full bg-black/80"></div>
+              </div>
+              <div class="chart-col flex flex-col gap-1 items-center" data-runs="19" data-time="06:00">
+                <div class="chart-dot w-1.5 h-1.5 rounded-full bg-black/80"></div>
+                <div class="chart-dot w-1.5 h-1.5 rounded-full bg-black/80"></div>
+                <div class="chart-dot w-1.5 h-1.5 rounded-full bg-black/80"></div>
+                <div class="chart-dot w-1.5 h-1.5 rounded-full bg-black/80"></div>
+                <div class="chart-dot w-1.5 h-1.5 rounded-full bg-black/80"></div>
+                <div class="chart-dot w-1.5 h-1.5 rounded-full bg-black/80"></div>
+              </div>
+              <div class="chart-col flex flex-col gap-1 items-center" data-runs="8" data-time="07:00">
+                <div class="chart-dot w-1.5 h-1.5 rounded-full bg-black/80"></div>
+                <div class="chart-dot w-1.5 h-1.5 rounded-full bg-black/80"></div>
+              </div>
+              <!-- 07 à 09 (Montée vers le pic) -->
+              <div class="chart-col flex flex-col gap-1 items-center" data-runs="14" data-time="07:45">
+                <div class="chart-dot w-1.5 h-1.5 rounded-full bg-black/80"></div>
+                <div class="chart-dot w-1.5 h-1.5 rounded-full bg-black/80"></div>
+                <div class="chart-dot w-1.5 h-1.5 rounded-full bg-black/80"></div>
+                <div class="chart-dot w-1.5 h-1.5 rounded-full bg-black/80"></div>
+              </div>
+              <div class="chart-col flex flex-col gap-1 items-center" data-runs="24" data-time="08:30">
+                <div class="chart-dot w-1.5 h-1.5 rounded-full bg-black/80"></div>
+                <div class="chart-dot w-1.5 h-1.5 rounded-full bg-black/80"></div>
+                <div class="chart-dot w-1.5 h-1.5 rounded-full bg-black/80"></div>
+                <div class="chart-dot w-1.5 h-1.5 rounded-full bg-black/80"></div>
+                <div class="chart-dot w-1.5 h-1.5 rounded-full bg-black/80"></div>
+                <div class="chart-dot w-1.5 h-1.5 rounded-full bg-black/80"></div>
+                <div class="chart-dot w-1.5 h-1.5 rounded-full bg-black/80"></div>
+              </div>
+              <!-- Colonne au pic d'activité (14 points) -->
+              <div class="chart-col flex flex-col gap-1 items-center" data-peak="true" data-runs="48" data-time="09:25">
+                <div class="chart-dot w-1.5 h-1.5 rounded-full bg-black"></div>
+                <div class="chart-dot w-1.5 h-1.5 rounded-full bg-black"></div>
+                <div class="chart-dot w-1.5 h-1.5 rounded-full bg-black"></div>
+                <div class="chart-dot w-1.5 h-1.5 rounded-full bg-black"></div>
+                <div class="chart-dot w-1.5 h-1.5 rounded-full bg-black"></div>
+                <div class="chart-dot w-1.5 h-1.5 rounded-full bg-black"></div>
+                <div class="chart-dot w-1.5 h-1.5 rounded-full bg-black"></div>
+                <div class="chart-dot w-1.5 h-1.5 rounded-full bg-black"></div>
+                <div class="chart-dot w-1.5 h-1.5 rounded-full bg-black"></div>
+                <div class="chart-dot w-1.5 h-1.5 rounded-full bg-black"></div>
+                <div class="chart-dot w-1.5 h-1.5 rounded-full bg-black"></div>
+                <div class="chart-dot w-1.5 h-1.5 rounded-full bg-black"></div>
+                <div class="chart-dot w-1.5 h-1.5 rounded-full bg-black"></div>
+                <div class="chart-dot w-1.5 h-1.5 rounded-full bg-black"></div>
+              </div>
+              <div class="chart-col flex flex-col gap-1 items-center" data-runs="38" data-time="10:15">
+                <div class="chart-dot w-1.5 h-1.5 rounded-full bg-black"></div>
+                <div class="chart-dot w-1.5 h-1.5 rounded-full bg-black"></div>
+                <div class="chart-dot w-1.5 h-1.5 rounded-full bg-black"></div>
+                <div class="chart-dot w-1.5 h-1.5 rounded-full bg-black"></div>
+                <div class="chart-dot w-1.5 h-1.5 rounded-full bg-black"></div>
+                <div class="chart-dot w-1.5 h-1.5 rounded-full bg-black"></div>
+                <div class="chart-dot w-1.5 h-1.5 rounded-full bg-black"></div>
+                <div class="chart-dot w-1.5 h-1.5 rounded-full bg-black"></div>
+                <div class="chart-dot w-1.5 h-1.5 rounded-full bg-black"></div>
+                <div class="chart-dot w-1.5 h-1.5 rounded-full bg-black"></div>
+              </div>
+              <div class="chart-col flex flex-col gap-1 items-center" data-runs="28" data-time="11:00">
+                <div class="chart-dot w-1.5 h-1.5 rounded-full bg-black"></div>
+                <div class="chart-dot w-1.5 h-1.5 rounded-full bg-black"></div>
+                <div class="chart-dot w-1.5 h-1.5 rounded-full bg-black"></div>
+                <div class="chart-dot w-1.5 h-1.5 rounded-full bg-black"></div>
+                <div class="chart-dot w-1.5 h-1.5 rounded-full bg-black"></div>
+                <div class="chart-dot w-1.5 h-1.5 rounded-full bg-black"></div>
+                <div class="chart-dot w-1.5 h-1.5 rounded-full bg-black"></div>
+                <div class="chart-dot w-1.5 h-1.5 rounded-full bg-black"></div>
+              </div>
+              <div class="chart-col flex flex-col gap-1 items-center" data-runs="17" data-time="12:00">
+                <div class="chart-dot w-1.5 h-1.5 rounded-full bg-black/80"></div>
+                <div class="chart-dot w-1.5 h-1.5 rounded-full bg-black/80"></div>
+                <div class="chart-dot w-1.5 h-1.5 rounded-full bg-black/80"></div>
+                <div class="chart-dot w-1.5 h-1.5 rounded-full bg-black/80"></div>
+                <div class="chart-dot w-1.5 h-1.5 rounded-full bg-black/80"></div>
+              </div>
+              <div class="chart-col flex flex-col gap-1 items-center" data-runs="11" data-time="13:30">
+                <div class="chart-dot w-1.5 h-1.5 rounded-full bg-black/80"></div>
+                <div class="chart-dot w-1.5 h-1.5 rounded-full bg-black/80"></div>
+                <div class="chart-dot w-1.5 h-1.5 rounded-full bg-black/80"></div>
+              </div>
+              <!-- 12 à 24 (Décroissance) -->
+              <div class="chart-col flex flex-col gap-1 items-center" data-runs="7" data-time="15:00"><div class="chart-dot w-1.5 h-1.5 rounded-full bg-black/40"></div><div class="chart-dot w-1.5 h-1.5 rounded-full bg-black/40"></div></div>
+              <div class="chart-col flex flex-col gap-1 items-center" data-runs="4" data-time="16:30"><div class="chart-dot w-1.5 h-1.5 rounded-full bg-black/30"></div></div>
+              <div class="chart-col flex flex-col gap-1 items-center" data-runs="3" data-time="18:00"><div class="chart-dot w-1.5 h-1.5 rounded-full bg-black/30"></div></div>
+              <div class="chart-col flex flex-col gap-1 items-center" data-runs="3" data-time="19:30"><div class="chart-dot w-1.5 h-1.5 rounded-full bg-black/30"></div></div>
+              <div class="chart-col flex flex-col gap-1 items-center" data-runs="2" data-time="21:00"><div class="chart-dot w-1.5 h-1.5 rounded-full bg-black/20"></div></div>
+              <div class="chart-col flex flex-col gap-1 items-center" data-runs="1" data-time="22:30"><div class="chart-dot w-1.5 h-1.5 rounded-full bg-black/20"></div></div>
+              <div class="chart-col flex flex-col gap-1 items-center" data-runs="1" data-time="24:00"><div class="chart-dot w-1.5 h-1.5 rounded-full bg-black/20"></div></div>
+            </div>
+            <!-- Étiquettes de l'axe temporel -->
+            <div class="flex justify-between text-[10px] text-subtle font-mono px-1 pt-1.5">
+              <span>00</span>
+              <span>03</span>
+              <span>06</span>
+              <span class="text-black font-semibold">09</span>
+              <span>12</span>
+              <span>15</span>
+              <span>18</span>
+              <span>21</span>
+              <span>24</span>
+            </div>
+          </div>
+        </div>
+      </section>
+      <!-- FIN : Carte Aperçu supérieur -->
+
+      <!-- DÉBUT : Grille scindée inférieure -->
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-4 flex-1">
+        <!-- DÉBUT : Carte Liste des flux de travail (Col 8) -->
+        <section class="lg:col-span-8 bg-white rounded-[26px] p-5 shadow-soft-card border border-white flex flex-col justify-between" data-purpose="workflows-list">
+          <div>
+            <!-- En-tête de section -->
+            <div class="flex items-center justify-between mb-3">
+              <div class="flex items-center gap-3">
+                <h2 class="text-sm font-bold text-gray-900">Flux de travail</h2>
+                <div class="flex items-center gap-1 text-xs" id="workflow-tabs">
+                  <button class="px-2.5 py-0.5 rounded-md bg-gray-100 font-medium text-black transition" data-wf-tab="active">Actifs <span class="text-subtle font-normal">18</span></button>
+                  <button class="px-2.5 py-0.5 rounded-md text-subtle hover:text-black transition" data-wf-tab="paused">En pause <span class="text-subtle font-normal">4</span></button>
+                  <button class="px-2.5 py-0.5 rounded-md text-subtle hover:text-black transition" data-wf-tab="drafts">Brouillons <span class="text-subtle font-normal">2</span></button>
+                </div>
+              </div>
+              <button class="text-xs text-subtle hover:text-black font-medium flex items-center gap-1 transition group">
+                <span>Tous les 24</span>
+                <svg class="w-3 h-3 group-hover:translate-x-0.5 transition-transform" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path d="M9 5l7 7-7 7" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>
+              </button>
+            </div>
+            <!-- En-têtes de tableau -->
+            <div class="grid grid-cols-12 text-[10px] uppercase font-semibold text-subtle tracking-wider px-2 py-1.5 border-b border-gray-100">
+              <span class="col-span-6">Flux</span>
+              <span class="col-span-4">30 dernières exécutions</span>
+              <span class="col-span-2 text-right">Statut</span>
+            </div>
+            <!-- Lignes de flux -->
+            <div class="divide-y divide-gray-50 text-xs">
+              <!-- Élément 1 : Rapprochement de factures -->
+              <div class="grid grid-cols-12 items-center px-2 py-3 hover:bg-gray-50/70 rounded-xl transition cursor-pointer">
+                <div class="col-span-6 flex items-center gap-3">
+                  <div class="w-7 h-7 rounded-lg bg-[#F2F4F7] flex items-center justify-center text-gray-600 flex-shrink-0">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path d="M9 14l6-6m-5.5.5h.01m4.99 5h.01M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16l3.5-2 3.5 2 3.5-2 3.5 2z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>
+                  </div>
+                  <div>
+                    <div class="font-medium text-gray-900">Rapprochement de factures</div>
+                    <div class="text-[11px] text-subtle">Stripe · Netsuite</div>
+                  </div>
+                </div>
+                <!-- Sparkline / histogramme miniature -->
+                <div class="col-span-4 flex items-center gap-0.5">
+                  <span class="w-1 h-3.5 bg-black rounded-xs"></span>
+                  <span class="w-1 h-4 bg-black rounded-xs"></span>
+                  <span class="w-1 h-3.5 bg-black rounded-xs"></span>
+                  <span class="w-1 h-5 bg-black rounded-xs"></span>
+                  <span class="w-1 h-4 bg-black rounded-xs"></span>
+                  <span class="w-1 h-5 bg-black rounded-xs"></span>
+                  <span class="w-1 h-3.5 bg-black rounded-xs"></span>
+                  <span class="w-1 h-5 bg-black rounded-xs"></span>
+                  <span class="w-1 h-4 bg-black rounded-xs"></span>
+                  <span class="w-1 h-3 bg-gray-200 rounded-xs"></span>
+                  <span class="w-1 h-3 bg-gray-200 rounded-xs"></span>
+                  <span class="w-1 h-3 bg-gray-200 rounded-xs"></span>
+                </div>
+                <div class="col-span-2 text-right">
+                  <span class="inline-flex items-center gap-1 text-[11px] text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full font-medium">
+                    <span class="w-1 h-1 rounded-full bg-emerald-600"></span> En direct
+                  </span>
+                </div>
+              </div>
+              <!-- Élément 2 : Intégration nouveaux employés -->
+              <div class="grid grid-cols-12 items-center px-2 py-3 hover:bg-gray-50/70 rounded-xl transition cursor-pointer">
+                <div class="col-span-6 flex items-center gap-3">
+                  <div class="w-7 h-7 rounded-lg bg-[#F2F4F7] flex items-center justify-center text-gray-600 flex-shrink-0">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>
+                  </div>
+                  <div>
+                    <div class="font-medium text-gray-900">Intégration nouveaux employés</div>
+                    <div class="text-[11px] text-subtle">Rippling · Okta, Slack</div>
+                  </div>
+                </div>
+                <div class="col-span-4 flex items-center gap-0.5">
+                  <span class="w-1 h-3 bg-black rounded-xs"></span>
+                  <span class="w-1 h-4 bg-black rounded-xs"></span>
+                  <span class="w-1 h-4 bg-black rounded-xs"></span>
+                  <span class="w-1 h-3 bg-black rounded-xs"></span>
+                  <span class="w-1 h-5 bg-black rounded-xs"></span>
+                  <span class="w-1 h-4 bg-black rounded-xs"></span>
+                  <span class="w-1 h-3 bg-black rounded-xs"></span>
+                  <span class="w-1 h-4 bg-black rounded-xs"></span>
+                  <span class="w-1 h-3 bg-black rounded-xs"></span>
+                  <span class="w-1 h-3 bg-gray-200 rounded-xs"></span>
+                </div>
+                <div class="col-span-2 text-right">
+                  <span class="text-[11px] text-subtle font-mono">il y a 18 min</span>
+                </div>
+              </div>
+              <!-- Élément 3 : Revue trimestrielle des accès -->
+              <div class="grid grid-cols-12 items-center px-2 py-3 hover:bg-gray-50/70 rounded-xl transition cursor-pointer">
+                <div class="col-span-6 flex items-center gap-3">
+                  <div class="w-7 h-7 rounded-lg bg-[#F2F4F7] flex items-center justify-center text-gray-600 flex-shrink-0">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>
+                  </div>
+                  <div>
+                    <div class="font-medium text-gray-900">Revue trimestrielle des accès</div>
+                    <div class="text-[11px] text-subtle">Okta · Trimestriel · AWS</div>
+                  </div>
+                </div>
+                <div class="col-span-4 flex items-center gap-0.5">
+                  <span class="w-1 h-4 bg-black rounded-xs"></span>
+                  <span class="w-1 h-3.5 bg-black rounded-xs"></span>
+                  <span class="w-1 h-5 bg-black rounded-xs"></span>
+                  <span class="w-1 h-3 bg-black rounded-xs"></span>
+                  <span class="w-1 h-4 bg-black rounded-xs"></span>
+                  <span class="w-1 h-3 bg-gray-200 rounded-xs"></span>
+                  <span class="w-1 h-3 bg-gray-200 rounded-xs"></span>
+                </div>
+                <div class="col-span-2 text-right">
+                  <span class="text-[11px] text-subtle font-mono">il y a 1 h</span>
+                </div>
+              </div>
+              <!-- Élément 4 : Renouvellement fournisseurs -->
+              <div class="grid grid-cols-12 items-center px-2 py-3 hover:bg-gray-50/70 rounded-xl transition cursor-pointer">
+                <div class="col-span-6 flex items-center gap-3">
+                  <div class="w-7 h-7 rounded-lg bg-[#F2F4F7] flex items-center justify-center text-gray-600 flex-shrink-0">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>
+                  </div>
+                  <div>
+                    <div class="font-medium text-gray-900">Renouvellement fournisseurs</div>
+                    <div class="text-[11px] text-subtle">Subpart · Gmail</div>
+                  </div>
+                </div>
+                <div class="col-span-4 flex items-center gap-0.5">
+                  <span class="w-1 h-3.5 bg-black rounded-xs"></span>
+                  <span class="w-1 h-4 bg-black rounded-xs"></span>
+                  <span class="w-1 h-3 bg-black rounded-xs"></span>
+                  <span class="w-1 h-3 bg-gray-200 rounded-xs"></span>
+                </div>
+                <div class="col-span-2 text-right">
+                  <span class="text-[11px] text-subtle font-mono">il y a 3 h</span>
+                </div>
+              </div>
+              <!-- Élément 5 : Export de paie -->
+              <div class="grid grid-cols-12 items-center px-2 py-2.5 hover:bg-gray-50/70 rounded-xl transition cursor-pointer">
+                <div class="col-span-6 flex items-center gap-3">
+                  <div class="w-7 h-7 rounded-lg bg-[#F2F4F7] flex items-center justify-center text-gray-600 flex-shrink-0">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>
+                  </div>
+                  <div>
+                    <div class="font-medium text-gray-900">Export de paie</div>
+                    <div class="text-[11px] text-subtle">Gusto · 11:00</div>
+                  </div>
+                </div>
+                <div class="col-span-4 flex items-center gap-0.5">
+                  <span class="w-1 h-3 bg-black rounded-xs"></span>
+                  <span class="w-1 h-3 bg-black rounded-xs"></span>
+                  <span class="w-1 h-3 bg-gray-200 rounded-xs"></span>
+                </div>
+                <div class="col-span-2 text-right">
+                  <span class="text-[11px] text-subtle font-mono">Planifié</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+        <!-- FIN : Carte Liste des flux de travail -->
+
+        <!-- DÉBUT : Carte En attente de validation (Col 4) -->
+        <section class="lg:col-span-4 bg-white rounded-[26px] p-5 shadow-soft-card border border-white flex flex-col justify-between" data-purpose="needs-you-approvals">
+          <div>
+            <!-- En-tête -->
+            <div class="flex items-center justify-between mb-3">
+              <div class="flex items-center gap-2">
+                <h2 class="text-sm font-bold text-gray-900">En attente de vous</h2>
+                <span id="badge-needs-count" class="w-4 h-4 rounded-full bg-[#E5FA52] text-[#121316] font-semibold text-[10px] flex items-center justify-center">3</span>
+              </div>
+              <button class="text-xs text-subtle hover:text-black font-medium flex items-center gap-1 transition group">
+                <span>File d'attente</span>
+                <svg class="w-3 h-3 group-hover:translate-x-0.5 transition-transform" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path d="M9 5l7 7-7 7" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>
+              </button>
+            </div>
+            <!-- Liste des approbations en attente -->
+            <div class="space-y-2.5">
+              <!-- Élément 1 : Actif avec boutons Approuver / Refuser -->
+              <div class="p-3 bg-[#F8F9FA] rounded-2xl border border-gray-100/90 shadow-sm transition-all duration-300" id="card-ap-204">
+                <div class="flex items-center justify-between text-[11px] text-subtle mb-1">
+                  <span class="flex items-center gap-1 font-mono text-[10px]">
+                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>
+                    AP-204
+                  </span>
+                  <span>il y a 12 min</span>
+                </div>
+                <div class="text-xs font-semibold text-gray-900 mb-0.5">Droits admin Okta pour Leo Park</div>
+                <div class="text-[11px] text-subtle mb-3">Revue des accès · demandé par Trinity Rivera</div>
+                <!-- Boutons d'action -->
+                <div class="flex items-center gap-2" id="action-buttons-ap-204">
+                  <button id="btn-approve-204" class="flex-1 py-1.5 bg-[#141518] hover:bg-black text-white text-xs font-medium rounded-xl shadow-sm transition active:scale-95">
+                    Approuver
+                  </button>
+                  <button id="btn-decline-204" class="flex-1 py-1.5 bg-white hover:bg-gray-100 text-gray-700 text-xs font-medium rounded-xl border border-gray-200 transition active:scale-95">
+                    Refuser
+                  </button>
+                </div>
+              </div>
+              <!-- Élément 2 -->
+              <div class="p-3 bg-white hover:bg-gray-50/80 rounded-2xl border border-gray-100 transition cursor-pointer">
+                <div class="flex items-center justify-between text-[11px] text-subtle mb-1">
+                  <span class="font-mono text-[10px]">AP-203</span>
+                  <span>il y a 24 min</span>
+                </div>
+                <div class="text-xs font-semibold text-gray-900 mb-0.5">Remboursement de 7 420 $ à Northwind</div>
+                <div class="text-[11px] text-subtle leading-tight">Initiateur : système · au-dessus du plafond auto de 5 000 $</div>
+              </div>
+              <!-- Élément 3 -->
+              <div class="p-3 bg-white hover:bg-gray-50/80 rounded-2xl border border-gray-100 transition cursor-pointer">
+                <div class="flex items-center justify-between text-[11px] text-subtle mb-1">
+                  <span class="font-mono text-[10px]">AP-201</span>
+                  <span>il y a 1 h</span>
+                </div>
+                <div class="text-xs font-semibold text-gray-900 mb-0.5">Supprimer 3 fournisseurs inactifs</div>
+                <div class="text-[11px] text-subtle leading-tight">Révocation de renouvellement par le Système</div>
+              </div>
+            </div>
+          </div>
+          <!-- Pied de carte : actions groupées -->
+          <div class="pt-3 border-t border-gray-100 flex items-center justify-between text-[11px] text-subtle">
+            <span>Attente moy. 14 min</span>
+            <div class="flex items-center gap-2">
+              <button class="hover:text-black font-medium transition" onclick="triggerBatch('approve')">Tout approuver</button>
+              <span>·</span>
+              <button class="hover:text-black font-medium transition" onclick="triggerBatch('decline')">Refuser</button>
+            </div>
+          </div>
+        </section>
+        <!-- FIN : Carte En attente de validation -->
+      </div>
+      <!-- FIN : Grille scindée inférieure -->
+    </main>
+    <!-- FIN : Zone de contenu principale -->
+  </div>
+</div>
+<!-- FIN : Cadre de la fenêtre de l'application -->
+
+<!-- Boîte de dialogue modale : Nouveau flux -->
+<div id="modal-new-workflow" class="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+  <div class="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border border-white/60 animate-in fade-in zoom-in-95 duration-200">
+    <div class="flex items-center justify-between pb-4 border-b border-gray-100">
+      <div class="flex items-center gap-2.5">
+        <div class="w-8 h-8 rounded-xl bg-black text-white flex items-center justify-center text-xs font-bold">
+          +
+        </div>
+        <div>
+          <h3 class="text-sm font-bold text-gray-900">Créer un flux de travail</h3>
+          <p class="text-[11px] text-gray-400">Configurer le déclencheur et les automatisations</p>
+        </div>
+      </div>
+      <button onclick="toggleModal(false)" class="text-gray-400 hover:text-gray-700 p-1 rounded-lg">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M6 18L18 6M6 6l12 12" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>
+      </button>
+    </div>
+    <div class="py-4 space-y-3">
+      <div>
+        <label class="block text-[11px] font-semibold text-gray-700 uppercase tracking-wider mb-1">Nom du flux</label>
+        <input type="text" placeholder="ex. Escalade des litiges Stripe" class="w-full text-xs rounded-xl border-gray-200 focus:border-black focus:ring-0 p-2.5 bg-gray-50"/>
+      </div>
+      <div>
+        <label class="block text-[11px] font-semibold text-gray-700 uppercase tracking-wider mb-1">Déclencheur d'intégration</label>
+        <select class="w-full text-xs rounded-xl border-gray-200 focus:border-black focus:ring-0 p-2.5 bg-gray-50">
+          <option>Webhook / Événement HTTP</option>
+          <option>Mise à jour de débit Stripe</option>
+          <option>Attribution utilisateur Okta</option>
+          <option>Tâche planifiée Cron (Quotidienne / Hebdomadaire)</option>
+        </select>
+      </div>
+    </div>
+    <div class="flex items-center justify-end gap-2 pt-3 border-t border-gray-100">
+      <button onclick="toggleModal(false)" class="px-4 py-2 text-xs font-medium text-gray-600 hover:text-gray-900">Annuler</button>
+      <button onclick="saveNewWorkflow()" class="px-4 py-2 bg-black hover:bg-gray-800 text-white text-xs font-semibold rounded-xl shadow-sm transition">Créer le flux</button>
+    </div>
+  </div>
+</div>
+
+<!-- Notification Toast rapide -->
+<div id="toast-message" class="fixed bottom-6 right-6 bg-[#18191D] text-white text-xs py-2.5 px-4 rounded-2xl shadow-xl border border-white/10 flex items-center gap-2 transform translate-y-12 opacity-0 transition-all duration-300 pointer-events-none z-50">
+  <span class="w-2 h-2 rounded-full bg-[#E5FA52]"></span>
+  <span id="toast-text">Action effectuée avec succès</span>
+</div>
+
+<script>
+  (function () {
+    const matrix = document.getElementById('runs-chart-matrix');
+    if (!matrix) return;
+
+    const cols = Array.from(matrix.querySelectorAll('.chart-col'));
+    const indicator = document.getElementById('chart-peak-indicator');
+    const tooltipPill = document.getElementById('chart-tooltip-pill');
+    const viewButtons = Array.from(document.querySelectorAll('[data-view-btn]'));
+
+    let pinnedCol = null;
+    const defaultCol = matrix.querySelector('[data-peak="true"]') || cols[10];
+
+    // 1. Animation d'entrée échelonnée (du bas vers le haut par colonne)
+    cols.forEach((col, colIdx) => {
+      const dots = Array.from(col.querySelectorAll('.chart-dot'));
+      const total = dots.length;
+      dots.forEach((dot, dotIdx) => {
+        const fromBottomIdx = total - 1 - dotIdx;
+        const delay = colIdx * 20 + fromBottomIdx * 22;
+        dot.style.setProperty('--dot-delay', `${delay}ms`);
+      });
+    });
+
+    // Positionner le repère et mettre à jour le texte de l'info-bulle
+    function moveIndicatorTo(col, showCount) {
+      if (!col || !indicator || !tooltipPill) return;
+      const matrixRect = matrix.getBoundingClientRect();
+      const colRect = col.getBoundingClientRect();
+      const centerLeft = colRect.left - matrixRect.left + colRect.width / 2;
+
+      indicator.style.left = `${centerLeft}px`;
+      const time = col.getAttribute('data-time') || '09:25';
+      const runs = col.getAttribute('data-runs');
+      tooltipPill.textContent = showCount && runs ? `${time} · ${runs} exécutions` : time;
+    }
+
+    // Initialisation de la position par défaut
+    setTimeout(() => {
+      moveIndicatorTo(defaultCol, false);
+    }, 50);
+
+    // 2. Survol interactif & 3. Épinglage au clic
+    cols.forEach((col) => {
+      col.addEventListener('mouseenter', () => {
+        matrix.classList.add('is-hovering');
+        cols.forEach((c) => c.classList.remove('is-active'));
+        col.classList.add('is-active');
+        moveIndicatorTo(col, true);
+      });
+
+      col.addEventListener('click', () => {
+        if (pinnedCol === col) {
+          col.classList.remove('is-pinned');
+          pinnedCol = null;
+          moveIndicatorTo(col, true);
+        } else {
+          cols.forEach((c) => c.classList.remove('is-pinned'));
+          col.classList.add('is-pinned');
+          pinnedCol = col;
+          moveIndicatorTo(col, true);
+        }
+      });
+    });
+
+    matrix.addEventListener('mouseleave', () => {
+      matrix.classList.remove('is-hovering');
+      cols.forEach((c) => c.classList.remove('is-active'));
+      if (pinnedCol) {
+        moveIndicatorTo(pinnedCol, true);
+      } else {
+        moveIndicatorTo(defaultCol, false);
+      }
+    });
+
+    // 4. Boutons de bascule de vue du graphique
+    viewButtons.forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const targetView = btn.getAttribute('data-view-btn');
+        matrix.setAttribute('data-view', targetView);
+
+        viewButtons.forEach((b) => {
+          b.classList.remove('bg-white', 'shadow-xs', 'text-black');
+          b.classList.add('text-subtle');
+        });
+        btn.classList.add('bg-white', 'shadow-xs', 'text-black');
+        btn.classList.remove('text-subtle');
+        const viewLabels = {
+          dots: 'Matrice de points',
+          bars: 'Histogramme en barres',
+          peaks: 'Points de crête'
+        };
+        showToast(`Mode d'affichage : ${viewLabels[targetView] || targetView}`);
+      });
+    });
+  })();
+
+  // Pilules de filtrage temporel
+  const timePills = document.querySelectorAll('#time-pills button');
+  const kpiRunsCount = document.getElementById('kpi-runs-count');
+
+  timePills.forEach(pill => {
+    pill.addEventListener('click', () => {
+      timePills.forEach(p => {
+        p.classList.remove('bg-white', 'text-[#111317]', 'shadow-sm');
+        p.classList.add('text-subtle');
+      });
+      pill.classList.add('bg-white', 'text-[#111317]', 'shadow-sm');
+      pill.classList.remove('text-subtle');
+
+      const range = pill.getAttribute('data-range');
+      if (range === 'today') kpiRunsCount.textContent = '335';
+      if (range === '7d') kpiRunsCount.textContent = '2 491';
+      if (range === '30d') kpiRunsCount.textContent = '11 840';
+
+      showToast(`Exécutions affichées pour : ${pill.textContent.trim()}`);
+    });
+  });
+
+  // Actions d'approbation pour AP-204
+  const btnApprove204 = document.getElementById('btn-approve-204');
+  const btnDecline204 = document.getElementById('btn-decline-204');
+  const cardAp204 = document.getElementById('card-ap-204');
+  const badgeNeeds = document.getElementById('badge-needs-count');
+  const badgeNavApprovals = document.getElementById('badge-nav-approvals');
+
+  function resolveApproval(action) {
+    if (!cardAp204) return;
+    cardAp204.style.opacity = '0.6';
+    const isApprove = action === 'approved';
+    cardAp204.innerHTML = `
+      <div class="flex items-center justify-between text-xs py-2">
+        <span class="font-semibold ${isApprove ? 'text-emerald-600' : 'text-gray-500'} flex items-center gap-1.5">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M5 13l4 4L19 7" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"></path></svg>
+          AP-204 ${isApprove ? 'Approuvé' : 'Refusé'}
+        </span>
+        <span class="text-[10px] text-gray-400 font-mono">À l'instant</span>
+      </div>
+    `;
+    if (badgeNeeds) badgeNeeds.textContent = '2';
+    if (badgeNavApprovals) badgeNavApprovals.textContent = '2';
+    showToast(`Demande AP-204 ${isApprove ? 'approuvée' : 'refusée'}`);
+  }
+
+  if (btnApprove204) btnApprove204.addEventListener('click', () => resolveApproval('approved'));
+  if (btnDecline204) btnDecline204.addEventListener('click', () => resolveApproval('declined'));
+
+  // Actions groupées
+  function triggerBatch(type) {
+    if (badgeNeeds) badgeNeeds.textContent = '0';
+    if (badgeNavApprovals) badgeNavApprovals.textContent = '0';
+    showToast(`Toutes les approbations restantes ont été ${type === 'approve' ? 'validées' : 'refusées'}`);
+  }
+
+  // Utilitaire Toast
+  function showToast(msg) {
+    const toast = document.getElementById('toast-message');
+    const toastText = document.getElementById('toast-text');
+    if (!toast || !toastText) return;
+    toastText.textContent = msg;
+    toast.classList.remove('translate-y-12', 'opacity-0');
+    toast.classList.add('translate-y-0', 'opacity-100');
+    clearTimeout(window._toastTimer);
+    window._toastTimer = setTimeout(() => {
+      toast.classList.add('translate-y-12', 'opacity-0');
+      toast.classList.remove('translate-y-0', 'opacity-100');
+    }, 2500);
+  }
+
+  // Modale Nouveau flux
+  const modalNewWorkflow = document.getElementById('modal-new-workflow');
+  const btnNewWorkflow = document.getElementById('btn-new-workflow');
+  if (btnNewWorkflow) {
+    btnNewWorkflow.addEventListener('click', () => toggleModal(true));
+  }
+  function toggleModal(open) {
+    if (!modalNewWorkflow) return;
+    if (open) {
+      modalNewWorkflow.classList.remove('hidden');
+    } else {
+      modalNewWorkflow.classList.add('hidden');
+    }
+  }
+  function saveNewWorkflow() {
+    toggleModal(false);
+    showToast('Nouveau flux créé et planifié !');
+  }
+
+  // Animation du bouton d'actualisation
+  const btnRefresh = document.getElementById('btn-refresh');
+  if (btnRefresh) {
+    btnRefresh.addEventListener('click', () => {
+      btnRefresh.classList.add('rotate-180');
+      setTimeout(() => {
+        btnRefresh.classList.remove('rotate-180');
+        showToast('Métriques du tableau de bord synchronisées');
+      }, 400);
+    });
+  }
+
+  // Onglets des flux de travail
+  const wfTabs = document.querySelectorAll('#workflow-tabs button');
+  wfTabs.forEach(tab => {
+    tab.addEventListener('click', () => {
+      wfTabs.forEach(t => {
+        t.className = 'px-2.5 py-0.5 rounded-md text-subtle hover:text-black transition';
+      });
+      tab.className = 'px-2.5 py-0.5 rounded-md bg-gray-100 font-medium text-black transition';
+      showToast(`Affichage des flux : ${tab.textContent.trim()}`);
+    });
+  });
+
+  // Raccourci clavier ⌘K / Ctrl+K
+  window.addEventListener('keydown', (e) => {
+    if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+      e.preventDefault();
+      const input = document.getElementById('quick-search-input');
+      if (input) {
+        input.focus();
+        input.select();
+      }
+    }
+  });
+</script>
+</body>
+</html>

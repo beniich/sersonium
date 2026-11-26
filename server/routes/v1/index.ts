@@ -19,6 +19,7 @@ import paypalRoutes from "./paypal.routes.js";
 import terminalRoutes from "./terminal.routes.js";
 import bridgeRoutes from "./bridge.routes.js";
 import complianceRoutes from "./compliance.routes.js";
+import iamRoutes from "./iam.routes.js";
 import iotRoutes from "./iot.routes.js";
 import masterControlRoutes from "./masterControl.routes.js";
 import uemCockpitRoutes, { uemAgentRoutes } from "./uem.routes.js";
@@ -82,6 +83,9 @@ router.use("/observability", cockpitAccess, observabilityRoutes);
 // Sprint 1: Manage (Billing, Jetons & Credits)
 router.use("/manage", cockpitAccess, manageRoutes);
 
+// Multi-Tenant IAM (Membres, Rôles, Invitations)
+router.use("/iam", [authenticateToken, requireTenant], iamRoutes);
+
 // Sprint 1: Zero Trust (Access Policies & Enforcement)
 router.use("/zero-trust", cockpitAccess, zeroTrustRoutes);
 
@@ -91,7 +95,8 @@ router.get("/cafm/dashboard/summary", async (req, res) => {
   try {
     const { getTenantClient } = await import("../../db/tenantPrisma.js");
     const { CafmService } = await import("../../services/cafm.service.js");
-    const tenantPrisma = getTenantClient("caisse-retraites-default");
+    const tenantId = (req as any).tenantId || (req as any).user?.tenantId || "default";
+    const tenantPrisma = getTenantClient(tenantId);
     const summary = await CafmService.getDashboardSummary(tenantPrisma);
     res.status(200).json({ success: true, data: summary });
   } catch (error: any) {
@@ -108,6 +113,7 @@ router.use("/traffic", cockpitAccess, trafficRoutes);
 
 // Sprint 3: Security & WAF
 router.use("/security/waf", cockpitAccess, wafRoutes);
+router.use("/waf", cockpitAccess, wafRoutes);
 
 // Sprint 4: Compute & AI (Gemini Log Analysis & Diagnostics - Protégé Cockpit avec déduction de tokens)
 router.use("/ai", (req, res, next) => {

@@ -120,6 +120,60 @@ class AuthService {
   }
 
   /**
+   * Register a new sovereign organization & user account
+   */
+  public async register(params: {
+    name: string;
+    email: string;
+    password: string;
+    organizationName?: string;
+    invitationToken?: string;
+  }): Promise<{ success: boolean; user?: AuthUser; error?: string }> {
+    try {
+      const res = await fetch("/api/v1/auth/register", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Accept": "application/json"
+        },
+        credentials: "include",
+        body: JSON.stringify(params)
+      });
+
+      const result = await res.json();
+
+      if (!res.ok || !result.success) {
+        return {
+          success: false,
+          error: result.error?.message || "Échec de l'inscription"
+        };
+      }
+
+      this.accessToken = result.data.accessToken;
+      this.csrfToken = result.data.csrfToken || this.getCookie("XSRF-TOKEN");
+      this.user = result.data.user;
+
+      if (typeof localStorage !== "undefined") {
+        localStorage.removeItem("sensorium_access_token");
+        localStorage.setItem("sensorium_auth_user", JSON.stringify(this.user));
+        if (this.csrfToken) localStorage.setItem("sensorium_csrf_token", this.csrfToken);
+      }
+
+      this.notifyListeners();
+
+      return {
+        success: true,
+        user: this.user!
+      };
+    } catch (err: any) {
+      return {
+        success: false,
+        error: err.message || "Erreur de connexion au serveur"
+      };
+    }
+  }
+
+  /**
    * Login with email & password
    */
   public async login(email: string, password: string): Promise<{ success: boolean; user?: AuthUser; error?: string }> {
@@ -196,15 +250,16 @@ class AuthService {
           photoUrl: firebaseUser.photoURL || result.data.user.photoUrl,
         };
       } else {
-        // Fallback local Google session souveraine (Entreprise M par défaut)
+        // Fallback local Google session souveraine (tenant dynamique basé sur le compte)
+        const userShortId = firebaseUser.uid.substring(0, 8);
         userData = {
           userId: firebaseUser.uid,
           email: firebaseUser.email || "user@gmail.com",
           displayName: firebaseUser.displayName || firebaseUser.email?.split("@")[0] || "Utilisateur Google",
           photoUrl: firebaseUser.photoURL || undefined,
           role: "admin",
-          tenantId: "tenant-cmr",
-          organizationName: "Entreprise M",
+          tenantId: `tenant-${userShortId}`,
+          organizationName: `${firebaseUser.displayName || firebaseUser.email?.split("@")[0] || "Organisation"} (Souverain)`,
         };
       }
 
@@ -237,7 +292,11 @@ class AuthService {
    */
   public setSession(user: AuthUser | null, accessToken: string | null = null, csrfToken: string | null = null): void {
     this.user = user;
-    this.accessToken = user && !accessToken ? "sensorium_client_session_token" : accessToken;
+    if (accessToken !== null) {
+      this.accessToken = accessToken;
+    } else if (!this.accessToken && user) {
+      this.accessToken = "sensorium_client_session_token";
+    }
     if (csrfToken) this.csrfToken = csrfToken;
 
     if (typeof localStorage !== "undefined") {

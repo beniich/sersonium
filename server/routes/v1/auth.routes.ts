@@ -1,5 +1,6 @@
 import { Router } from "express";
 import { 
+  register,
   login, 
   refreshSession, 
   logout, 
@@ -13,7 +14,7 @@ import { authenticateToken } from "../../middlewares/auth.middleware.js";
 import { requireTenant } from "../../middlewares/tenant.middleware.js";
 import { validateRequest } from "../../middlewares/validate.middleware.js";
 import { strictRateLimiter } from "../../middlewares/rateLimit.middleware.js";
-import { loginSchema } from "../../schemas/auth.schema.js";
+import { loginSchema, registerSchema } from "../../schemas/auth.schema.js";
 
 const router = Router();
 
@@ -23,6 +24,9 @@ router.get("/csrf-token", getCsrfToken);
 // Google OAuth 2.0 & API Gmail authentication flows
 router.get("/google/url", getGoogleAuthUrl);
 router.get("/google/callback", handleGoogleCallback);
+
+// Inscription souveraine directe
+router.post("/register", strictRateLimiter, validateRequest({ body: registerSchema }), register);
 
 // Routes publiques d'authentification blindées par Rate-Limiter strict (anti-brute force) et validation Zod
 router.post("/login", strictRateLimiter, validateRequest({ body: loginSchema }), login);

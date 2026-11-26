@@ -674,6 +674,34 @@ export const initialGoogleAuthConfig: GoogleAuthConfig = {
   dnsVerificationTxtRecord: "google-site-verification=lacaza-clouindustrie-dns-verify-2026-09"
 };
 
+// ─── État vide T0 : affiché avant toute connexion ───────────────────────────
+// Toutes les listes sont vides, tous les compteurs à 0.
+// Les vraies données n'apparaissent qu'après connexion Gmail réelle.
+export function getEmptyT0State(): GlobalState {
+  return {
+    trafficData: [],
+    nodes: [],
+    securityEvents: [],
+    dnsRecords: [],
+    workers: [],
+    workOrders: [],
+    transactions: [],
+    auditLogs: [],
+    ztPolicies: [],
+    buckets: [],
+    objectives: [],
+    kpis: [],
+    urlRedirects: [],
+    domainConfigs: [],
+    paypalConfig: initialPayPalConfig,
+    paypalTransactions: [],
+    rolesAndPermissions: [],
+    teamMembers: [],
+    googleAuthConfig: initialGoogleAuthConfig,
+    subscriptionTier: "free",
+  };
+}
+
 export function getDefaultMockState(): GlobalState {
   return {
     trafficData: generateTimeSeries(),
@@ -719,7 +747,9 @@ export async function logAuditEvent(action: string, details: string) {
 
 export function useGlobalState(userId: string | null, isMockMode: boolean = false) {
   const [state, setState] = useState<GlobalState>(() => {
-    if (isMockMode || !userId) {
+    // Mode démo explicitement activé (bouton "Tester la démo") :
+    // → données simulées réalistes depuis getDefaultMockState()
+    if (isMockMode) {
       if (typeof window !== "undefined") {
         try {
           const cached = localStorage.getItem("cafm_mock_state");
@@ -745,8 +775,17 @@ export function useGlobalState(userId: string | null, isMockMode: boolean = fals
       }
       return getDefaultMockState();
     }
+
+    // T0 — utilisateur non connecté, pas en mode démo :
+    // → état zéro : aucune donnée affichée, pas de mock
+    if (!userId) {
+      return getEmptyT0State();
+    }
+
+    // Utilisateur Gmail connecté : on retourne un état vide
+    // qui sera rempli par Firestore via onSnapshot ci-dessous
     return {
-      trafficData: generateTimeSeries(),
+      trafficData: [],
       nodes: [],
       securityEvents: [],
       dnsRecords: [],
@@ -782,9 +821,10 @@ export function useGlobalState(userId: string | null, isMockMode: boolean = fals
     return () => window.removeEventListener("sensorium:subscription_changed", handleSubscriptionChanged);
   }, []);
 
-  // When in Mock Mode: live micro-fluctuations simulation (keeps graphs & nodes feeling alive)
+  // When in Mock Mode ONLY: live micro-fluctuations simulation (keeps graphs & nodes feeling alive)
+  // En mode réel (userId connecté), aucune animation fictive — les vraies données Firestore s'affichent.
   useEffect(() => {
-    if (!isMockMode && !!userId) return;
+    if (!isMockMode) return; // Jitter uniquement en mode démo
 
     const interval = setInterval(() => {
       setState(prev => {
@@ -822,18 +862,18 @@ export function useGlobalState(userId: string | null, isMockMode: boolean = fals
     return () => clearInterval(interval);
   }, [isMockMode, userId]);
 
-  // Save mock state changes to localStorage
+  // Save mock state changes to localStorage — uniquement en mode démo explicite
   useEffect(() => {
-    if (isMockMode || !userId) {
+    if (isMockMode) {
       try {
         localStorage.setItem("cafm_mock_state", JSON.stringify(state));
       } catch {
         // localStorage quota or private mode
       }
     }
-  }, [state, isMockMode, userId]);
+  }, [state, isMockMode]);
 
-  // Firestore synchronization (when in Live Mode with authenticated user)
+  // Firestore synchronization (when in Live Mode with authenticated Gmail user)
   useEffect(() => {
     if (isMockMode || !userId) {
       setLoading(false);
@@ -845,36 +885,12 @@ export function useGlobalState(userId: string | null, isMockMode: boolean = fals
     const setup = async () => {
       try {
         setLoading(true);
-        const timeoutPromise = new Promise((_, reject) => 
-          setTimeout(() => reject(new Error('Firestore connection timeout')), 3000)
-        );
 
-        await Promise.race([
-          (async () => {
-            const userNodesRef = collection(db, `users/${userId}/nodes`);
-            const nodesSnap = await getDocs(userNodesRef);
-            
-            if (nodesSnap.empty) {
-              console.info(`[SENSORIUM] Seeding initial workspace for user ${userId}...`);
-              const promises = [
-                ...initialNodes.map(n => setDoc(doc(db, `users/${userId}/nodes`, n.id), n)),
-                ...initialSecurityEvents.map(e => setDoc(doc(db, `users/${userId}/securityEvents`, e.id), e)),
-                ...initialDnsRecords.map(d => setDoc(doc(db, `users/${userId}/dnsRecords`, d.id), d)),
-                ...initialWorkers.map(w => setDoc(doc(db, `users/${userId}/workers`, w.id), w)),
-                ...initialWorkOrders.map(w => setDoc(doc(db, `users/${userId}/workOrders`, w.id), w)),
-                ...initialZtPolicies.map(z => setDoc(doc(db, `users/${userId}/ztPolicies`, z.id), z)),
-                ...initialBuckets.map(b => setDoc(doc(db, `users/${userId}/buckets`, b.id), b)),
-                ...initialAuditLogs.map(a => setDoc(doc(db, `users/${userId}/auditLogs`, a.id), a)),
-                ...initialTransactions.map(t => setDoc(doc(db, `users/${userId}/transactions`, t.id), t)),
-              ];
-              await Promise.all(promises);
-            }
-          })(),
-          timeoutPromise
-        ]);
-
+        // ⚠️ PRODUCTION : On ne seed JAMAIS de fausses données pour un vrai utilisateur.
+        // Les collections Firestore de l'utilisateur sont lues telles quelles.
+        // Si elles sont vides, l'interface affiche un état propre (zéro données).
         const cols = [
-          'nodes', 'securityEvents', 'dnsRecords', 'workers', 
+          'nodes', 'securityEvents', 'dnsRecords', 'workers',
           'workOrders', 'ztPolicies', 'buckets', 'auditLogs', 'transactions'
         ];
 
@@ -889,8 +905,8 @@ export function useGlobalState(userId: string | null, isMockMode: boolean = fals
 
         setLoading(false);
       } catch (err) {
-        console.warn("Firestore setup failed, using offline mock data:", err);
-        setState(getDefaultMockState());
+        console.warn("Firestore setup failed, keeping empty state:", err);
+        setState(getEmptyT0State());
         setLoading(false);
       }
     };

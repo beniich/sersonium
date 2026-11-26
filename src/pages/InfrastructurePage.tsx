@@ -23,6 +23,8 @@ import PreventiveMaintenanceScheduler from "../components/PreventiveMaintenanceS
 import { CockpitConsoleView } from "../components/CockpitConsoleView";
 import TelemetryChart from "../components/TelemetryChart";
 import PageHeaderBanner from "../components/PageHeaderBanner";
+import apiClient from "../services/apiClient";
+import authService from "../services/auth.service";
 
 interface InfrastructurePageProps {
   state: GlobalState;
@@ -166,18 +168,35 @@ export default function InfrastructurePage({ state, isDark, activeItemId = "inf-
     
     setIsSubmitting(true);
     try {
-      const colRef = collection(db, "nodes");
-      const docRef = await addDoc(colRef, {
-        ...newNode,
-        cpuUsage: Math.floor(Math.random() * 30) + 10,
-        ramUsage: Math.floor(Math.random() * 40) + 20,
-        bandwidth: Math.floor(Math.random() * 500) + 100,
-        latency: Math.floor(Math.random() * 15) + 5,
-        uptime: 99.99,
-        walletAddress: `jt_0x${Math.floor(Math.random()*16777215).toString(16).toUpperCase()}`,
-        budget: 5000
-      });
-      await updateDoc(doc(db, "nodes", docRef.id), { id: docRef.id });
+      // 1. Enregistrer dans PostgreSQL via l'API REST
+      await apiClient.post("/assets", {
+        name: newNode.name,
+        location: newNode.location,
+        type: "edge_node",
+        status: newNode.status || "healthy",
+        powerUsageKw: 45.0,
+        pueScore: 1.15,
+        renewablePct: 100.0,
+      }).catch(err => console.warn("[InfrastructurePage] Backend asset creation:", err.message));
+
+      // 2. Synchroniser dans le workspace Firestore de l'utilisateur
+      const currentUser = authService.getSession().user;
+      if (currentUser?.userId) {
+        const userColRef = collection(db, `users/${currentUser.userId}/nodes`);
+        const docRef = await addDoc(userColRef, {
+          ...newNode,
+          cpuUsage: 25,
+          ramUsage: 40,
+          bandwidth: 120,
+          latency: 8,
+          uptime: 100,
+          walletAddress: `jt_0x${Math.floor(Math.random()*16777215).toString(16).toUpperCase()}`,
+          budget: 5000,
+          createdAt: new Date().toISOString()
+        });
+        await updateDoc(doc(db, `users/${currentUser.userId}/nodes`, docRef.id), { id: docRef.id });
+      }
+
       await logAuditEvent("NODE_PROVISION", `Provisioned new Edge POP '${newNode.name}' in ${newNode.location}`);
       
       setIsModalOpen(false);
@@ -194,16 +213,19 @@ export default function InfrastructurePage({ state, isDark, activeItemId = "inf-
     if (!newWorkOrder.title) return;
 
     try {
-      const colRef = collection(db, "workOrders");
-      const docRef = await addDoc(colRef, {
-        ...newWorkOrder,
-        nodeId: newWorkOrder.nodeId || (state.nodes?.[0]?.id || "fra-1"),
-        status: "open",
-        createdAt: new Date().toISOString(),
-        scheduledDate: newWorkOrder.scheduledDate,
-        aiAnalysis: "Preventative inspection scheduled by automated telemetry rule."
-      });
-      await updateDoc(doc(db, "workOrders", docRef.id), { id: docRef.id });
+      const currentUser = authService.getSession().user;
+      if (currentUser?.userId) {
+        const colRef = collection(db, `users/${currentUser.userId}/workOrders`);
+        const docRef = await addDoc(colRef, {
+          ...newWorkOrder,
+          nodeId: newWorkOrder.nodeId || (state.nodes?.[0]?.id || "node-1"),
+          status: "open",
+          createdAt: new Date().toISOString(),
+          scheduledDate: newWorkOrder.scheduledDate,
+          aiAnalysis: "Preventative inspection scheduled by automated telemetry rule."
+        });
+        await updateDoc(doc(db, `users/${currentUser.userId}/workOrders`, docRef.id), { id: docRef.id });
+      }
       await logAuditEvent("WORK_ORDER_CREATE", `Created work order: ${newWorkOrder.title}`);
       
       setIsWorkOrderModalOpen(false);
@@ -215,7 +237,9 @@ export default function InfrastructurePage({ state, isDark, activeItemId = "inf-
 
   const handleUpdateWorkOrderDate = async (workOrderId: string, newDate: string) => {
     try {
-      await updateDoc(doc(db, "workOrders", workOrderId), { scheduledDate: newDate });
+      const currentUser = authService.getSession().user;
+      const docPath = currentUser?.userId ? `users/${currentUser.userId}/workOrders` : "workOrders";
+      await updateDoc(doc(db, docPath, workOrderId), { scheduledDate: newDate });
       await logAuditEvent("WORK_ORDER_RESCHEDULE", `Rescheduled work order to ${newDate}`);
     } catch (err) {
       console.error("Failed to reschedule work order", err);
@@ -224,7 +248,9 @@ export default function InfrastructurePage({ state, isDark, activeItemId = "inf-
 
   const handleResolveWorkOrder = async (id: string, title: string) => {
     try {
-      await updateDoc(doc(db, "workOrders", id), { status: "resolved" });
+      const currentUser = authService.getSession().user;
+      const docPath = currentUser?.userId ? `users/${currentUser.userId}/workOrders` : "workOrders";
+      await updateDoc(doc(db, docPath, id), { status: "resolved" });
       await logAuditEvent("WORK_ORDER_RESOLVE", `Resolved CAFM ticket: ${title}`);
     } catch (err) {
       console.error("Failed to resolve work order", err);

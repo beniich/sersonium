@@ -24,7 +24,10 @@ export async function getPayPalPublicConfig(req: Request, res: Response) {
 export async function createSubscriptionOrder(req: Request, res: Response) {
   try {
     const { cycle = "monthly" } = req.body;
-    const tenantId = (req as any).tenantId || "tenant_beecarbonat_global";
+    const tenantId = (req as any).tenantId || (req as any).user?.tenantId;
+    if (!tenantId) {
+      return res.status(401).json({ success: false, error: "Contexte d'organisation requis pour initialiser la commande." });
+    }
 
     // Tarifs : 49 € / mois ou 499 € / an
     const amount = cycle === "yearly" ? 499.0 : 49.0;
@@ -60,13 +63,122 @@ export async function createSubscriptionOrder(req: Request, res: Response) {
  */
 export async function captureSubscriptionOrder(req: Request, res: Response) {
   try {
-    const { orderId } = req.body;
-    if (!orderId) {
-      return res.status(400).json({ success: false, error: "Identifiant de commande orderId requis." });
+    const { orderId, subscriptionId, planId, billingCycle } = req.body;
+    const effectiveSubId = subscriptionId || (typeof orderId === "string" && orderId.startsWith("I-") ? orderId : null);
+    const effectiveOrderId = !effectiveSubId ? orderId : null;
+
+    if (!effectiveSubId && !effectiveOrderId) {
+      return res.status(400).json({ success: false, error: "Identifiant de commande orderId ou subscriptionId requis." });
     }
 
-    const tenantId = (req as any).tenantId || "tenant_beecarbonat_global";
-    const captureResult = await paypalService.captureOrder(orderId);
+    const tenantId = (req as any).tenantId || (req as any).user?.tenantId;
+    if (!tenantId) {
+      return res.status(401).json({ success: false, error: "Contexte d'organisation requis pour le paiement." });
+    }
+
+    let amountVal = 49.0;
+    let currency = "EUR";
+    let payerEmail = (req as any).user?.email || "client@sensorium.ai";
+    let cycle = billingCycle || "monthly";
+
+    // Cas 1 : Abonnement Vault / Smart Subscription PayPal (ID préfixé par I-)
+    if (effectiveSubId) {
+      const isEnterprise = String(planId || "").toLowerCase().includes("enterprise");
+      const targetPlanName = isEnterprise ? "enterprise" : "pro";
+      amountVal = isEnterprise ? 499.0 : 49.0;
+
+      const expirationDays = cycle === "yearly" ? 365 : 30;
+      const expiresAt = new Date();
+      expiresAt.setDate(expiresAt.getDate() + expirationDays);
+
+      // 1. Mettre à jour l'Organisation vers le forfait Pro ou Enterprise avec statut ACTIF
+      await rawPrisma.organization.update({
+        where: { id: tenantId },
+        data: {
+          plan: targetPlanName,
+          subscriptionStatus: "active",
+          subscriptionCycle: cycle,
+          subscriptionExpiresAt: expiresAt,
+          paypalSubscriptionId: effectiveSubId,
+        },
+      });
+
+      // 2. Créer ou mettre à jour la ligne Subscription officielle
+      const matchedPlan = await rawPrisma.plan.findFirst({
+        where: { name: { contains: targetPlanName, mode: "insensitive" } }
+      });
+
+      if (matchedPlan) {
+        await rawPrisma.subscription.create({
+          data: {
+            tenantId,
+            planId: matchedPlan.id,
+            paypalSubscriptionId: effectiveSubId,
+            status: "active",
+            currentPeriodStart: new Date(),
+            currentPeriodEnd: expiresAt,
+          }
+        }).catch((e) => console.warn("[PayPal] Erreur création Subscription:", e?.message));
+      }
+
+      // 3. Créer l'enregistrement de facture officiel certifié
+      const invoice = await rawPrisma.invoice.create({
+        data: {
+          tenantId,
+          amount: amountVal,
+          currency,
+          status: "paid",
+          description: `Abonnement SENSORIUM ${targetPlanName.toUpperCase()} (${cycle}) - PayPal Subscription`,
+          paypalOrderId: effectiveSubId,
+          payerEmail,
+          paymentMethod: "paypal",
+        },
+      });
+
+      // 4. Créditer les jetons (tokens) de l'utilisateur pour l'IA
+      const reqUser = (req as any).user;
+      if (reqUser?.userId) {
+        await rawPrisma.user.update({
+          where: { id: reqUser.userId },
+          data: { tokens: { increment: isEnterprise ? 50000 : 5000 } }
+        }).catch(() => {});
+      }
+
+      // 5. Logger dans la piste d'audit
+      await rawPrisma.auditLog.create({
+        data: {
+          tenantId,
+          action: "PAYPAL_SUBSCRIPTION_ACTIVE",
+          resource: "Invoice",
+          resourceId: invoice.id,
+          details: JSON.stringify({
+            subscriptionId: effectiveSubId,
+            amount: amountVal,
+            currency,
+            payerEmail,
+            plan: targetPlanName,
+            cycle,
+            expiresAt: expiresAt.toISOString(),
+          }),
+        },
+      });
+
+      return res.json({
+        success: true,
+        data: {
+          plan: targetPlanName,
+          cycle,
+          expiresAt: expiresAt.toISOString(),
+          invoiceId: invoice.id,
+          subscriptionId: effectiveSubId,
+          amount: amountVal,
+          currency,
+        },
+      });
+    }
+
+    // Cas 2 : Ordre de commande standard PayPal v2 Orders
+    const captureResult = await paypalService.captureOrder(effectiveOrderId!);
 
     if (captureResult.status !== "COMPLETED") {
       return res.status(400).json({
@@ -78,9 +190,9 @@ export async function captureSubscriptionOrder(req: Request, res: Response) {
     // Récupérer les détails de la capture
     const purchaseUnit = captureResult.purchase_units?.[0];
     const capture = purchaseUnit?.payments?.captures?.[0];
-    const amountVal = parseFloat(capture?.amount?.value || "49.0");
-    const currency = capture?.amount?.currency_code || "EUR";
-    const payerEmail = captureResult.payer?.email_address || "client@sensorium.ai";
+    amountVal = parseFloat(capture?.amount?.value || "49.0");
+    currency = capture?.amount?.currency_code || "EUR";
+    payerEmail = captureResult.payer?.email_address || payerEmail;
 
     let customData: any = {};
     try {
@@ -91,23 +203,42 @@ export async function captureSubscriptionOrder(req: Request, res: Response) {
       // Ignorer l'erreur de parse si format texte
     }
 
-    const cycle = customData.cycle || "monthly";
+    cycle = customData.cycle || billingCycle || "monthly";
     const expirationDays = cycle === "yearly" ? 365 : 30;
     const expiresAt = new Date();
     expiresAt.setDate(expiresAt.getDate() + expirationDays);
 
-    // 1. Mettre à jour l'Organisation vers le forfait Pro
+    // 1. Mettre à jour l'Organisation vers le forfait Pro avec statut ACTIF
     await rawPrisma.organization.update({
       where: { id: tenantId },
       data: {
         plan: "pro",
+        subscriptionStatus: "active",
         subscriptionCycle: cycle,
         subscriptionExpiresAt: expiresAt,
-        paypalSubscriptionId: orderId,
+        paypalSubscriptionId: effectiveOrderId,
       },
     });
 
-    // 2. Créer l'enregistrement de facture officiel certifié
+    // 2. Créer ou mettre à jour la ligne Subscription officielle
+    const proPlan = await rawPrisma.plan.findFirst({
+      where: { name: { contains: "Pro", mode: "insensitive" } }
+    });
+
+    if (proPlan) {
+      await rawPrisma.subscription.create({
+        data: {
+          tenantId,
+          planId: proPlan.id,
+          paypalSubscriptionId: effectiveOrderId,
+          status: "active",
+          currentPeriodStart: new Date(),
+          currentPeriodEnd: expiresAt,
+        }
+      }).catch((e) => console.warn("[PayPal] Erreur création Subscription:", e?.message));
+    }
+
+    // 3. Créer l'enregistrement de facture officiel certifié
     const invoice = await rawPrisma.invoice.create({
       data: {
         tenantId,
@@ -115,13 +246,22 @@ export async function captureSubscriptionOrder(req: Request, res: Response) {
         currency,
         status: "paid",
         description: `Abonnement SENSORIUM PRO (${cycle}) - Capture PayPal`,
-        paypalOrderId: orderId,
+        paypalOrderId: effectiveOrderId,
         payerEmail,
         paymentMethod: "paypal",
       },
     });
 
-    // 3. Logger dans la piste d'audit
+    // 4. Créditer les jetons (tokens) de l'utilisateur pour l'IA
+    const reqUser = (req as any).user;
+    if (reqUser?.userId) {
+      await rawPrisma.user.update({
+        where: { id: reqUser.userId },
+        data: { tokens: { increment: 5000 } }
+      }).catch(() => {});
+    }
+
+    // 5. Logger dans la piste d'audit
     await rawPrisma.auditLog.create({
       data: {
         tenantId,
@@ -129,7 +269,7 @@ export async function captureSubscriptionOrder(req: Request, res: Response) {
         resource: "Invoice",
         resourceId: invoice.id,
         details: JSON.stringify({
-          orderId,
+          orderId: effectiveOrderId,
           amount: amountVal,
           currency,
           payerEmail,
@@ -147,7 +287,7 @@ export async function captureSubscriptionOrder(req: Request, res: Response) {
         cycle,
         expiresAt: expiresAt.toISOString(),
         invoiceId: invoice.id,
-        orderId,
+        orderId: effectiveOrderId,
         amount: amountVal,
         currency,
       },

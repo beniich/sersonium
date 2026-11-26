@@ -16,6 +16,7 @@ import {
   RefreshCw
 } from 'lucide-react';
 import rbacService, { RbacRole } from '../services/rbac.service';
+import authService from '../services/auth.service';
 import { googleSignIn } from '../firebase';
 import { GoogleLogoIcon } from './ShowcaseViewer';
 
@@ -45,24 +46,24 @@ export const SensoriumAuthModal: React.FC<SensoriumAuthModalProps> = ({
     try {
       setIsGoogleLoading(true);
       setError(null);
-      const res = await googleSignIn();
-      if (res?.user) {
+      const res = await authService.loginWithGoogle();
+      if (res.success && res.user) {
         const u = res.user;
         const userData = {
-          name: u.displayName || u.email?.split('@')[0] || 'Utilisateur',
-          email: u.email || '',
-          company: 'SENSORIUM Fleet',
-          role: 'ADMIN' as RbacRole,
+          name: u.displayName || u.email.split('@')[0] || 'Utilisateur',
+          email: u.email,
+          company: u.organizationName || 'SENSORIUM Sovereign',
+          role: (u.role || 'ADMIN').toUpperCase() as RbacRole,
         };
-        localStorage.setItem('sensorium_registered_user', JSON.stringify(userData));
-        localStorage.setItem('sensorium_simulation_mode', 'false');
-        window.dispatchEvent(new CustomEvent('sensorium:mode_changed', { detail: { isSimulation: false } }));
         setSuccessMessage('Connexion Google réussie !');
         setTimeout(() => {
           setIsGoogleLoading(false);
           onSuccess(userData);
           onClose();
         }, 500);
+      } else {
+        setIsGoogleLoading(false);
+        setError(res.error || 'Erreur lors de la connexion Google.');
       }
     } catch (err: any) {
       setIsGoogleLoading(false);
@@ -91,7 +92,7 @@ export const SensoriumAuthModal: React.FC<SensoriumAuthModalProps> = ({
   if (!isOpen) return null;
 
   // 1. Inscription d'une nouvelle entreprise / utilisateur
-  const handleRegister = (e: React.FormEvent) => {
+  const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!regName || !regEmail || !regCompany || !regPassword) {
       setError('Veuillez remplir tous les champs obligatoires.');
@@ -105,31 +106,29 @@ export const SensoriumAuthModal: React.FC<SensoriumAuthModalProps> = ({
     setLoading(true);
     setError(null);
 
-    // Enregistrement persistant dans localStorage
-    const newRegisteredUser = {
-      id: `usr-${Date.now()}`,
-      name: regName.trim(),
-      email: regEmail.trim().toLowerCase(),
-      company: regCompany.trim(),
-      role: regRole,
-      createdAt: new Date().toISOString(),
-    };
-
     try {
-      localStorage.setItem('sensorium_registered_user', JSON.stringify(newRegisteredUser));
-      localStorage.setItem('sensorium_user_session', JSON.stringify({
-        isAuthenticated: true,
-        user: newRegisteredUser,
-        tenantId: `tenant-${regCompany.toLowerCase().replace(/[^a-z0-9]/g, '-')}`,
-      }));
+      const regRes = await authService.register({
+        name: regName.trim(),
+        email: regEmail.trim().toLowerCase(),
+        password: regPassword,
+        organizationName: regCompany.trim(),
+      });
 
-      // Initialiser la session RBAC avec ce rôle
-      loginAsMock(regRole, `tenant-${regCompany.toLowerCase().replace(/[^a-z0-9]/g, '-')}`);
+      if (!regRes.success) {
+        setLoading(false);
+        setError(regRes.error || "Erreur lors de la création du compte.");
+        return;
+      }
 
       setSuccessMessage('Compte entreprise créé avec succès ! Initialisation de votre espace...');
       setTimeout(() => {
         setLoading(false);
-        onSuccess(newRegisteredUser);
+        onSuccess({
+          name: regName.trim(),
+          email: regEmail.trim().toLowerCase(),
+          company: regCompany.trim(),
+          role: regRole,
+        });
         onClose();
       }, 1000);
     } catch (err: any) {
@@ -150,51 +149,43 @@ export const SensoriumAuthModal: React.FC<SensoriumAuthModalProps> = ({
     setError(null);
 
     try {
-      // Vérifier si un compte existe dans le localStorage
-      const savedUserStr = localStorage.getItem('sensorium_registered_user');
-      let savedUser = savedUserStr ? JSON.parse(savedUserStr) : null;
-
-      if (savedUser && savedUser.email === loginEmail.trim().toLowerCase()) {
-        loginAsMock(savedUser.role, `tenant-${savedUser.company.toLowerCase().replace(/[^a-z0-9]/g, '-')}`);
+      const loginRes = await authService.login(loginEmail.trim().toLowerCase(), loginPassword);
+      if (loginRes.success && loginRes.user) {
         setSuccessMessage('Connexion réussie ! Chargement de votre dashboard...');
         setTimeout(() => {
           setLoading(false);
-          onSuccess(savedUser);
+          onSuccess({
+            name: loginRes.user?.displayName || loginRes.user?.email.split('@')[0] || 'Utilisateur',
+            email: loginRes.user?.email || loginEmail,
+            company: loginRes.user?.organizationName || 'Organisation Souveraine',
+            role: loginRes.user?.role || 'admin',
+          });
           onClose();
         }, 800);
         return;
       }
 
-      // Tenter la connexion RBAC
-      const res = await loginWithEmail(loginEmail, loginPassword);
-      if (res.success) {
-        setSuccessMessage('Connexion réussie ! Chargement...');
-        setTimeout(() => {
-          setLoading(false);
-          onSuccess();
-          onClose();
-        }, 800);
-      } else {
-        // Mode tolérant : création de session de session de test
-        const fallbackUser = {
-          id: `usr-${Date.now()}`,
-          name: loginEmail.split('@')[0],
-          email: loginEmail,
-          company: loginEmail.split('@')[1]?.replace(/\.[a-z]+$/, '').toUpperCase() || 'ENTREPRISE',
-          role: 'FACILITY_LEAD' as RbacRole,
-        };
-        localStorage.setItem('sensorium_registered_user', JSON.stringify(fallbackUser));
-        loginAsMock('FACILITY_LEAD');
-        setSuccessMessage('Session entreprise activée !');
-        setTimeout(() => {
-          setLoading(false);
-          onSuccess(fallbackUser);
-          onClose();
-        }, 800);
+      // En mode développement uniquement, tolérance démo locale
+      if (!import.meta.env.PROD) {
+        const savedUserStr = localStorage.getItem('sensorium_registered_user');
+        let savedUser = savedUserStr ? JSON.parse(savedUserStr) : null;
+        if (savedUser && savedUser.email === loginEmail.trim().toLowerCase()) {
+          loginAsMock(savedUser.role, `tenant-${savedUser.company.toLowerCase().replace(/[^a-z0-9]/g, '-')}`);
+          setSuccessMessage('Connexion locale réussie !');
+          setTimeout(() => {
+            setLoading(false);
+            onSuccess(savedUser);
+            onClose();
+          }, 800);
+          return;
+        }
       }
+
+      setLoading(false);
+      setError(loginRes.error || 'Email ou mot de passe incorrect.');
     } catch (err: any) {
       setLoading(false);
-      setError(err?.message || 'Identifiants invalides.');
+      setError(err?.message || "Erreur lors de la connexion.");
     }
   };
 

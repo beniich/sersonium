@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
+import apiClient from '../services/apiClient';
 import {
   FileText,
   UserCheck,
@@ -168,17 +169,15 @@ export const ComplianceRegistry: React.FC<{ isDark?: boolean }> = ({ isDark = tr
   const fetchRegistry = useCallback(async () => {
     setIsLoading(true);
     try {
-      const res = await fetch(API_BASE, { headers: getAuthHeader() });
-      if (res.ok) {
-        const json = await res.json();
-        if (json.certs && json.permits && (json.insurances || json.insurance)) {
-          setData({
-            certs: json.certs,
-            permits: json.permits,
-            insurance: json.insurances || json.insurance,
-          });
-          setLastSync(new Date());
-        }
+      const res = await apiClient.get('/compliance');
+      const json = res.data;
+      if (json && json.certs && json.permits && (json.insurances || json.insurance)) {
+        setData({
+          certs: json.certs,
+          permits: json.permits,
+          insurance: json.insurances || json.insurance,
+        });
+        setLastSync(new Date());
       }
     } catch {
       // Keep mock data on network error
@@ -246,21 +245,16 @@ export const ComplianceRegistry: React.FC<{ isDark?: boolean }> = ({ isDark = tr
 
     try {
       const endpoint = activeTab === 'certs'
-        ? `${API_BASE}/certifications`
+        ? '/compliance/certifications'
         : activeTab === 'permits'
-        ? `${API_BASE}/permits`
-        : `${API_BASE}/insurances`;
+        ? '/compliance/permits'
+        : '/compliance/insurances';
 
-      await fetch(endpoint, {
-        method: 'POST',
-        headers: getAuthHeader(),
-        body: JSON.stringify({ ...itemToSave, orgId: 'tenant_enterprise_lacaza' }),
-      });
+      await apiClient.post(endpoint, { ...itemToSave, orgId: 'tenant_enterprise_lacaza' });
 
-      await fetch('/api/v1/terminal/sync-compliance', {
-        method: 'POST',
-        headers: getAuthHeader(),
-        body: JSON.stringify({ orgId: 'tenant_enterprise_lacaza', hardwareId: 'SNSR-SILICIUM-X1' }),
+      await apiClient.post('/terminal/sync-compliance', {
+        orgId: 'tenant_enterprise_lacaza',
+        hardwareId: 'SNSR-SILICIUM-X1'
       });
 
       setLastSync(new Date());
@@ -285,10 +279,7 @@ export const ComplianceRegistry: React.FC<{ isDark?: boolean }> = ({ isDark = tr
     }));
 
     try {
-      await fetch(`${API_BASE}/${activeTab}/${itemToDelete.id}`, {
-        method: 'DELETE',
-        headers: getAuthHeader(),
-      });
+      await apiClient.delete(`/compliance/${activeTab}/${itemToDelete.id}`);
       setSyncState({ type: 'success', message: '🗑️ Élément supprimé et suppression synchronisée avec le Terminal.' });
     } catch {
       setSyncState({ type: 'error', message: '⚠️ Supprimé localement. La synchronisation sera effectuée au prochain cycle.' });

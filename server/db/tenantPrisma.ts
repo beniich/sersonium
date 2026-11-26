@@ -39,6 +39,14 @@ export const TENANT_ISOLATED_MODELS = [
   "Certification",
   "Permit",
   "Insurance",
+
+  // ── Multi-Tenant Invitations & Subscriptions ─────────────────────
+  "TenantInvitation",
+  "Subscription",
+  "LicenseKey",
+  "Entitlement",
+  "AccessGateLog",
+  "UemTerminal",
 ] as const;
 
 export type TenantIsolatedModel = typeof TENANT_ISOLATED_MODELS[number];

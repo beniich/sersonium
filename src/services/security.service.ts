@@ -36,7 +36,7 @@ export class SecurityService {
    */
   async fetchIntrusionAttempts(): Promise<IntrusionAttempt[]> {
     try {
-      const response = await axios.get(`${API_BASE_URL}/waf/events`);
+      const response = await axios.get(`${API_BASE_URL}/security/waf/events`, { withCredentials: true });
       if (response.data?.data && Array.isArray(response.data.data) && response.data.data.length > 0) {
         return response.data.data.map((evt: any) => ({
           id: evt.id || `evt_${Math.random()}`,
@@ -65,15 +65,15 @@ export class SecurityService {
         ip,
         action: "BLOCK_IP_PERMANENT",
         reason,
-      });
+      }, { withCredentials: true });
       return response.data;
     } catch (error) {
       // Repli WAF challenge
       try {
-        const challengeRes = await axios.post(`${API_BASE_URL}/waf/challenge`, {
+        const challengeRes = await axios.post(`${API_BASE_URL}/security/waf/challenge`, {
           threatType: `manual_ban_${ip}`,
           ruleId: "ADMIN_IP_BLACKLIST",
-        });
+        }, { withCredentials: true });
         return { status: "IP_BLOCKED", ip, data: challengeRes.data };
       } catch (err) {
         console.warn("[SecurityService] Simulation de blocage local", ip);
@@ -87,9 +87,9 @@ export class SecurityService {
    */
   async toggleSecurityRule(ruleId: string, enabled: boolean): Promise<any> {
     try {
-      const response = await axios.patch(`${API_BASE_URL}/waf/rules/${ruleId}`, {
+      const response = await axios.patch(`${API_BASE_URL}/security/waf/rules/${ruleId}`, {
         enabled,
-      });
+      }, { withCredentials: true });
       return response.data;
     } catch {
       return { ruleId, enabled, status: "UPDATED" };

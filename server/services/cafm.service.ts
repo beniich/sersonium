@@ -196,12 +196,12 @@ export class CafmService {
     const totalTelemetry = await tenantPrisma.assetTelemetry.count().catch(() => 0);
     const totalFiles = await tenantPrisma.fileMetadata.count().catch(() => 0);
 
-    // Calcul dynamique ou fallback réaliste si base fraîche
-    const baseAssets = totalAssets > 0 ? totalAssets : 1248;
-    const availabilityRate = criticalAssets > 0 ? Math.max(98.5, 100 - (criticalAssets * 0.4)).toFixed(2) : "99.99";
-    const interventions = criticalAssets > 0 ? (criticalAssets * 3 + 12) : 24;
+    // Calcul dynamique strict basé sur les données réelles du tenant
+    const baseAssets = totalAssets;
+    const availabilityRate = totalAssets > 0 ? (criticalAssets > 0 ? Math.max(90.0, 100 - (criticalAssets * 2.5)).toFixed(2) : "100.00") : "100.00";
+    const interventions = criticalAssets * 2;
     const complianceScore = 100;
-    const storageUsageGb = totalFiles > 0 ? Math.round(totalFiles * 1.8 + 400) : 892;
+    const storageUsageGb = totalFiles > 0 ? Math.round(totalFiles * 1.8) : 0;
 
     return {
       kpis: {

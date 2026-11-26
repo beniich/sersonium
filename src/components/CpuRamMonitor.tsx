@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useMemo, useRef } from "react";
 import { motion } from "motion/react";
+import apiClient from "../services/apiClient";
 import {
   Cpu,
   Activity,
@@ -175,10 +176,9 @@ export default function CpuRamMonitor() {
 
     const fetchLiveMetrics = async () => {
       try {
-        const response = await fetch('/api/v1/observability/metrics/live');
-        if (response.ok) {
-          const json = await response.json();
-          if (json.success && json.data) {
+        const response = await apiClient.get('/observability/metrics/live');
+        const json = response.data;
+        if (json.success && json.data) {
             const data = json.data;
             setUptimeSeconds(data.uptimeSeconds);
             
@@ -200,7 +200,6 @@ export default function CpuRamMonitor() {
               }
             }
           }
-        }
       } catch (err) {
         console.error("Failed to fetch live metrics:", err);
       }

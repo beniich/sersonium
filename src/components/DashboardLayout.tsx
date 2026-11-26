@@ -43,7 +43,9 @@ import {
   BatteryCharging,
   Workflow,
   ShieldAlert,
-  PlugZap
+  PlugZap,
+  LayoutGrid,
+  Orbit
 } from "lucide-react";
 
 import { useLanguage } from "../App";
@@ -56,6 +58,7 @@ import SubscriptionPricingModal from "./SubscriptionPricingModal";
 import TerminalStatusBadge from "./TerminalStatusBadge";
 import { useRbac, ROLE_LABELS, ROLE_COLORS, RbacRole } from "../bridge/useRbac";
 import EnterpriseLoginModal from "./EnterpriseLoginModal";
+import UserProfileModal from "./UserProfileModal";
 import MasterHeader from "./MasterHeader";
 import DashboardFooter from "./DashboardFooter";
 
@@ -100,7 +103,7 @@ export const SENSORIUM_SERVICE_SUITE: SidebarServiceGroup[] = [
     name: "Overview & ERP",
     icon: Layers,
     items: [
-      { id: "ov-agent-orbit", label: "🤖 36 Agents IA — Écosystème Orbit", page: "overview", badge: "36 Agents", badgeType: "ia", keywords: "agent orbit ia research content publish sales community loop automatisation agents swarm 36 claude code" },
+      { id: "ov-agent-orbit", label: "🤖 36 Agents IA — Écosystème Orbit", page: "agent-orbit", badge: "36 Agents", badgeType: "ia", keywords: "agent orbit ia research content publish sales community loop automatisation agents swarm 36 claude code" },
       { id: "ov-general", label: "Unified Dashboard & KPIs", page: "overview", badge: "Live", badgeType: "live", keywords: "cockpit metrics global home erp kpi dashboard" },
       { id: "ov-glass", label: "✨ Vision Dashboard (Image)", page: "overview", badge: "Vision", badgeType: "live", keywords: "vision mockup image glass dashboard reference executive kpi cafm pro" },
       { id: "ov-master", label: "Master Control Panel (CEO/CTO)", page: "master-control", badge: "Command", badgeType: "live", keywords: "master control ceo cto executive tenants billing sockets db waste traffic server status command center" },
@@ -373,6 +376,7 @@ export default function DashboardLayout(props: any) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [isQuickSetupOpen, setIsQuickSetupOpen] = useState(false);
   const [isPricingModalOpen, setIsPricingModalOpen] = useState(false);
+  const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [collapsedGroups, setCollapsedGroups] = useState<Record<string, boolean>>({});
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState<boolean>(() => {
@@ -385,7 +389,8 @@ export default function DashboardLayout(props: any) {
   const [isNavExportOpen, setIsNavExportOpen] = useState(false);
   const [isEnterpriseLoginOpen, setIsEnterpriseLoginOpen] = useState(false);
   const [circuitAlert, setCircuitAlert] = useState<string | null>(null);
-  const { session: rbacSession } = useRbac();
+  const { session: rbacSession, currentUser, currentTenant } = useRbac();
+  const initials = currentUser?.name?.split(' ').map((n: string) => n[0]).join('').toUpperCase().slice(0, 2) || 'AD';
 
   useEffect(() => {
     const handleCircuitAlert = (e: any) => {
@@ -393,6 +398,23 @@ export default function DashboardLayout(props: any) {
     };
     window.addEventListener("sensorium:circuit_alert", handleCircuitAlert);
     return () => window.removeEventListener("sensorium:circuit_alert", handleCircuitAlert);
+  }, []);
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "b") {
+        e.preventDefault();
+        setIsSidebarCollapsed(prev => {
+          const next = !prev;
+          try {
+            localStorage.setItem("sensorium_sidebar_collapsed", String(next));
+          } catch {}
+          return next;
+        });
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
   }, []);
 
   const toggleSidebarCollapse = () => {
@@ -492,13 +514,12 @@ export default function DashboardLayout(props: any) {
   };
 
   return (
-    <div className="min-h-screen bg-[#f8fafc] dark:bg-[#070709] text-slate-900 dark:text-white font-sans selection:bg-orange-500/20 dark:selection:bg-orange-500/30 relative overflow-x-hidden flex flex-col transition-colors duration-300">
+    <div className="min-h-screen bg-[#07090E] text-slate-100 font-sans selection:bg-[#E5FA52]/20 relative overflow-x-hidden flex flex-col transition-colors duration-300">
       
       {/* Background Ambient Flagship Glow with Soft Easing */}
       <div className="fixed inset-0 pointer-events-none overflow-hidden z-0">
-        <div className="absolute top-[-10%] left-[20%] w-[300px] sm:w-[600px] h-[300px] sm:h-[600px] rounded-full bg-orange-500/[0.025] dark:bg-orange-500/[0.04] blur-[100px] sm:blur-[140px]" />
-        <div className="absolute bottom-[-10%] right-[10%] w-[250px] sm:w-[500px] h-[250px] sm:h-[500px] rounded-full bg-amber-600/[0.02] dark:bg-amber-600/[0.03] blur-[120px] sm:blur-[160px]" />
-        <div className="absolute inset-0 bg-[linear-gradient(to_right,rgba(0,0,0,0.02)_1px,transparent_1px),linear-gradient(to_bottom,rgba(0,0,0,0.02)_1px,transparent_1px)] dark:bg-[linear-gradient(to_right,rgba(255,255,255,0.015)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.015)_1px,transparent_1px)] bg-[size:24px_24px] sm:bg-[size:32px_32px]" />
+        <div className="absolute top-[-10%] left-[20%] w-[300px] sm:w-[600px] h-[300px] sm:h-[600px] rounded-full bg-[#E5FA52]/[0.015] blur-[120px]" />
+        <div className="absolute bottom-[-10%] right-[10%] w-[250px] sm:w-[500px] h-[250px] sm:h-[500px] rounded-full bg-cyan-600/[0.02] blur-[140px]" />
       </div>
 
       {/* Sovereign Master Header (4-Zone Executive Conductor Console) */}
@@ -528,9 +549,9 @@ export default function DashboardLayout(props: any) {
 
       {/* Offline Mode PWA Notification Banner */}
       {!isOnline && (
-        <div className="bg-amber-500/15 dark:bg-amber-500/20 border-b border-amber-500/30 dark:border-amber-500/40 text-amber-900 dark:text-amber-200 px-4 py-2.5 text-xs sm:text-sm flex items-center justify-between gap-3 shadow-sm z-40">
+        <div className="bg-amber-500/15 border-b border-amber-500/30 text-amber-200 px-4 py-2.5 text-xs sm:text-sm flex items-center justify-between gap-3 shadow-sm z-40">
           <div className="flex items-center gap-2.5 max-w-4xl mx-auto">
-            <WifiOff className="w-4 h-4 text-amber-600 dark:text-amber-400 flex-shrink-0 animate-pulse" />
+            <WifiOff className="w-4 h-4 text-amber-400 flex-shrink-0 animate-pulse" />
             <span>
               <strong>Offline Mode (Local PWA Cache):</strong> The application is currently operating without an Internet connection. Telemetry data is read and stored in the local cache; real-time cloud sync is temporarily paused.
             </span>
@@ -548,221 +569,367 @@ export default function DashboardLayout(props: any) {
 
       {/* No mock banner in production mode */}
 
-      {/* Main Layout Container */}
-      <div className="flex flex-1 overflow-hidden h-[calc(100vh-56px)] sm:h-[calc(100vh-64px)] relative z-10">
+      {/* Main Layout Container (Encapsulated in macOS Floating Frame) */}
+      <div className="flex flex-1 overflow-hidden h-[calc(100vh-100px)] relative z-10 p-1 sm:p-2 gap-2.5">
         
-        {/* Exhaustive Master Sidebar on Desktop (lg+) with Silky Frosted Glass & Collapsible State */}
-        <aside className={`${isSidebarCollapsed ? "w-16" : "w-64 xl:w-72"} flex-shrink-0 border-r border-slate-200/80 dark:border-white/[0.07] bg-white/70 dark:bg-[#070709]/85 backdrop-blur-2xl flex flex-col hidden lg:flex transition-all duration-300`}>
-          
-          {isSidebarCollapsed ? (
-            /* Mini Icon Sidebar when collapsed */
-            <div className="flex flex-col h-full py-3 items-center justify-between">
-              <div className="flex flex-col items-center gap-2 w-full px-2">
-                <button
-                  onClick={toggleSidebarCollapse}
-                  className="p-2 rounded-lg text-slate-400 dark:text-[#858585] hover:text-white hover:bg-slate-100 dark:hover:bg-white/[0.06] transition-colors cursor-pointer"
-                  title="Déployer la barre latérale"
-                >
-                  <PanelLeftOpen className="w-5 h-5 text-slate-400 dark:text-[#858585]" />
-                </button>
-
-                <div className="w-8 h-px bg-slate-200 dark:bg-white/[0.08] my-1" />
-
-                {/* Group icons quick navigation - VS Code Activity Bar style */}
-                <div className="flex flex-col gap-1.5 w-full items-center overflow-y-auto max-h-[calc(100vh-220px)] custom-scrollbar py-1">
-                  {SENSORIUM_SERVICE_SUITE.map(group => {
-                    const hasActive = group.items.some(it => it.id === activeItemId);
-                    const firstItem = group.items[0];
-                    return (
-                      <button
-                        key={group.id}
-                        onClick={() => firstItem && handleSelectService(firstItem.page, firstItem.id)}
-                        className={`p-2.5 rounded-xl transition-all relative group flex items-center justify-center cursor-pointer ${
-                          hasActive 
-                            ? "bg-white/10 text-white border border-white/20 shadow-sm" 
-                            : "text-slate-400 dark:text-[#858585] hover:text-white hover:bg-white/[0.06]"
-                        }`}
-                        title={getGroupName(group.id, group.name)}
-                      >
-                        <group.icon className={`w-5 h-5 ${hasActive ? "text-white" : "text-slate-400 dark:text-[#858585] group-hover:text-white"} transition-colors`} />
-                        {hasActive && (
-                          <span className="absolute -top-0.5 -right-0.5 min-w-[15px] h-3.5 px-0.5 rounded-full bg-[#007acc] text-white text-[9px] font-bold flex items-center justify-center shadow-xs">
-                            1
-                          </span>
-                        )}
-                        {/* Tooltip on hover */}
-                        <div className="absolute left-full ml-2 px-2.5 py-1 bg-slate-900 border border-slate-700 text-white text-[11px] rounded-lg shadow-xl whitespace-nowrap opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity z-50">
-                          {getGroupName(group.id, group.name)}
-                        </div>
-                      </button>
-                    );
-                  })}
-                </div>
+        {/* BEGIN: Extreme Left Primary Icon Dock (Black Capsule Dock) */}
+        <aside className="w-14 hidden lg:flex flex-col justify-between items-center py-2 flex-shrink-0 z-30" data-purpose="primary-icon-dock">
+          {/* Top Dock Capsule */}
+          <div className="w-12 bg-[#1C1E22] rounded-full py-3 flex flex-col items-center gap-2.5 shadow-xl border border-white/15">
+            {/* SENSORIUM Brand Button */}
+            <button
+              type="button"
+              onClick={() => handleSelectService("overview", "ov-general")}
+              className="w-9 h-9 rounded-full bg-white/15 hover:bg-white/25 flex items-center justify-center text-white transition-all group relative border border-white/10"
+              title="SENSORIUM Overview"
+            >
+              <span className="font-bold text-sm tracking-tighter">S</span>
+              <div className="absolute left-full ml-3 px-2.5 py-1 bg-[#181A1F] text-white text-[11px] font-medium rounded-lg shadow-xl border border-white/15 whitespace-nowrap z-50 pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity">
+                SENSORIUM Home
               </div>
+            </button>
 
-              {onReturnToPortal && (
-                <div className="p-2 w-full flex justify-center border-t border-slate-200/80 dark:border-white/[0.07]">
-                  <button
-                    onClick={onReturnToPortal}
-                    className="p-2 rounded-lg text-slate-400 dark:text-[#858585] hover:text-white hover:bg-slate-100 dark:hover:bg-white/[0.06] transition-colors cursor-pointer"
-                    title="Portail Public SENSORIUM"
-                  >
-                    <Globe className="w-4 h-4 text-slate-400 dark:text-[#858585]" />
-                  </button>
-                </div>
+            {/* Toggle Secondary Sidebar (Collapse all the way / Expand) */}
+            <button
+              type="button"
+              onClick={toggleSidebarCollapse}
+              className={`w-9 h-9 rounded-xl flex items-center justify-center transition-all relative group ${
+                isSidebarCollapsed
+                  ? "bg-[#E5FA52]/15 text-[#E5FA52] hover:bg-[#E5FA52]/25 border border-[#E5FA52]/40 shadow-[0_0_12px_rgba(229,250,82,0.2)]"
+                  : "bg-white/5 hover:bg-white/15 text-slate-200 hover:text-white border border-white/10"
+              }`}
+              title={isSidebarCollapsed ? "Déplier la barre latérale (128 services) [⌘B]" : "Réduire la barre latérale jusqu'au bout [⌘B]"}
+            >
+              {isSidebarCollapsed ? (
+                <PanelLeftOpen className="w-5 h-5 stroke-[1.8]" />
+              ) : (
+                <PanelLeftClose className="w-5 h-5 stroke-[1.8]" />
               )}
-            </div>
-          ) : (
-            /* Full expanded sidebar */
-            <>
-              {/* Search and Navigation Tools Header */}
-              <div className="p-3 border-b border-slate-200/80 dark:border-white/[0.06] space-y-2">
-                <div className="flex items-center justify-between gap-1">
-                  <div className="relative flex-1">
-                    <Search className="w-3.5 h-3.5 text-slate-400 dark:text-neutral-500 absolute left-2.5 top-1/2 -translate-y-1/2" />
-                    <input
-                      type="text"
-                      value={searchQuery}
-                      onChange={(e) => setSearchQuery(e.target.value)}
-                      placeholder="Filter services..."
-                      className="w-full bg-slate-100/90 dark:bg-white/[0.04] border border-slate-200 dark:border-white/[0.07] focus:border-orange-500/50 rounded-lg pl-8 pr-7 py-1.5 text-xs text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-neutral-500 outline-none transition-colors"
-                    />
-                    {searchQuery && (
-                      <button
-                        onClick={() => setSearchQuery("")}
-                        className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 dark:text-neutral-400 hover:text-slate-700 dark:hover:text-white"
-                      >
-                        <X className="w-3 h-3" />
-                      </button>
-                    )}
-                  </div>
-                  <button
-                    onClick={toggleSidebarCollapse}
-                    className="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/[0.06] transition-colors shrink-0"
-                    title="Réduire la barre latérale"
-                  >
-                    <PanelLeftClose className="w-4 h-4" />
-                  </button>
-                </div>
+              <div className="absolute left-full ml-3 px-2.5 py-1 bg-[#181A1F] text-white text-[11px] font-medium rounded-lg shadow-xl border border-white/15 whitespace-nowrap z-50 pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity">
+                {isSidebarCollapsed ? "Déplier le menu (128 services) [⌘B]" : "Réduire le menu [⌘B]"}
+              </div>
+            </button>
 
-                <div className="flex items-center justify-between text-[10px] text-slate-500 dark:text-neutral-400 font-mono px-1">
-                  <span>{filteredStructure.reduce((a, b) => a + b.items.length, 0)} {t.header.availableServices}</span>
-                  <div className="flex items-center gap-2">
-                    <button 
-                      onClick={expandAllGroups}
-                      className="hover:text-slate-800 dark:hover:text-neutral-200 cursor-pointer"
-                      title={t.header.expandAll}
-                    >
-                      {t.header.expandAll}
-                    </button>
-                    <span>•</span>
-                    <button 
-                      onClick={collapseAllGroups}
-                      className="hover:text-slate-800 dark:hover:text-neutral-200 cursor-pointer"
-                      title={t.header.collapseAll}
-                    >
-                      {t.header.collapseAll}
-                    </button>
-                  </div>
+            <div className="w-6 h-px bg-white/10 my-0.5" />
+
+            {/* Overview / General */}
+            <button
+              type="button"
+              onClick={() => handleSelectService("overview", "ov-general")}
+              className={`w-9 h-9 rounded-xl flex items-center justify-center transition-all relative group ${
+                activePage === "overview" && activeItemId === "ov-general"
+                  ? "bg-white/20 text-[#E5FA52] shadow-[0_0_12px_rgba(229,250,82,0.25)] border border-[#E5FA52]/40"
+                  : "hover:bg-white/10 text-slate-200 hover:text-white"
+              }`}
+              title="Vue Globale ERP"
+            >
+              <LayoutGrid className="w-5 h-5 stroke-[1.8]" />
+              {activePage === "overview" && activeItemId === "ov-general" && (
+                <span className="absolute -left-1.5 top-2.5 w-1.5 h-4 rounded-full bg-[#E5FA52] shadow-[0_0_6px_#E5FA52]" />
+              )}
+              <div className="absolute left-full ml-3 px-2.5 py-1 bg-[#181A1F] text-white text-[11px] font-medium rounded-lg shadow-xl border border-white/15 whitespace-nowrap z-50 pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity">
+                Vue Globale ERP
+              </div>
+            </button>
+
+            {/* 36 AI Agents Orbit */}
+            <button
+              type="button"
+              onClick={() => handleSelectService("agent-orbit", "ov-agent-orbit")}
+              className={`w-9 h-9 rounded-xl flex items-center justify-center transition-all relative group ${
+                activePage === "agent-orbit" || activeItemId === "ov-agent-orbit"
+                  ? "bg-white/20 text-[#E5FA52] shadow-[0_0_12px_rgba(229,250,82,0.25)] border border-[#E5FA52]/40"
+                  : "hover:bg-white/10 text-purple-300 hover:text-white"
+              }`}
+              title="36 Agents IA Orbit"
+            >
+              <Orbit className="w-5 h-5 stroke-[1.8]" />
+              {(activePage === "agent-orbit" || activeItemId === "ov-agent-orbit") && (
+                <span className="absolute -left-1.5 top-2.5 w-1.5 h-4 rounded-full bg-[#E5FA52] shadow-[0_0_6px_#E5FA52]" />
+              )}
+              <div className="absolute left-full ml-3 px-2.5 py-1 bg-[#181A1F] text-white text-[11px] font-medium rounded-lg shadow-xl border border-white/15 whitespace-nowrap z-50 pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity">
+                36 Agents IA Orbit
+              </div>
+            </button>
+
+            {/* Digital Twin & Cockpit */}
+            <button
+              type="button"
+              onClick={() => handleSelectService("cockpit", "spider-cockpit")}
+              className={`w-9 h-9 rounded-xl flex items-center justify-center transition-all relative group ${
+                activePage === "cockpit"
+                  ? "bg-white/20 text-[#E5FA52] shadow-[0_0_12px_rgba(229,250,82,0.25)] border border-[#E5FA52]/40"
+                  : "hover:bg-white/10 text-cyan-300 hover:text-white"
+              }`}
+              title="Jumeau Numérique 3D Cockpit"
+            >
+              <Compass className="w-5 h-5 stroke-[1.8]" />
+              {activePage === "cockpit" && (
+                <span className="absolute -left-1.5 top-2.5 w-1.5 h-4 rounded-full bg-[#E5FA52] shadow-[0_0_6px_#E5FA52]" />
+              )}
+              <div className="absolute left-full ml-3 px-2.5 py-1 bg-[#181A1F] text-white text-[11px] font-medium rounded-lg shadow-xl border border-white/15 whitespace-nowrap z-50 pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity">
+                Jumeau Numérique 3D Cockpit
+              </div>
+            </button>
+
+            {/* Zero-Trust Security */}
+            <button
+              type="button"
+              onClick={() => handleSelectService("zerotrust", "zt-1")}
+              className={`w-9 h-9 rounded-xl flex items-center justify-center transition-all relative group ${
+                activePage === "zerotrust" || activePage === "security"
+                  ? "bg-white/20 text-[#E5FA52] shadow-[0_0_12px_rgba(229,250,82,0.25)] border border-[#E5FA52]/40"
+                  : "hover:bg-white/10 text-emerald-300 hover:text-white"
+              }`}
+              title="Cybersécurité & Zero Trust"
+            >
+              <Shield className="w-5 h-5 stroke-[1.8]" />
+              {(activePage === "zerotrust" || activePage === "security") && (
+                <span className="absolute -left-1.5 top-2.5 w-1.5 h-4 rounded-full bg-[#E5FA52] shadow-[0_0_6px_#E5FA52]" />
+              )}
+              <div className="absolute left-full ml-3 px-2.5 py-1 bg-[#181A1F] text-white text-[11px] font-medium rounded-lg shadow-xl border border-white/15 whitespace-nowrap z-50 pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity">
+                Cybersécurité & Zero Trust
+              </div>
+            </button>
+
+            {/* Télémétrie Live */}
+            <button
+              type="button"
+              onClick={() => handleSelectService("telemetry", "tel-1")}
+              className={`w-9 h-9 rounded-xl flex items-center justify-center transition-all relative group ${
+                activePage === "telemetry"
+                  ? "bg-white/20 text-[#E5FA52] shadow-[0_0_12px_rgba(229,250,82,0.25)] border border-[#E5FA52]/40"
+                  : "hover:bg-white/10 text-amber-300 hover:text-white"
+              }`}
+              title="Télémétrie Kafka Live"
+            >
+              <Zap className="w-5 h-5 stroke-[1.8]" />
+              {activePage === "telemetry" && (
+                <span className="absolute -left-1.5 top-2.5 w-1.5 h-4 rounded-full bg-[#E5FA52] shadow-[0_0_6px_#E5FA52]" />
+              )}
+              <div className="absolute left-full ml-3 px-2.5 py-1 bg-[#181A1F] text-white text-[11px] font-medium rounded-lg shadow-xl border border-white/15 whitespace-nowrap z-50 pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity">
+                Télémétrie Kafka Live
+              </div>
+            </button>
+
+            {/* Administration / IAM */}
+            <button
+              type="button"
+              onClick={() => handleSelectService("iam", "iam-admin")}
+              className={`w-9 h-9 rounded-xl flex items-center justify-center transition-all relative group ${
+                activePage === "iam" || activePage === "settings"
+                  ? "bg-white/20 text-[#E5FA52] shadow-[0_0_12px_rgba(229,250,82,0.25)] border border-[#E5FA52]/40"
+                  : "hover:bg-white/10 text-slate-200 hover:text-white"
+              }`}
+              title="Paramètres & Administration"
+            >
+              <Settings className="w-5 h-5 stroke-[1.8]" />
+              {(activePage === "iam" || activePage === "settings") && (
+                <span className="absolute -left-1.5 top-2.5 w-1.5 h-4 rounded-full bg-[#E5FA52] shadow-[0_0_6px_#E5FA52]" />
+              )}
+              <div className="absolute left-full ml-3 px-2.5 py-1 bg-[#181A1F] text-white text-[11px] font-medium rounded-lg shadow-xl border border-white/15 whitespace-nowrap z-50 pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity">
+                Paramètres & Administration
+              </div>
+            </button>
+          </div>
+
+          {/* Bottom Sovereign Logo / Action */}
+          <button
+            type="button"
+            onClick={onReturnToPortal}
+            className="w-10 h-10 rounded-full bg-[#1C1E22] text-white flex items-center justify-center shadow-lg border border-white/15 hover:bg-[#252830] hover:border-white/30 transition font-bold text-xs relative group"
+            title="Portail Public SENSORIUM"
+          >
+            FN
+            <div className="absolute left-full ml-3 px-2.5 py-1 bg-[#181A1F] text-white text-[11px] font-medium rounded-lg shadow-xl border border-white/15 whitespace-nowrap z-50 pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity">
+              Portail Public SENSORIUM
+            </div>
+          </button>
+        </aside>
+        {/* END: Extreme Left Primary Icon Dock */}
+
+        {/* BEGIN: Secondary Sidebar (Tactile 128 Services Suite) */}
+        <aside className={`flex-shrink-0 bg-[#13161C] rounded-[26px] border border-white/[0.06] shadow-sm flex flex-col justify-between hidden lg:flex transition-all duration-300 ease-in-out overflow-hidden ${isSidebarCollapsed ? "w-0 opacity-0 p-0 border-0 pointer-events-none -ml-2.5" : "w-64 xl:w-72 opacity-100"}`}>
+          {/* Workspace Header & Search Input */}
+          <div className="p-3 border-b border-white/[0.06] space-y-2.5">
+            {/* Active Workspace Capsule */}
+            <div className="flex items-center justify-between p-1.5 bg-[#181A1F] rounded-2xl border border-white/[0.06] shadow-2xs">
+              <div className="flex items-center gap-2 min-w-0">
+                <div className="w-7 h-7 rounded-xl bg-white text-[#111317] flex items-center justify-center text-xs font-bold shrink-0">
+                  S
+                </div>
+                <div className="leading-tight min-w-0">
+                  <div className="text-xs font-semibold text-white truncate">{currentTenant?.name ?? 'SENSORIUM'}</div>
+                  <div className="text-[10px] text-[#8E929C] truncate">Core workspace</div>
                 </div>
               </div>
+              <ChevronDown className="w-3.5 h-3.5 text-[#8E929C] shrink-0" />
+            </div>
 
-              {/* Scrollable Services Tree */}
-              <div className="flex-1 overflow-y-auto px-2 py-3 space-y-4 custom-scrollbar">
-                {filteredStructure.map((group) => {
-                  const isCollapsed = collapsedGroups[group.id] && !searchQuery;
-                  const hasActiveItem = group.items.some(item => activeItemId === item.id);
-
-                  return (
-                    <div key={group.id} className="space-y-1">
-                      
-                      {/* Category Header with Toggle */}
-                      <button
-                        onClick={() => toggleGroupCollapse(group.id)}
-                        className="w-full flex items-center justify-between px-2.5 py-1 rounded text-[11px] font-semibold text-slate-600 dark:text-neutral-400 hover:text-slate-900 dark:hover:text-neutral-200 hover:bg-slate-100/80 dark:hover:bg-white/[0.03] transition-colors cursor-pointer group"
-                      >
-                        <div className="flex items-center gap-2 min-w-0">
-                          <group.icon className={`w-3.5 h-3.5 flex-shrink-0 ${hasActiveItem ? "text-white" : "text-slate-400 dark:text-[#858585] group-hover:text-white"} transition-colors`} />
-                          <span className="truncate uppercase tracking-wider text-[10px] font-mono">{getGroupName(group.id, group.name)}</span>
-                        </div>
-
-                        <div className="flex items-center gap-1.5 flex-shrink-0">
-                          <span className="text-[9px] font-mono px-1.5 py-0.5 rounded bg-slate-100 dark:bg-white/[0.04] text-slate-600 dark:text-neutral-400 group-hover:text-slate-900 dark:group-hover:text-neutral-300">
-                            {group.items.length}
-                          </span>
-                          {isCollapsed ? (
-                            <ChevronRight className="w-3 h-3 text-slate-400 dark:text-neutral-500" />
-                          ) : (
-                            <ChevronDown className="w-3 h-3 text-slate-400 dark:text-neutral-500" />
-                          )}
-                        </div>
-                      </button>
-
-                      {/* Category Items */}
-                      {!isCollapsed && (
-                        <div className="space-y-0.5 pl-2 border-l border-slate-200/80 dark:border-white/[0.04] ml-2 mt-0.5">
-                          {group.items.map(item => {
-                            const isActive = activeItemId === item.id;
-                            return (
-                              <button
-                                key={item.id}
-                                onClick={() => handleSelectService(item.page, item.id)}
-                                className={`w-full text-left px-2.5 py-1.5 text-xs rounded-md transition-all flex items-center justify-between group cursor-pointer ${
-                                  isActive 
-                                    ? "bg-orange-500/10 dark:bg-white/[0.09] text-orange-600 dark:text-white font-medium border border-orange-500/25 dark:border-white/[0.12] shadow-2xs" 
-                                    : "text-slate-600 dark:text-neutral-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100/70 dark:hover:bg-white/[0.04]"
-                                }`}
-                              >
-                                <span className="truncate text-[12px]">{item.label}</span>
-                                
-                                <div className="flex items-center gap-1.5 flex-shrink-0 ml-1.5">
-                                  {item.badge && (
-                                    <span className={`text-[9px] font-mono px-1.5 py-0.2 rounded font-semibold ${getBadgeClass(item.badgeType)}`}>
-                                      {item.badge}
-                                    </span>
-                                  )}
-                                  {isActive && (
-                                    <div className="w-1.5 h-1.5 rounded-full bg-orange-500 shadow-[0_0_6px_rgba(249,115,22,0.6)]" />
-                                  )}
-                                </div>
-                              </button>
-                            );
-                          })}
-                        </div>
-                      )}
-                    </div>
-                  );
-                })}
-
-                {filteredStructure.length === 0 && (
-                  <div className="text-center py-8 px-4 text-slate-400 dark:text-neutral-500 text-xs">
-                    <Search className="w-6 h-6 mx-auto mb-2 opacity-40" />
-                    <p>No service matching "{searchQuery}"</p>
-                    <button
-                      onClick={() => setSearchQuery("")}
-                      className="mt-2 text-orange-500 dark:text-orange-400 hover:underline text-xs"
-                    >
-                      Reset filter
-                    </button>
-                  </div>
+            {/* Search Bar with ⌘K */}
+            <div className="flex items-center justify-between gap-1.5">
+              <div className="relative flex-1">
+                <Search className="w-3.5 h-3.5 text-[#8E929C] absolute left-2.5 top-1/2 -translate-y-1/2" />
+                <input
+                  type="text"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  placeholder="Search services..."
+                  className="w-full bg-white/[0.04] text-xs rounded-xl pl-8 pr-7 py-1.5 border border-transparent focus:border-white/20 focus:bg-[#181A1F] placeholder-[#8E929C] text-white outline-none transition-all"
+                />
+                {searchQuery ? (
+                  <button
+                    onClick={() => setSearchQuery("")}
+                    className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[#8E929C] hover:text-white"
+                  >
+                    <X className="w-3 h-3" />
+                  </button>
+                ) : (
+                  <span className="absolute right-2 top-1/2 -translate-y-1/2 text-[10px] text-[#8E929C] font-mono">⌘K</span>
                 )}
               </div>
+              <button
+                onClick={toggleSidebarCollapse}
+                className="p-1.5 rounded-xl text-[#8E929C] hover:text-white hover:bg-white/[0.06] transition-colors shrink-0"
+                title="Réduire la barre latérale"
+              >
+                <PanelLeftClose className="w-4 h-4" />
+              </button>
+            </div>
 
-              {/* Desktop Sidebar Footer Action */}
-              {onReturnToPortal && (
-                <div className="p-3 border-t border-slate-200/80 dark:border-white/[0.07] bg-slate-50/80 dark:bg-[#0c0c0e]/80">
+            <div className="flex items-center justify-between text-[10px] text-[#8E929C] font-mono px-1">
+              <span>{filteredStructure.reduce((a, b) => a + b.items.length, 0)} {t.header.availableServices}</span>
+              <div className="flex items-center gap-2">
+                <button 
+                  onClick={expandAllGroups}
+                  className="hover:text-white cursor-pointer"
+                  title={t.header.expandAll}
+                >
+                  {t.header.expandAll}
+                </button>
+                <span>•</span>
+                <button 
+                  onClick={collapseAllGroups}
+                  className="hover:text-white cursor-pointer"
+                  title={t.header.collapseAll}
+                >
+                  {t.header.collapseAll}
+                </button>
+              </div>
+            </div>
+          </div>
+
+          {/* Scrollable Services Tree */}
+          <div className="flex-1 overflow-y-auto px-2.5 py-3 space-y-3 custom-scrollbar">
+            {filteredStructure.map((group) => {
+              const isCollapsed = collapsedGroups[group.id] && !searchQuery;
+              const hasActiveItem = group.items.some(item => activeItemId === item.id);
+
+              return (
+                <div key={group.id} className="space-y-1">
+                  
+                  {/* Category Header */}
                   <button
-                    onClick={onReturnToPortal}
-                    className="w-full py-2 px-3 rounded-lg bg-white dark:bg-white/[0.04] hover:bg-slate-100 dark:hover:bg-white/[0.08] border border-slate-200 dark:border-white/[0.07] text-slate-700 dark:text-neutral-300 hover:text-slate-900 dark:hover:text-white text-xs font-medium flex items-center justify-center gap-2 transition-all cursor-pointer group shadow-2xs"
+                    onClick={() => toggleGroupCollapse(group.id)}
+                    className="w-full flex items-center justify-between px-2 py-1.5 rounded-xl text-[11px] font-semibold text-slate-200 hover:text-white hover:bg-white/[0.05] transition-colors cursor-pointer group"
                   >
-                    <Globe className="w-3.5 h-3.5 text-slate-400 dark:text-[#858585] group-hover:text-white group-hover:scale-110 transition-all" />
-                    <span>Portail Public SENSORIUM</span>
+                    <div className="flex items-center gap-2.5 min-w-0">
+                      <div className={`p-1.5 rounded-lg border transition-colors flex-shrink-0 ${
+                        hasActiveItem 
+                          ? "bg-[#E5FA52]/15 text-[#E5FA52] border-[#E5FA52]/40 shadow-[0_0_8px_rgba(229,250,82,0.2)]" 
+                          : "bg-white/[0.06] text-slate-200 border-white/[0.08] group-hover:bg-white/[0.12] group-hover:text-white"
+                      }`}>
+                        <group.icon className="w-4 h-4 stroke-[1.8]" />
+                      </div>
+                      <span className="truncate uppercase tracking-wider text-[10px] font-mono">{getGroupName(group.id, group.name)}</span>
+                    </div>
+
+                    <div className="flex items-center gap-1.5 flex-shrink-0">
+                      <span className="text-[9px] font-mono px-1.5 py-0.5 rounded bg-white/[0.04] text-[#8E929C] group-hover:text-white">
+                        {group.items.length}
+                      </span>
+                      {isCollapsed ? (
+                        <ChevronRight className="w-3 h-3 text-[#8E929C]" />
+                      ) : (
+                        <ChevronDown className="w-3 h-3 text-[#8E929C]" />
+                      )}
+                    </div>
                   </button>
+
+                  {/* Category Items */}
+                  {!isCollapsed && (
+                    <div className="space-y-0.5 pl-2 border-l border-white/[0.06] ml-2 mt-0.5">
+                      {group.items.map(item => {
+                        const isActive = activeItemId === item.id;
+                        return (
+                          <button
+                            key={item.id}
+                            onClick={() => handleSelectService(item.page, item.id)}
+                            className={`w-full text-left px-2.5 py-1.5 text-xs rounded-xl transition-all flex items-center justify-between group cursor-pointer ${
+                              isActive 
+                                ? "bg-[#202327] text-white font-medium border border-white/[0.08] shadow-xs" 
+                                : "text-[#8E929C] hover:text-white hover:bg-white/[0.04]"
+                            }`}
+                          >
+                            <span className="truncate text-[12px]">{item.label}</span>
+                            
+                            <div className="flex items-center gap-1.5 flex-shrink-0 ml-1.5">
+                              {item.badge && (
+                                <span className={`text-[9px] font-mono px-1.5 py-0.2 rounded font-semibold ${getBadgeClass(item.badgeType)}`}>
+                                  {item.badge}
+                                </span>
+                              )}
+                              {isActive && (
+                                <div className="w-1.5 h-1.5 rounded-full bg-[#E5FA52] shadow-[0_0_6px_rgba(229,250,82,0.6)]" />
+                              )}
+                            </div>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  )}
                 </div>
-              )}
-            </>
-          )}
+              );
+            })}
+
+            {filteredStructure.length === 0 && (
+              <div className="text-center py-8 px-4 text-[#8E929C] text-xs">
+                <Search className="w-6 h-6 mx-auto mb-2 opacity-40" />
+                <p>No service matching "{searchQuery}"</p>
+                <button
+                  onClick={() => setSearchQuery("")}
+                  className="mt-2 text-[#E5FA52] hover:underline text-xs"
+                >
+                  Reset filter
+                </button>
+              </div>
+            )}
+          </div>
+
+          {/* Profile Card at bottom */}
+          <div className="p-3 border-t border-white/[0.06] bg-[#101217] flex items-center justify-between">
+            <div 
+              onClick={() => setIsProfileModalOpen(true)}
+              className="flex items-center gap-2 cursor-pointer group min-w-0"
+            >
+              <div className="w-7 h-7 rounded-full bg-slate-700 flex items-center justify-center text-[10px] font-bold text-white shrink-0">
+                {initials}
+              </div>
+              <div className="leading-tight min-w-0">
+                <div className="text-xs font-semibold text-white truncate group-hover:text-[#E5FA52] transition-colors">{currentUser?.name ?? 'Admin User'}</div>
+                <div className="text-[10px] text-[#8E929C] truncate">{currentUser?.role ?? 'SuperAdmin'}</div>
+              </div>
+            </div>
+            <button
+              onClick={() => setIsProfileModalOpen(true)}
+              className="text-[#8E929C] hover:text-white"
+              title="Options"
+            >
+              ···
+            </button>
+          </div>
         </aside>
+        {/* END: Secondary Sidebar */}
 
         {/* Mobile & Tablet Full Screen Navigation Drawer */}
         {mobileMenuOpen && (
@@ -874,8 +1041,8 @@ export default function DashboardLayout(props: any) {
           </div>
         )}
 
-        {/* Responsive Main Content Viewport with compact padding & optimal density */}
-        <main className="flex-1 overflow-y-auto transition-colors duration-300 relative flex flex-col">
+        {/* Responsive Main Content Canvas Encapsulated in Tactile Dark Surface */}
+        <main className="flex-1 min-w-0 bg-[#15171B] rounded-[28px] border border-white/[0.06] shadow-soft-card overflow-y-auto transition-colors duration-300 relative flex flex-col p-2.5 sm:p-4">
           {children}
           <DashboardFooter />
         </main>
@@ -921,6 +1088,14 @@ export default function DashboardLayout(props: any) {
           setActivePage("iam" as any);
           setActiveItemId("iam-admin");
         }}
+      />
+
+      {/* User Profile Modal */}
+      <UserProfileModal
+        isOpen={isProfileModalOpen}
+        onClose={() => setIsProfileModalOpen(false)}
+        onOpenPricing={() => setIsPricingModalOpen(true)}
+        onOpenAuth={() => setIsEnterpriseLoginOpen(true)}
       />
     </div>
   );

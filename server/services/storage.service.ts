@@ -32,8 +32,8 @@ export class StorageService {
     const minioEndpoint = process.env.MINIO_ENDPOINT;
     const minioPort = process.env.MINIO_PORT ? parseInt(process.env.MINIO_PORT, 10) : undefined;
     const minioUseSSL = process.env.MINIO_USE_SSL === "true" || process.env.MINIO_USE_SSL === "1";
-    const minioAccessKey = process.env.MINIO_ACCESS_KEY || process.env.MINIO_ROOT_USER || process.env.S3_ACCESS_KEY_ID || process.env.R2_ACCESS_KEY_ID || "minioadmin";
-    const minioSecretKey = process.env.MINIO_SECRET_KEY || process.env.MINIO_ROOT_PASSWORD || process.env.S3_SECRET_ACCESS_KEY || process.env.R2_SECRET_ACCESS_KEY || "minioadmin_secret_2026";
+    const minioAccessKey = process.env.MINIO_ACCESS_KEY || process.env.MINIO_ROOT_USER || process.env.S3_ACCESS_KEY_ID || process.env.R2_ACCESS_KEY_ID || (process.env.NODE_ENV !== "production" ? "minioadmin" : "");
+    const minioSecretKey = process.env.MINIO_SECRET_KEY || process.env.MINIO_ROOT_PASSWORD || process.env.S3_SECRET_ACCESS_KEY || process.env.R2_SECRET_ACCESS_KEY || (process.env.NODE_ENV !== "production" ? "minioadmin_dev" : "");
     const defaultBucket = process.env.MINIO_DEFAULT_BUCKET || process.env.S3_BUCKET || "sensorium-vault";
     const region = process.env.MINIO_REGION || process.env.AWS_REGION || "us-east-1";
 

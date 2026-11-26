@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { Cpu, Search, MapPin, Send, RefreshCw, CheckCircle2, ShieldAlert } from "lucide-react";
 import { logAuditEvent } from "../hooks/useGlobalState";
+import apiClient from "../services/apiClient";
 
 export default function AIGroundingAssistant() {
   const [query, setQuery] = useState("");
@@ -17,22 +18,20 @@ export default function AIGroundingAssistant() {
     setError("");
 
     try {
-      const res = await fetch("/api/v1/grounding/query", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ prompt: query, toolType: tool })
+      const res = await apiClient.post("/grounding/query", {
+        prompt: query,
+        toolType: tool
       });
       
-      const data = await res.json();
-      
-      if (!res.ok) {
-        throw new Error(data.error || "Failed to query AI");
+      const data = res.data;
+      if (!data?.data?.response) {
+        throw new Error(data?.error || "Failed to query AI");
       }
       
       setResponse(data.data.response);
       logAuditEvent("AI_GROUNDING_QUERY", `Queried AI with ${tool} grounding: ${query.substring(0, 30)}...`);
     } catch (err: any) {
-      setError(err.message);
+      setError(err.response?.data?.error || err.message || "Failed to query AI");
     } finally {
       setLoading(false);
     }

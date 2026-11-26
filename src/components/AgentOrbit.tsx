@@ -3,9 +3,31 @@
 // Intégration fidèle de l'écosystème Orbital d'agents IA (Research, Content, The loop, Publish, Sales, Community)
 
 import React, { useState, useEffect, useMemo, useRef } from 'react';
-import { Plus, History, ArrowLeft, Filter, Check, RefreshCw, Search, CheckCircle2, AlertTriangle, X } from 'lucide-react';
+import {
+  Plus,
+  History,
+  ArrowLeft,
+  Filter,
+  Check,
+  RefreshCw,
+  Search,
+  CheckCircle2,
+  AlertTriangle,
+  X,
+  Workflow,
+  Orbit,
+  LayoutGrid,
+  Zap,
+  Shield,
+  Folder,
+  ChevronDown,
+  Settings,
+} from 'lucide-react';
 import { initialGroups } from '../data/initialGroups';
-import type { Agent, AgentIconKey, Group, RunRecord, StatusFilter } from '../types/agent';
+import { initialWorkflows } from '../data/initialWorkflows';
+import { initialApprovals } from '../data/initialApprovals';
+import apiClient from '../services/apiClient';
+import type { Agent, AgentIconKey, Group, RunRecord, StatusFilter, TimeframeOption, WorkflowItem, ApprovalItem } from '../types/agent';
 import {
   computeOrchestratorStats,
   filterGroups,
@@ -15,6 +37,7 @@ import { OrbitDiagram } from './orbit/OrbitDiagram';
 import { AgentSidePanel } from './orbit/AgentSidePanel';
 import { CreateAgentModal } from './orbit/CreateAgentModal';
 import { RunHistoryView } from './orbit/RunHistoryView';
+import { FieldnoteOverview } from './orbit/FieldnoteOverview';
 
 const FILTER_OPTIONS: { value: StatusFilter; label: string; dotClass: string }[] = [
   { value: 'all', label: 'All Agents', dotClass: 'bg-slate-400' },
@@ -26,13 +49,14 @@ const FILTER_OPTIONS: { value: StatusFilter; label: string; dotClass: string }[]
   { value: 'error', label: 'Failed', dotClass: 'bg-red-500' },
 ];
 
-type ActiveView = 'orbit' | 'history';
+type ActiveView = 'orbit' | 'fieldnote' | 'history';
 
 interface AgentOrbitProps {
   isDark?: boolean;
+  onNavigateToERP?: () => void;
 }
 
-export default function AgentOrbit({ isDark: isDarkProp = true }: AgentOrbitProps) {
+export default function AgentOrbit({ isDark: isDarkProp = true, onNavigateToERP }: AgentOrbitProps) {
   // Sync groups state with local storage for high responsiveness
   const [groups, setGroups] = useState<Group[]>(() => {
     try {
@@ -47,7 +71,7 @@ export default function AgentOrbit({ isDark: isDarkProp = true }: AgentOrbitProp
     return initialGroups;
   });
 
-  const [activeView, setActiveView] = useState<ActiveView>('orbit');
+  const [activeView, setActiveView] = useState<ActiveView>('fieldnote');
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedAgentId, setSelectedAgentId] = useState<string | null>(null);
   const [isRunning, setIsRunning] = useState(false);
@@ -74,6 +98,57 @@ export default function AgentOrbit({ isDark: isDarkProp = true }: AgentOrbitProp
   const [statusFilter, setStatusFilter] = useState<StatusFilter>('all');
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const filterContainerRef = useRef<HTMLDivElement | null>(null);
+
+  // Fieldnote State (Timeframe, Workflows & ZTNA Approvals)
+  const [timeframe, setTimeframe] = useState<TimeframeOption>('today');
+  const [workflows, setWorkflows] = useState<WorkflowItem[]>(() => {
+    try {
+      const saved = localStorage.getItem('sensorium_orbit_workflows');
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      }
+    } catch {}
+    return initialWorkflows;
+  });
+
+  const [approvals, setApprovals] = useState<ApprovalItem[]>(() => {
+    try {
+      const saved = localStorage.getItem('sensorium_orbit_approvals');
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      }
+    } catch {}
+    return initialApprovals;
+  });
+
+  const [runningWorkflowId, setRunningWorkflowId] = useState<string | null>(null);
+  const [decidingApprovalId, setDecidingApprovalId] = useState<string | null>(null);
+
+  const pendingApprovalsCount = useMemo(
+    () => approvals.filter((a) => a.status === 'pending').length,
+    [approvals]
+  );
+
+  // Debounced persistence for Fieldnote workflows and approvals
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      try {
+        localStorage.setItem('sensorium_orbit_workflows', JSON.stringify(workflows));
+      } catch {}
+    }, 400);
+    return () => clearTimeout(timer);
+  }, [workflows]);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      try {
+        localStorage.setItem('sensorium_orbit_approvals', JSON.stringify(approvals));
+      } catch {}
+    }, 400);
+    return () => clearTimeout(timer);
+  }, [approvals]);
 
   // Auto-dismiss toast
   useEffect(() => {
@@ -105,9 +180,9 @@ export default function AgentOrbit({ isDark: isDarkProp = true }: AgentOrbitProp
   // Load from server state endpoint if available
   useEffect(() => {
     let active = true;
-    fetch('/api/state')
-      .then((res) => (res.ok ? res.json() : null))
-      .then((data: { groups?: Group[]; runHistory?: RunRecord[] } | null) => {
+    apiClient.get<{ groups?: Group[]; runHistory?: RunRecord[] }>('/api/state')
+      .then((res) => res.data)
+      .then((data) => {
         if (!active || !data) return;
         if (Array.isArray(data.groups) && data.groups.length > 0) {
           setGroups(data.groups);
@@ -279,19 +354,15 @@ export default function AgentOrbit({ isDark: isDarkProp = true }: AgentOrbitProp
 
     try {
       // 1. Tenter l'appel serveur
-      const response = await fetch(`/api/agents/${encodeURIComponent(agent.id)}/run`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ prompt }),
-      }).catch(() => null);
+      const response = await apiClient.post<{
+        error?: string;
+        run?: RunRecord;
+        groups?: Group[];
+        runHistory?: RunRecord[];
+      }>(`/api/agents/${encodeURIComponent(agent.id)}/run`, { prompt }, { timeout: 15000 }).catch(() => null);
 
-      if (response && response.ok) {
-        const data = (await response.json()) as {
-          error?: string;
-          run?: RunRecord;
-          groups?: Group[];
-          runHistory?: RunRecord[];
-        };
+      if (response && response.data) {
+        const data = response.data;
 
         window.clearInterval(progressTimer);
         setProgress(100);
@@ -368,9 +439,7 @@ export default function AgentOrbit({ isDark: isDarkProp = true }: AgentOrbitProp
     setLastRun(null);
     setRunError(null);
 
-    fetch(`/api/agents/${encodeURIComponent(agentId)}/reset`, {
-      method: 'POST',
-    }).catch(() => null);
+    apiClient.post(`/api/agents/${encodeURIComponent(agentId)}/reset`).catch(() => null);
 
     setGroups((prev) =>
       updateAgentInGroups(prev, agentId, (a) => ({
@@ -384,11 +453,7 @@ export default function AgentOrbit({ isDark: isDarkProp = true }: AgentOrbitProp
     agentId: string,
     updates: { name: string; description: string; highlighted: boolean }
   ) => {
-    fetch(`/api/agents/${encodeURIComponent(agentId)}`, {
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(updates),
-    }).catch(() => null);
+    apiClient.patch(`/api/agents/${encodeURIComponent(agentId)}`, updates).catch(() => null);
 
     setGroups((prev) =>
       updateAgentInGroups(prev, agentId, (a) => ({
@@ -401,9 +466,7 @@ export default function AgentOrbit({ isDark: isDarkProp = true }: AgentOrbitProp
   };
 
   const handleDeleteAgent = async (agentId: string) => {
-    fetch(`/api/agents/${encodeURIComponent(agentId)}`, {
-      method: 'DELETE',
-    }).catch(() => null);
+    apiClient.delete(`/api/agents/${encodeURIComponent(agentId)}`).catch(() => null);
 
     setGroups((prev) =>
       prev.map((group) => ({
@@ -422,11 +485,7 @@ export default function AgentOrbit({ isDark: isDarkProp = true }: AgentOrbitProp
     highlighted: boolean;
     platform: string;
   }) => {
-    fetch('/api/agents', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(params),
-    }).catch(() => null);
+    apiClient.post('/api/agents', params).catch(() => null);
 
     const newAgent: Agent = {
       id: `custom-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
@@ -453,27 +512,142 @@ export default function AgentOrbit({ isDark: isDarkProp = true }: AgentOrbitProp
   };
 
   const handleClearHistory = async () => {
-    fetch('/api/runs', { method: 'DELETE' }).catch(() => null);
+    apiClient.delete('/api/runs').catch(() => null);
     setRunHistory([]);
   };
 
   const handleConfirmResetDefaults = () => {
     setGroups(initialGroups);
     setRunHistory([]);
+    setWorkflows(initialWorkflows);
+    setApprovals(initialApprovals);
     try {
       localStorage.removeItem('sensorium_orbit_groups');
       localStorage.removeItem('sensorium_orbit_history');
+      localStorage.removeItem('sensorium_orbit_workflows');
+      localStorage.removeItem('sensorium_orbit_approvals');
     } catch {}
     setShowResetConfirm(false);
     setToastMessage({
       title: 'Écosystème réinitialisé',
-      desc: 'Les 36 agents IA par défaut sont restaurés.',
+      desc: 'Les 36 agents IA, workflows et approbations par défaut sont restaurés.',
+      type: 'success',
+    });
+  };
+
+  // Fieldnote: Run workflow triggered from table
+  const handleRunWorkflow = (workflow: WorkflowItem) => {
+    if (runningWorkflowId) return;
+    setRunningWorkflowId(workflow.id);
+    setToastMessage({
+      title: 'Workflow démarré',
+      desc: `L'Agent IA supervise le flux "${workflow.name}"...`,
+      type: 'success',
+    });
+
+    setTimeout(() => {
+      setWorkflows((prev) =>
+        prev.map((w) =>
+          w.id === workflow.id
+            ? { ...w, isLive: true, statusLabel: 'Live', sparkline: [...w.sparkline.slice(1), 10] }
+            : w
+        )
+      );
+
+      const runLog: RunRecord = {
+        id: `wf-run-${Date.now()}`,
+        agentId: workflow.agentId || 'agent-orchestrator',
+        agentName: workflow.name,
+        groupId: 'group-workflows',
+        groupTitle: 'Workflows & Automation',
+        durationMs: 3200,
+        timestamp: new Date().toISOString(),
+        status: 'success',
+        summary: `Exécution réussie du workflow "${workflow.name}" via ${workflow.integrations}`,
+        logs: [
+          `[Init] Déclenchement du flux ${workflow.name}`,
+          `[ZTNA] Vérification des signatures souveraines validée`,
+          `[Connector] Intégration ${workflow.integrations} synchronisée`,
+          `[Success] Traitement finalisé sans anomalie`,
+        ],
+      };
+
+      setRunHistory((prev) => [runLog, ...prev]);
+      setRunningWorkflowId(null);
+      setToastMessage({
+        title: 'Workflow exécuté',
+        desc: `Le flux "${workflow.name}" a été traité avec succès.`,
+        type: 'success',
+      });
+    }, 1800);
+  };
+
+  // Fieldnote: Decide an approval (Approve / Decline)
+  const handleDecideApproval = (approvalId: string, decision: 'approved' | 'declined') => {
+    setDecidingApprovalId(approvalId);
+    const targetApproval = approvals.find((a) => a.id === approvalId);
+    const title = targetApproval ? targetApproval.title : approvalId;
+
+    setTimeout(() => {
+      setApprovals((prev) =>
+        prev.map((a) => (a.id === approvalId ? { ...a, status: decision } : a))
+      );
+      setDecidingApprovalId(null);
+
+      const isApproved = decision === 'approved';
+      setToastMessage({
+        title: isApproved ? 'Demande approuvée' : 'Demande rejetée',
+        desc: `${title} a été ${isApproved ? 'validé et autorisé par ZTNA' : 'rejeté et consigné au registre'}.`,
+        type: isApproved ? 'success' : 'error',
+      });
+
+      const auditLog: RunRecord = {
+        id: `approval-${Date.now()}`,
+        agentId: targetApproval?.agentId || 'agent-iam-provisioner',
+        agentName: `ZTNA Human Gate: ${approvalId}`,
+        groupId: 'group-security',
+        groupTitle: 'Zero Trust Network Access',
+        durationMs: 150,
+        timestamp: new Date().toISOString(),
+        status: isApproved ? 'success' : 'error',
+        summary: `${approvalId} ${isApproved ? 'AUTORISÉ' : 'REJETÉ'} par validation souveraine`,
+        logs: [
+          `[ZTNA Gate] Décision humaine enregistrée: ${decision.toUpperCase()}`,
+          `[Subject] ${title}`,
+          `[Policy] Règle DORA / Zero Trust appliquée avec succès`,
+        ],
+      };
+      setRunHistory((prev) => [auditLog, ...prev]);
+    }, 500);
+  };
+
+  // Fieldnote: Batch decide approvals
+  const handleBatchDecideApprovals = (decision: 'approved' | 'declined') => {
+    const pendingCount = approvals.filter((a) => a.status === 'pending').length;
+    if (pendingCount === 0) return;
+
+    setApprovals((prev) =>
+      prev.map((a) => (a.status === 'pending' ? { ...a, status: decision } : a))
+    );
+
+    setToastMessage({
+      title: decision === 'approved' ? 'Toutes les demandes approuvées' : 'Toutes les demandes rejetées',
+      desc: `${pendingCount} demandes traitées en lot.`,
+      type: decision === 'approved' ? 'success' : 'error',
+    });
+  };
+
+  // Fieldnote: Refresh telemetry
+  const handleRefreshFieldnote = () => {
+    setToastMessage({
+      title: 'Télémétrie actualisée',
+      desc: 'Matrice de densité 24h et statuts de workflows synchronisés.',
       type: 'success',
     });
   };
 
   return (
-    <div className="w-full rounded-3xl bg-[#F4F5F7] dark:bg-[#0B0F17] text-slate-900 dark:text-slate-100 p-3 sm:p-5 border border-slate-200 dark:border-slate-800/80 shadow-sm relative overflow-hidden transition-colors duration-200">
+    <div className="w-full max-w-[1440px] mx-auto rounded-[32px] p-2.5 bg-[#E9EBEF] dark:bg-[#07090E] border border-white/80 dark:border-white/[0.08] shadow-[0_25px_60px_-15px_rgba(0,0,0,0.12),0_0_0_1px_rgba(255,255,255,0.7)] flex flex-col overflow-hidden relative transition-colors duration-200">
       
       {/* Toast Notification Flottante */}
       {toastMessage && (
@@ -527,198 +701,538 @@ export default function AgentOrbit({ isDark: isDarkProp = true }: AgentOrbitProp
         </div>
       )}
 
-      {/* Barre d'outils et de contrôle */}
-      <div className="w-full flex flex-wrap items-center justify-between gap-2.5 pb-3 border-b border-slate-200/80 dark:border-slate-800/60 mb-4">
+      {/* BEGIN: macOS Window Header */}
+      <div className="flex items-center justify-between px-3 sm:px-4 pt-2 pb-2.5" data-purpose="window-controls">
         <div className="flex items-center gap-2">
-          <div className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-ping" />
-          <span className="text-xs font-semibold text-slate-700 dark:text-slate-300">
-            Orchestration Active • 6 Pôles Cognitifs
-          </span>
-          <span className="hidden sm:inline-block px-2 py-0.5 rounded-full bg-orange-500/10 text-orange-600 dark:text-orange-400 text-[11px] font-bold">
-            {stats.totalAgents} Agents
+          <div
+            onClick={onNavigateToERP}
+            className="w-3 h-3 rounded-full bg-[#FF5F56] border border-[#E0443E]/40 cursor-pointer hover:opacity-80 transition"
+            title="Quitter / Retour ERP"
+          />
+          <div className="w-3 h-3 rounded-full bg-[#FFBD2E] border border-[#DEA123]/40 cursor-pointer hover:opacity-80 transition" title="Réduire" />
+          <div className="w-3 h-3 rounded-full bg-[#27C93F] border border-[#1AAB29]/40 cursor-pointer hover:opacity-80 transition" title="Agrandir" />
+          <span className="text-[11px] font-mono text-[#8E929C] ml-2 hidden sm:inline">
+            Fieldnote v2.4 · SENSORIUM Sovereign AI & Workflow Hub
           </span>
         </div>
 
-        <div className="flex flex-wrap items-center gap-2">
-          {/* Barre de Recherche Intuitive */}
-          <div className="relative">
-            <Search className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
-            <input
-              type="text"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Rechercher un agent..."
-              className="pl-8 pr-3 py-1.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-xs text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-orange-500 w-36 sm:w-44 transition"
-            />
-            {searchQuery && (
-              <button
-                onClick={() => setSearchQuery('')}
-                className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
-              >
-                <X className="w-3 h-3" />
-              </button>
-            )}
-          </div>
+        {/* View Switcher Capsule on the window header */}
+        <div className="flex items-center gap-2">
+          <div className="inline-flex items-center p-0.5 rounded-full bg-white/70 dark:bg-[#1a1c20] border border-black/[0.06] dark:border-white/[0.08] shadow-xs text-xs font-medium">
+            <button
+              type="button"
+              onClick={() => setActiveView('fieldnote')}
+              className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium transition cursor-pointer ${
+                activeView === 'fieldnote'
+                  ? 'bg-[#111317] dark:bg-white text-white dark:text-[#111317] font-semibold shadow-xs'
+                  : 'text-[#8E929C] hover:text-slate-900 dark:hover:text-white'
+              }`}
+            >
+              <Workflow className="w-3 h-3" />
+              <span>Overview</span>
+              {pendingApprovalsCount > 0 && (
+                <span className="w-4 h-4 rounded-full bg-[#E5FA52] text-[#111317] font-bold text-[10px] flex items-center justify-center">
+                  {pendingApprovalsCount}
+                </span>
+              )}
+            </button>
 
-          {activeView === 'history' ? (
             <button
               type="button"
               onClick={() => setActiveView('orbit')}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-xs font-medium text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800 transition shadow-xs cursor-pointer"
+              className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium transition cursor-pointer ${
+                activeView === 'orbit'
+                  ? 'bg-[#111317] dark:bg-white text-white dark:text-[#111317] font-semibold shadow-xs'
+                  : 'text-[#8E929C] hover:text-slate-900 dark:hover:text-white'
+              }`}
             >
-              <ArrowLeft className="w-3.5 h-3.5" aria-hidden="true" />
-              <span>Retour à l'Orchestrateur</span>
+              <Orbit className="w-3 h-3" />
+              <span>3D Orbit (36 Agents)</span>
             </button>
-          ) : (
-            <>
-              {/* Filter Dropdown */}
-              <div ref={filterContainerRef} className="relative">
+
+            <button
+              type="button"
+              onClick={() => setActiveView('history')}
+              className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium transition cursor-pointer ${
+                activeView === 'history'
+                  ? 'bg-[#111317] dark:bg-white text-white dark:text-[#111317] font-semibold shadow-xs'
+                  : 'text-[#8E929C] hover:text-slate-900 dark:hover:text-white'
+              }`}
+            >
+              <History className="w-3 h-3" />
+              <span>Historique{runHistory.length > 0 ? ` (${runHistory.length})` : ''}</span>
+            </button>
+          </div>
+
+          {onNavigateToERP && (
+            <button
+              type="button"
+              onClick={onNavigateToERP}
+              className="px-3 py-1 rounded-full bg-white/70 dark:bg-white/10 hover:bg-white dark:hover:bg-white/20 text-[#8E929C] hover:text-slate-900 dark:hover:text-white text-xs font-medium transition shadow-2xs border border-black/[0.04] dark:border-white/[0.08] cursor-pointer"
+              title="Retourner à la console ERP globale"
+            >
+              Vue ERP Classique →
+            </button>
+          )}
+        </div>
+      </div>
+      {/* END: macOS Window Header */}
+
+      {/* Main Workspace Frame */}
+      <div className="flex-1 flex gap-3 overflow-hidden p-1 min-h-[750px]">
+        {/* BEGIN: Leftmost Icon Dock */}
+        <aside className="w-13 flex flex-col justify-between items-center py-2 flex-shrink-0" data-purpose="primary-icon-dock">
+          {/* Top Dock Capsule */}
+          <div className="w-12 bg-[#1C1E22] dark:bg-[#111317] rounded-full py-4 flex flex-col items-center gap-4 shadow-xl border border-white/10 text-white/50">
+            {/* Brand Button */}
+            <button
+              type="button"
+              onClick={() => (onNavigateToERP ? onNavigateToERP() : setActiveView('fieldnote'))}
+              className="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center text-white transition group"
+              title="SENSORIUM / Retour ERP"
+            >
+              <span className="font-bold text-xs tracking-tighter">S</span>
+            </button>
+
+            {/* Overview / Fieldnote item */}
+            <button
+              type="button"
+              onClick={() => setActiveView('fieldnote')}
+              className={`w-8 h-8 rounded-xl flex items-center justify-center transition relative ${
+                activeView === 'fieldnote'
+                  ? 'bg-white/20 text-white'
+                  : 'hover:bg-white/10 text-white/60 hover:text-white'
+              }`}
+              title="Aperçu des flux & télémétrie"
+            >
+              <LayoutGrid className="w-4 h-4" />
+              {activeView === 'fieldnote' && (
+                <span className="absolute -left-1 top-2 w-1.5 h-1.5 rounded-full bg-[#E5FA52]" />
+              )}
+            </button>
+
+            {/* 3D Orbit item */}
+            <button
+              type="button"
+              onClick={() => setActiveView('orbit')}
+              className={`w-8 h-8 rounded-xl flex items-center justify-center transition relative ${
+                activeView === 'orbit'
+                  ? 'bg-white/20 text-white'
+                  : 'hover:bg-white/10 text-white/60 hover:text-white'
+              }`}
+              title="Écosystème Orbit 36 Agents"
+            >
+              <Orbit className="w-4 h-4" />
+              {activeView === 'orbit' && (
+                <span className="absolute -left-1 top-2 w-1.5 h-1.5 rounded-full bg-orange-400" />
+              )}
+            </button>
+
+            {/* Workflows item */}
+            <button
+              type="button"
+              onClick={() => setActiveView('fieldnote')}
+              className="w-8 h-8 rounded-xl hover:bg-white/10 text-white/60 hover:text-white flex items-center justify-center transition"
+              title="Flux de travail"
+            >
+              <Zap className="w-4 h-4" />
+            </button>
+
+            {/* ZTNA Approvals item */}
+            <button
+              type="button"
+              onClick={() => {
+                setActiveView('fieldnote');
+                setToastMessage({
+                  title: 'File d\'approbations ZTNA',
+                  desc: `${pendingApprovalsCount} demandes nécessitent votre signature souveraine.`,
+                  type: 'success',
+                });
+              }}
+              className="w-8 h-8 rounded-xl hover:bg-white/10 text-white/60 hover:text-white flex items-center justify-center transition relative"
+              title="Approbations ZTNA Human-in-the-loop"
+            >
+              <Shield className="w-4 h-4" />
+              {pendingApprovalsCount > 0 && (
+                <span className="absolute -top-1 -right-1 w-3.5 h-3.5 rounded-full bg-[#E5FA52] text-[#111317] text-[9px] font-bold flex items-center justify-center">
+                  {pendingApprovalsCount}
+                </span>
+              )}
+            </button>
+
+            {/* History item */}
+            <button
+              type="button"
+              onClick={() => setActiveView('history')}
+              className={`w-8 h-8 rounded-xl flex items-center justify-center transition relative ${
+                activeView === 'history'
+                  ? 'bg-white/20 text-white'
+                  : 'hover:bg-white/10 text-white/60 hover:text-white'
+              }`}
+              title="Historique d'exécution"
+            >
+              <History className="w-4 h-4" />
+              {activeView === 'history' && (
+                <span className="absolute -left-1 top-2 w-1.5 h-1.5 rounded-full bg-sky-400" />
+              )}
+            </button>
+
+            {/* Settings item */}
+            <button
+              type="button"
+              onClick={() => setShowResetConfirm(true)}
+              className="w-8 h-8 rounded-xl hover:bg-white/10 text-white/60 hover:text-white flex items-center justify-center transition"
+              title="Réinitialiser les 36 agents par défaut"
+            >
+              <Settings className="w-4 h-4" />
+            </button>
+          </div>
+
+          {/* Avatar button at bottom */}
+          <button
+            type="button"
+            className="w-10 h-10 rounded-full bg-[#1C1E22] text-white flex items-center justify-center shadow-lg border border-white/10 hover:opacity-90 transition font-bold text-xs"
+            title="Administrateur Souverain SENSORIUM"
+          >
+            FN
+          </button>
+        </aside>
+        {/* END: Leftmost Icon Dock */}
+
+        {/* BEGIN: Secondary Sidebar */}
+        <aside className="hidden md:flex w-60 bg-[#F2F4F7]/95 dark:bg-[#13161c] rounded-[26px] p-3.5 flex-col justify-between border border-white dark:border-white/[0.06] shadow-sm shrink-0" data-purpose="workspace-nav">
+          <div className="flex flex-col gap-4 overflow-y-auto pr-1">
+            {/* Workspace Header */}
+            <div className="flex items-center justify-between p-1.5 bg-white dark:bg-[#1a1c20] rounded-2xl shadow-xs border border-black/[0.04] dark:border-white/[0.06]">
+              <div className="flex items-center gap-2">
+                <div className="w-7 h-7 rounded-xl bg-[#1A1C20] dark:bg-white text-white dark:text-[#111317] flex items-center justify-center text-xs font-bold">
+                  F
+                </div>
+                <div className="leading-tight">
+                  <div className="text-xs font-semibold text-slate-900 dark:text-white">Fieldnote</div>
+                  <div className="text-[10px] text-[#8E929C]">Core workspace</div>
+                </div>
+              </div>
+              <ChevronDown className="w-3.5 h-3.5 text-[#8E929C]" />
+            </div>
+
+            {/* Search Input */}
+            <div className="relative">
+              <Search className="w-3.5 h-3.5 absolute left-2.5 top-1/2 -translate-y-1/2 text-[#8E929C]" />
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Search..."
+                className="w-full bg-[#E8EAEF]/60 dark:bg-white/[0.05] text-xs rounded-xl pl-8 pr-7 py-1.5 border-transparent focus:border-black/20 focus:bg-white dark:focus:bg-black/40 focus:ring-0 placeholder-[#8E929C] text-slate-800 dark:text-white transition"
+              />
+              <span className="absolute right-2 top-1/2 -translate-y-1/2 text-[10px] text-[#8E929C] font-mono">⌘K</span>
+            </div>
+
+            {/* WORKSPACE Navigation */}
+            <div>
+              <div className="text-[10px] font-semibold tracking-wider text-[#8E929C] uppercase px-2 mb-1.5">
+                Workspace
+              </div>
+              <nav className="space-y-0.5 text-xs font-medium">
                 <button
                   type="button"
-                  onClick={() => setIsFilterOpen((open) => !open)}
-                  aria-expanded={isFilterOpen}
-                  aria-haspopup="menu"
-                  className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border text-xs font-medium transition whitespace-nowrap tabular-nums cursor-pointer shadow-xs ${
-                    statusFilter !== 'all'
-                      ? 'bg-[#FDF0EA] dark:bg-orange-500/20 border-[#D96B43]/60 text-[#B84A24] dark:text-orange-200'
-                      : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800'
+                  onClick={() => setActiveView('fieldnote')}
+                  className={`w-full flex items-center justify-between px-2.5 py-1.5 rounded-xl transition cursor-pointer ${
+                    activeView === 'fieldnote'
+                      ? 'bg-white dark:bg-[#202327] text-slate-900 dark:text-white shadow-xs border border-black/[0.04] dark:border-white/[0.06] font-semibold'
+                      : 'text-[#8E929C] hover:text-slate-900 dark:hover:text-white hover:bg-black/[0.02]'
                   }`}
                 >
-                  <Filter className="w-3.5 h-3.5 shrink-0" aria-hidden="true" />
-                  <span className="max-w-[130px] truncate">
-                    {statusFilter === 'all'
-                      ? 'Filtrer'
-                      : `${activeFilterOption.label} (${filterResult.matchingAgentIds.size})`}
+                  <div className="flex items-center gap-2">
+                    <LayoutGrid className="w-3.5 h-3.5" />
+                    <span>Overview</span>
+                  </div>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setActiveView('orbit')}
+                  className={`w-full flex items-center justify-between px-2.5 py-1.5 rounded-xl transition cursor-pointer ${
+                    activeView === 'orbit'
+                      ? 'bg-white dark:bg-[#202327] text-slate-900 dark:text-white shadow-xs border border-black/[0.04] dark:border-white/[0.06] font-semibold'
+                      : 'text-[#8E929C] hover:text-slate-900 dark:hover:text-white hover:bg-black/[0.02]'
+                  }`}
+                >
+                  <div className="flex items-center gap-2">
+                    <Orbit className="w-3.5 h-3.5" />
+                    <span>3D Orbit</span>
+                  </div>
+                  <span className="text-[10px] text-[#8E929C]">36</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setActiveView('fieldnote')}
+                  className="w-full flex items-center justify-between px-2.5 py-1.5 rounded-xl text-[#8E929C] hover:text-slate-900 dark:hover:text-white hover:bg-black/[0.02] transition cursor-pointer"
+                >
+                  <div className="flex items-center gap-2">
+                    <Zap className="w-3.5 h-3.5" />
+                    <span>Workflows</span>
+                  </div>
+                  <span className="text-[10px] text-[#8E929C]">{workflows.length}</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    setActiveView('fieldnote');
+                    setToastMessage({
+                      title: 'File d\'approbations ZTNA',
+                      desc: `${pendingApprovalsCount} autorisations en attente de signature souveraine.`,
+                      type: 'success',
+                    });
+                  }}
+                  className="w-full flex items-center justify-between px-2.5 py-1.5 rounded-xl text-[#8E929C] hover:text-slate-900 dark:hover:text-white hover:bg-black/[0.02] transition cursor-pointer"
+                >
+                  <div className="flex items-center gap-2">
+                    <Shield className="w-3.5 h-3.5" />
+                    <span>Approvals</span>
+                  </div>
+                  <span className="w-4 h-4 rounded-full bg-[#E5FA52] text-[#111317] font-semibold text-[10px] flex items-center justify-center">
+                    {pendingApprovalsCount}
                   </span>
                 </button>
 
-                {isFilterOpen && (
-                  <div
-                    role="menu"
-                    aria-label="Filter agents by status"
-                    className="absolute right-0 mt-1.5 w-56 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xl py-1.5 z-40"
-                  >
-                    <div className="px-3 py-1.5 flex items-center justify-between border-b border-slate-100 dark:border-slate-800">
-                      <span className="text-[11px] font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500">
-                        Statut d'agent
-                      </span>
-                      {statusFilter !== 'all' && (
-                        <button
-                          type="button"
-                          onClick={() => {
-                            setStatusFilter('all');
-                            setIsFilterOpen(false);
-                          }}
-                          className="text-[11px] font-medium text-[#D96B43] hover:underline cursor-pointer"
-                        >
-                          Réinitialiser
-                        </button>
-                      )}
-                    </div>
-                    {FILTER_OPTIONS.map((option) => {
-                      const isSelected = statusFilter === option.value;
-                      const count = statusCounts[option.value];
-                      return (
-                        <button
-                          key={option.value}
-                          type="button"
-                          role="menuitemradio"
-                          aria-checked={isSelected}
-                          onClick={() => {
-                            setStatusFilter(option.value);
-                            setIsFilterOpen(false);
-                          }}
-                          className={`w-full px-3 py-2 flex items-center justify-between text-xs transition cursor-pointer ${
-                            isSelected
-                              ? 'bg-[#FDF0EA] dark:bg-orange-500/15 text-slate-950 dark:text-white font-semibold'
-                              : 'text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800/70'
-                          }`}
-                        >
-                          <span className="flex items-center gap-2">
-                            <span
-                              className={`w-2 h-2 rounded-full ${option.dotClass}`}
-                              aria-hidden="true"
-                            />
-                            <span>{option.label}</span>
-                          </span>
-                          <span className="flex items-center gap-1.5 tabular-nums text-[11px] text-slate-400 dark:text-slate-500">
-                            <span>{count}</span>
-                            {isSelected && (
-                              <Check className="w-3.5 h-3.5 text-[#D96B43]" aria-hidden="true" />
-                            )}
-                          </span>
-                        </button>
-                      );
-                    })}
+                <button
+                  type="button"
+                  onClick={() => setActiveView('history')}
+                  className={`w-full flex items-center justify-between px-2.5 py-1.5 rounded-xl transition cursor-pointer ${
+                    activeView === 'history'
+                      ? 'bg-white dark:bg-[#202327] text-slate-900 dark:text-white shadow-xs border border-black/[0.04] dark:border-white/[0.06] font-semibold'
+                      : 'text-[#8E929C] hover:text-slate-900 dark:hover:text-white hover:bg-black/[0.02]'
+                  }`}
+                >
+                  <div className="flex items-center gap-2">
+                    <History className="w-3.5 h-3.5" />
+                    <span>Run history</span>
                   </div>
-                )}
+                  <span className="text-[10px] text-[#8E929C]">{runHistory.length}</span>
+                </button>
+              </nav>
+            </div>
+
+            {/* LIVE Section */}
+            <div>
+              <div className="text-[10px] font-semibold tracking-wider text-[#8E929C] uppercase px-2 mb-1.5 flex items-center gap-1.5">
+                <span>Live</span>
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+              </div>
+              <div className="space-y-1 px-2 text-xs">
+                <div className="flex items-center justify-between py-0.5 text-slate-700 dark:text-slate-300">
+                  <div className="flex items-center gap-2">
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                    <span className="text-[#8E929C]">Running</span>
+                  </div>
+                  <span className="font-semibold text-[11px] text-slate-800 dark:text-slate-200">12</span>
+                </div>
+                <div className="flex items-center justify-between py-0.5 text-slate-700 dark:text-slate-300">
+                  <div className="flex items-center gap-2">
+                    <span className="w-1.5 h-1.5 rounded-full bg-amber-400" />
+                    <span className="text-[#8E929C]">Queued</span>
+                  </div>
+                  <span className="font-semibold text-[11px] text-slate-800 dark:text-slate-200">46</span>
+                </div>
+                <div className="flex items-center justify-between py-0.5 text-slate-700 dark:text-slate-300">
+                  <div className="flex items-center gap-2">
+                    <span className="w-1.5 h-1.5 rounded-full bg-rose-500" />
+                    <span className="text-[#8E929C]">Failed today</span>
+                  </div>
+                  <span className="font-semibold text-[11px] text-slate-800 dark:text-slate-200">2</span>
+                </div>
+              </div>
+            </div>
+
+            {/* FOLDERS / COGNITIVE POLES Section */}
+            <div>
+              <div className="text-[10px] font-semibold tracking-wider text-[#8E929C] uppercase px-2 mb-1.5">
+                Folders
+              </div>
+              <div className="space-y-1">
+                {/* Finance Folder (Expanded) */}
+                <div className="bg-black/[0.02] dark:bg-white/[0.02] rounded-xl p-1.5">
+                  <div className="flex items-center justify-between px-1.5 py-0.5 text-xs font-semibold text-slate-800 dark:text-slate-200 cursor-pointer">
+                    <div className="flex items-center gap-1.5">
+                      <ChevronDown className="w-3 h-3 text-[#8E929C]" />
+                      <Folder className="w-3.5 h-3.5 text-[#8E929C]" />
+                      <span>Finance</span>
+                    </div>
+                    <span className="text-[10px] text-[#8E929C]">11</span>
+                  </div>
+                  <div className="ml-4 mt-1 space-y-0.5 border-l border-slate-200 dark:border-white/10 pl-2 text-[11px]">
+                    <div className="text-[#8E929C] py-0.5 flex items-center justify-between cursor-pointer hover:text-black dark:hover:text-white">
+                      <span>Month-end close</span>
+                      <span className="text-[10px]">5</span>
+                    </div>
+                    <div className="text-slate-900 dark:text-white font-medium py-0.5 px-1.5 rounded-md bg-white dark:bg-[#1a1c20] shadow-2xs flex items-center justify-between cursor-pointer">
+                      <span className="flex items-center gap-1">
+                        <span className="w-1 h-1 rounded-full bg-slate-900 dark:bg-white" />
+                        Invoice recon
+                      </span>
+                      <span className="text-[10px] text-[#8E929C]">4</span>
+                    </div>
+                    <div className="text-[#8E929C] py-0.5 flex items-center justify-between cursor-pointer hover:text-black dark:hover:text-white">
+                      <span>Vendors</span>
+                      <span className="text-[10px]">2</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Other Cognitive Pole Folders */}
+                <div className="flex items-center justify-between px-2 py-1 text-xs text-[#8E929C] hover:text-slate-900 dark:hover:text-white cursor-pointer rounded-lg hover:bg-black/[0.02] transition">
+                  <div className="flex items-center gap-1.5">
+                    <Folder className="w-3.5 h-3.5" />
+                    <span>People ops</span>
+                  </div>
+                  <span className="text-[10px]">6</span>
+                </div>
+
+                <div className="flex items-center justify-between px-2 py-1 text-xs text-[#8E929C] hover:text-slate-900 dark:hover:text-white cursor-pointer rounded-lg hover:bg-black/[0.02] transition">
+                  <div className="flex items-center gap-1.5">
+                    <Folder className="w-3.5 h-3.5" />
+                    <span>IT & access</span>
+                  </div>
+                  <span className="text-[10px]">7</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Profile Badge at bottom */}
+          <div className="mt-3 pt-2.5 border-t border-slate-200/60 dark:border-white/[0.08] flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <div className="w-7 h-7 rounded-full bg-[#DCE2EA] dark:bg-slate-700 flex items-center justify-center text-[10px] font-bold text-slate-800 dark:text-slate-200">
+                DK
+              </div>
+              <div className="leading-tight">
+                <div className="text-xs font-semibold text-slate-900 dark:text-white">Dana Kim</div>
+                <div className="text-[10px] text-[#8E929C]">Operations</div>
+              </div>
+            </div>
+            <button
+              type="button"
+              onClick={() => setShowResetConfirm(true)}
+              className="text-[#8E929C] hover:text-slate-900 dark:hover:text-white"
+              title="Options"
+            >
+              ···
+            </button>
+          </div>
+        </aside>
+        {/* END: Secondary Sidebar */}
+
+        {/* BEGIN: Main Workspace Canvas */}
+        <main className="flex-1 min-w-0 bg-[#F8F9FA] dark:bg-[#15171b] rounded-[28px] p-3 sm:p-4.5 border border-white dark:border-white/[0.06] shadow-soft-card overflow-y-auto">
+          {activeView === 'fieldnote' ? (
+            <FieldnoteOverview
+              timeframe={timeframe}
+              workflows={workflows}
+              approvals={approvals}
+              stats={stats}
+              runningWorkflowId={runningWorkflowId}
+              decidingApprovalId={decidingApprovalId}
+              onOpenRunLog={() => setActiveView('history')}
+              onOpenAllWorkflows={() => setActiveView('fieldnote')}
+              onOpenApprovalsQueue={() => {
+                setToastMessage({
+                  title: 'File d\'approbations ZTNA',
+                  desc: `${pendingApprovalsCount} autorisations en attente de signature souveraine.`,
+                  type: 'success',
+                });
+              }}
+              onRunWorkflow={handleRunWorkflow}
+              onDecideApproval={handleDecideApproval}
+              onBatchDecideApprovals={handleBatchDecideApprovals}
+              onTimeframeChange={(tf) => setTimeframe(tf)}
+              onNewWorkflow={() => setIsCreateOpen(true)}
+              onRefresh={handleRefreshFieldnote}
+            />
+          ) : activeView === 'orbit' ? (
+            <div className="w-full">
+              <div className="flex flex-wrap items-center justify-between gap-3 mb-6 pb-3 border-b border-slate-200 dark:border-white/10">
+                <div>
+                  <h2 className="text-xl sm:text-2xl font-bold tracking-tight text-slate-900 dark:text-white">
+                    36 AI Agents Orbit
+                  </h2>
+                  <p className="text-xs text-[#8E929C]">
+                    Supervision cognitive des 6 pôles en anneaux orbitaux
+                  </p>
+                </div>
+
+                <div className="flex items-center gap-2">
+                  {/* Status Filter */}
+                  <div ref={filterContainerRef} className="relative">
+                    <button
+                      type="button"
+                      onClick={() => setIsFilterOpen((open) => !open)}
+                      className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-slate-200 dark:border-white/10 text-xs font-medium bg-white dark:bg-[#1a1c20] text-slate-700 dark:text-slate-200"
+                    >
+                      <Filter className="w-3.5 h-3.5" />
+                      <span>{statusFilter === 'all' ? 'Filtrer' : activeFilterOption.label}</span>
+                    </button>
+                    {isFilterOpen && (
+                      <div className="absolute right-0 mt-1.5 w-52 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xl py-1.5 z-40">
+                        {FILTER_OPTIONS.map((option) => (
+                          <button
+                            key={option.value}
+                            type="button"
+                            onClick={() => {
+                              setStatusFilter(option.value);
+                              setIsFilterOpen(false);
+                            }}
+                            className="w-full px-3 py-1.5 flex items-center justify-between text-xs hover:bg-slate-50 dark:hover:bg-slate-800 cursor-pointer"
+                          >
+                            <span className="flex items-center gap-2">
+                              <span className={`w-2 h-2 rounded-full ${option.dotClass}`} />
+                              <span>{option.label}</span>
+                            </span>
+                            <span className="text-[11px] text-[#8E929C]">{statusCounts[option.value]}</span>
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={() => setIsCreateOpen(true)}
+                    className="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl bg-[#111317] dark:bg-white text-white dark:text-[#111317] text-xs font-bold transition shadow-xs cursor-pointer"
+                  >
+                    <Plus className="w-3.5 h-3.5" />
+                    <span>Ajouter Agent</span>
+                  </button>
+                </div>
               </div>
 
-              {/* History Button */}
-              <button
-                type="button"
-                onClick={() => setActiveView('history')}
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-xs font-medium text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition whitespace-nowrap tabular-nums cursor-pointer shadow-xs"
-              >
-                <History className="w-3.5 h-3.5" aria-hidden="true" />
-                <span>Historique{runHistory.length > 0 ? ` (${runHistory.length})` : ''}</span>
-              </button>
-            </>
+              <OrbitDiagram
+                groups={groups}
+                selectedAgentId={selectedAgentId}
+                matchingAgentIds={filterResult.matchingAgentIds}
+                hasActiveFilter={filterResult.hasActiveFilter}
+                onSelectAgent={handleSelectAgent}
+              />
+            </div>
+          ) : (
+            <div className="max-w-[960px] mx-auto pt-2">
+              <h2 className="text-xl sm:text-2xl font-bold tracking-tight text-slate-900 dark:text-white mb-4">
+                Historique d'exécution des Agents
+              </h2>
+              <RunHistoryView
+                runs={runHistory}
+                stats={stats}
+                onClearHistory={handleClearHistory}
+                onBackToOrbit={() => setActiveView('orbit')}
+              />
+            </div>
           )}
-
-          {/* Add Agent Button */}
-          <button
-            type="button"
-            onClick={() => setIsCreateOpen(true)}
-            aria-label="Nouvel Agent"
-            className="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl bg-orange-500 hover:bg-orange-600 text-white text-xs font-bold transition whitespace-nowrap cursor-pointer shadow-xs"
-          >
-            <Plus className="w-3.5 h-3.5" aria-hidden="true" />
-            <span>Ajouter</span>
-          </button>
-
-          {/* Reset agents to initial defaults */}
-          <button
-            type="button"
-            onClick={() => setShowResetConfirm(true)}
-            title="Réinitialiser les 36 agents par défaut"
-            className="inline-flex items-center justify-center w-8 h-8 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-500 hover:text-slate-900 dark:hover:text-white transition cursor-pointer shadow-xs"
-          >
-            <RefreshCw className="w-3.5 h-3.5" />
-          </button>
-        </div>
+        </main>
+        {/* END: Main Workspace Canvas */}
       </div>
-
-      {/* Main Content View */}
-      <main className="w-full">
-        {activeView === 'orbit' ? (
-          <div className="w-full">
-            <h2 className="text-2xl sm:text-[36px] font-bold tracking-tight text-slate-900 dark:text-white text-center mb-6 tabular-nums">
-              36 AI Agents
-            </h2>
-
-            <OrbitDiagram
-              groups={groups}
-              selectedAgentId={selectedAgentId}
-              matchingAgentIds={filterResult.matchingAgentIds}
-              hasActiveFilter={filterResult.hasActiveFilter}
-              onSelectAgent={handleSelectAgent}
-            />
-          </div>
-        ) : (
-          <div className="max-w-[960px] mx-auto pt-2">
-            <h2 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white mb-5">
-              Historique d'exécution des Agents
-            </h2>
-            <RunHistoryView
-              runs={runHistory}
-              stats={stats}
-              onClearHistory={handleClearHistory}
-              onBackToOrbit={() => setActiveView('orbit')}
-            />
-          </div>
-        )}
-      </main>
 
       {/* Side Panel Drawer */}
       <AgentSidePanel

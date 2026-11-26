@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import { 
   receiveTelemetry, 
+  importTelemetryBatch,
   getTrafficMap, 
   getBalancedNodes, 
   getTelemetrySnapshot, 
@@ -14,6 +15,9 @@ const router = Router();
 
 // Ingestion massive IoT via le bus Kafka (202 Accepted — sans bloquer le capteur)
 router.post('/telemetry', authenticateToken, requireTenant, receiveTelemetry);
+
+// Import batch de mesures (CSV/JSON) vers PostgreSQL
+router.post('/import', authenticateToken, requireTenant, importTelemetryBatch);
 
 // Télémétrie instantanée unifiée (aligné strictement sous /api/v1/iot/snapshot)
 router.get('/snapshot', getTelemetrySnapshot);

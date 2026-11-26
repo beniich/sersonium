@@ -65,14 +65,27 @@ export const MasterHeader: React.FC<MasterHeaderProps> = ({
     ?.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2) ?? 'EM';
 
   return (
-    <header className={`h-[44px] w-full bg-[#0a0b11] border-b border-gray-800 flex items-center justify-between px-3 sm:px-4 sticky top-0 z-50 backdrop-blur-md bg-opacity-95 ${className}`}>
+    <header className={`h-[46px] w-full bg-[#111317] border-b border-white/[0.08] flex items-center justify-between px-3 sm:px-4.5 sticky top-0 z-50 backdrop-blur-md transition-colors ${className}`}>
       
-      {/* ZONE 1 : IDENTITÉ SOUVERAINE & TENANT */}
+      {/* ZONE 1 : macOS WINDOW CONTROLS & IDENTITÉ SOUVERAINE */}
       <div className="flex items-center gap-3">
+        {/* macOS Window Traffic Lights */}
+        <div className="flex items-center gap-2 pr-1" data-purpose="window-controls">
+          <div 
+            onClick={() => navigate('/portal')} 
+            className="w-3 h-3 rounded-full bg-[#FF5F56] border border-[#E0443E]/40 cursor-pointer hover:opacity-80 transition" 
+            title="Retour Portail Public SENSORIUM" 
+          />
+          <div className="w-3 h-3 rounded-full bg-[#FFBD2E] border border-[#DEA123]/40 cursor-pointer hover:opacity-80 transition" title="Réduire" />
+          <div className="w-3 h-3 rounded-full bg-[#27C93F] border border-[#1AAB29]/40 cursor-pointer hover:opacity-80 transition" title="Plein écran" />
+        </div>
+
+        <div className="h-4 w-[1px] bg-white/10 hidden sm:block" />
+
         {onOpenMenu && (
           <button
             onClick={onOpenMenu}
-            className="lg:hidden p-1 rounded text-gray-400 hover:text-white hover:bg-gray-800 transition-colors"
+            className="lg:hidden p-1 rounded-lg text-slate-400 hover:text-white hover:bg-white/[0.08] transition-colors"
             title="Menu"
             aria-label="Menu"
           >
@@ -85,28 +98,28 @@ export const MasterHeader: React.FC<MasterHeaderProps> = ({
           className="flex items-center gap-2 cursor-pointer group"
           title="Portail Souverain SENSORIUM"
         >
-          <div className="w-7 h-7 bg-white rounded-lg flex items-center justify-center shadow-sm group-hover:scale-105 transition-transform overflow-hidden p-0.5 border border-white/20">
+          <div className="w-6.5 h-6.5 bg-[#1C1E22] rounded-lg flex items-center justify-center shadow-xs group-hover:scale-105 transition-transform overflow-hidden p-0.5 border border-white/20">
             <img src="/logo-icon.png" alt="SENSORIUM" className="w-full h-full object-contain" />
           </div>
-          <span className="text-white font-bold tracking-tight text-sm uppercase">Sensorium</span>
+          <span className="text-white font-bold tracking-tight text-xs uppercase font-mono hidden xs:inline">Sensorium</span>
         </div>
 
-        <div className="h-4 w-[1px] bg-gray-700 mx-1 hidden xs:block" />
+        <div className="h-3.5 w-[1px] bg-white/10 mx-0.5 hidden xs:block" />
 
         <div 
           onClick={() => setIsProfileModalOpen(true)}
-          className="flex flex-col cursor-pointer group" 
+          className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white/[0.04] hover:bg-white/[0.08] border border-white/[0.06] cursor-pointer group transition-all" 
           title="Modifier le nom de l'organisation active"
         >
-          <span className="text-[9px] text-gray-500 uppercase font-bold leading-none group-hover:text-orange-400 transition-colors">Active Tenant</span>
-          <span className="text-xs text-gray-200 font-medium leading-tight truncate max-w-[140px] sm:max-w-[220px] group-hover:text-white transition-colors">
-            {currentTenant?.name ?? 'Entreprise M'}
+          <span className="w-1.5 h-1.5 rounded-full bg-[#E5FA52]" />
+          <span className="text-[11px] text-slate-300 font-medium leading-none truncate max-w-[120px] sm:max-w-[180px] group-hover:text-white transition-colors">
+            {currentTenant?.name ?? 'SENSORIUM Démo Corp'}
           </span>
         </div>
       </div>
 
-      {/* ZONE 2 : INDICATEURS VITAUX (Compacts) */}
-      <div className="hidden md:flex items-center gap-5 px-3 py-1 bg-black/40 rounded-full border border-gray-800">
+      {/* ZONE 2 : INDICATEURS VITAUX (Tactile Capsule Pills) */}
+      <div className="hidden md:flex items-center gap-4 px-3 py-1 bg-[#181A1F] rounded-full border border-white/[0.08] shadow-xs">
         <HealthMetric label="SLA" value={sla || "99.99%"} color="text-emerald-400" />
         <HealthMetric
           label="AI"
@@ -133,25 +146,25 @@ export const MasterHeader: React.FC<MasterHeaderProps> = ({
         />
       </div>
 
-      {/* ZONE 3 : THÈME, PROFIL, QUOTAS, ABONNEMENT & INSCRIPTION */}
+      {/* ZONE 3 : THÈME, PROFIL, QUOTAS, ABONNEMENT & ACTIONS */}
       <div className="flex items-center gap-1.5 sm:gap-2">
         {/* Bouton de bascule Vitrine & Documentation */}
         <button
           onClick={() => navigate('/site-viewer')}
-          className="hidden md:flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-slate-800/80 hover:bg-slate-700/80 border border-slate-700/60 text-slate-300 hover:text-white text-xs font-semibold transition-all cursor-pointer shadow-xs active:scale-95"
+          className="hidden md:flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/[0.05] hover:bg-white/[0.1] border border-white/[0.08] text-slate-300 hover:text-white text-xs font-medium transition-all cursor-pointer shadow-xs active:scale-95"
           title="Explorer le Site Vitrine, Solutions & Documentation SENSORIUM"
         >
-          <Globe size={13} className="text-orange-400" />
+          <Globe size={12} className="text-[#E5FA52]" />
           <span className="hidden lg:inline">Vitrine &amp; Solutions</span>
         </button>
 
         {/* Bouton d'Abonnement explicite */}
         <button
           onClick={() => navigate('/pricing')}
-          className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-orange-500/15 hover:bg-orange-500/25 border border-orange-500/35 text-orange-400 hover:text-orange-300 text-xs font-semibold transition-all cursor-pointer shadow-xs active:scale-95"
+          className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/[0.05] hover:bg-white/[0.1] border border-white/[0.08] text-slate-300 hover:text-white text-xs font-medium transition-all cursor-pointer shadow-xs active:scale-95"
           title="Consulter les forfaits et gérer votre abonnement SENSORIUM"
         >
-          <Crown size={13} className="text-orange-400" />
+          <Crown size={12} className="text-amber-400" />
           <span className="hidden sm:inline">Abonnement</span>
         </button>
 
@@ -159,12 +172,12 @@ export const MasterHeader: React.FC<MasterHeaderProps> = ({
         <button
           onClick={handleGoogleQuickLogin}
           disabled={isGoogleLoggingIn}
-          className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-white/10 hover:bg-white/20 border border-white/20 text-white text-xs font-semibold transition-all cursor-pointer shadow-xs active:scale-95"
+          className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/[0.05] hover:bg-white/[0.1] border border-white/[0.08] text-slate-200 hover:text-white text-xs font-medium transition-all cursor-pointer shadow-xs active:scale-95"
           title="Se connecter avec votre compte Google / Gmail"
         >
-          <GoogleLogoIcon size={14} />
+          <GoogleLogoIcon size={13} />
           <span className="hidden sm:inline">
-            {isGoogleLoggingIn ? "Connexion..." : currentUser?.email?.includes("@") ? "Google Connecté" : "Connexion Google"}
+            {isGoogleLoggingIn ? "Connexion..." : currentUser?.email?.includes("@") ? "Google Connecté" : "Connexion"}
           </span>
         </button>
 
@@ -174,10 +187,10 @@ export const MasterHeader: React.FC<MasterHeaderProps> = ({
             setAuthDefaultTab('register');
             setIsAuthModalOpen(true);
           }}
-          className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-orange-500/15 hover:bg-orange-500/25 border border-orange-500/35 text-orange-400 hover:text-orange-300 text-xs font-semibold transition-all cursor-pointer shadow-xs active:scale-95"
+          className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/[0.05] hover:bg-white/[0.1] border border-white/[0.08] text-slate-300 hover:text-white text-xs font-medium transition-all cursor-pointer shadow-xs active:scale-95"
           title="Créer un compte ou se connecter à la plateforme SENSORIUM"
         >
-          <UserPlus size={13} className="text-orange-400" />
+          <UserPlus size={12} className="text-slate-300" />
           <span className="hidden sm:inline">Inscription</span>
         </button>
 
@@ -185,11 +198,11 @@ export const MasterHeader: React.FC<MasterHeaderProps> = ({
         {trialStatus.isTrialActive ? (
           <div
             onClick={() => navigate('/pricing')}
-            className="hidden md:inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-gradient-to-r from-amber-500/15 via-orange-500/15 to-amber-500/15 border border-amber-500/35 text-amber-300 text-xs font-semibold cursor-pointer shadow-xs hover:border-amber-400 transition-all select-none"
+            className="hidden md:inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-amber-400/10 border border-amber-400/30 text-amber-300 text-xs font-semibold cursor-pointer shadow-xs hover:border-amber-400 transition-all select-none"
             title="Pass Découverte 10 Jours Actif — Tous les services Enterprise sont 100% débloqués"
           >
-            <Sparkles size={12} className="text-amber-400 animate-pulse shrink-0" />
-            <span className="font-bold">Pass 10 Jours :</span>
+            <Sparkles size={11} className="text-amber-400 animate-pulse shrink-0" />
+            <span className="font-bold">Pass 10 J :</span>
             <span className="font-mono text-[11px] text-amber-200">{trialStatus.formattedTime}</span>
           </div>
         ) : (
@@ -198,11 +211,11 @@ export const MasterHeader: React.FC<MasterHeaderProps> = ({
               TrialService.activate10DayFreeTrial();
               setTrialStatus(TrialService.getTrialStatus());
             }}
-            className="hidden md:inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-gradient-to-r from-orange-500 to-amber-500 hover:brightness-110 text-white text-xs font-bold cursor-pointer shadow-xs transition-all"
+            className="hidden md:inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white text-[#111317] hover:bg-slate-200 text-xs font-bold cursor-pointer shadow-xs transition-all"
             title="Activer un accès gratuit de 10 jours à tous les services"
           >
-            <Sparkles size={12} className="text-amber-200 shrink-0" />
-            <span>Pass Gratuit 10 Jours</span>
+            <Sparkles size={11} className="text-amber-500 shrink-0" />
+            <span>Pass Gratuit 10 J</span>
           </button>
         )}
 
@@ -219,22 +232,22 @@ export const MasterHeader: React.FC<MasterHeaderProps> = ({
         {/* Theme Toggle Button */}
         <button
           onClick={toggleTheme}
-          className="p-1.5 rounded-lg bg-gray-900/60 hover:bg-gray-800 border border-gray-700/60 text-slate-400 dark:text-[#858585] hover:text-white transition-all shadow-xs flex items-center justify-center cursor-pointer"
+          className="p-1.5 rounded-full bg-white/[0.05] hover:bg-white/[0.1] border border-white/[0.08] text-slate-400 hover:text-white transition-all shadow-xs flex items-center justify-center cursor-pointer"
           title={theme === "dark" ? "Passer en Mode Clair" : "Passer en Mode Sombre"}
           aria-label="Basculer le thème"
         >
-          {theme === "dark" ? <Sun size={14} className="text-slate-400 dark:text-[#858585] hover:text-white" /> : <Moon size={14} className="text-slate-400 dark:text-[#858585] hover:text-white" />}
+          {theme === "dark" ? <Sun size={13} className="text-slate-400 hover:text-white" /> : <Moon size={13} className="text-slate-400 hover:text-white" />}
         </button>
 
         <div 
           onClick={() => setIsProfileModalOpen(true)}
-          className="text-right hidden sm:block cursor-pointer group"
+          className="text-right hidden sm:block cursor-pointer group pl-1"
           title="Modifier votre profil et nom d'organisation"
         >
-          <p className="text-[11px] font-bold text-white leading-none truncate max-w-[120px] group-hover:text-orange-400 transition-colors">
+          <p className="text-[11px] font-semibold text-white leading-none truncate max-w-[110px] group-hover:text-[#E5FA52] transition-colors">
             {currentUser?.name ?? 'Admin User'}
           </p>
-          <p className="text-[9px] text-gray-500 uppercase leading-none mt-0.5">
+          <p className="text-[9px] text-[#8E929C] uppercase leading-none mt-0.5">
             {currentUser?.role ?? 'SuperAdmin'}
           </p>
         </div>
@@ -242,7 +255,7 @@ export const MasterHeader: React.FC<MasterHeaderProps> = ({
         {/* Avatar Souverain Local / Photo de profil Gmail */}
         <div 
           onClick={() => setIsProfileModalOpen(true)}
-          className="w-7 h-7 rounded-full bg-indigo-700 border border-indigo-500/80 flex items-center justify-center cursor-pointer hover:ring-2 ring-orange-500 transition-all shadow-sm overflow-hidden"
+          className="w-7 h-7 rounded-full bg-[#1C1E22] border border-white/20 flex items-center justify-center cursor-pointer hover:border-[#E5FA52] transition-all shadow-xs overflow-hidden"
           title="Modifier mon profil & photo Gmail"
         >
           {currentUser?.photoUrl ? (
@@ -252,7 +265,7 @@ export const MasterHeader: React.FC<MasterHeaderProps> = ({
               className="w-full h-full object-cover" 
             />
           ) : (
-            <span className="text-white text-[11px] font-bold tracking-tight">{initials}</span>
+            <span className="text-white text-[10px] font-bold tracking-tight">{initials}</span>
           )}
         </div>
       </div>

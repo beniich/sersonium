@@ -34,7 +34,7 @@ export class PayPalService {
       const accessToken = authService.getSession().accessToken;
       
       const response = await axios.post(
-        `${API_BASE_URL}/payments/paypal/create-order`,
+        `${API_BASE_URL}/paypal/create-order`,
         { planId, cycle, tenantId },
         {
           headers: {
@@ -62,7 +62,7 @@ export class PayPalService {
     const accessToken = authService.getSession().accessToken;
     
     const response = await axios.post(
-      `${API_BASE_URL}/payments/paypal/capture-order`,
+      `${API_BASE_URL}/paypal/capture-order`,
       {
         orderId: subscriptionIdOrOrderId,
         subscriptionId: subscriptionIdOrOrderId,

@@ -9,7 +9,7 @@
     "start": "node dist/server.mjs",
     "deploy": "npm run build && wrangler deploy",
     "clean": "rm -rf dist",
-    "lint": "tsc --noEmit",
+    "lint": "tsc --noEmit && tsc -p tsconfig.server.json --noEmit",
     "test": "tsx tests/services.test.ts",
     "test:api": "tsx tests/api.test.ts",
     "test:e2e": "tsx tests/e2e.test.ts",

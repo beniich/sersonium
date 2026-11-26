@@ -12,19 +12,21 @@ export interface LiveTelemetryData {
 }
 
 export function useLiveTelemetry() {
-  const [telemetry, setTelemetry] = useState<LiveTelemetryData>({
-    cpu: 28,
-    ram: 62,
-    net: 42,
-    cpuPoints: "0,18 18,14 36,10 54,13 72,5",
-    ramPoints: "0,16 18,12 36,17 54,9 72,5",
-    netPoints: "0,18 18,16 36,9 54,13 72,3",
-    isOnline: true
-  });
+  const isDemo = typeof window !== "undefined" && localStorage.getItem("sensorium_simulation_mode") === "true";
 
-  const [cpuHistory, setCpuHistory] = useState<number[]>([26, 28, 27, 30, 28]);
-  const [ramHistory, setRamHistory] = useState<number[]>([61, 63, 62, 64, 62]);
-  const [netHistory, setNetHistory] = useState<number[]>([39, 41, 44, 40, 42]);
+  const [telemetry, setTelemetry] = useState<LiveTelemetryData>(() => ({
+    cpu: isDemo ? 28 : 0,
+    ram: isDemo ? 62 : 0,
+    net: isDemo ? 42 : 0,
+    cpuPoints: isDemo ? "0,18 18,14 36,10 54,13 72,5" : "0,18 72,18",
+    ramPoints: isDemo ? "0,16 18,12 36,17 54,9 72,5" : "0,18 72,18",
+    netPoints: isDemo ? "0,18 18,16 36,9 54,13 72,3" : "0,18 72,18",
+    isOnline: isDemo
+  }));
+
+  const [cpuHistory, setCpuHistory] = useState<number[]>(() => isDemo ? [26, 28, 27, 30, 28] : [0, 0, 0, 0, 0]);
+  const [ramHistory, setRamHistory] = useState<number[]>(() => isDemo ? [61, 63, 62, 64, 62] : [0, 0, 0, 0, 0]);
+  const [netHistory, setNetHistory] = useState<number[]>(() => isDemo ? [39, 41, 44, 40, 42] : [0, 0, 0, 0, 0]);
 
   useEffect(() => {
     let socket: Socket | null = null;

@@ -64,7 +64,29 @@ const DEFAULT_SUMMARY: DashboardSummaryData = {
   timestamp: new Date().toISOString()
 };
 
+const EMPTY_SUMMARY: DashboardSummaryData = {
+  kpis: {
+    managedAssets: { value: "0", rawValue: 0, change: "—", isPositive: true },
+    availability: { value: "100%", rawValue: 100, change: "—", isPositive: true },
+    interventions: { value: "0", rawValue: 0, change: "—", isPositive: true },
+    compliance: { value: "100%", rawValue: 100, change: "—", isPositive: true },
+    cloudStorage: { value: "0 GB", rawValue: 0, change: "—", isPositive: true }
+  },
+  systemStatus: {
+    operational: true,
+    availability: "100%",
+    statusLabel: "En attente d'équipements"
+  },
+  timestamp: new Date().toISOString()
+};
+
+function isDemoMode(): boolean {
+  if (typeof window === "undefined") return false;
+  return localStorage.getItem("sensorium_simulation_mode") === "true";
+}
+
 function getInitialSummary(): DashboardSummaryData {
+  if (!isDemoMode()) return EMPTY_SUMMARY;
   try {
     const cached = typeof window !== "undefined" ? localStorage.getItem(LOCAL_STORAGE_SUMMARY_KEY) : null;
     if (cached) return JSON.parse(cached);
@@ -75,6 +97,7 @@ function getInitialSummary(): DashboardSummaryData {
 }
 
 function getInitialEvents(): DashboardEvent[] {
+  if (!isDemoMode()) return [];
   try {
     const cached = typeof window !== "undefined" ? localStorage.getItem(LOCAL_STORAGE_EVENTS_KEY) : null;
     if (cached) return JSON.parse(cached);

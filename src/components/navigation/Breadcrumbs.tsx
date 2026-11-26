@@ -10,28 +10,29 @@ export const Breadcrumbs: React.FC<{ className?: string }> = ({ className = '' }
   return (
     <nav 
       aria-label="Fil d'Ariane contextuel" 
-      className={`h-[28px] w-full bg-[#0a0b12]/95 border-b border-gray-800/80 px-3 sm:px-4 flex items-center justify-between text-[11px] font-mono tracking-tight shrink-0 select-none ${className}`}
+      className={`h-[28px] w-full bg-[#111317] border-b border-white/[0.06] px-3 sm:px-4.5 flex items-center justify-between text-[10px] uppercase font-bold tracking-wider shrink-0 select-none ${className}`}
     >
       {/* Dynamic Trail */}
       <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar scroll-smooth">
-        <Shield size={12} className="text-indigo-400 shrink-0" />
+        <span className="text-[#8E929C] tracking-widest font-mono text-[9px]">SENSORIUM</span>
+        <span className="text-white/20">/</span>
         
         {breadcrumbs.map((item, idx) => {
           const isLast = idx === breadcrumbs.length - 1;
           return (
             <React.Fragment key={idx}>
               {idx > 0 && (
-                <ChevronRight size={10} className="text-gray-600 shrink-0" />
+                <span className="text-white/20">/</span>
               )}
               {isLast || item.active ? (
-                <span className="text-indigo-400 font-semibold truncate max-w-[180px] sm:max-w-xs">
+                <span className="text-white font-semibold truncate max-w-[180px] sm:max-w-xs">
                   {item.label}
                 </span>
               ) : (
                 <button
                   type="button"
                   onClick={item.onClick}
-                  className="text-gray-400 hover:text-gray-100 hover:underline transition-colors truncate max-w-[140px] sm:max-w-[200px] cursor-pointer"
+                  className="text-[#8E929C] hover:text-white transition-colors truncate max-w-[140px] sm:max-w-[200px] cursor-pointer"
                 >
                   {item.label}
                 </button>
@@ -42,13 +43,13 @@ export const Breadcrumbs: React.FC<{ className?: string }> = ({ className = '' }
       </div>
 
       {/* Right Context Badge : Active Sub-system indication */}
-      <div className="hidden md:flex items-center gap-2 shrink-0 text-[10px] text-gray-500">
-        <span className="flex items-center gap-1 px-1.5 py-0.5 rounded bg-gray-900 border border-gray-800">
-          <Server size={10} className="text-emerald-400" />
-          <span className="text-gray-300">ID: {activeAssetId.toUpperCase()}</span>
+      <div className="hidden md:flex items-center gap-2 shrink-0 text-[10px] text-[#8E929C]">
+        <span className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-white/[0.04] border border-white/[0.06]">
+          <Server size={10} className="text-[#4edea3]" />
+          <span className="text-slate-200">ID: {activeAssetId.toUpperCase()}</span>
         </span>
-        <span className="text-gray-600">•</span>
-        <span className="text-gray-400 font-sans capitalize">{activeAssetTab}</span>
+        <span className="text-white/20">•</span>
+        <span className="text-[#8E929C] font-mono capitalize">{activeAssetTab}</span>
       </div>
 
       <style>{`

@@ -75,29 +75,37 @@ export default function OverviewPage({
     if (onSelectTab) onSelectTab(tabId);
   };
 
+  const isDemo = typeof window !== "undefined" && localStorage.getItem("sensorium_simulation_mode") === "true";
+
   // Minimalist Stock Data
-  const stockCategories = [
+  const stockCategories = isDemo ? [
     { name: "Electronic Components & Processors", count: 18420, capacity: 85, status: "Optimal", code: "SKU-PRO-01" },
     { name: "IoT Sensors & Building Probes", count: 8250, capacity: 92, status: "Optimal", code: "SKU-IOT-88" },
     { name: "Fiber Cabling & Server Racks", count: 12300, capacity: 64, status: "Normal", code: "SKU-NET-40" },
     { name: "UPS Modules & Power Units", count: 3880, capacity: 42, status: "Restocking", code: "SKU-PWR-12" },
-  ];
+  ] : (state.spareParts && state.spareParts.length > 0 ? state.spareParts.map(sp => ({
+    name: sp.name, count: sp.quantityInStock, capacity: Math.min(100, sp.quantityInStock * 2), status: sp.quantityInStock > sp.minThreshold ? "Optimal" : "Restocking", code: sp.sku
+  })) : []);
 
   // Minimalist Personnel Data
-  const teams = [
+  const teams = isDemo ? [
     { team: "Building Supervision & CAFM", lead: "S. Dupont", members: 14, activeShift: 12, compliance: 100, role: "Facility Ops" },
     { team: "Inventory & Supply Flow", lead: "M. Leroy", members: 18, activeShift: 16, compliance: 98, role: "Logistics Lead" },
     { team: "Telemetry & Edge Nodes", lead: "A. Benali", members: 8, activeShift: 8, compliance: 100, role: "Systems Arch" },
     { team: "ZTNA Security & Compliance", lead: "C. Martin", members: 6, activeShift: 5, compliance: 100, role: "Cyber Security" },
-  ];
+  ] : (state.teamMembers && state.teamMembers.length > 0 ? state.teamMembers.map(tm => ({
+    team: tm.tenant || "Équipe Principale", lead: tm.name, members: 1, activeShift: 1, compliance: 100, role: tm.roleId
+  })) : []);
 
   // Minimalist CAFM Work Orders
-  const workOrders = [
+  const workOrders = isDemo ? [
     { id: "WO-8921", site: "Paris North Datacenter", task: "HVAC & Filter Calibration", priority: "High", status: "In Progress" },
     { id: "WO-8922", site: "Lyon Tech Campus", task: "UPS B4 Replacement", priority: "Critical", status: "Scheduled" },
     { id: "WO-8923", site: "Marseille Logistics Hub", task: "Sensor Weatherproofing Audit", priority: "Normal", status: "Completed" },
     { id: "WO-8924", site: "Frankfurt POP-2 Site", task: "Rack Firmware Update", priority: "Low", status: "Completed" },
-  ];
+  ] : (state.workOrders && state.workOrders.length > 0 ? state.workOrders.map(wo => ({
+    id: wo.id, site: wo.nodeId || "Site Principal", task: wo.title, priority: wo.priority.toUpperCase(), status: wo.status === "resolved" ? "Completed" : "In Progress"
+  })) : []);
 
   const [isCompactMode, setIsCompactMode] = useState<boolean>(() => {
     try {
@@ -119,52 +127,15 @@ export default function OverviewPage({
   const effectiveCompactMode = isCompactModeProp !== undefined ? isCompactModeProp : isCompactMode;
   const effectiveToggleCompactMode = onToggleCompactModeProp || toggleCompactMode;
 
-  // 🤖 PREMIER RUBRIQUE : 36 Agents IA — Écosystème Orbit
+  // 🤖 PREMIER RUBRIQUE : 36 Agents IA — Écosystème Orbit (Fusion Fieldnote Tactile)
+  // Fallback de sécurité si rendu au sein du conteneur Overview
   if (activeTab === "ov-agent-orbit") {
     return (
-      <div className="w-full space-y-4">
-        {/* En-tête contextuel */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-4 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xs">
-          <div>
-            <h1 className="text-xl sm:text-2xl font-['Manrope'] font-extrabold text-slate-900 dark:text-white flex items-center gap-2">
-              <span className="p-2 rounded-xl bg-orange-500/10 text-orange-500 text-lg">🤖</span>
-              36 AI Agents — Écosystème Orbit
-            </h1>
-            <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-              Supervision orchestrée des 36 agents IA (Research, Content, The loop, Publish, Sales, Community)
-            </p>
-          </div>
-          <div className="flex flex-wrap items-center gap-2 shrink-0">
-            {/* Badge Pass 10 Jours Actif ou Bouton d'activation */}
-            {TrialService.hasActiveTrial() ? (
-              <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-gradient-to-r from-amber-500/15 via-orange-500/15 to-amber-500/15 border border-amber-500/35 text-amber-600 dark:text-amber-300 text-xs font-semibold shadow-xs">
-                <Sparkles className="w-3.5 h-3.5 text-amber-500 animate-pulse shrink-0" />
-                <span>Pass 10 Jours Actif : <strong>{TrialService.getTrialStatus().formattedTime}</strong> (Tous Services Enterprise)</span>
-              </div>
-            ) : (
-              <button
-                onClick={() => {
-                  TrialService.activate10DayFreeTrial();
-                  window.location.reload();
-                }}
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-gradient-to-r from-orange-500 to-amber-500 hover:brightness-110 text-white font-bold text-xs shadow-xs transition cursor-pointer"
-              >
-                <Sparkles className="w-3.5 h-3.5 text-amber-200 shrink-0" />
-                <span>Activer Pass Gratuit 10 Jours</span>
-              </button>
-            )}
-
-            <button
-              onClick={() => handleTabChange("ov-general")}
-              className="px-3.5 py-1.5 rounded-xl border border-slate-200 dark:border-slate-700 text-xs font-semibold text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition cursor-pointer"
-            >
-              Vue ERP Classique →
-            </button>
-          </div>
-        </div>
-
-        {/* Composant Orbit 36 Agents */}
-        <AgentOrbit isDark={isDark} />
+      <div className="w-full -mt-2">
+        <AgentOrbit 
+          isDark={isDark} 
+          onNavigateToERP={() => handleTabChange("ov-general")}
+        />
       </div>
     );
   }

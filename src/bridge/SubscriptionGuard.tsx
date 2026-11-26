@@ -9,6 +9,7 @@ import type { User } from 'firebase/auth';
 import { useSubscriptionGate, SubscriptionTier } from './useSubscriptionGate';
 import { Zap, ShieldAlert, KeyRound, Sparkles } from 'lucide-react';
 import TrialService from '../services/trial.service';
+import apiClient from '../services/apiClient';
 
 interface SubscriptionGuardProps {
   user: User | null | undefined;
@@ -111,21 +112,19 @@ export const SubscriptionGuard: React.FC<SubscriptionGuardProps> = ({
     setLicenseError(null);
 
     try {
-      const res = await fetch('/api/v1/bridge/verify-license', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ licenseKey: licenseInput.trim(), uid: user?.uid }),
+      const res = await apiClient.post('/bridge/verify-license', {
+        licenseKey: licenseInput.trim(),
+        uid: user?.uid
       });
 
-      if (res.ok) {
+      if (res.data?.success || res.status === 200) {
         localStorage.setItem('sensorium_user_tier', 'enterprise');
         refreshSubscription();
       } else {
-        const data = await res.json();
-        setLicenseError(data.error || 'Clé de licence invalide ou expirée.');
+        setLicenseError(res.data?.error || 'Clé de licence invalide ou expirée.');
       }
-    } catch {
-      setLicenseError('Erreur de communication avec le serveur de licence.');
+    } catch (err: any) {
+      setLicenseError(err.response?.data?.error || 'Clé de licence invalide ou expirée.');
     } finally {
       setIsVerifyingLicense(false);
     }

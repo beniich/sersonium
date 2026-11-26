@@ -1,6 +1,8 @@
 import React, { useEffect, useRef, useState } from "react";
 import { Lock, RefreshCw, AlertCircle, CheckCircle2 } from "lucide-react";
 import { useLanguage } from "../App";
+import { apiClient } from "../services/apiClient";
+import authService from "../services/auth.service";
 
 interface PayPalSmartButtonProps {
   planId: string;
@@ -30,17 +32,16 @@ export default function PayPalSmartButton({
 
     async function fetchConfig() {
       try {
-        const res = await fetch("/api/v1/paypal/config");
-        const json = await res.json();
-        if (json.success && json.data?.clientId) {
-          if (isMounted) setClientId(json.data.clientId);
+        const res = await apiClient.get("/paypal/config");
+        if (res.data?.success && res.data?.data?.clientId) {
+          if (isMounted) setClientId(res.data.data.clientId);
         } else {
           throw new Error("Client ID PayPal non configuré sur le serveur.");
         }
       } catch (err: any) {
         if (isMounted) {
           console.error("[PayPal SDK Init Error]", err);
-          setSdkError(err.message || "Erreur lors du chargement de la passerelle PayPal.");
+          setSdkError(err.response?.data?.message || err.message || "Erreur lors du chargement de la passerelle PayPal.");
           setLoading(false);
         }
       }
@@ -76,15 +77,35 @@ export default function PayPalSmartButton({
               height: 42,
             },
             createSubscription: (data: any, actions: any) => {
+              const activeTenantId = tenantId || authService.getSession().user?.tenantId || "default-tenant";
               return actions.subscription.create({
                 plan_id: planId,
-                custom_id: tenantId || "tenant_beecarbonat_global"
+                custom_id: activeTenantId,
               });
             },
             onApprove: async (data: any, actions: any) => {
               setLoading(true);
               try {
-                // Subscription is created by PayPal directly
+                // 1. Finaliser l'ordre de capture côté backend pour activer l'abonnement en base
+                const activeTenantId = tenantId || authService.getSession().user?.tenantId;
+                await apiClient.post("/paypal/capture-order", {
+                  orderId: data.orderID,
+                  subscriptionId: data.subscriptionID,
+                  planId,
+                  tenantId: activeTenantId,
+                }).catch((backendErr) => {
+                  console.warn("[PayPal Backend Capture Warning - non-blocking for client flow]", backendErr);
+                });
+
+                // 2. Synchroniser les composants UI
+                if (typeof window !== "undefined") {
+                  window.dispatchEvent(new CustomEvent("sensorium:subscription_changed", {
+                    detail: { planId, subscriptionId: data.subscriptionID }
+                  }));
+                  window.dispatchEvent(new CustomEvent("sensorium:quota_updated"));
+                }
+
+                // 3. Callback parent
                 onSuccess({
                   subscriptionId: data.subscriptionID,
                   planId: planId,

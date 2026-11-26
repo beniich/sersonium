@@ -98,29 +98,27 @@ export function useSubscriptionGate(user: User | null | undefined) {
   }, []);
 
   const checkSubscription = useCallback(async () => {
-    // Clé localStorage unifiée : sensorium_subscription_tier (BUG #7 corrigé)
-    const savedTier = (localStorage.getItem('sensorium_subscription_tier') || '').toUpperCase() as SubscriptionTier;
-    const hasValidLocalTier = savedTier === 'STARTER' || savedTier === 'SILVER' || savedTier === 'PRO' || savedTier === 'ENTERPRISE';
+    // En environnement de production, l'accès est STRICTEMENT déterminé par le backend PostgreSQL
+    if (!import.meta.env.PROD) {
+      const savedTier = (localStorage.getItem('sensorium_subscription_tier') || '').toUpperCase() as SubscriptionTier;
+      const trialExpires = localStorage.getItem('sensorium_trial_expires_at');
+      const isTrialActive = trialExpires ? Date.now() < new Date(trialExpires).getTime() : false;
 
-    // Vérifier si le Pass Découverte 10 jours ou un essai est toujours valide
-    const trialExpires = localStorage.getItem('sensorium_trial_expires_at');
-    const isTrialActive = trialExpires ? Date.now() < new Date(trialExpires).getTime() : false;
-
-    // Si Pass Découverte 10 Jours actif ou tier Enterprise local : déblocage immédiat de 100% des services
-    if (isTrialActive || savedTier === 'ENTERPRISE') {
-      setSubState({
-        status: isTrialActive ? 'trialing' : 'active',
-        tier: 'ENTERPRISE',
-        planName: isTrialActive ? 'Pass Découverte 10 Jours (Tous Services Débloqués)' : 'Plan Enterprise Gold',
-        hasAccessToCockpit: true,
-        has3dDigitalTwin: true,
-        hasRealtimeKafka: true,
-        hasZtnaHardware: true,
-        tokenBalance: 2000000,
-        expiresAt: trialExpires,
-        isLoading: false,
-      });
-      return;
+      if (isTrialActive || savedTier === 'ENTERPRISE') {
+        setSubState({
+          status: isTrialActive ? 'trialing' : 'active',
+          tier: 'ENTERPRISE',
+          planName: isTrialActive ? 'Pass Découverte 10 Jours (Mode Démo)' : 'Plan Enterprise (Mode Démo)',
+          hasAccessToCockpit: true,
+          has3dDigitalTwin: true,
+          hasRealtimeKafka: true,
+          hasZtnaHardware: true,
+          tokenBalance: 2000000,
+          expiresAt: trialExpires,
+          isLoading: false,
+        });
+        return;
+      }
     }
 
     const effectiveUser = user || (authService.isAuthenticated() ? { uid: authService.getSession().user?.userId, email: authService.getSession().user?.email } : null);
@@ -188,25 +186,56 @@ export function useSubscriptionGate(user: User | null | undefined) {
         });
       } else {
         // En cas d'échec d'autorisation API (401, 402, 403), accès formellement refusé
-        const trialExpires = localStorage.getItem('sensorium_trial_expires_at');
-        const isTrialActive = trialExpires ? Date.now() < new Date(trialExpires).getTime() : false;
+        if (!import.meta.env.PROD) {
+          const trialExpires = localStorage.getItem('sensorium_trial_expires_at');
+          const isTrialActive = trialExpires ? Date.now() < new Date(trialExpires).getTime() : false;
 
-        setSubState({
-          status: isTrialActive ? 'trialing' : 'none',
-          tier: isTrialActive ? 'ENTERPRISE' : 'FREE',
-          planName: isTrialActive ? 'Pass Découverte 10 Jours (Tous Services Débloqués)' : 'Offre Découverte',
-          hasAccessToCockpit: isTrialActive,
-          has3dDigitalTwin: isTrialActive,
-          hasRealtimeKafka: isTrialActive,
-          hasZtnaHardware: isTrialActive,
-          tokenBalance: isTrialActive ? 2000000 : 0,
-          expiresAt: isTrialActive ? trialExpires : null,
-          isLoading: false,
-        });
+          setSubState({
+            status: isTrialActive ? 'trialing' : 'none',
+            tier: isTrialActive ? 'ENTERPRISE' : 'FREE',
+            planName: isTrialActive ? 'Pass Découverte 10 Jours (Tous Services Débloqués)' : 'Offre Découverte',
+            hasAccessToCockpit: isTrialActive,
+            has3dDigitalTwin: isTrialActive,
+            hasRealtimeKafka: isTrialActive,
+            hasZtnaHardware: isTrialActive,
+            tokenBalance: isTrialActive ? 2000000 : 0,
+            expiresAt: isTrialActive ? trialExpires : null,
+            isLoading: false,
+          });
+        } else {
+          // En PROD: fail-closed strict (aucun bypass local)
+          setSubState({
+            status: 'none',
+            tier: 'FREE',
+            planName: 'Offre Découverte (Accès Restreint)',
+            hasAccessToCockpit: false,
+            has3dDigitalTwin: false,
+            hasRealtimeKafka: false,
+            hasZtnaHardware: false,
+            tokenBalance: 0,
+            expiresAt: null,
+            isLoading: false,
+          });
+        }
       }
     } catch {
       // Fallback gracieux en cas de coupure réseau
-      setSubState((prev) => ({ ...prev, isLoading: false }));
+      if (!import.meta.env.PROD) {
+        setSubState((prev) => ({ ...prev, isLoading: false }));
+      } else {
+        setSubState({
+          status: 'none',
+          tier: 'FREE',
+          planName: 'Offre Découverte (Accès Restreint)',
+          hasAccessToCockpit: false,
+          has3dDigitalTwin: false,
+          hasRealtimeKafka: false,
+          hasZtnaHardware: false,
+          tokenBalance: 0,
+          expiresAt: null,
+          isLoading: false,
+        });
+      }
     }
   }, [user]);
 

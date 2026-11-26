@@ -69,10 +69,15 @@ class KafkaService {
     }
   }
 
-  async disconnect() {
+  async disconnect(): Promise<void> {
     if (this.producer && this.isConnected) {
-      await this.producer.disconnect();
-      this.isConnected = false;
+      try {
+        await this.producer.disconnect();
+        this.isConnected = false;
+        console.log("[Kafka Service] Producer déconnecté avec succès.");
+      } catch (err) {
+        console.error("[Kafka Service] Erreur lors de la déconnexion Kafka:", err);
+      }
     }
   }
 

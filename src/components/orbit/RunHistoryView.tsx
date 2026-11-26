@@ -65,11 +65,10 @@ export function RunHistoryView({
                 key={tab.key}
                 type="button"
                 onClick={() => setOutcomeFilter(tab.key)}
-                className={`px-3 py-1.5 text-xs font-medium rounded-md transition-colors whitespace-nowrap ${
-                  outcomeFilter === tab.key
+                className={`px-3 py-1.5 text-xs font-medium rounded-md transition-colors whitespace-nowrap ${outcomeFilter === tab.key
                     ? 'bg-white dark:bg-slate-900 text-slate-900 dark:text-white shadow-sm'
                     : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
-                }`}
+                  }`}
               >
                 {tab.label}
               </button>

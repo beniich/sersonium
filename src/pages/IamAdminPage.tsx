@@ -1,15 +1,32 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { useRbac, ROLE_LABELS, ROLE_COLORS, RbacRole, TenantMember, Tenant } from "../bridge/useRbac";
 import { MOCK_TENANTS, ROLE_PERMISSIONS } from "../services/rbac.service";
 import type { Permission } from "../services/rbac.service";
 import PageHeaderBanner from "../components/PageHeaderBanner";
-import { ShieldCheck } from "lucide-react";
+import { ShieldCheck, RefreshCw, Trash2, Mail, UserPlus, CheckCircle2, AlertCircle } from "lucide-react";
+import apiClient from "../services/apiClient";
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
 const ROLE_ICON: Record<RbacRole, string> = {
   SUPER_ADMIN: "👑", TENANT_ADMIN: "🏢", FACILITY_LEAD: "🏗️",
   FIELD_TECHNICIAN: "🔧", CSRD_AUDITOR: "📋", VIEWER: "👁️",
+};
+
+export const RBAC_TO_BACKEND_ROLE: Record<string, string> = {
+  SUPER_ADMIN: "admin",
+  TENANT_ADMIN: "admin",
+  FACILITY_LEAD: "operator",
+  FIELD_TECHNICIAN: "operator",
+  CSRD_AUDITOR: "auditor",
+  VIEWER: "viewer",
+};
+
+export const BACKEND_TO_RBAC_ROLE: Record<string, RbacRole> = {
+  admin: "TENANT_ADMIN",
+  operator: "FACILITY_LEAD",
+  auditor: "CSRD_AUDITOR",
+  viewer: "VIEWER",
 };
 
 function Badge({ label, color }: { label: string; color: string }) {
@@ -21,16 +38,57 @@ function Badge({ label, color }: { label: string; color: string }) {
   );
 }
 
+// ─── Interfaces Backend IAM ───────────────────────────────────────────────────
+
+interface BackendMember {
+  id: string;
+  email: string;
+  name: string;
+  role: string;
+  tokens?: number;
+  isActive: boolean;
+  createdAt: string;
+  lastLoginAt?: string | null;
+}
+
+interface BackendInvitation {
+  id: string;
+  email: string;
+  role: string;
+  expiresAt: string;
+  createdAt: string;
+  invitedBy?: { name: string; email: string };
+}
+
+interface BackendQuota {
+  maxUsers: number;
+  activeUsers: number;
+  pendingInvitations: number;
+  remainingSlots: number;
+}
+
 // ─── Member Row ────────────────────────────────────────────────────────────────
 
-function MemberRow({ member, canManage, onRoleChange }: {
+function MemberRow({ member, canManage, onRoleChange, onRemove }: {
   member: TenantMember;
   canManage: boolean;
-  onRoleChange: (userId: string, role: RbacRole) => void;
+  onRoleChange: (userId: string, role: RbacRole) => Promise<void>;
+  onRemove?: (userId: string) => Promise<void>;
 }) {
-  const color = ROLE_COLORS[member.role];
+  const color = ROLE_COLORS[member.role] || "#94a3b8";
   const [editing, setEditing] = useState(false);
   const [newRole, setNewRole] = useState<RbacRole>(member.role);
+  const [isUpdating, setIsUpdating] = useState(false);
+
+  const handleSaveRole = async () => {
+    setIsUpdating(true);
+    try {
+      await onRoleChange(member.userId, newRole);
+      setEditing(false);
+    } finally {
+      setIsUpdating(false);
+    }
+  };
 
   return (
     <tr style={{ borderBottom: "1px solid rgba(255,255,255,0.04)" }}>
@@ -54,6 +112,7 @@ function MemberRow({ member, canManage, onRoleChange }: {
             <select
               value={newRole}
               onChange={(e) => setNewRole(e.target.value as RbacRole)}
+              disabled={isUpdating}
               style={{
                 background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)",
                 borderRadius: "6px", color: "#e2e8f0", fontSize: "11px", padding: "4px 8px",
@@ -63,15 +122,25 @@ function MemberRow({ member, canManage, onRoleChange }: {
                 <option key={r} value={r} style={{ background: "#0f172a" }}>{ROLE_LABELS[r]}</option>
               ))}
             </select>
-            <button onClick={() => { onRoleChange(member.userId, newRole); setEditing(false); }}
-              style={{ padding: "3px 8px", borderRadius: "4px", background: "#10b981", border: "none", color: "white", fontSize: "10px", cursor: "pointer" }}>✓</button>
-            <button onClick={() => setEditing(false)}
-              style={{ padding: "3px 8px", borderRadius: "4px", background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)", color: "#64748b", fontSize: "10px", cursor: "pointer" }}>✕</button>
+            <button
+              onClick={handleSaveRole}
+              disabled={isUpdating}
+              style={{ padding: "3px 8px", borderRadius: "4px", background: "#10b981", border: "none", color: "white", fontSize: "10px", cursor: "pointer" }}
+            >
+              {isUpdating ? "..." : "✓"}
+            </button>
+            <button
+              onClick={() => setEditing(false)}
+              disabled={isUpdating}
+              style={{ padding: "3px 8px", borderRadius: "4px", background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)", color: "#64748b", fontSize: "10px", cursor: "pointer" }}
+            >
+              ✕
+            </button>
           </div>
         ) : (
           <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
-            <span style={{ fontSize: "14px" }}>{ROLE_ICON[member.role]}</span>
-            <Badge label={ROLE_LABELS[member.role]} color={ROLE_COLORS[member.role]} />
+            <span style={{ fontSize: "14px" }}>{ROLE_ICON[member.role] || "👤"}</span>
+            <Badge label={ROLE_LABELS[member.role] || member.role} color={color} />
             {canManage && (
               <button onClick={() => setEditing(true)} style={{ background: "transparent", border: "none", color: "#64748b", cursor: "pointer", fontSize: "11px" }}>✏️</button>
             )}
@@ -87,25 +156,50 @@ function MemberRow({ member, canManage, onRoleChange }: {
         </div>
       </td>
       <td style={{ padding: "12px 10px", fontSize: "11px", color: "#64748b" }}>
-        {new Date(member.invitedAt).toLocaleDateString("fr-FR")}
+        {member.invitedAt ? new Date(member.invitedAt).toLocaleDateString("fr-FR") : "—"}
       </td>
+      {canManage && onRemove && (
+        <td style={{ padding: "12px 10px", textAlign: "right" }}>
+          <button
+            onClick={() => onRemove(member.userId)}
+            title="Supprimer le membre"
+            style={{ background: "transparent", border: "none", color: "#ef4444", cursor: "pointer", padding: "4px" }}
+          >
+            <Trash2 size={13} />
+          </button>
+        </td>
+      )}
     </tr>
   );
 }
 
 // ─── Invite Form ───────────────────────────────────────────────────────────────
 
-function InviteForm({ tenantId, onInvite }: { tenantId: string; onInvite: (m: Omit<TenantMember, "userId" | "invitedAt" | "invitedBy">) => { success: boolean; error?: string } }) {
+function InviteForm({ onInviteSubmit }: {
+  onInviteSubmit: (email: string, role: string) => Promise<{ success: boolean; invitationUrl?: string; error?: string }>;
+}) {
   const [email, setEmail] = useState("");
-  const [name, setName] = useState("");
   const [role, setRole] = useState<RbacRole>("VIEWER");
-  const [result, setResult] = useState<{ success?: boolean; error?: string }>({});
+  const [submitting, setSubmitting] = useState(false);
+  const [copied, setCopied] = useState(false);
+  const [result, setResult] = useState<{ success?: boolean; invitationUrl?: string; error?: string }>({});
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const r = onInvite({ email, displayName: name, role, tenantId, isActive: true, mfaEnabled: false });
-    setResult(r);
-    if (r.success) { setEmail(""); setName(""); setRole("VIEWER"); }
+    if (!email.trim() || submitting) return;
+    setSubmitting(true);
+    setResult({});
+
+    try {
+      const res = await onInviteSubmit(email.trim(), role);
+      setResult(res);
+      if (res.success) {
+        setEmail("");
+        setRole("VIEWER");
+      }
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   const INPUT: React.CSSProperties = {
@@ -117,27 +211,61 @@ function InviteForm({ tenantId, onInvite }: { tenantId: string; onInvite: (m: Om
   return (
     <form onSubmit={handleSubmit} style={{ display: "flex", flexWrap: "wrap", gap: "10px", alignItems: "flex-end" }}>
       <div style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
-        <label style={{ fontSize: "11px", color: "#64748b" }}>Nom complet</label>
-        <input value={name} onChange={(e) => setName(e.target.value)} required placeholder="Prénom Nom" style={{ ...INPUT, width: "160px" }} />
+        <label style={{ fontSize: "11px", color: "#64748b" }}>Email du collaborateur</label>
+        <input
+          type="email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          required
+          placeholder="collaborateur@domaine.com"
+          style={{ ...INPUT, width: "220px" }}
+        />
       </div>
       <div style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
-        <label style={{ fontSize: "11px", color: "#64748b" }}>Email professionnel</label>
-        <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required placeholder="user@domaine.com" style={{ ...INPUT, width: "200px" }} />
-      </div>
-      <div style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
-        <label style={{ fontSize: "11px", color: "#64748b" }}>Rôle</label>
+        <label style={{ fontSize: "11px", color: "#64748b" }}>Rôle assigné</label>
         <select value={role} onChange={(e) => setRole(e.target.value as RbacRole)} style={{ ...INPUT }}>
           {(Object.keys(ROLE_LABELS) as RbacRole[]).map((r) => (
             <option key={r} value={r} style={{ background: "#0f172a" }}>{ROLE_ICON[r]} {ROLE_LABELS[r]}</option>
           ))}
         </select>
       </div>
-      <button type="submit" style={{
-        padding: "8px 16px", borderRadius: "8px",
-        background: "linear-gradient(135deg, #6366f1, #8b5cf6)",
-        border: "none", color: "white", fontSize: "12px", fontWeight: 600, cursor: "pointer",
-      }}>+ Inviter</button>
-      {result.success && <span style={{ fontSize: "12px", color: "#10b981" }}>✓ Invitation envoyée</span>}
+      <button
+        type="submit"
+        disabled={submitting}
+        style={{
+          padding: "8px 16px", borderRadius: "8px",
+          background: "linear-gradient(135deg, #6366f1, #8b5cf6)",
+          border: "none", color: "white", fontSize: "12px", fontWeight: 600, cursor: "pointer",
+        }}
+      >
+        {submitting ? "Envoi..." : "+ Inviter"}
+      </button>
+      {result.success && (
+        <div style={{ display: "flex", alignItems: "center", gap: "8px", width: "100%", marginTop: "6px", flexWrap: "wrap" }}>
+          <span style={{ fontSize: "12px", color: "#10b981" }}>✓ Invitation créée et enregistrée</span>
+          {result.invitationUrl && (
+            <div style={{ display: "flex", alignItems: "center", gap: "6px", background: "rgba(16,185,129,0.1)", border: "1px solid rgba(16,185,129,0.3)", borderRadius: "6px", padding: "4px 8px" }}>
+              <input
+                type="text"
+                readOnly
+                value={result.invitationUrl}
+                style={{ background: "transparent", border: "none", color: "#a7f3d0", fontSize: "11px", width: "220px", outline: "none" }}
+              />
+              <button
+                type="button"
+                onClick={() => {
+                  navigator.clipboard.writeText(result.invitationUrl!);
+                  setCopied(true);
+                  setTimeout(() => setCopied(false), 2000);
+                }}
+                style={{ background: "#10b981", border: "none", color: "white", borderRadius: "4px", padding: "2px 8px", fontSize: "10px", cursor: "pointer", fontWeight: 600 }}
+              >
+                {copied ? "Copié !" : "Copier le lien"}
+              </button>
+            </div>
+          )}
+        </div>
+      )}
       {result.error && <span style={{ fontSize: "12px", color: "#ef4444" }}>{result.error}</span>}
     </form>
   );
@@ -207,8 +335,111 @@ export function IamAdminPage({ isDark = true }: { isDark?: boolean }) {
   const { session, tenantMembers, allTenants, can, changeRole, inviteMember } = useRbac();
   const [activeTab, setActiveTab] = useState<"members" | "tenants" | "matrix" | "session">("session");
 
+  // Backend state
+  const [backendMembers, setBackendMembers] = useState<BackendMember[]>([]);
+  const [invitations, setInvitations] = useState<BackendInvitation[]>([]);
+  const [quota, setQuota] = useState<BackendQuota | null>(null);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [backendError, setBackendError] = useState<string | null>(null);
+
   const canManage = can("users:manage");
   const canRoles = can("roles:assign");
+
+  // Chargement réel des membres depuis l'API REST v1 IAM
+  const fetchIamData = useCallback(async () => {
+    setIsLoading(true);
+    setBackendError(null);
+    try {
+      const res = await apiClient.get("/iam/members");
+      if (res.data?.success && res.data?.data) {
+        setBackendMembers(res.data.data.members || []);
+        setInvitations(res.data.data.invitations || []);
+        setQuota(res.data.data.quota || null);
+      }
+    } catch (err: any) {
+      // Fallback gracieux vers les membres mockés en cas de mode hors-ligne
+      console.warn("[IamAdminPage] Fallback to local RBAC data:", err.message);
+      setBackendError(err.response?.data?.error || null);
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchIamData();
+  }, [fetchIamData]);
+
+  // Actions Backend avec synchronisation immédiate
+  const handleBackendInvite = async (email: string, role: string) => {
+    try {
+      const backendRole = RBAC_TO_BACKEND_ROLE[role] || role.toLowerCase();
+      const res = await apiClient.post("/iam/invitations", { email, role: backendRole });
+      if (res.data?.success) {
+        await fetchIamData();
+        const fullUrl = res.data.data?.invitationUrl
+          ? (typeof window !== "undefined" ? `${window.location.origin}${res.data.data.invitationUrl}` : res.data.data.invitationUrl)
+          : undefined;
+        return { success: true, invitationUrl: fullUrl };
+      }
+      return { success: false, error: res.data?.error?.message || res.data?.error || "Erreur lors de l'invitation." };
+    } catch (err: any) {
+      // Tenter le fallback local
+      inviteMember({
+        email,
+        displayName: email.split("@")[0],
+        role: role as RbacRole,
+        tenantId: session?.tenantId || "default",
+        isActive: true,
+        mfaEnabled: false
+      });
+      return { success: false, error: err.response?.data?.error?.message || err.response?.data?.error || err.message };
+    }
+  };
+
+  const handleBackendRoleChange = async (userId: string, newRole: RbacRole) => {
+    try {
+      const backendRole = RBAC_TO_BACKEND_ROLE[newRole] || "viewer";
+      await apiClient.patch(`/iam/members/${userId}/role`, { role: backendRole });
+      await fetchIamData();
+    } catch {
+      // Fallback local
+      changeRole(userId, newRole);
+    }
+  };
+
+  const handleBackendRemove = async (userId: string) => {
+    if (!window.confirm("Êtes-vous sûr de vouloir supprimer ce membre de l'organisation ?")) return;
+    try {
+      await apiClient.delete(`/iam/members/${userId}`);
+      await fetchIamData();
+    } catch (err: any) {
+      alert(err.response?.data?.error || "Impossible de supprimer ce membre.");
+    }
+  };
+
+  const handleCancelInvitation = async (invitationId: string) => {
+    try {
+      await apiClient.delete(`/iam/invitations/${invitationId}`);
+      await fetchIamData();
+    } catch (err: any) {
+      alert(err.response?.data?.error || "Impossible d'annuler cette invitation.");
+    }
+  };
+
+  // Fusion des membres réels avec les membres mockés si backend actif
+  const displayMembers: TenantMember[] = backendMembers.length > 0
+    ? backendMembers.map((bm) => ({
+        userId: bm.id,
+        email: bm.email,
+        displayName: bm.name || bm.email.split("@")[0],
+        role: BACKEND_TO_RBAC_ROLE[bm.role.toLowerCase()] || (bm.role as RbacRole) || "VIEWER",
+        tenantId: session?.tenantId || "tenant-default",
+        isActive: bm.isActive,
+        mfaEnabled: true,
+        invitedAt: bm.createdAt,
+        invitedBy: "System"
+      }))
+    : tenantMembers;
 
   const TAB: React.CSSProperties = { padding: "8px 16px", borderRadius: "8px", border: "1px solid rgba(255,255,255,0.08)", background: "transparent", color: "#64748b", cursor: "pointer", fontSize: "12px", fontWeight: 500 };
   const TAB_ACTIVE: React.CSSProperties = { ...TAB, background: "rgba(99,102,241,0.15)", borderColor: "#6366f1", color: "#818cf8" };
@@ -239,11 +470,11 @@ export function IamAdminPage({ isDark = true }: { isDark?: boolean }) {
         badgeColor="bg-indigo-500/15 text-indigo-400 border-indigo-500/30"
         status={{ label: `ROLE: ${ROLE_LABELS[session.role]}`, color: "purple" }}
         title="IAM — Gestion des Identités & Accès"
-        subtitle="Authentification entreprise multi-tenant · RBAC · SSO · Audit cryptographique"
-        description="Panneau d'administration centralisé pour la gestion des membres, tenants, permissions granulaires et matrice de contrôle d'accès basé sur les rôles."
+        subtitle="Authentification entreprise multi-tenant · RBAC · SSO · Isolation PostgreSQL"
+        description="Panneau d'administration centralisé pour la gestion des membres, invitations, permissions granulaires et isolation cryptographique multi-tenant."
         telemetry={[
           { label: "Tenants Actifs", value: `${allTenants.length}` },
-          { label: "Membres Totaux", value: `${tenantMembers.length}` },
+          { label: "Membres Totaux", value: `${displayMembers.length}` },
           { label: "Session", value: session.displayName.split(" ")[0] },
           { label: "Auth Method", value: session.authMethod.toUpperCase(), isPositive: true }
         ]}
@@ -269,20 +500,34 @@ export function IamAdminPage({ isDark = true }: { isDark?: boolean }) {
 
       {/* Tabs */}
       <div className="sticky top-0 z-20 -mx-2.5 sm:-mx-4 lg:-mx-5 px-2.5 sm:px-4 lg:px-5 py-2 bg-slate-950/90 backdrop-blur-xl border-b border-white/10 shadow-xs">
-      <div style={{ display: "flex", gap: "8px", flexWrap: "wrap" }}>
-        {[
-          { id: "session", label: "🔑 Ma session" },
-          { id: "members", label: "👥 Membres" },
-          { id: "tenants", label: "🏢 Tenants" },
-          { id: "matrix", label: "🔒 Matrice RBAC" },
-        ].map(({ id, label }) => (
-          <button key={id} onClick={() => setActiveTab(id as any)} style={activeTab === id ? TAB_ACTIVE : TAB}>{label}</button>
-        ))}
+      <div style={{ display: "flex", gap: "8px", flexWrap: "wrap", alignItems: "center", justifyContent: "space-between" }}>
+        <div style={{ display: "flex", gap: "8px", flexWrap: "wrap" }}>
+          {[
+            { id: "session", label: "🔑 Ma session" },
+            { id: "members", label: `👥 Membres (${displayMembers.length})` },
+            { id: "tenants", label: "🏢 Tenants" },
+            { id: "matrix", label: "🔒 Matrice RBAC" },
+          ].map(({ id, label }) => (
+            <button key={id} onClick={() => setActiveTab(id as any)} style={activeTab === id ? TAB_ACTIVE : TAB}>{label}</button>
+          ))}
+        </div>
+        <button
+          onClick={fetchIamData}
+          disabled={isLoading}
+          style={{
+            display: "inline-flex", alignItems: "center", gap: "6px",
+            background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)",
+            padding: "6px 12px", borderRadius: "6px", color: "#94a3b8", fontSize: "11px", cursor: "pointer"
+          }}
+        >
+          <RefreshCw size={12} className={isLoading ? "animate-spin" : ""} />
+          Actualiser
+        </button>
       </div>
       </div>
 
       {/* Content */}
-      <div style={{ background: "rgba(15,23,42,0.6)", border: "1px solid rgba(255,255,255,0.06)", borderRadius: "16px", padding: "20px" }}>
+      <div style={{ background: "rgba(15,23,42,0.6)", border: "1px solid rgba(255,255,255,0.06)", borderRadius: "16px", padding: "20px", marginTop: "16px" }}>
 
         {/* Session tab */}
         {activeTab === "session" && (
@@ -328,27 +573,99 @@ export function IamAdminPage({ isDark = true }: { isDark?: boolean }) {
         {/* Members tab */}
         {activeTab === "members" && (
           <div>
-            {canManage && (
-              <div style={{ marginBottom: "20px", padding: "16px", background: "rgba(99,102,241,0.05)", border: "1px solid rgba(99,102,241,0.15)", borderRadius: "10px" }}>
-                <div style={{ fontSize: "12px", color: "#818cf8", fontWeight: 600, marginBottom: "12px" }}>Inviter un nouveau membre</div>
-                <InviteForm tenantId={session.tenantId} onInvite={inviteMember} />
+            {/* Quota Banner */}
+            {quota && (
+              <div style={{
+                marginBottom: "16px", padding: "12px 16px", borderRadius: "10px",
+                background: "rgba(99,102,241,0.08)", border: "1px solid rgba(99,102,241,0.2)",
+                display: "flex", flexWrap: "wrap", gap: "16px", alignItems: "center", justifyContent: "space-between"
+              }}>
+                <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                  <ShieldCheck className="text-indigo-400" size={18} />
+                  <div>
+                    <span style={{ fontSize: "12px", fontWeight: 600, color: "#e2e8f0" }}>Quota Utilisateurs : </span>
+                    <span style={{ fontSize: "12px", color: "#818cf8" }}>{quota.activeUsers} actifs / {quota.maxUsers} max</span>
+                  </div>
+                </div>
+                <div style={{ display: "flex", gap: "12px", fontSize: "11px", color: "#94a3b8" }}>
+                  <span>Invitations en attente : <strong style={{ color: "#f59e0b" }}>{quota.pendingInvitations}</strong></span>
+                  <span>Places restantes : <strong style={{ color: "#10b981" }}>{quota.remainingSlots}</strong></span>
+                </div>
               </div>
             )}
+
+            {canManage && (
+              <div style={{ marginBottom: "20px", padding: "16px", background: "rgba(99,102,241,0.05)", border: "1px solid rgba(99,102,241,0.15)", borderRadius: "10px" }}>
+                <div style={{ fontSize: "12px", color: "#818cf8", fontWeight: 600, marginBottom: "12px", display: "flex", alignItems: "center", gap: "6px" }}>
+                  <UserPlus size={14} /> Inviter un collaborateur dans l'organisation
+                </div>
+                <InviteForm onInviteSubmit={handleBackendInvite} />
+              </div>
+            )}
+
+            {/* Pending Invitations list */}
+            {invitations.length > 0 && (
+              <div style={{ marginBottom: "20px" }}>
+                <div style={{ fontSize: "12px", color: "#f59e0b", fontWeight: 600, marginBottom: "8px", display: "flex", alignItems: "center", gap: "6px" }}>
+                  <Mail size={13} /> Invitations en attente ({invitations.length})
+                </div>
+                <div style={{ overflowX: "auto", background: "rgba(245,158,11,0.03)", borderRadius: "8px", border: "1px solid rgba(245,158,11,0.1)" }}>
+                  <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "11px" }}>
+                    <thead>
+                      <tr style={{ borderBottom: "1px solid rgba(245,158,11,0.1)", color: "#94a3b8" }}>
+                        <th style={{ padding: "8px 10px", textAlign: "left" }}>Email</th>
+                        <th style={{ padding: "8px 10px", textAlign: "left" }}>Rôle assigné</th>
+                        <th style={{ padding: "8px 10px", textAlign: "left" }}>Expire le</th>
+                        <th style={{ padding: "8px 10px", textAlign: "right" }}>Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {invitations.map((inv) => (
+                        <tr key={inv.id} style={{ borderBottom: "1px solid rgba(255,255,255,0.03)" }}>
+                          <td style={{ padding: "8px 10px", color: "#e2e8f0" }}>{inv.email}</td>
+                          <td style={{ padding: "8px 10px" }}>
+                            <Badge label={ROLE_LABELS[inv.role as RbacRole] || inv.role} color="#6366f1" />
+                          </td>
+                          <td style={{ padding: "8px 10px", color: "#64748b" }}>
+                            {new Date(inv.expiresAt).toLocaleDateString("fr-FR")}
+                          </td>
+                          <td style={{ padding: "8px 10px", textAlign: "right" }}>
+                            <button
+                              onClick={() => handleCancelInvitation(inv.id)}
+                              style={{ background: "transparent", border: "none", color: "#ef4444", cursor: "pointer", fontSize: "11px" }}
+                            >
+                              Annuler
+                            </button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            )}
+
             <div style={{ fontSize: "12px", color: "#64748b", marginBottom: "12px" }}>
-              {tenantMembers.length} membre(s) dans {session.tenant.name}
+              {displayMembers.length} membre(s) actif(s) dans l'organisation
             </div>
             <div style={{ overflowX: "auto" }}>
               <table style={{ width: "100%", borderCollapse: "collapse" }}>
                 <thead>
                   <tr style={{ borderBottom: "1px solid rgba(255,255,255,0.08)" }}>
-                    {["Membre", "Rôle", "Statut", "Invité le"].map((h) => (
-                      <th key={h} style={{ padding: "10px", textAlign: "left", fontSize: "11px", color: "#64748b", fontWeight: 500 }}>{h}</th>
+                    {["Membre", "Rôle", "Statut", "Inscrit le", ...(canManage ? ["Action"] : [])].map((h) => (
+                      <th key={h} style={{ padding: "10px", textAlign: h === "Action" ? "right" : "left", fontSize: "11px", color: "#64748b", fontWeight: 500 }}>{h}</th>
                     ))}
                   </tr>
                 </thead>
                 <tbody>
-                  {tenantMembers.map((m) => (
-                    <MemberRow key={m.userId} member={m} canManage={canRoles} onRoleChange={changeRole} />
+                  {displayMembers.map((m) => (
+                    <MemberRow
+                      key={m.userId}
+                      member={m}
+                      canManage={canRoles}
+                      onRoleChange={handleBackendRoleChange}
+                      onRemove={canManage ? handleBackendRemove : undefined}
+                    />
                   ))}
                 </tbody>
               </table>

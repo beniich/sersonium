@@ -294,7 +294,10 @@ export class ZeroTrustService {
    * @returns true si la signature est cryptographiquement valide
    */
   static validateEdgeNode(nodeId: string, signature: string, payload: string): boolean {
-    const edgeSecret = process.env.EDGE_SECRET || "edge_secret_sensorium_iot_dev";
+    if (process.env.NODE_ENV === "production" && !process.env.EDGE_SECRET) {
+      throw new Error("FATAL: EDGE_SECRET must be set in production.");
+    }
+    const edgeSecret = process.env.EDGE_SECRET || (process.env.NODE_ENV !== "production" ? "edge_secret_dev_only" : "");
     const expectedSignature = crypto
       .createHmac("sha256", edgeSecret)
       .update(`${nodeId}:${payload}`)

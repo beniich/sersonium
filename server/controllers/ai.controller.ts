@@ -37,8 +37,74 @@ export const analyzeLogs = async (req: AuthenticatedRequest, res: Response): Pro
 };
 
 /**
- * Route héritée pour compatibilité existante
+ * POST /api/v1/ai/analyze-tenant
+ * Analyse déterministe & IA prédictive sur les données réelles du tenant
  */
+export const analyzeTenantHealth = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
+  try {
+    const tenantId = req.tenantId!;
+    const { rawPrisma } = await import("../db/prisma.js");
+
+    const [assets, telemetries] = await Promise.all([
+      rawPrisma.infrastructureAsset.findMany({ where: { tenantId } }),
+      rawPrisma.assetTelemetry.findMany({
+        where: { tenantId },
+        orderBy: { timestamp: "desc" },
+        take: 50
+      })
+    ]);
+
+    if (assets.length === 0 && telemetries.length === 0) {
+      res.status(200).json({
+        success: true,
+        data: {
+          status: "OK",
+          isSufficient: false,
+          diagnostic: "Aucun équipement ni relevé de télémétrie trouvé dans votre organisation (État T0).",
+          recommendation: "Ajoutez votre premier équipement ou importez un fichier CSV/JSON pour déclencher l'analyse.",
+          assetCount: 0,
+          sampleCount: 0,
+          energySaving: 0,
+        }
+      });
+      return;
+    }
+
+    if (telemetries.length < 2) {
+      res.status(200).json({
+        success: true,
+        data: {
+          status: "OK",
+          isSufficient: false,
+          diagnostic: `Télémétrie insuffisante (${telemetries.length} point). Au moins 2 points de mesure sont nécessaires pour calculer les pentes thermiques et vibratoires.`,
+          recommendation: "Envoyez une seconde mesure ou activez le terminal pour corréler la santé des actifs.",
+          assetCount: assets.length,
+          sampleCount: telemetries.length,
+          energySaving: 0,
+        }
+      });
+      return;
+    }
+
+    const result = await AIService.analyzeBuildingHealth(
+      tenantId,
+      assets[0]?.id || "asset-main",
+      telemetries
+    );
+
+    res.status(200).json({
+      success: true,
+      data: {
+        ...result,
+        isSufficient: true,
+        assetCount: assets.length,
+        sampleCount: telemetries.length,
+      }
+    });
+  } catch (error: any) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+};
 export const analyzeTelemetry = async (req: AuthenticatedRequest, res: Response, next: NextFunction): Promise<void> => {
   try {
     const { query } = req.body;

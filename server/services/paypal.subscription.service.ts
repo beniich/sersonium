@@ -102,22 +102,23 @@ export class PayPalSubscriptionService {
     // ── Idempotence : ignorer les doublons (replay attack ou double-livraison Kafka) ──
     if (eventId) {
       try {
-        const existing = await rawPrisma.$queryRaw<{ eventId: string }[]>`
-          SELECT "eventId" FROM "ProcessedWebhookEvent" WHERE "eventId" = ${eventId} LIMIT 1
-        `;
-        if (existing && existing.length > 0) {
+        const existing = await rawPrisma.processedWebhookEvent.findUnique({
+          where: { eventId }
+        });
+        if (existing) {
           console.log(`[PayPal] ♻️ Événement déjà traité (idempotent skip): ${eventId}`);
           return;
         }
         // Enregistrer atomiquement l'événement avant traitement
-        await rawPrisma.$executeRaw`
-          INSERT INTO "ProcessedWebhookEvent" ("eventId", "eventType", "processedAt")
-          VALUES (${eventId}, ${eventType}, NOW())
-          ON CONFLICT ("eventId") DO NOTHING
-        `;
-      } catch {
-        // Table non encore créée (migration non appliquée) — continuer sans idempotence
-        console.warn("[PayPal] ⚠️ Table ProcessedWebhookEvent manquante — idempotence désactivée.");
+        await rawPrisma.processedWebhookEvent.create({
+          data: {
+            eventId,
+            eventType: eventType || "UNKNOWN",
+            processedAt: new Date()
+          }
+        });
+      } catch (err: any) {
+        console.warn("[PayPal] ⚠️ Erreur lors du contrôle d'idempotence:", err?.message || err);
       }
     }
 

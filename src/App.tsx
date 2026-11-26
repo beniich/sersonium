@@ -100,21 +100,32 @@ export default function App() {
   const location = useLocation();
 
   // Map URL path → page key
+  // "agent-orbit" = page Fieldnote standalone (bypasse DashboardLayout)
+  // "overview"    = page ERP classique (dans DashboardLayout)
   const pageFromPath = (pathname: string): string => {
     const lower = pathname.toLowerCase();
     const seg = lower.replace(/^\//, "").split("/")[0];
-    // Default root "/" or "/portal" or "/website" or "/vitrine" is the Website
     if (!seg || seg === "portal" || seg === "website" || seg === "vitrine") {
       return "portal";
     }
     if (seg === "demo") {
       authService.loginAsDemo();
-      return "overview";
+      return "agent-orbit"; // demo → Fieldnote directement
     }
     if (seg === "site-viewer" || seg === "showcase" || seg === "solutions" || seg === "roi" || seg === "developers") {
       return "site-viewer";
     }
-    if (seg === "dashboard" || seg === "cafm") {
+    // /dashboard → Fieldnote standalone (image 2) par défaut, ou Classic ERP si explicitement choisi
+    if (seg === "dashboard") {
+      try {
+        const mode = typeof window !== "undefined" ? sessionStorage.getItem("sensorium_dashboard_mode") : null;
+        if (mode === "erp") {
+          return "overview";
+        }
+      } catch {}
+      return "agent-orbit";
+    }
+    if (seg === "cafm") {
       return "overview";
     }
     if (seg === "executive" || seg === "glass") {
@@ -148,7 +159,11 @@ export default function App() {
     if (typeof window !== "undefined") {
       const p = window.location.pathname.toLowerCase();
       if (p.includes("executive") || p.includes("glass")) return "ov-glass";
-      if (p.includes("orbit") || p.includes("agent")) return "ov-agent-orbit";
+      try {
+        const mode = sessionStorage.getItem("sensorium_dashboard_mode");
+        if (mode === "erp") return "ov-general";
+      } catch {}
+      if (p === "/dashboard" || p.startsWith("/dashboard/")) return "ov-agent-orbit";
     }
     return "ov-agent-orbit";
   });
@@ -362,7 +377,7 @@ export default function App() {
     }, 800);
 
     const unsubscribe = initAuth(
-      (user) => {
+      async (user) => {
         clearTimeout(timer);
         setUser(user);
         setAuthLoading(false);
@@ -374,14 +389,18 @@ export default function App() {
           }
           window.dispatchEvent(new CustomEvent("sensorium:mode_changed", { detail: { isSimulation: false } }));
 
+          const session = authService.getSession();
+          const tenantId = session.user?.tenantId || `tenant-${user.uid.substring(0, 8)}`;
+          const orgName = session.user?.organizationName || `${user.displayName || user.email?.split("@")[0] || "Organisation"} (Souverain)`;
+
           rbacService.syncFromAuthUser({
             userId: user.uid,
             email: user.email || "user@gmail.com",
             displayName: user.displayName || user.email?.split("@")[0] || "Administrateur",
             photoUrl: user.photoURL || undefined,
-            role: "admin",
-            tenantId: "tenant-cmr",
-            organizationName: (typeof localStorage !== "undefined" && localStorage.getItem("sensorium_company_name")) || "Entreprise M",
+            role: (session.user?.role as any) || "admin",
+            tenantId,
+            organizationName: orgName,
           });
         }
       },
@@ -398,12 +417,16 @@ export default function App() {
   }, []);
 
   // Bascule dynamique : Mode Production (Live) par défaut vs Mode Simulation (Sandbox)
+  // Par défaut false : T0 = données vides, sans mock.
+  // Le mode simulation NE se charge QUE si l'utilisateur clique explicitement sur "Tester la démo".
   const [isSimulationMode, setIsSimulationMode] = useState<boolean>(() => {
     if (typeof localStorage !== "undefined") {
       const stored = localStorage.getItem("sensorium_simulation_mode");
+      // Si l'utilisateur Firebase est présent (reconnu), on force le mode live
+      // On lit juste la valeur stockée — le reset sur auth arrive via onAuthStateChange
       if (stored !== null) return stored === "true";
     }
-    return false; // Par défaut : Mode LIVE (Cloud réel), pas Mode Mock
+    return false; // Par défaut : Mode LIVE (état T0 vide), jamais Mock par défaut
   });
   const isMockMode = isSimulationMode;
 
@@ -414,6 +437,24 @@ export default function App() {
     window.addEventListener("sensorium:mode_changed", handleModeChange);
     return () => window.removeEventListener("sensorium:mode_changed", handleModeChange);
   }, []);
+
+  // Déconnexion unifiée globale en cas d'invalidation de session (401 unrecoverable)
+  useEffect(() => {
+    const handleLogout = () => {
+      logout();
+      authService.logout();
+      // Nettoyer le mode simulation au logout pour revenir à l'état T0 propre
+      setIsSimulationMode(false);
+      if (typeof localStorage !== "undefined") {
+        localStorage.setItem("sensorium_simulation_mode", "false");
+      }
+      setActivePage("portal");
+      setActiveItemId("spider-portal");
+      navigate("/");
+    };
+    window.addEventListener("sensorium:logout", handleLogout);
+    return () => window.removeEventListener("sensorium:logout", handleLogout);
+  }, [navigate]);
 
   const { 
     state, 
@@ -436,30 +477,41 @@ export default function App() {
     }
   };
 
-  const handleEnterDemoMode = (targetPage: string = "overview") => {
+  const handleEnterDemoMode = (targetPage: string = "agent-orbit") => {
     authService.loginAsDemo();
     setIsSimulationMode(true);
     if (typeof localStorage !== "undefined") {
       localStorage.setItem("sensorium_simulation_mode", "true");
     }
-    setActivePage(targetPage);
-    setActiveItemId(targetPage === "cockpit" ? "spider-cockpit" : "ov-agent-orbit");
-    navigate(targetPage === "overview" ? "/dashboard" : `/${targetPage}`);
+    // Si la cible est le cockpit, garder cockpit ; sinon aller vers Fieldnote standalone
+    if (targetPage === "cockpit") {
+      setActivePage("cockpit");
+      setActiveItemId("spider-cockpit");
+      navigate("/cockpit");
+    } else {
+      setActivePage("agent-orbit");
+      setActiveItemId("ov-agent-orbit");
+      navigate("/dashboard");
+    }
   };
 
-  const handleEnterDashboard = async (targetPage: string = "overview") => {
-    // Si l'utilisateur n'est pas connecté, accès fluide et direct au Dashboard Démo
-    if (!user && !authService.isAuthenticated()) {
-      handleEnterDemoMode(targetPage);
-      return;
+  const handleEnterDashboard = async (targetPage: string = "agent-orbit") => {
+    // Si l'utilisateur n'est pas connecté via Gmail : on affiche le dashboard
+    // en état T0 (zéro données). PAS de mode démo automatique.
+    // Le mode démo ne s'active QUE via le bouton explicite "Tester la démo".
+    if (targetPage === "cockpit") {
+      setActivePage("cockpit");
+      setActiveItemId("spider-cockpit");
+      navigate("/cockpit");
+    } else {
+      setActivePage("agent-orbit");
+      setActiveItemId("ov-agent-orbit");
+      navigate("/dashboard");
     }
-    setActivePage(targetPage);
-    setActiveItemId(targetPage === "cockpit" ? "spider-cockpit" : "ov-agent-orbit");
-    navigate(targetPage === "overview" ? "/dashboard" : `/${targetPage}`);
   };
 
   const handleEnterMockMode = async () => {
-    handleEnterDemoMode("overview");
+    handleEnterDemoMode("agent-orbit");
   };
 
   // Persist subscription tier to Firestore when user upgrades
@@ -494,13 +546,15 @@ export default function App() {
   const handleSignIn = async () => {
     setAuthError(null);
     try {
-      const res = await googleSignIn();
-      if (res?.user) {
+      const res = await authService.loginWithGoogle();
+      if (res?.success && res.user) {
         setIsSimulationMode(false);
         if (typeof localStorage !== "undefined") {
           localStorage.setItem("sensorium_simulation_mode", "false");
         }
         window.dispatchEvent(new CustomEvent("sensorium:mode_changed", { detail: { isSimulation: false } }));
+      } else if (!res?.success) {
+        setAuthError(res?.error || "Erreur lors de la connexion Google.");
       }
     } catch (err: any) {
       console.error("Google Sign-In Error:", err);
@@ -524,6 +578,8 @@ export default function App() {
       target = "/";
     } else if (activePage === "overview") {
       target = "/dashboard";
+    } else if (activePage === "agent-orbit") {
+      target = "/dashboard"; // ← Fieldnote standalone reste sur /dashboard
     } else {
       target = `/${activePage}`;
     }
@@ -537,11 +593,13 @@ export default function App() {
     const newPage = pageFromPath(location.pathname);
     if (newPage !== activePage) {
       setActivePage(newPage);
-      if (newPage === "overview") {
+      if (newPage === "agent-orbit") {
+        setActiveItemId("ov-agent-orbit");
+      } else if (newPage === "overview") {
         const overviewPrefixes = ["ov-", "cafm-", "kpi-"];
         const isAlreadyOverviewTab = overviewPrefixes.some(pref => activeItemId.startsWith(pref));
         if (!isAlreadyOverviewTab) {
-          setActiveItemId(location.pathname.includes("/cafm") ? "ov-cafm" : "ov-agent-orbit");
+          setActiveItemId(location.pathname.includes("/cafm") ? "ov-cafm" : "ov-general");
         }
       } else if (newPage === "cockpit") {
         setActiveItemId("spider-cockpit");
@@ -560,7 +618,11 @@ export default function App() {
   const handleNavigateFromPortal = (page: string, itemId: string) => {
     setActivePage(page);
     setActiveItemId(itemId);
-    navigate(page === "overview" ? "/dashboard" : `/${page}`);
+    if (page === "overview" || page === "agent-orbit") {
+      navigate("/dashboard");
+    } else {
+      navigate(`/${page}`);
+    }
   };
 
   // When activePage is "portal" (root "/" or "/portal"), display the full-screen Website immediately without waiting
@@ -841,6 +903,10 @@ export default function App() {
     );
   };
 
+  // Fieldnote standalone = affichage plein écran tactile (Image 2) dès que agent-orbit ou ov-agent-orbit est actif
+  // Cela remplace complètement l'ancien dashboard ERP (Image 1)
+  const isFieldnoteStandalone = activePage === "agent-orbit" || activeItemId === "ov-agent-orbit";
+
   return (
     <RbacProvider>
       <AppProvider>
@@ -848,6 +914,26 @@ export default function App() {
         <ThemeContext.Provider value={themeContextValue}>
           <LanguageContext.Provider value={languageContextValue}>
             <NavigationContextBridge setActivePage={setActivePage} setActiveItemId={setActiveItemId} />
+            {isFieldnoteStandalone ? (
+              <div className="w-full min-h-screen bg-[#E7E9ED] dark:bg-[#07090E] p-2 sm:p-4 md:p-6 flex items-center justify-center select-none transition-colors duration-200">
+                <Suspense fallback={
+                  <div className="min-h-[50vh] flex items-center justify-center text-slate-500">
+                    <Loader2 className="w-8 h-8 animate-spin text-orange-500 mb-2" />
+                  </div>
+                }>
+                  <AgentOrbit 
+                    isDark={isDark} 
+                    onNavigateToERP={() => {
+                      try {
+                        sessionStorage.setItem("sensorium_dashboard_mode", "erp");
+                      } catch {}
+                      setActiveItemId("ov-general");
+                      setActivePage("overview");
+                    }}
+                  />
+                </Suspense>
+              </div>
+            ) : (
         <DashboardLayout 
           activeItemId={activeItemId} 
           setActiveItemId={setActiveItemId}
@@ -895,7 +981,18 @@ export default function App() {
                   } else if (id === "pricing") {
                     setActivePage("pricing");
                     setActiveItemId("showcase-pricing");
+                  } else if (id === "ov-agent-orbit") {
+                    // ← Fieldnote standalone : bascule directe vers l'interface tactile (Image 2)
+                    try {
+                      sessionStorage.setItem("sensorium_dashboard_mode", "fieldnote");
+                    } catch {}
+                    setActivePage("agent-orbit");
+                    setActiveItemId("ov-agent-orbit");
+                    navigate("/dashboard");
                   } else {
+                    try {
+                      sessionStorage.setItem("sensorium_dashboard_mode", "erp");
+                    } catch {}
                     setActiveItemId(id);
                     setActivePage("overview");
                   }
@@ -912,8 +1009,8 @@ export default function App() {
             </>
           )}
 
-          {/* ─── Contenu de la page avec padding normal ─── */}
-          <div className="flex-1 max-w-[1440px] w-full mx-auto px-2.5 sm:px-4 lg:px-5 pt-2.5 sm:pt-4 lg:pt-5 space-y-3 sm:space-y-3.5 pb-12">
+          {/* ─── Contenu de la page avec padding optimal ─── */}
+          <div className="flex-1 max-w-[1440px] w-full mx-auto p-1 sm:p-2 space-y-3 pb-8">
             <AnimatePresence mode="wait">
               <motion.div
                 key={activePage}
@@ -934,6 +1031,7 @@ export default function App() {
             </AnimatePresence>
           </div>
         </DashboardLayout>
+        )}
 
         {/* Global Command Palette (Cmd+K / Ctrl+K) Omniprésente */}
         <GlobalCommandPalette

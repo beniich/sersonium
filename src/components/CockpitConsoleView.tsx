@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { generateDoraAuditCertificate, triggerFileDownload } from '../utils/doraReport';
+import apiClient from '../services/apiClient';
 
 interface CockpitConsoleViewProps {
   onNavigate: (path: any) => void;
@@ -100,14 +101,13 @@ export const CockpitConsoleView: React.FC<CockpitConsoleViewProps> = ({ onNaviga
 
     // Appel réseau réel au backend pour trace Network tab
     try {
-      const res = await fetch('/api/v1/showcase/developers/telemetry/scenario-drift', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ scenario: 'cvc_chiller_drift', buildingCount: count, company: org })
+      const res = await apiClient.post('/showcase/developers/telemetry/scenario-drift', {
+        scenario: 'cvc_chiller_drift',
+        buildingCount: count,
+        company: org
       });
-      if (res.ok) {
-        const data = await res.json();
-        appendLog('API_GATEWAY', `POST /api/v1/telemetry/scenario-drift (200 OK • ${res.statusText})`);
+      if (res.status === 200) {
+        appendLog('API_GATEWAY', `POST /api/v1/telemetry/scenario-drift (200 OK • Success)`);
       }
     } catch {
       // Offline fallback
@@ -133,10 +133,10 @@ export const CockpitConsoleView: React.FC<CockpitConsoleViewProps> = ({ onNaviga
     setDoraJsonCache(null);
 
     try {
-      await fetch('/api/v1/showcase/developers/telemetry/scenario-drift', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ scenario: 'cvc_chiller_drift', buildingCount: validCount, company: clientOrg })
+      await apiClient.post('/showcase/developers/telemetry/scenario-drift', {
+        scenario: 'cvc_chiller_drift',
+        buildingCount: validCount,
+        company: clientOrg
       });
     } catch {
       // Offline
@@ -160,19 +160,14 @@ export const CockpitConsoleView: React.FC<CockpitConsoleViewProps> = ({ onNaviga
       // Appel réseau réel au endpoint de conformité
       let serverSeal: string | null = null;
       try {
-        const netRes = await fetch('/api/v1/showcase/developers/compliance/dora/stamp', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            incidentId: `DORA-INC-${Date.now().toString().slice(-6)}`,
-            severity: 'CRITICAL',
-            resolutionLatencyMs: 1400,
-            actionsTaken: ['VAV_BALANCED', 'COP_RESTORED', 'CAMPUS_PORTFOLIO_OPTIMIZED']
-          })
+        const netRes = await apiClient.post('/showcase/developers/compliance/dora/stamp', {
+          incidentId: `DORA-INC-${Date.now().toString().slice(-6)}`,
+          severity: 'CRITICAL',
+          resolutionLatencyMs: 1400,
+          actionsTaken: ['VAV_BALANCED', 'COP_RESTORED', 'CAMPUS_PORTFOLIO_OPTIMIZED']
         });
-        if (netRes.ok) {
-          const json = await netRes.json();
-          serverSeal = json?.data?.immutableSealSha256;
+        if (netRes.status === 200 && netRes.data) {
+          serverSeal = netRes.data?.data?.immutableSealSha256;
           appendLog('API_GATEWAY', `POST /api/v1/compliance/dora/stamp (200 OK • Sceau serveur validé)`);
         }
       } catch {
@@ -231,12 +226,12 @@ export const CockpitConsoleView: React.FC<CockpitConsoleViewProps> = ({ onNaviga
     appendLog('AIOPS_EXEC', 'Gemini Neural Rebalancing : Calcul de compensation thermique et ré-étalonnage vanne V-14...');
 
     try {
-      const res = await fetch('/api/v1/showcase/developers/ai/rebalance', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ scenario: 'cvc_chiller_drift', buildingCount, company: clientOrg })
+      const res = await apiClient.post('/showcase/developers/ai/rebalance', {
+        scenario: 'cvc_chiller_drift',
+        buildingCount,
+        company: clientOrg
       });
-      if (res.ok) {
+      if (res.status === 200) {
         appendLog('API_GATEWAY', `POST /api/v1/ai/rebalance (200 OK • Latence AIOps 1.4s)`);
       }
     } catch {

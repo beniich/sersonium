@@ -12,6 +12,7 @@ import { AuthenticatedRequest, UserPayload, RoleType } from "../types/auth.js";
 import { generateCsrfToken, CSRF_COOKIE_NAME } from "../middlewares/csrf.middleware.js";
 import { authService } from "../services/auth.service.js";
 import { rawPrisma } from "../db/prisma.js";
+import { hashPassword, verifyPassword } from "../services/password.service.js";
 
 // Helper for constant-time comparison
 function timingSafeEqualStr(a: string, b: string): boolean {
@@ -20,41 +21,224 @@ function timingSafeEqualStr(a: string, b: string): boolean {
   return crypto.timingSafeEqual(hashA, hashB);
 }
 
-// Mock user directory for authentication demonstration
-const USERS_DB = [
-  {
-    userId: "usr_admin_001",
-    email: "beniich.contact@gmail.com",
-    role: "admin" as RoleType,
-    subscriptionTier: "enterprise" as const,
-    tenantId: "tenant_enterprise_lacaza",
-    organizationName: "LACAZA ClouIndustrie Group"
-  },
-  {
-    userId: "usr_operator_002",
-    email: "ops@lacaza.clouindustrie.com",
-    role: "operator" as RoleType,
-    subscriptionTier: "pro" as const,
-    tenantId: "tenant_enterprise_lacaza",
-    organizationName: "LACAZA ClouIndustrie Group"
-  },
-  {
-    userId: "usr_tech_003",
-    email: "tech.field@lacaza.clouindustrie.com",
-    role: "technician" as RoleType,
-    subscriptionTier: "silver" as const,
-    tenantId: "tenant_enterprise_lacaza",
-    organizationName: "LACAZA ClouIndustrie Group"
-  },
-  {
-    userId: "usr_auditor_004",
-    email: "auditor@lacaza.clouindustrie.com",
-    role: "auditor" as RoleType,
-    subscriptionTier: "free" as const,
-    tenantId: "tenant_enterprise_lacaza",
-    organizationName: "LACAZA ClouIndustrie Group"
+// Demo user directory — only active in development / demo mode.
+// In production, authentication is exclusively handled via Firebase (JWT flow above).
+// NEVER accept these credentials in production.
+const USERS_DB = process.env.NODE_ENV !== "production"
+  ? [
+      {
+        userId: "usr_admin_001",
+        email: "admin@demo.sensorium.local",
+        role: "admin" as RoleType,
+        subscriptionTier: "enterprise" as const,
+        tenantId: "tenant_demo",
+        organizationName: "SENSORIUM Demo Org"
+      },
+      {
+        userId: "usr_operator_002",
+        email: "operator@demo.sensorium.local",
+        role: "operator" as RoleType,
+        subscriptionTier: "pro" as const,
+        tenantId: "tenant_demo",
+        organizationName: "SENSORIUM Demo Org"
+      },
+      {
+        userId: "usr_tech_003",
+        email: "technician@demo.sensorium.local",
+        role: "technician" as RoleType,
+        subscriptionTier: "silver" as const,
+        tenantId: "tenant_demo",
+        organizationName: "SENSORIUM Demo Org"
+      },
+      {
+        userId: "usr_auditor_004",
+        email: "auditor@demo.sensorium.local",
+        role: "auditor" as RoleType,
+        subscriptionTier: "free" as const,
+        tenantId: "tenant_demo",
+        organizationName: "SENSORIUM Demo Org"
+      }
+    ]
+  : [];
+
+/**
+ * POST /api/v1/auth/register
+ * Inscription souveraine directe avec création d'Organisation et de Compte Utilisateur
+ */
+export const register = async (req: Request, res: Response): Promise<void> => {
+  const { name, email, password, organizationName, invitationToken } = req.body;
+
+  try {
+    const normalizedEmail = email.trim().toLowerCase();
+
+    // 1. Vérifier si l'utilisateur existe déjà
+    const existingUser = await rawPrisma.user.findUnique({
+      where: { email: normalizedEmail }
+    });
+
+    if (existingUser) {
+      res.status(409).json({
+        success: false,
+        error: {
+          code: "USER_ALREADY_EXISTS",
+          message: "Un compte avec cette adresse email existe déjà."
+        }
+      });
+      return;
+    }
+
+    // 2. Traiter le cas de l'invitation (collaborateur invité par un administrateur)
+    let targetTenantId: string | null = null;
+    let targetRole: RoleType = "admin";
+    let invitationRecord: any = null;
+
+    if (invitationToken) {
+      const tokenHash = crypto.createHash("sha256").update(invitationToken).digest("hex");
+      invitationRecord = await rawPrisma.tenantInvitation.findUnique({
+        where: { tokenHash },
+        include: { organization: true }
+      });
+
+      if (!invitationRecord) {
+        res.status(400).json({
+          success: false,
+          error: {
+            code: "INVALID_INVITATION",
+            message: "Lien d'invitation invalide ou introuvable."
+          }
+        });
+        return;
+      }
+
+      if (invitationRecord.expiresAt < new Date()) {
+        res.status(400).json({
+          success: false,
+          error: {
+            code: "INVITATION_EXPIRED",
+            message: "Cette invitation a expiré. Veuillez contacter votre administrateur."
+          }
+        });
+        return;
+      }
+
+      if (invitationRecord.acceptedAt) {
+        res.status(400).json({
+          success: false,
+          error: {
+            code: "INVITATION_ALREADY_USED",
+            message: "Cette invitation a déjà été acceptée."
+          }
+        });
+        return;
+      }
+
+      targetTenantId = invitationRecord.tenantId;
+      targetRole = (invitationRecord.role as RoleType) || "viewer";
+    }
+
+    // 3. Hachage cryptographique du mot de passe avec scrypt
+    const hashedPassword = await hashPassword(password);
+
+    // 4. Transaction atomique de création BDD
+    const result = await rawPrisma.$transaction(async (tx) => {
+      let organization;
+      if (targetTenantId) {
+        organization = await tx.organization.findUnique({
+          where: { id: targetTenantId }
+        });
+        if (!organization) throw new Error("Organisation introuvable.");
+
+        await tx.tenantInvitation.update({
+          where: { id: invitationRecord.id },
+          data: { acceptedAt: new Date() }
+        });
+      } else {
+        const orgName = organizationName?.trim() || `${name.trim()}'s Organization`;
+        const slug = `${orgName.toLowerCase().replace(/[^a-z0-9]/g, "-")}-${Date.now().toString(36)}`;
+        organization = await tx.organization.create({
+          data: {
+            name: orgName,
+            slug,
+            plan: "FREE",
+            subscriptionStatus: "active"
+          }
+        });
+        targetTenantId = organization.id;
+        targetRole = "admin";
+      }
+
+      const newUser = await tx.user.create({
+        data: {
+          name: name.trim(),
+          email: normalizedEmail,
+          passwordHash: hashedPassword,
+          role: targetRole,
+          tenantId: targetTenantId,
+          tokens: 1000,
+          isActive: true,
+          lastLoginAt: new Date()
+        }
+      });
+
+      return { user: newUser, organization };
+    });
+
+    // 5. Génération de session JWT sécurisée
+    const userPayload: UserPayload = {
+      userId: result.user.id,
+      email: result.user.email,
+      role: result.user.role as RoleType,
+      tenantId: result.organization.id,
+      organizationName: result.organization.name,
+      subscriptionTier: (result.organization.plan || "free").toLowerCase() as any
+    };
+
+    const accessToken = signAccessToken(userPayload);
+    const refreshData = signRefreshToken(userPayload);
+    const refreshToken = refreshData.token;
+
+    // Cookies HTTP-Only
+    const cookieOptions = getRefreshTokenCookieOptions();
+    res.cookie(REFRESH_TOKEN_COOKIE_NAME, refreshToken, cookieOptions);
+
+    res.cookie("sensorium_access_token", accessToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: process.env.NODE_ENV === "production" ? "strict" : "lax",
+      maxAge: 15 * 60 * 1000,
+      path: "/"
+    });
+
+    const csrfToken = generateCsrfToken();
+    res.cookie(CSRF_COOKIE_NAME, csrfToken, {
+      httpOnly: false,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax",
+      path: "/"
+    });
+
+    res.status(201).json({
+      success: true,
+      data: {
+        accessToken,
+        csrfToken,
+        tokenType: "Bearer",
+        expiresIn: "15m",
+        user: userPayload
+      },
+      token: accessToken
+    });
+  } catch (err: any) {
+    console.error("[auth.controller] Registration error:", err);
+    res.status(500).json({
+      success: false,
+      error: {
+        code: "REGISTRATION_FAILED",
+        message: "Une erreur est survenue lors de l'enregistrement."
+      }
+    });
   }
-];
+};
 
 /**
  * POST /api/v1/auth/login
@@ -74,18 +258,56 @@ export const login = async (req: Request, res: Response): Promise<void> => {
       refreshToken = session.refreshToken;
       userPayload = session.user;
     } 
-    // -- 2. Fallback: Legacy Email/Password Authentication (Mock DB)
+    // -- 2. Authentication via Base de Données PostgreSQL Réelle
     else {
-      const targetUser = USERS_DB.find(u => u.email.toLowerCase() === email?.toLowerCase());
+      const normalizedEmail = (email || "").trim().toLowerCase();
+      
+      // Recherche prioritaire dans PostgreSQL
+      const dbUser = await rawPrisma.user.findUnique({
+        where: { email: normalizedEmail },
+        include: { organization: true }
+      });
 
-      let isMatch = false;
-      if (targetUser && password) {
-        if (password === "AdminSecure2026!" || password === "password123" || password.length >= 6) {
-          isMatch = true;
+      let authenticated = false;
+
+      if (dbUser && dbUser.isActive && dbUser.passwordHash && password) {
+        const isPasswordValid = await verifyPassword(password, dbUser.passwordHash);
+        if (isPasswordValid) {
+          authenticated = true;
+          userPayload = {
+            userId: dbUser.id,
+            email: dbUser.email,
+            role: dbUser.role as RoleType,
+            tenantId: dbUser.tenantId,
+            organizationName: dbUser.organization?.name || "SENSORIUM Sovereign",
+            subscriptionTier: (dbUser.organization?.plan || "free").toLowerCase() as any
+          };
+
+          // Mise à jour de la dernière date de connexion
+          rawPrisma.user.update({
+            where: { id: dbUser.id },
+            data: { lastLoginAt: new Date() }
+          }).catch(() => {});
         }
       }
 
-      if (!targetUser || !isMatch) {
+      // Fallback Demo uniquement en environnement de développement local
+      if (!authenticated && process.env.NODE_ENV !== "production") {
+        const targetDemoUser = USERS_DB.find(u => u.email.toLowerCase() === normalizedEmail);
+        if (targetDemoUser && password && password.length >= 8) {
+          authenticated = true;
+          userPayload = {
+            userId: targetDemoUser.userId,
+            email: targetDemoUser.email,
+            role: targetDemoUser.role,
+            tenantId: targetDemoUser.tenantId,
+            organizationName: targetDemoUser.organizationName,
+            subscriptionTier: targetDemoUser.subscriptionTier
+          };
+        }
+      }
+
+      if (!authenticated || !userPayload!) {
         res.status(401).json({
           success: false,
           error: {
@@ -95,15 +317,6 @@ export const login = async (req: Request, res: Response): Promise<void> => {
         });
         return;
       }
-
-      userPayload = {
-        userId: targetUser.userId,
-        email: targetUser.email,
-        role: targetUser.role,
-        tenantId: targetUser.tenantId,
-        organizationName: targetUser.organizationName,
-        subscriptionTier: targetUser.subscriptionTier
-      };
 
       accessToken = signAccessToken(userPayload);
       const refreshData = signRefreshToken(userPayload);

@@ -28,6 +28,7 @@ import {
   Star
 } from "lucide-react";
 import { auth, db, googleSignIn } from "../firebase";
+import apiClient from "../services/apiClient";
 import { doc, setDoc } from "firebase/firestore";
 import { GoogleLogoIcon } from "./ShowcaseViewer";
 
@@ -473,23 +474,19 @@ echo "✅ Agent SENSORIUM UEM installe et actif pour $TERMINAL_ID!"
 
     try {
       // 1. Tenter l'enregistrement sur le backend SENSORIUM (non bloquant)
-      await fetch("/api/v1/uem/policies", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          groupId: "default",
-          policy: {
-            usbBlocked: formData.blockUsb,
-            bluetoothBlocked: formData.blockBluetooth,
-            firewallStrict: formData.strictFirewall,
-            dlpEnabled: formData.enableDlp,
-            screenLockMinutes: 15,
-            blacklistedApps: ["TorrentClient", "BitTorrent"],
-            allowedApps: [],
-            encryptionRequired: false,
-            allowedFileExtensions: [".exe", ".msi"],
-          },
-        }),
+      await apiClient.post("/uem/policies", {
+        groupId: "default",
+        policy: {
+          usbBlocked: formData.blockUsb,
+          bluetoothBlocked: formData.blockBluetooth,
+          firewallStrict: formData.strictFirewall,
+          dlpEnabled: formData.enableDlp,
+          screenLockMinutes: 15,
+          blacklistedApps: ["TorrentClient", "BitTorrent"],
+          allowedApps: [],
+          encryptionRequired: false,
+          allowedFileExtensions: [".exe", ".msi"],
+        },
       }).catch(() => null);
 
       // 2. Attribution et initialisation du tokenQuota en localStorage

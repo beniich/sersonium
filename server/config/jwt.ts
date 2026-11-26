@@ -3,8 +3,33 @@ import { CookieOptions } from "express";
 import crypto from "crypto";
 import { UserPayload, JWTPayload } from "../types/auth.js";
 
-const ACCESS_TOKEN_SECRET = process.env.JWT_ACCESS_SECRET || "jeton_access_super_secret_key_2026_dev";
-const REFRESH_TOKEN_SECRET = process.env.JWT_REFRESH_SECRET || "jeton_refresh_super_secret_key_2026_dev";
+// In production, secrets MUST be provided via environment variables.
+// Weak dev fallbacks are only allowed outside production.
+const _isDev = process.env.NODE_ENV !== "production";
+
+if (!_isDev && !process.env.JWT_ACCESS_SECRET) {
+  throw new Error("FATAL: JWT_ACCESS_SECRET must be set in production. Refusing to start.");
+}
+if (!_isDev && !process.env.JWT_REFRESH_SECRET) {
+  throw new Error("FATAL: JWT_REFRESH_SECRET must be set in production. Refusing to start.");
+}
+
+const ACCESS_TOKEN_SECRET = process.env.JWT_ACCESS_SECRET || (_isDev ? "jeton_access_dev_only_not_for_prod" : "");
+const REFRESH_TOKEN_SECRET = process.env.JWT_REFRESH_SECRET || (_isDev ? "jeton_refresh_dev_only_not_for_prod" : "");
+
+/**
+ * Fail-fast assertion for JWT configuration — called at server startup.
+ */
+export function assertJwtConfig(): void {
+  if (process.env.NODE_ENV === "production") {
+    if (!process.env.JWT_ACCESS_SECRET || process.env.JWT_ACCESS_SECRET.length < 32) {
+      throw new Error("FATAL: JWT_ACCESS_SECRET must be set and ≥ 32 characters in production.");
+    }
+    if (!process.env.JWT_REFRESH_SECRET || process.env.JWT_REFRESH_SECRET.length < 32) {
+      throw new Error("FATAL: JWT_REFRESH_SECRET must be set and ≥ 32 characters in production.");
+    }
+  }
+}
 
 export const ACCESS_TOKEN_EXPIRY = "15m";
 export const REFRESH_TOKEN_EXPIRY = "7d";

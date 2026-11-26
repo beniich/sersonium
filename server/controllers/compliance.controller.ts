@@ -21,11 +21,28 @@ export async function triggerTerminalSync(orgId: string) {
   }
 }
 
+// Helper de résolution stricte du tenant cible (empêche l'IDOR inter-tenants)
+function resolveAuthorizedOrgId(authReq: AuthenticatedRequest, requestedOrgId?: string): string {
+  const userTenant = authReq.tenantId || authReq.user?.tenantId;
+  if (authReq.user?.role === "admin" && requestedOrgId) {
+    return requestedOrgId;
+  }
+  return userTenant || requestedOrgId || "tenant_enterprise_lacaza";
+}
+
 // ─── GET /api/v1/compliance OR /api/v1/compliance/:orgId ─────────────────────
 export const getComplianceOverview = async (req: Request, res: Response): Promise<void> => {
   try {
     const authReq = req as AuthenticatedRequest;
-    const orgId = req.params.orgId || authReq.user?.tenantId || (req.query.orgId as string) || "tenant_enterprise_lacaza";
+    const requestedOrgId = req.params.orgId || (req.query.orgId as string);
+    if (requestedOrgId && authReq.user?.tenantId && requestedOrgId !== authReq.user.tenantId && authReq.user.role !== "admin") {
+      res.status(403).json({
+        success: false,
+        error: { code: "TENANT_ACCESS_DENIED", message: "Accès refusé à une organisation tierce." },
+      });
+      return;
+    }
+    const orgId = resolveAuthorizedOrgId(authReq, requestedOrgId);
 
     const [certs, permits, insurances, org] = await Promise.all([
       rawPrisma.certification.findMany({
@@ -261,14 +278,14 @@ export const deleteComplianceItem = async (req: Request, res: Response): Promise
   try {
     const authReq = req as AuthenticatedRequest;
     const { category, id } = req.params;
-    const targetOrgId = authReq.user?.tenantId || "tenant_enterprise_lacaza";
+    const targetOrgId = resolveAuthorizedOrgId(authReq);
 
     if (category === "certs") {
-      await rawPrisma.certification.delete({ where: { id } });
+      await rawPrisma.certification.deleteMany({ where: { id, tenantId: targetOrgId } });
     } else if (category === "permits") {
-      await rawPrisma.permit.delete({ where: { id } });
+      await rawPrisma.permit.deleteMany({ where: { id, tenantId: targetOrgId } });
     } else if (category === "insurance" || category === "insurances") {
-      await rawPrisma.insurance.delete({ where: { id } });
+      await rawPrisma.insurance.deleteMany({ where: { id, tenantId: targetOrgId } });
     } else {
       res.status(400).json({ success: false, error: "Invalid category" });
       return;
@@ -316,7 +333,7 @@ export const getDoraMetrics = (_req: Request, res: Response): void => {
 
 export const getServiceHealth = async (_req: Request, res: Response): Promise<void> => {
   try {
-    const { getAllServiceHealth, getDoraIncidentLog } = await import("../../middlewares/resilience.middleware.js");
+    const { getAllServiceHealth, getDoraIncidentLog } = await import("../middlewares/resilience.middleware.js");
     res.status(200).json({
       success: true,
       data: {

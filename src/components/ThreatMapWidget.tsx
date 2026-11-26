@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Shield, ShieldAlert, Globe, AlertOctagon, RefreshCw, Unlock, Zap, Activity } from "lucide-react";
+import apiClient from "../services/apiClient";
 
 interface ThreatEntry {
   ip: string;
@@ -38,35 +39,14 @@ export const ThreatMapWidget: React.FC<{ isDark?: boolean }> = ({ isDark = true 
 
   const fetchThreatIntel = async () => {
     try {
-      const token = typeof localStorage !== "undefined" ? localStorage.getItem("accessToken") : null;
-      const res = await fetch("/api/v1/waf/threat-intelligence", {
-        headers: token ? { Authorization: `Bearer ${token}` } : {},
-        signal: AbortSignal.timeout(4000)
-      });
-      if (res.ok) {
-        const json = await res.json();
-        if (json.data) {
-          setData(json.data);
-        }
+      const res = await apiClient.get("/security/waf/threat-intelligence", { timeout: 4000 });
+      if (res.data?.data) {
+        setData(res.data.data);
       } else {
-        // Mock fallback pour le mode simulation/déconnecté
-        setData({
-          threatEntries: [
-            { ip: "185.220.101.5", score: 95, eventCount: 8, lastSeenAt: Date.now() - 120000, bannedUntil: Date.now() + 780000, reasons: ["SQL_INJECTION", "BOT_FINGERPRINT"] },
-            { ip: "45.154.255.89", score: 85, eventCount: 4, lastSeenAt: Date.now() - 340000, bannedUntil: Date.now() + 560000, reasons: ["XSS", "BRUTE_FORCE"] },
-            { ip: "194.26.29.112", score: 65, eventCount: 3, lastSeenAt: Date.now() - 600000, reasons: ["PATH_TRAVERSAL"] },
-            { ip: "91.240.118.242", score: 40, eventCount: 2, lastSeenAt: Date.now() - 900000, reasons: ["RATE_LIMIT"] },
-          ],
-          bannedCount: 2,
-          totalTracked: 4,
-          bannedIps: [
-            { ip: "185.220.101.5", expiresAt: new Date(Date.now() + 780000).toISOString(), score: 95, reasons: ["SQL_INJECTION", "BOT_FINGERPRINT"] },
-            { ip: "45.154.255.89", expiresAt: new Date(Date.now() + 560000).toISOString(), score: 85, reasons: ["XSS", "BRUTE_FORCE"] },
-          ]
-        });
+        throw new Error("No data returned");
       }
     } catch {
-      // Fallback gracieux en mode simulation
+      // Mock fallback pour le mode simulation/déconnecté
       setData({
         threatEntries: [
           { ip: "185.220.101.5", score: 95, eventCount: 8, lastSeenAt: Date.now() - 120000, bannedUntil: Date.now() + 780000, reasons: ["SQL_INJECTION", "BOT_FINGERPRINT"] },
@@ -95,15 +75,7 @@ export const ThreatMapWidget: React.FC<{ isDark?: boolean }> = ({ isDark = true 
   const handleUnban = async (ip: string) => {
     setUnbanningIp(ip);
     try {
-      const token = typeof localStorage !== "undefined" ? localStorage.getItem("accessToken") : null;
-      await fetch("/api/v1/waf/unban", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          ...(token ? { Authorization: `Bearer ${token}` } : {})
-        },
-        body: JSON.stringify({ ip })
-      });
+      await apiClient.post("/security/waf/unban", { ip });
       await fetchThreatIntel();
     } catch (e) {
       console.warn("Échec du débannissement", e);
@@ -116,19 +88,11 @@ export const ThreatMapWidget: React.FC<{ isDark?: boolean }> = ({ isDark = true 
     setSimulating(true);
     setSimMessage(null);
     try {
-      const token = typeof localStorage !== "undefined" ? localStorage.getItem("accessToken") : null;
-      const res = await fetch("/api/v1/waf/challenge", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          ...(token ? { Authorization: `Bearer ${token}` } : {})
-        },
-        body: JSON.stringify({
-          threatType: "SQL_INJECTION",
-          ruleId: "OWASP_CRS_942_SQLI"
-        })
+      const res = await apiClient.post("/security/waf/challenge", {
+        threatType: "SQL_INJECTION",
+        ruleId: "OWASP_CRS_942_SQLI"
       });
-      if (res.ok) {
+      if (res.data?.success) {
         setSimMessage("⚡ Attaque simulée interceptée avec succès par le WAF adaptatif !");
         await fetchThreatIntel();
       } else {

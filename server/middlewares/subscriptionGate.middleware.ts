@@ -51,8 +51,42 @@ export const requireActiveSubscription = (minimumTier: "STARTER" | "PRO" | "ENTE
       const currentTier = (activeSub?.plan?.code || org.plan || "FREE").toUpperCase();
       const isSubActive = (activeSub?.status === "active") || (org.subscriptionStatus === "active");
 
-      // Vérification du statut
-      if (!isSubActive || currentTier === "FREE") {
+      // Mode Découverte Gratuit : permet l'accès initial (création jusqu'à 2 équipements et analyse de base)
+      if (currentTier === "FREE") {
+        if (!isSubActive) {
+          res.status(402).json({
+            success: false,
+            error: {
+              code: "SUBSCRIPTION_INACTIVE",
+              message: "Votre compte est inactif. Veuillez contacter le support.",
+            },
+          });
+          return;
+        }
+
+        // Vérifier le quota de découverte (max 2 équipements en écriture)
+        if (req.method === "POST" && req.originalUrl.includes("/assets")) {
+          const assetCount = await rawPrisma.infrastructureAsset.count({ where: { tenantId } });
+          if (assetCount >= 2) {
+            res.status(402).json({
+              success: false,
+              error: {
+                code: "DISCOVERY_QUOTA_REACHED",
+                message: "Le forfait Découverte Gratuit est limité à 2 équipements. Veuillez passer à l'abonnement Pro pour ajouter plus d'équipements.",
+                upgradeUrl: "/pricing",
+              },
+            });
+            return;
+          }
+        }
+
+        // Accès accordé pour la découverte des données réelles
+        next();
+        return;
+      }
+
+      // Vérification du statut pour les forfaits payants
+      if (!isSubActive) {
         // Enregistrer le refus dans le journal d'accès
         rawPrisma.accessGateLog.create({
           data: {
@@ -106,7 +140,17 @@ export const requireActiveSubscription = (minimumTier: "STARTER" | "PRO" | "ENTE
       next();
     } catch (err: any) {
       console.error("[subscriptionGate.middleware] Error:", err);
-      // Mode tolérant en cas d'erreur inattendue
+      if (process.env.NODE_ENV === "production") {
+        res.status(503).json({
+          success: false,
+          error: {
+            code: "SUBSCRIPTION_SERVICE_UNAVAILABLE",
+            message: "Le service d'autorisation d'abonnement est temporairement indisponible."
+          }
+        });
+        return;
+      }
+      // Mode tolérant réservé au développement local
       next();
     }
   };
@@ -220,7 +264,17 @@ export const requireEntitlement = (featureKey: string) => {
       next();
     } catch (err: any) {
       console.error("[requireEntitlement] Error:", err);
-      // Fail-open contrôlé en développement
+      if (process.env.NODE_ENV === "production") {
+        res.status(503).json({
+          success: false,
+          error: {
+            code: "ENTITLEMENT_SERVICE_UNAVAILABLE",
+            message: "Le service de vérification des droits (Entitlements) est temporairement indisponible."
+          }
+        });
+        return;
+      }
+      // Fail-open contrôlé réservé au développement local
       next();
     }
   };

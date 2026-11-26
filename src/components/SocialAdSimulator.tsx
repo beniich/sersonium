@@ -169,7 +169,7 @@ export default function SocialAdSimulator({ initialMode = "story", onActionClick
 
   // Toast feedback
   const [toastMessage, setToastMessage] = useState<string | null>(null);
-  const toastTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const toastTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const showToast = (msg: string) => {
     setToastMessage(msg);
@@ -221,7 +221,7 @@ export default function SocialAdSimulator({ initialMode = "story", onActionClick
 
   // Video playback timer (for Reels mode)
   useEffect(() => {
-    let interval: NodeJS.Timeout | null = null;
+    let interval: ReturnType<typeof setInterval> | null = null;
     if (isPlaying && activeMode === "reels") {
       interval = setInterval(() => {
         setCurrentSeconds(prev => {

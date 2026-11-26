@@ -58,19 +58,19 @@ export const ModuleNavigationBar: React.FC<ModuleNavigationBarProps> = ({
   };
 
   return (
-    <div className={`w-full bg-[#0f111a] border-b border-gray-800 px-3 sm:px-4 py-1.5 flex items-center justify-between gap-2 shrink-0 ${className}`}>
+    <div className={`w-full bg-[#111317] border-b border-white/[0.08] px-3 sm:px-4.5 py-2 flex items-center justify-between gap-3 shrink-0 ${className}`}>
       {/* Pills Container without any grey scrollbars */}
-      <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar scroll-smooth py-0.5">
+      <div className="flex items-center gap-1 overflow-x-auto no-scrollbar scroll-smooth p-1 bg-[#181A1F] rounded-full border border-white/[0.06]">
         {MODULE_TABS.map((tab) => {
           const isSelected = activeTab === tab.id || (activePage === tab.id);
           return (
             <button
               key={tab.id}
               onClick={() => handleTabClick(tab)}
-              className={`px-3 py-1 rounded-full text-xs font-medium transition-all duration-150 whitespace-nowrap cursor-pointer border ${
+              className={`px-3 py-1 rounded-full text-xs font-medium transition-all duration-150 whitespace-nowrap cursor-pointer ${
                 isSelected
-                  ? "bg-orange-500 text-white font-semibold border-orange-400 shadow-sm shadow-orange-500/20"
-                  : "bg-gray-800/80 text-gray-400 hover:bg-gray-700/90 hover:text-white border-gray-700/60"
+                  ? "bg-white text-[#111317] font-semibold shadow-xs"
+                  : "text-[#8E929C] hover:text-white hover:bg-white/[0.06]"
               }`}
             >
               {tab.label}
@@ -80,18 +80,18 @@ export const ModuleNavigationBar: React.FC<ModuleNavigationBarProps> = ({
       </div>
 
       {/* Right Tools : AI Studio Pill + Compact View */}
-      <div className="flex items-center gap-1.5 shrink-0 pl-2">
+      <div className="flex items-center gap-2 shrink-0 pl-2">
         {onOpenAiStudio && (
           <button
             onClick={onOpenAiStudio}
             className={`flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium shrink-0 transition-all cursor-pointer border ${
               activePage === "ai-studio"
-                ? "bg-purple-600 text-white border-purple-500 font-semibold shadow-sm"
-                : "bg-purple-950/40 text-purple-300 border-purple-800/50 hover:bg-purple-900/50 hover:text-white"
+                ? "bg-purple-600 text-white border-purple-500 font-semibold shadow-xs"
+                : "bg-purple-950/30 text-purple-300 border-purple-800/40 hover:bg-purple-900/40 hover:text-white"
             }`}
             title="Studio d'Artefacts & Copilote IA"
           >
-            <Sparkles className="w-3 h-3 text-slate-400 dark:text-[#858585] group-hover:text-white" />
+            <Sparkles className="w-3 h-3 text-purple-300" />
             <span className="hidden sm:inline">Copilote IA</span>
           </button>
         )}
@@ -101,8 +101,8 @@ export const ModuleNavigationBar: React.FC<ModuleNavigationBarProps> = ({
             onClick={onToggleCompactMode}
             className={`p-1.5 rounded-full border transition-all cursor-pointer text-xs ${
               isCompactMode
-                ? "bg-orange-500/20 text-orange-400 border-orange-500/40"
-                : "bg-gray-800/80 text-gray-400 border-gray-700/60 hover:text-white"
+                ? "bg-[#E5FA52]/20 text-[#E5FA52] border-[#E5FA52]/40"
+                : "bg-white/[0.04] text-[#8E929C] border-white/[0.08] hover:text-white hover:bg-white/[0.08]"
             }`}
             title={isCompactMode ? "Mode Normal" : "Mode Compact"}
           >

@@ -164,6 +164,22 @@ export async function terminalHeartbeat(req: Request, res: Response) {
       },
     });
 
+    // Si l'appliance ou le terminal remonte des métriques de capteurs réelles
+    const telemetry = (req.body as any).telemetry;
+    if (telemetry && typeof telemetry === "object") {
+      await rawPrisma.assetTelemetry.create({
+        data: {
+          tenantId: orgId,
+          assetId: terminalSerial || "terminal-edge-appliance",
+          temperatureC: Number(telemetry.temperatureC) || 24.0,
+          vibrationMmS: Number(telemetry.vibrationMmS) || 0.4,
+          powerKw: Number(telemetry.powerKw) || 35.0,
+          pueScore: Number(telemetry.pueScore) || 1.12,
+          status: "nominal"
+        }
+      }).catch((e: any) => console.warn("[Terminal Heartbeat Telemetry]", e?.message));
+    }
+
     if (!isActive) {
       console.warn(
         `[Terminal] 🔴 Heartbeat REVOKED for terminal ${terminalSerial} (org ${orgId}) — ` +
