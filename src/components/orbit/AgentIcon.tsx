@@ -1,12 +1,22 @@
 import React from 'react';
 import {
+  Activity,
   BarChart3,
+  Bot,
   Calendar,
+  Cpu,
+  Database,
   DollarSign,
   FileText,
+  Lock,
   MessageSquare,
+  Network,
   Newspaper,
+  Server,
+  Shield,
   Sparkles,
+  Terminal,
+  Workflow,
 } from 'lucide-react';
 import type { AgentIconKey } from '../../types/agent';
 
@@ -165,6 +175,26 @@ export function AgentIcon({
       return <DollarSign className={`${baseClass} ${mutedColor}`} aria-hidden="true" />;
     case 'message':
       return <MessageSquare className={`${baseClass} ${mutedColor}`} aria-hidden="true" />;
+    case 'database':
+      return <Database className={`${baseClass} ${mutedColor}`} aria-hidden="true" />;
+    case 'activity':
+      return <Activity className={`${baseClass} ${mutedColor}`} aria-hidden="true" />;
+    case 'terminal':
+      return <Terminal className={`${baseClass} ${mutedColor}`} aria-hidden="true" />;
+    case 'cpu':
+      return <Cpu className={`${baseClass} ${mutedColor}`} aria-hidden="true" />;
+    case 'lock':
+      return <Lock className={`${baseClass} ${mutedColor}`} aria-hidden="true" />;
+    case 'shield':
+      return <Shield className={`${baseClass} ${mutedColor}`} aria-hidden="true" />;
+    case 'workflow':
+      return <Workflow className={`${baseClass} ${mutedColor}`} aria-hidden="true" />;
+    case 'bot':
+      return <Bot className={`${baseClass} ${mutedColor}`} aria-hidden="true" />;
+    case 'network':
+      return <Network className={`${baseClass} ${mutedColor}`} aria-hidden="true" />;
+    case 'server':
+      return <Server className={`${baseClass} ${mutedColor}`} aria-hidden="true" />;
     case 'spark':
     default:
       return <Sparkles className={`${baseClass} ${mutedColor}`} aria-hidden="true" />;

@@ -1,21 +1,20 @@
 /**
  * @file plans.ts
- * @description Source unique de vérité (SSoT) pour les plans d'abonnement SENSORIUM.
- * Importé par PricingPage, SettingsPage, SubscriptionGuard et FeatureUpgradeModal.
+ * @description Source unique de vérité (SSoT) pour les plans d'abonnement SENSORIUM & Agent Orbit.
+ * Compatible à la fois avec PricingPage, SettingsPage, SubscriptionGuard et MultiUsersView.
  */
 
+// ── Types pour l'ancien système ERP ──────────────────────────────────────────
 export type PlanId = "free" | "silver" | "pro" | "enterprise";
 
-export interface PlanDefinition {
+export interface PlanDefinitionERP {
   id: PlanId;
-  /** Slug tier interne (lowercase) */
   tier: PlanId;
-  /** Slug tier dans useSubscriptionGate (UPPERCASE) */
   tierKey: "FREE" | "STARTER" | "SILVER" | "PRO" | "ENTERPRISE";
   name: string;
   tagline: string;
-  price: number; // EUR/mois, 0 = gratuit
-  yearlyPrice: number; // EUR/mois si annuel (-20%)
+  price: number;
+  yearlyPrice: number;
   period: string;
   badgeLabel?: string;
   recommended?: boolean;
@@ -27,7 +26,7 @@ export interface PlanDefinition {
   buttonLabel: string;
 }
 
-export const PLANS: PlanDefinition[] = [
+export const PLANS: PlanDefinitionERP[] = [
   {
     id: "free",
     tier: "free",
@@ -125,8 +124,115 @@ export const PLANS: PlanDefinition[] = [
   },
 ];
 
-export const getPlanById = (id: PlanId): PlanDefinition =>
+export const getPlanById = (id: PlanId): PlanDefinitionERP =>
   PLANS.find((p) => p.id === id) ?? PLANS[0];
 
-export const getPlanByTierKey = (tierKey: string): PlanDefinition =>
+export const getPlanByTierKey = (tierKey: string): PlanDefinitionERP =>
   PLANS.find((p) => p.tierKey === tierKey.toUpperCase()) ?? PLANS[0];
+
+// ── Types pour le système Agent Orbit / new26_11 ──────────────────────────────
+export type PlanCode = 'FREE' | 'STARTER' | 'PRO' | 'ENTERPRISE';
+export type BillingCycle = 'monthly' | 'yearly';
+
+export interface PlanDefinition {
+  code: PlanCode;
+  displayName: string;
+  tierRank: number;
+  priceMonthlyEur: number;
+  priceYearlyEur: number;
+  quotaLimit: number;
+  maxUsers: number;
+  paypalPlanIdMonthly: string;
+  paypalPlanIdYearly: string;
+  tagline: string;
+  features: string[];
+}
+
+export const PLAN_CATALOG: PlanDefinition[] = [
+  {
+    code: 'FREE',
+    displayName: 'Free',
+    tierRank: 0,
+    priceMonthlyEur: 0,
+    priceYearlyEur: 0,
+    quotaLimit: 10000,
+    maxUsers: 2,
+    paypalPlanIdMonthly: 'P-SENSORIUM-FREE-M',
+    paypalPlanIdYearly: 'P-SENSORIUM-FREE-Y',
+    tagline: 'Discovery & prototypes',
+    features: ['10,000 runs / month', 'Up to 2 members', '36 Orbit AI Agents'],
+  },
+  {
+    code: 'STARTER',
+    displayName: 'Starter',
+    tierRank: 1,
+    priceMonthlyEur: 29,
+    priceYearlyEur: 290,
+    quotaLimit: 25000,
+    maxUsers: 5,
+    paypalPlanIdMonthly: 'P-SENSORIUM-STARTER-M',
+    paypalPlanIdYearly: 'P-SENSORIUM-STARTER-Y',
+    tagline: 'Agile teams & workflows',
+    features: ['25,000 runs / month', '5 members included', '128 services catalog'],
+  },
+  {
+    code: 'PRO',
+    displayName: 'Pro',
+    tierRank: 2,
+    priceMonthlyEur: 99,
+    priceYearlyEur: 990,
+    quotaLimit: 100000,
+    maxUsers: 25,
+    paypalPlanIdMonthly: 'P-SENSORIUM-PRO-M',
+    paypalPlanIdYearly: 'P-SENSORIUM-PRO-Y',
+    tagline: 'Production & AI automation',
+    features: ['100,000 runs / month', '25 members included', 'Priority SLA & IAM Audit'],
+  },
+  {
+    code: 'ENTERPRISE',
+    displayName: 'Enterprise',
+    tierRank: 3,
+    priceMonthlyEur: 299,
+    priceYearlyEur: 2990,
+    quotaLimit: 500000,
+    maxUsers: 200,
+    paypalPlanIdMonthly: 'P-SENSORIUM-ENT-M',
+    paypalPlanIdYearly: 'P-SENSORIUM-ENT-Y',
+    tagline: 'Zero-Trust & dedicated multi-tenant',
+    features: ['500,000 runs / month', '200 members included', '100% ZTNA & dedicated support'],
+  },
+];
+
+export const PLAN_BY_CODE: Record<PlanCode, PlanDefinition> = {
+  FREE: PLAN_CATALOG[0],
+  STARTER: PLAN_CATALOG[1],
+  PRO: PLAN_CATALOG[2],
+  ENTERPRISE: PLAN_CATALOG[3],
+};
+
+export function normalizePlanCode(input: string | undefined | null): PlanCode {
+  const upper = (input ?? '').trim().toUpperCase();
+  if (upper === 'ENTERPRISE') return 'ENTERPRISE';
+  if (upper === 'PRO' || upper === 'GOLD') return 'PRO';
+  if (upper === 'STARTER' || upper === 'SILVER' || upper === 'STAGING') return 'STARTER';
+  return 'FREE';
+}
+
+export function getPlanAmountEur(code: PlanCode, cycle: BillingCycle): number {
+  const plan = PLAN_BY_CODE[code];
+  return cycle === 'yearly' ? plan.priceYearlyEur : plan.priceMonthlyEur;
+}
+
+export function planCodeToOrgPlanLabel(code: PlanCode): 'Free' | 'Staging' | 'Pro' | 'Enterprise' {
+  switch (code) {
+    case 'ENTERPRISE':
+      return 'Enterprise';
+    case 'PRO':
+      return 'Pro';
+    case 'STARTER':
+      return 'Staging';
+    case 'FREE':
+    default:
+      return 'Free';
+  }
+}

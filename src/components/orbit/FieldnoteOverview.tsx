@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { Lock, ChevronRight, Loader2, RefreshCw, Plus } from 'lucide-react';
+import { Lock, ChevronRight, Loader2 } from 'lucide-react';
 import type {
   ApprovalItem,
   OrchestratorStats,
@@ -17,19 +17,12 @@ interface FieldnoteOverviewProps {
   stats: OrchestratorStats;
   runningWorkflowId: string | null;
   decidingApprovalId: string | null;
-  searchQuery?: string;
-  isDemoMode?: boolean;
-  isRefreshing?: boolean;
   onOpenRunLog: () => void;
   onOpenAllWorkflows: () => void;
   onOpenApprovalsQueue: () => void;
   onRunWorkflow: (workflow: WorkflowItem) => void;
   onDecideApproval: (approvalId: string, decision: 'approved' | 'declined') => void;
   onBatchDecideApprovals: (decision: 'approved' | 'declined') => void;
-  onTimeframeChange?: (timeframe: TimeframeOption) => void;
-  onNewWorkflow?: () => void;
-  onRefresh?: () => void;
-  onLoadDemoData?: () => void;
 }
 
 export function FieldnoteOverview({
@@ -39,22 +32,14 @@ export function FieldnoteOverview({
   stats,
   runningWorkflowId,
   decidingApprovalId,
-  searchQuery = '',
-  isDemoMode = false,
-  isRefreshing = false,
   onOpenRunLog,
   onOpenAllWorkflows,
   onOpenApprovalsQueue,
   onRunWorkflow,
   onDecideApproval,
   onBatchDecideApprovals,
-  onTimeframeChange,
-  onNewWorkflow,
-  onRefresh,
-  onLoadDemoData,
 }: FieldnoteOverviewProps) {
   const [workflowTab, setWorkflowTab] = useState<WorkflowStatus>('active');
-  const [showAllWorkflows, setShowAllWorkflows] = useState(false);
 
   const counts = useMemo(
     () => ({
@@ -65,20 +50,9 @@ export function FieldnoteOverview({
     [workflows]
   );
 
-  const filteredWorkflows = useMemo(() => {
-    let list = workflows.filter((w) => w.status === workflowTab);
-    if (searchQuery && searchQuery.trim()) {
-      const q = searchQuery.toLowerCase().trim();
-      list = list.filter(
-        (w) => w.name.toLowerCase().includes(q) || w.integrations.toLowerCase().includes(q)
-      );
-    }
-    return list;
-  }, [workflows, workflowTab, searchQuery]);
-
   const visibleWorkflows = useMemo(
-    () => (showAllWorkflows ? filteredWorkflows : filteredWorkflows.slice(0, 5)),
-    [filteredWorkflows, showAllWorkflows]
+    () => workflows.filter((w) => w.status === workflowTab).slice(0, 5),
+    [workflows, workflowTab]
   );
 
   const pendingApprovals = useMemo(
@@ -91,71 +65,12 @@ export function FieldnoteOverview({
 
   return (
     <div className="flex flex-col gap-3">
-      {/* Top Header matching Fieldnote Overview */}
-      <div className="flex flex-wrap items-center justify-between gap-3 mb-1">
-        <div>
-          <div className="text-[10px] font-bold uppercase tracking-wider text-[#8E929C]">
-            FIELDNOTE / OVERVIEW
-          </div>
-          <div className="flex flex-wrap items-baseline gap-2.5">
-            <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-slate-900 dark:text-white">
-              Overview
-            </h1>
-            <span className="text-xs sm:text-sm text-[#8E929C] dark:text-slate-400 font-normal">
-              {new Date().toLocaleDateString('en-US', { weekday: 'long', day: 'numeric', month: 'long' })} · {new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false })}
-            </span>
-          </div>
-        </div>
-
-        <div className="flex items-center gap-2">
-          {/* Timeframe pill switcher */}
-          <div className="inline-flex items-center bg-white dark:bg-[#1e2023] p-1 rounded-full border border-slate-200/80 dark:border-white/[0.08] shadow-xs text-xs font-medium">
-            {(['today', '7d', '30d'] as TimeframeOption[]).map((tf) => (
-              <button
-                key={tf}
-                type="button"
-                onClick={() => onTimeframeChange?.(tf)}
-                className={`px-3 py-1 rounded-full transition-all cursor-pointer ${
-                  timeframe === tf
-                    ? 'bg-[#111317] dark:bg-white text-white dark:text-[#111317] font-semibold shadow-xs'
-                    : 'text-[#8E929C] hover:text-slate-900 dark:hover:text-white'
-                }`}
-              >
-                {tf === 'today' ? 'Today' : tf === '7d' ? '7 days' : '30 days'}
-              </button>
-            ))}
-          </div>
-
-          {/* Refresh icon */}
-          <button
-            type="button"
-            onClick={onRefresh}
-            disabled={isRefreshing}
-            title="Rafraîchir la télémétrie et l'état des agents"
-            className="w-8 h-8 rounded-full bg-white dark:bg-[#1e2023] border border-slate-200/80 dark:border-white/[0.08] flex items-center justify-center text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white transition shadow-xs cursor-pointer disabled:opacity-60"
-          >
-            <RefreshCw className={`w-3.5 h-3.5 ${isRefreshing ? 'animate-spin text-orange-500' : ''}`} />
-          </button>
-
-          {/* New Workflow button */}
-          <button
-            type="button"
-            onClick={onNewWorkflow}
-            className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-[#111317] dark:bg-white text-white dark:text-[#111317] text-xs font-semibold hover:bg-black dark:hover:bg-slate-200 transition shadow-xs cursor-pointer"
-          >
-            <Plus className="w-3.5 h-3.5" />
-            <span>New workflow</span>
-          </button>
-        </div>
-      </div>
-
       <RunsMatrixChart
         timeframe={timeframe}
         extraRunsToday={stats.totalRuns}
         liveSuccessRate={stats.totalRuns > 0 ? stats.successRate : null}
         liveAgentsRunning={stats.runningCount}
         liveFailedCount={stats.errorCount}
-        isDemoMode={isDemoMode}
         onOpenRunLog={onOpenRunLog}
       />
 
@@ -211,13 +126,10 @@ export function FieldnoteOverview({
 
               <button
                 type="button"
-                onClick={() => {
-                  setShowAllWorkflows((prev) => !prev);
-                  onOpenAllWorkflows?.();
-                }}
+                onClick={onOpenAllWorkflows}
                 className="text-xs text-[#8E929C] hover:text-black dark:hover:text-white font-medium inline-flex items-center gap-1 transition-colors"
               >
-                <span>{showAllWorkflows ? 'Top 5' : `All ${workflows.length}`}</span>
+                <span>All {workflows.length}</span>
                 <ChevronRight className="w-3 h-3" />
               </button>
             </div>
@@ -231,37 +143,9 @@ export function FieldnoteOverview({
 
             {/* Rows */}
             <div className="divide-y divide-slate-50 dark:divide-white/[0.05] text-xs">
-              {workflows.length === 0 ? (
-                <div className="py-12 px-4 text-center">
-                  <p className="text-xs font-semibold text-slate-900 dark:text-white mb-1">
-                    Phase T0 : Zéro flux de travail configuré
-                  </p>
-                  <p className="text-[11px] text-[#8E929C] mb-4 max-w-sm mx-auto">
-                    Votre espace de travail souverain est prêt. Vous pouvez créer un flux sur mesure ou charger les modèles d'exemple.
-                  </p>
-                  <div className="flex items-center justify-center gap-2">
-                    <button
-                      type="button"
-                      onClick={onNewWorkflow}
-                      className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-[#111317] dark:bg-white text-white dark:text-[#111317] text-xs font-semibold hover:opacity-90 transition shadow-xs cursor-pointer"
-                    >
-                      <Plus className="w-3.5 h-3.5" />
-                      <span>Créer un workflow</span>
-                    </button>
-                    {onLoadDemoData && (
-                      <button
-                        type="button"
-                        onClick={onLoadDemoData}
-                        className="px-3.5 py-1.5 rounded-full border border-slate-200 dark:border-white/10 text-xs font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition cursor-pointer"
-                      >
-                        Charger la démo
-                      </button>
-                    )}
-                  </div>
-                </div>
-              ) : visibleWorkflows.length === 0 ? (
+              {visibleWorkflows.length === 0 ? (
                 <div className="py-8 text-center text-xs text-[#8E929C]">
-                  Aucun workflow dans l'onglet {workflowTab} {searchQuery ? `correspondant à "${searchQuery}"` : ''}.
+                  No workflows in {workflowTab}.
                 </div>
               ) : (
                 visibleWorkflows.map((wf) => {
@@ -363,10 +247,10 @@ export function FieldnoteOverview({
             {pendingApprovals.length === 0 ? (
               <div className="py-10 px-4 text-center rounded-2xl bg-[#F8F9FA] dark:bg-[#1a1c1f] border border-slate-100 dark:border-white/[0.06]">
                 <p className="text-xs font-semibold text-slate-900 dark:text-white mb-1">
-                  File d'approbations ZTNA à jour
+                  All caught up
                 </p>
                 <p className="text-[11px] text-[#8E929C]">
-                  Aucune demande en attente de signature souveraine (Phase T0).
+                  No pending approvals in the queue.
                 </p>
               </div>
             ) : (
@@ -465,4 +349,3 @@ export function FieldnoteOverview({
     </div>
   );
 }
-

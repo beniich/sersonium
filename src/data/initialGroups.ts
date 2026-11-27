@@ -11,7 +11,8 @@ export const initialGroups: Group[] = [
         name: 'Trend Scout',
         icon: 'tiktok',
         platform: 'TikTok',
-        description: 'Scans emerging short-form trends and rising audio hooks across social channels.',
+        description:
+          'Detects emerging trends, viral audio hooks, and fast-rising video formats on TikTok.',
         status: 'active',
       },
       {
@@ -20,15 +21,17 @@ export const initialGroups: Group[] = [
         icon: 'reddit',
         platform: 'Reddit',
         highlighted: true,
-        description: 'Monitors niche subreddits and audience sentiment signals for recurring pain points.',
-        status: 'idle',
+        description:
+          'Monitors relevant Reddit communities to identify recurring pain points, frustrations, and audience needs.',
+        status: 'active',
       },
       {
         id: 'r3',
         name: 'Comment Miner',
         icon: 'instagram',
         platform: 'Instagram',
-        description: 'Extracts high-intent questions and objections directly from post comment threads.',
+        description:
+          'Analyzes Instagram comment threads to extract high-intent buying questions and objections.',
         status: 'idle',
       },
       {
@@ -36,23 +39,26 @@ export const initialGroups: Group[] = [
         name: 'Competitor Watch',
         icon: 'youtube',
         platform: 'YouTube',
-        description: 'Tracks competitor publishing cadence, video retention hooks, and topic gaps.',
-        status: 'active',
+        description:
+          'Tracks competitor publishing cadence, retention hooks, and untapped content gaps.',
+        status: 'idle',
       },
       {
         id: 'r5',
         name: 'Post Writer',
         icon: 'flower',
         platform: 'Claude',
-        description: 'Synthesizes research findings into structured, high-converting post drafts.',
-        status: 'idle',
+        description:
+          'Synthesizes research insights into structured, conversion-focused post drafts.',
+        status: 'active',
       },
       {
         id: 'r6',
         name: 'Email Writer',
         icon: 'mail',
         platform: 'Gmail',
-        description: 'Crafts segmented email sequences tailored to audience research insights.',
+        description:
+          'Writes segmented email sequences grounded in real audience insights.',
         status: 'idle',
       },
     ],
@@ -68,47 +74,53 @@ export const initialGroups: Group[] = [
         icon: 'figma',
         platform: 'Figma',
         highlighted: true,
-        description: 'Generates brand-aligned visual templates, thumbnails, and social layouts.',
-        status: 'idle',
+        description:
+          'Creates on-brand visual templates, thumbnails, and social graphics.',
+        status: 'active',
       },
       {
         id: 'c2',
         name: 'Carousel Builder',
-        icon: 'flower',
+        icon: 'spark',
         platform: 'Studio',
-        description: 'Structures multi-slide educational carousels optimized for saves and shares.',
-        status: 'idle',
+        description:
+          'Builds multi-slide educational carousels optimized for saves and shares.',
+        status: 'active',
       },
       {
         id: 'c3',
         name: 'Voiceover',
         icon: 'mic',
         platform: 'Audio',
-        description: 'Produces crisp, natural-paced narration tracks matched to script beats.',
+        description:
+          'Produces clear, well-paced voiceover tracks synchronized with the script.',
         status: 'idle',
       },
       {
         id: 'c4',
         name: 'Video Editor',
-        icon: 'flower',
+        icon: 'activity',
         platform: 'Timeline',
-        description: 'Cuts B-roll, tightens pacing, and burns dynamic captions into short-form clips.',
-        status: 'active',
+        description:
+          'Edits video timelines with B-roll cuts, pacing adjustments, and dynamic captions.',
+        status: 'idle',
       },
       {
         id: 'c5',
         name: 'Brand Check',
-        icon: 'doc',
+        icon: 'shield',
         platform: 'Guidelines',
-        description: 'Audits copy, tone, and visual assets against brand voice and compliance rules.',
+        description:
+          'Audits copy, tone of voice, and visual assets against brand and compliance guidelines.',
         status: 'active',
       },
       {
         id: 'c6',
         name: 'Approval Desk',
-        icon: 'flower',
+        icon: 'doc',
         platform: 'Review',
-        description: 'Stages completed deliverables for final sign-off before publishing queues.',
+        description:
+          'Packages final deliverables for human sign-off before entering the publishing queue.',
         status: 'idle',
       },
     ],
@@ -123,7 +135,8 @@ export const initialGroups: Group[] = [
         name: 'Post Analyst',
         icon: 'chart',
         platform: 'Analytics',
-        description: 'Evaluates hook retention, watch time, and share velocity across published posts.',
+        description:
+          'Evaluates hook performance, watch time, and share velocity across published posts.',
         status: 'active',
       },
       {
@@ -132,15 +145,17 @@ export const initialGroups: Group[] = [
         icon: 'stripe',
         platform: 'Stripe',
         highlighted: true,
-        description: 'Connects checkout conversions and MRR attribution back to individual content pieces.',
-        status: 'idle',
+        description:
+          'Attributes each piece of content to generated revenue and MRR impact.',
+        status: 'active',
       },
       {
         id: 'l3',
         name: 'Call Tracker',
-        icon: 'flower',
+        icon: 'zoom',
         platform: 'Calls',
-        description: 'Logs discovery call transcripts and surfaces which topics drove booked meetings.',
+        description:
+          'Archives call transcripts and identifies topics that convert into booked meetings.',
         status: 'idle',
       },
       {
@@ -148,7 +163,8 @@ export const initialGroups: Group[] = [
         name: 'Email Analyst',
         icon: 'mail',
         platform: 'Email',
-        description: 'Measures open decay, reply sentiment, and click-through attribution per sequence.',
+        description:
+          'Analyzes open rates, replies, and click attribution across email sequences.',
         status: 'idle',
       },
       {
@@ -156,16 +172,18 @@ export const initialGroups: Group[] = [
         name: 'Weekly Report',
         icon: 'doc',
         platform: 'Digest',
-        description: 'Compiles an executive weekly brief summarizing top winners and pipeline impact.',
-        status: 'idle',
+        description:
+          'Compiles an executive weekly digest on top-performing content and pipeline impact.',
+        status: 'active',
       },
       {
         id: 'l6',
         name: 'Loop Feeder',
-        icon: 'flower',
+        icon: 'workflow',
         platform: 'Feedback',
-        description: 'Feeds winning angles and revenue signals back into Research for the next cycle.',
-        status: 'active',
+        description:
+          'Feeds winning angles and revenue signals back into the Research pillar.',
+        status: 'idle',
       },
     ],
   },
@@ -179,7 +197,8 @@ export const initialGroups: Group[] = [
         name: 'Scheduler',
         icon: 'calendar',
         platform: 'Queue',
-        description: 'Selects optimal timezone release windows and balances channel cadence.',
+        description:
+          'Selects optimal posting windows and balances publishing volume across channels.',
         status: 'active',
       },
       {
@@ -188,15 +207,17 @@ export const initialGroups: Group[] = [
         icon: 'tiktok',
         platform: 'TikTok',
         highlighted: true,
-        description: 'Publishes vertical videos with native captions, tags, and trending metadata.',
-        status: 'idle',
+        description:
+          'Publishes vertical videos with native captions, hashtags, and optimized metadata.',
+        status: 'active',
       },
       {
         id: 'p3',
         name: 'Reels Poster',
         icon: 'instagram',
         platform: 'Instagram',
-        description: 'Distributes Reels with custom cover frames and first-comment prompts.',
+        description:
+          'Publishes Instagram Reels with custom covers and first-comment CTAs.',
         status: 'idle',
       },
       {
@@ -204,15 +225,17 @@ export const initialGroups: Group[] = [
         name: 'Shorts Poster',
         icon: 'youtube',
         platform: 'YouTube',
-        description: 'Uploads YouTube Shorts and links related long-form videos automatically.',
+        description:
+          'Uploads YouTube Shorts and links them to related long-form videos.',
         status: 'idle',
       },
       {
         id: 'p5',
         name: 'X Poster',
         icon: 'x',
-        platform: 'X',
-        description: 'Schedules threads and standalone insights formatted for timeline readability.',
+        platform: 'X (Twitter)',
+        description:
+          'Schedules threads and standalone posts tailored for feed engagement.',
         status: 'active',
       },
       {
@@ -220,7 +243,8 @@ export const initialGroups: Group[] = [
         name: 'Newsletter',
         icon: 'newsletter',
         platform: 'Newsletter',
-        description: 'Dispatches curated weekly editions to active subscribers.',
+        description:
+          'Delivers curated weekly editions to active newsletter subscribers.',
         status: 'idle',
       },
     ],
@@ -233,26 +257,29 @@ export const initialGroups: Group[] = [
       {
         id: 's1',
         name: 'Lead Scorer',
-        icon: 'hubspot',
+        icon: 'database',
         platform: 'CRM',
-        description: 'Scores inbound prospects using engagement depth, company fit, and intent signals.',
+        description:
+          'Scores leads by engagement depth, company fit, and buying intent signals.',
         status: 'active',
       },
       {
         id: 's2',
         name: 'Call Booker',
-        icon: 'zoom',
+        icon: 'calendar',
         platform: 'Booking',
         highlighted: true,
-        description: 'Qualifies interested leads and dispatches instant calendar booking links.',
-        status: 'idle',
+        description:
+          'Qualifies interested leads and immediately sends a calendar booking link.',
+        status: 'active',
       },
       {
         id: 's3',
         name: 'Reminder',
-        icon: 'doc',
+        icon: 'activity',
         platform: 'Alerts',
-        description: 'Sends timely pre-call briefings and SMS/email reminders to reduce no-shows.',
+        description:
+          'Sends pre-call SMS and email reminders to minimize meeting no-shows.',
         status: 'idle',
       },
       {
@@ -260,7 +287,8 @@ export const initialGroups: Group[] = [
         name: 'Follow-up',
         icon: 'mail',
         platform: 'Outreach',
-        description: 'Automates contextual post-call recaps and multi-touch follow-up sequences.',
+        description:
+          'Automates post-call follow-ups and context-aware nurture sequences.',
         status: 'idle',
       },
       {
@@ -268,16 +296,18 @@ export const initialGroups: Group[] = [
         name: 'Payment Link',
         icon: 'dollar',
         platform: 'Billing',
-        description: 'Generates custom checkout links and tracks invoice completion status.',
-        status: 'idle',
+        description:
+          'Generates custom checkout links and tracks invoice settlement status.',
+        status: 'active',
       },
       {
         id: 's6',
         name: 'CRM Sync',
         icon: 'hubspot',
         platform: 'HubSpot',
-        description: 'Keeps deal stages, call notes, and revenue events synchronized across systems.',
-        status: 'active',
+        description:
+          'Synchronizes deal stages, call notes, and revenue events across systems.',
+        status: 'idle',
       },
     ],
   },
@@ -289,18 +319,20 @@ export const initialGroups: Group[] = [
       {
         id: 'cm1',
         name: 'Comment Replier',
-        icon: 'flower',
+        icon: 'message',
         platform: 'Replies',
         highlighted: true,
-        description: 'Drafts and posts timely, on-brand replies to public comments and questions.',
-        status: 'idle',
+        description:
+          'Drafts and posts fast, on-brand replies across public comment sections.',
+        status: 'active',
       },
       {
         id: 'cm2',
         name: 'DM Agent',
-        icon: 'instagram',
+        icon: 'message',
         platform: 'Messages',
-        description: 'Handles inbound direct messages and routes qualified buyers to booking.',
+        description:
+          'Handles direct messages and routes qualified prospects to call booking.',
         status: 'active',
       },
       {
@@ -308,31 +340,35 @@ export const initialGroups: Group[] = [
         name: 'FAQ Builder',
         icon: 'doc',
         platform: 'Knowledge',
-        description: 'Turns recurring community questions into living FAQ documentation.',
+        description:
+          'Turns recurring community questions into an up-to-date FAQ knowledge base.',
         status: 'idle',
       },
       {
         id: 'cm4',
         name: 'Review Asker',
-        icon: 'google',
+        icon: 'spark',
         platform: 'Reviews',
-        description: 'Requests verified customer testimonials at peak satisfaction milestones.',
+        description:
+          'Requests reviews and testimonials at peak customer satisfaction moments.',
         status: 'idle',
       },
       {
         id: 'cm5',
         name: 'Lead Catcher',
-        icon: 'hubspot',
+        icon: 'bot',
         platform: 'Capture',
-        description: 'Identifies buying signals in community threads and pushes contacts to Sales.',
+        description:
+          'Detects buying intent inside discussions and routes contacts to Sales.',
         status: 'active',
       },
       {
         id: 'cm6',
         name: 'Escalation',
-        icon: 'mail',
+        icon: 'shield',
         platform: 'Support',
-        description: 'Flags sensitive edge cases and routes urgent threads directly to a human owner.',
+        description:
+          'Flags sensitive cases and escalates urgent requests to a human operator.',
         status: 'idle',
       },
     ],

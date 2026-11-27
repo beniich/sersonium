@@ -1,46 +1,21 @@
 import React from 'react';
-import { FileText, Users, ShieldCheck, Calendar, DollarSign, Cpu, Activity, Workflow } from 'lucide-react';
+import { Receipt, UserCheck, ShieldCheck, Calendar, Wallet, Sparkles } from 'lucide-react';
+import type { WorkflowIconKey } from '../../types/agent';
 
-interface WorkflowIconProps {
-  icon?: string;
-  className?: string;
-}
-
-export function WorkflowIcon({ icon, className = 'w-3.5 h-3.5' }: WorkflowIconProps) {
-  switch (icon?.toLowerCase()) {
+export function WorkflowIcon({ icon }: { icon: WorkflowIconKey }) {
+  switch (icon) {
     case 'invoice':
-    case 'receipt':
-    case 'doc':
-    case 'file':
-      return <FileText className={className} />;
+      return <Receipt className="w-3.5 h-3.5" />;
     case 'user':
-    case 'users':
-    case 'team':
-    case 'onboarding':
-      return <Users className={className} />;
+      return <UserCheck className="w-3.5 h-3.5" />;
     case 'shield':
-    case 'security':
-    case 'okta':
-    case 'access':
-      return <ShieldCheck className={className} />;
+      return <ShieldCheck className="w-3.5 h-3.5" />;
     case 'calendar':
-    case 'clock':
-    case 'renewal':
-      return <Calendar className={className} />;
-    case 'payroll':
-    case 'dollar':
-    case 'credit-card':
-    case 'money':
-      return <DollarSign className={className} />;
-    case 'cpu':
-    case 'edge':
-    case 'agent':
-      return <Cpu className={className} />;
-    case 'activity':
-    case 'sensor':
-      return <Activity className={className} />;
+      return <Calendar className="w-3.5 h-3.5" />;
+    case 'wallet':
+      return <Wallet className="w-3.5 h-3.5" />;
+    case 'spark':
     default:
-      return <Workflow className={className} />;
+      return <Sparkles className="w-3.5 h-3.5" />;
   }
 }
-

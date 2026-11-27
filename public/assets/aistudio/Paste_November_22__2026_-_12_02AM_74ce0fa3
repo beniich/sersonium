@@ -1,0 +1,645 @@
+Voici une **application React complète** prête à l’emploi, construite autour de tout ce qu’on a développé.
+
+### Stack
+- Vite + React + TypeScript
+- Tailwind CSS
+- Framer Motion
+- Dark mode global
+- Panneau latéral + Run Agent avec simulation d’API réelle
+
+---
+
+### 1. Créer le projet
+
+```bash
+npm create vite@latest agent-orbit -- --template react-ts
+cd agent-orbit
+npm install
+npm install framer-motion
+npm install -D tailwindcss @tailwindcss/vite
+```
+
+---
+
+### 2. Configuration Tailwind
+
+**`vite.config.ts`**
+```ts
+import { defineConfig } from 'vite'
+import react from '@vitejs/plugin-react'
+import tailwindcss from '@tailwindcss/vite'
+
+export default defineConfig({
+  plugins: [react(), tailwindcss()],
+})
+```
+
+**`src/index.css`**
+```css
+@import "tailwindcss";
+
+@custom-variant dark (&:where(.dark, .dark *));
+```
+
+---
+
+### 3. Structure des fichiers
+
+```
+src/
+├── components/
+│   └── AgentOrbit.tsx      ← le gros composant
+├── App.tsx
+├── main.tsx
+└── index.css
+```
+
+---
+
+### 4. Code complet
+
+#### `src/main.tsx`
+```tsx
+import { StrictMode } from 'react'
+import { createRoot } from 'react-dom/client'
+import './index.css'
+import App from './App'
+
+createRoot(document.getElementById('root')!).render(
+  <StrictMode>
+    <App />
+  </StrictMode>,
+)
+```
+
+#### `src/App.tsx`
+```tsx
+import { useState, useEffect } from 'react'
+import AgentOrbit from './components/AgentOrbit'
+
+export default function App() {
+  const [isDark, setIsDark] = useState(() => {
+    return localStorage.getItem('theme') === 'dark' ||
+      (!localStorage.getItem('theme') && window.matchMedia('(prefers-color-scheme: dark)').matches)
+  })
+
+  useEffect(() => {
+    const root = document.documentElement
+    if (isDark) {
+      root.classList.add('dark')
+      localStorage.setItem('theme', 'dark')
+    } else {
+      root.classList.remove('dark')
+      localStorage.setItem('theme', 'light')
+    }
+  }, [isDark])
+
+  return (
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-950 transition-colors duration-300">
+      {/* Header */}
+      <header className="border-b border-gray-200 dark:border-gray-800 bg-white/80 dark:bg-gray-900/80 backdrop-blur-md sticky top-0 z-50">
+        <div className="max-w-7xl mx-auto px-6 h-14 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 rounded-lg bg-black dark:bg-white flex items-center justify-center">
+              <svg viewBox="0 0 24 24" className="w-5 h-5 text-orange-400" fill="currentColor">
+                <path d="M12 2L14.5 9H22L16 13.5L18.5 21L12 16.5L5.5 21L8 13.5L2 9H9.5L12 2Z" />
+              </svg>
+            </div>
+            <div>
+              <h1 className="text-sm font-semibold text-gray-900 dark:text-white">Agent Orbit</h1>
+              <p className="text-[11px] text-gray-500 dark:text-gray-400">Orchestrator Dashboard</p>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-3">
+            <button
+              onClick={() => setIsDark(!isDark)}
+              className="px-3 py-1.5 text-xs font-medium rounded-full bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-200 hover:scale-105 transition-transform"
+            >
+              {isDark ? '☀️ Light' : '🌙 Dark'}
+            </button>
+          </div>
+        </div>
+      </header>
+
+      {/* Main Content */}
+      <main className="max-w-7xl mx-auto px-6 py-8">
+        <div className="mb-6">
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Agent Orchestrator</h2>
+          <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+            Visualisez, pilotez et exécutez vos agents depuis une seule interface.
+          </p>
+        </div>
+
+        <AgentOrbit isDark={isDark} />
+      </main>
+    </div>
+  )
+}
+```
+
+#### `src/components/AgentOrbit.tsx`
+```tsx
+import React, { useState } from 'react'
+import { motion, AnimatePresence } from 'framer-motion'
+
+type AgentStatus = 'active' | 'idle' | 'running' | 'success' | 'error'
+
+type Agent = {
+  id: string
+  name: string
+  icon?: string
+  highlighted?: boolean
+  description?: string
+  status?: AgentStatus
+}
+
+type Group = {
+  id: string
+  title: string
+  count: number
+  agents: Agent[]
+  position: 'top-left' | 'top-right' | 'middle-left' | 'middle-right' | 'bottom-left' | 'bottom-right'
+}
+
+const groupsData: Group[] = [
+  {
+    id: 'research',
+    title: 'Research',
+    count: 6,
+    position: 'top-left',
+    agents: [
+      { id: 'r1', name: 'Trend Scout', icon: '🔍', description: 'Scans emerging trends across platforms in real-time.', status: 'active' },
+      { id: 'r2', name: 'Audience Listener', icon: '🟠', highlighted: true, description: 'Monitors audience sentiment and engagement signals.', status: 'idle' },
+      { id: 'r3', name: 'Comment Miner', icon: '💬', description: 'Extracts insights from comments and replies.', status: 'idle' },
+      { id: 'r4', name: 'Competitor Watch', icon: '👁️', description: 'Tracks competitor content and performance.', status: 'active' },
+      { id: 'r5', name: 'Post Writer', icon: '✍️', description: 'Generates high-converting post drafts.', status: 'idle' },
+      { id: 'r6', name: 'Email Writer', icon: '📧', description: 'Creates personalized email sequences.', status: 'idle' },
+    ],
+  },
+  {
+    id: 'content',
+    title: 'Content',
+    count: 6,
+    position: 'top-right',
+    agents: [
+      { id: 'c1', name: 'Visual Designer', icon: '🎨', highlighted: true, description: 'Generates brand-aligned visual assets.', status: 'idle' },
+      { id: 'c2', name: 'Carousel Builder', icon: '🎠', description: 'Creates multi-slide carousels optimized for engagement.', status: 'idle' },
+      { id: 'c3', name: 'Voiceover', icon: '🎙️', description: 'Produces natural-sounding voiceovers.', status: 'idle' },
+      { id: 'c4', name: 'Video Editor', icon: '🎬', description: 'Edits and optimizes short-form videos.', status: 'active' },
+      { id: 'c5', name: 'Brand Check', icon: '✅', description: 'Ensures all content respects brand guidelines.', status: 'active' },
+      { id: 'c6', name: 'Approval Desk', icon: '📋', description: 'Manages content approval workflow.', status: 'idle' },
+    ],
+  },
+  {
+    id: 'loop',
+    title: 'The loop',
+    count: 6,
+    position: 'middle-left',
+    agents: [
+      { id: 'l1', name: 'Post Analyst', icon: '📊', description: 'Analyzes post performance and suggests improvements.', status: 'active' },
+      { id: 'l2', name: 'Revenue Tracker', icon: '💰', highlighted: true, description: 'Tracks revenue attribution from content.', status: 'idle' },
+      { id: 'l3', name: 'Call Tracker', icon: '📞', description: 'Logs and analyzes sales calls.', status: 'idle' },
+      { id: 'l4', name: 'Email Analyst', icon: '📧', description: 'Measures email campaign effectiveness.', status: 'idle' },
+      { id: 'l5', name: 'Weekly Report', icon: '📈', description: 'Generates automated weekly performance reports.', status: 'idle' },
+      { id: 'l6', name: 'Loop Feeder', icon: '🔄', description: 'Feeds insights back into the content loop.', status: 'active' },
+    ],
+  },
+  {
+    id: 'publish',
+    title: 'Publish',
+    count: 6,
+    position: 'middle-right',
+    agents: [
+      { id: 'p1', name: 'Scheduler', icon: '📅', description: 'Optimizes posting times across platforms.', status: 'active' },
+      { id: 'p2', name: 'TikTok Poster', icon: '🎵', highlighted: true, description: 'Publishes and optimizes TikTok content.', status: 'idle' },
+      { id: 'p3', name: 'Reels Poster', icon: '📱', description: 'Handles Instagram Reels publishing.', status: 'idle' },
+      { id: 'p4', name: 'Shorts Poster', icon: '▶️', description: 'Manages YouTube Shorts distribution.', status: 'idle' },
+      { id: 'p5', name: 'X Poster', icon: '𝕏', description: 'Posts and engages on X (Twitter).', status: 'active' },
+      { id: 'p6', name: 'Newsletter', icon: '📰', description: 'Sends and manages email newsletters.', status: 'idle' },
+    ],
+  },
+  {
+    id: 'sales',
+    title: 'Sales',
+    count: 6,
+    position: 'bottom-left',
+    agents: [
+      { id: 's1', name: 'Lead Scorer', icon: '🎯', description: 'Scores and prioritizes incoming leads.', status: 'active' },
+      { id: 's2', name: 'Call Booker', icon: '📞', highlighted: true, description: 'Books qualified calls automatically.', status: 'idle' },
+      { id: 's3', name: 'Reminder', icon: '⏰', description: 'Sends smart follow-up reminders.', status: 'idle' },
+      { id: 's4', name: 'Follow-up', icon: '🔄', description: 'Handles multi-step follow-up sequences.', status: 'idle' },
+      { id: 's5', name: 'Payment Link', icon: '💳', description: 'Generates and tracks payment links.', status: 'idle' },
+      { id: 's6', name: 'CRM Sync', icon: '🔗', description: 'Keeps CRM data synchronized in real-time.', status: 'active' },
+    ],
+  },
+  {
+    id: 'community',
+    title: 'Community',
+    count: 6,
+    position: 'bottom-right',
+    agents: [
+      { id: 'cm1', name: 'Comment Replier', icon: '💬', highlighted: true, description: 'Replies to comments with brand voice.', status: 'idle' },
+      { id: 'cm2', name: 'DM Agent', icon: '💌', description: 'Handles direct messages intelligently.', status: 'active' },
+      { id: 'cm3', name: 'FAQ Agent', icon: '❓', description: 'Answers frequently asked questions.', status: 'idle' },
+      { id: 'cm4', name: 'Review Asker', icon: '⭐', description: 'Requests reviews at the right moment.', status: 'idle' },
+      { id: 'cm5', name: 'Lead Catcher', icon: '🎣', description: 'Captures leads from community interactions.', status: 'active' },
+      { id: 'cm6', name: 'Escalation', icon: '🚨', description: 'Escalates complex issues to humans.', status: 'idle' },
+    ],
+  },
+]
+
+const positionClasses: Record<Group['position'], string> = {
+  'top-left': 'top-6 left-6',
+  'top-right': 'top-6 right-6',
+  'middle-left': 'top-1/2 -translate-y-1/2 left-6',
+  'middle-right': 'top-1/2 -translate-y-1/2 right-6',
+  'bottom-left': 'bottom-6 left-6',
+  'bottom-right': 'bottom-6 right-6',
+}
+
+const statusColors: Record<AgentStatus, string> = {
+  active: 'bg-emerald-500',
+  idle: 'bg-gray-400',
+  running: 'bg-orange-500',
+  success: 'bg-emerald-500',
+  error: 'bg-red-500',
+}
+
+// Simulation d'appel API réel
+async function runAgentAPI(agentId: string, agentName: string) {
+  const delay = 1800 + Math.random() * 1700
+  return new Promise<{ success: boolean; duration: number; output?: string; error?: string }>((resolve) => {
+    setTimeout(() => {
+      const isSuccess = Math.random() > 0.15
+      if (isSuccess) {
+        resolve({
+          success: true,
+          duration: Math.round(delay),
+          output: `Agent "${agentName}" executed successfully. Generated 3 artifacts and updated 2 data sources.`,
+        })
+      } else {
+        resolve({
+          success: false,
+          duration: Math.round(delay),
+          error: 'Upstream service timeout • Rate limit exceeded on external API',
+        })
+      }
+    }, delay)
+  })
+}
+
+interface Props {
+  isDark?: boolean
+}
+
+export default function AgentOrbit({ isDark }: Props) {
+  const [groups, setGroups] = useState(groupsData)
+  const [selectedAgent, setSelectedAgent] = useState<(Agent & { groupTitle: string }) | null>(null)
+  const [isRunning, setIsRunning] = useState(false)
+  const [progress, setProgress] = useState(0)
+  const [runLogs, setRunLogs] = useState<string[]>([])
+  const [lastResult, setLastResult] = useState<'success' | 'error' | null>(null)
+
+  const handleAgentClick = (agent: Agent, groupTitle: string) => {
+    setSelectedAgent({ ...agent, groupTitle })
+    setIsRunning(false)
+    setProgress(0)
+    setRunLogs([])
+    setLastResult(null)
+  }
+
+  const closePanel = () => {
+    setSelectedAgent(null)
+    setIsRunning(false)
+    setProgress(0)
+    setRunLogs([])
+    setLastResult(null)
+  }
+
+  const updateAgentStatus = (agentId: string, newStatus: AgentStatus) => {
+    setGroups((prev) =>
+      prev.map((group) => ({
+        ...group,
+        agents: group.agents.map((a) => (a.id === agentId ? { ...a, status: newStatus } : a)),
+      }))
+    )
+    if (selectedAgent?.id === agentId) {
+      setSelectedAgent((prev) => (prev ? { ...prev, status: newStatus } : null))
+    }
+  }
+
+  const addLog = (message: string) => {
+    setRunLogs((prev) => [...prev, `[${new Date().toLocaleTimeString()}] ${message}`])
+  }
+
+  const runAgent = async () => {
+    if (!selectedAgent || isRunning) return
+
+    setIsRunning(true)
+    setProgress(0)
+    setLastResult(null)
+    setRunLogs([])
+    updateAgentStatus(selectedAgent.id, 'running')
+
+    addLog(`Calling API → POST /agents/${selectedAgent.id}/run`)
+    addLog(`Payload: { agent: "${selectedAgent.name}", mode: "sync" }`)
+
+    const progressInterval = setInterval(() => {
+      setProgress((prev) => (prev >= 90 ? prev : prev + Math.random() * 8))
+    }, 200)
+
+    try {
+      const result = await runAgentAPI(selectedAgent.id, selectedAgent.name)
+      clearInterval(progressInterval)
+      setProgress(100)
+
+      if (result.success) {
+        addLog(`Response 200 OK (${result.duration}ms)`)
+        addLog(`✅ ${result.output}`)
+        updateAgentStatus(selectedAgent.id, 'success')
+        setLastResult('success')
+      } else {
+        addLog(`Response 500 Error (${result.duration}ms)`)
+        addLog(`❌ ${result.error}`)
+        updateAgentStatus(selectedAgent.id, 'error')
+        setLastResult('error')
+      }
+    } catch {
+      clearInterval(progressInterval)
+      setProgress(100)
+      addLog(`Network Error: Failed to fetch`)
+      updateAgentStatus(selectedAgent.id, 'error')
+      setLastResult('error')
+    } finally {
+      setIsRunning(false)
+    }
+  }
+
+  const resetAgent = () => {
+    if (!selectedAgent) return
+    setIsRunning(false)
+    setProgress(0)
+    setRunLogs([])
+    setLastResult(null)
+    updateAgentStatus(selectedAgent.id, 'idle')
+  }
+
+  return (
+    <div className="relative w-full h-[820px] bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-900 dark:to-gray-950 rounded-3xl overflow-hidden border border-gray-200 dark:border-gray-800">
+      {/* SVG Connections */}
+      <svg className="absolute inset-0 w-full h-full pointer-events-none" viewBox="0 0 1000 820" fill="none">
+        <motion.path
+          d="M500 80 C500 180 500 280 500 380 C500 480 500 580 500 720"
+          stroke="url(#lineGradient)"
+          strokeWidth="2.5"
+          strokeLinecap="round"
+          initial={{ pathLength: 0, opacity: 0 }}
+          animate={{ pathLength: 1, opacity: 0.7 }}
+          transition={{ duration: 1.6 }}
+        />
+        {['M180 200 H420', 'M580 200 H820', 'M180 410 H420', 'M580 410 H820', 'M180 620 H420', 'M580 620 H820'].map((d, i) => (
+          <motion.path
+            key={i}
+            d={d}
+            stroke="#f97316"
+            strokeWidth="1.5"
+            initial={{ pathLength: 0, opacity: 0 }}
+            animate={{ pathLength: 1, opacity: 0.4 }}
+            transition={{ duration: 1.2, delay: 0.3 + i * 0.08 }}
+          />
+        ))}
+        {[200, 410, 620].map((y, i) => (
+          <motion.circle
+            key={y}
+            cx="500"
+            cy={y}
+            r="5"
+            fill="#f97316"
+            animate={{ scale: [1, 1.6, 1], opacity: [0.8, 0.3, 0.8] }}
+            transition={{ duration: 2.2, repeat: Infinity, delay: i * 0.35 }}
+          />
+        ))}
+        <defs>
+          <linearGradient id="lineGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+            <stop offset="0%" stopColor="#f97316" stopOpacity="0.3" />
+            <stop offset="50%" stopColor="#f97316" stopOpacity="1" />
+            <stop offset="100%" stopColor="#f97316" stopOpacity="0.3" />
+          </linearGradient>
+        </defs>
+      </svg>
+
+      {/* Center Node */}
+      <motion.div
+        className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-20 flex flex-col items-center"
+        initial={{ opacity: 0, scale: 0.6 }}
+        animate={{ opacity: 1, scale: 1 }}
+      >
+        <div className="mb-3 px-4 py-1.5 bg-black dark:bg-white text-white dark:text-black text-xs font-medium rounded-full shadow-lg">
+          You
+        </div>
+        <motion.div
+          className="w-20 h-20 rounded-2xl bg-black dark:bg-gray-800 flex items-center justify-center shadow-2xl ring-4 ring-orange-400/40"
+          whileHover={{ scale: 1.1, rotate: 6 }}
+        >
+          <svg viewBox="0 0 24 24" className="w-10 h-10 text-orange-400" fill="currentColor">
+            <path d="M12 2L14.5 9H22L16 13.5L18.5 21L12 16.5L5.5 21L8 13.5L2 9H9.5L12 2Z" />
+          </svg>
+        </motion.div>
+        <div className="absolute -bottom-6 left-1/2 -translate-x-1/2 text-xs font-medium text-gray-500 dark:text-gray-400">
+          Claude Code
+        </div>
+      </motion.div>
+
+      {/* Agent Cards */}
+      {groups.map((group, groupIndex) => (
+        <motion.div
+          key={group.id}
+          initial={{ opacity: 0, scale: 0.85, y: 30 }}
+          animate={{ opacity: 1, scale: 1, y: 0 }}
+          transition={{ delay: 0.15 + groupIndex * 0.08 }}
+          whileHover={{ scale: 1.03, y: -6 }}
+          className={`absolute w-64 bg-white dark:bg-gray-800 rounded-2xl shadow-lg border border-gray-100 dark:border-gray-700 p-4 ${positionClasses[group.position]}`}
+        >
+          <div className="flex items-center justify-between mb-3">
+            <h3 className="font-semibold text-gray-800 dark:text-gray-100 text-sm">{group.title}</h3>
+            <span className="text-xs text-gray-400">{group.count} agents</span>
+          </div>
+          <ul className="space-y-1.5">
+            {group.agents.map((agent) => (
+              <motion.li
+                key={agent.id}
+                onClick={() => handleAgentClick(agent, group.title)}
+                whileHover={{ x: 4 }}
+                className={`flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-sm cursor-pointer ${
+                  agent.highlighted
+                    ? 'bg-orange-50 dark:bg-orange-500/15 text-orange-700 dark:text-orange-300 font-medium border border-orange-100 dark:border-orange-500/30'
+                    : 'text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700/50'
+                }`}
+              >
+                <span>{agent.icon}</span>
+                <span className="truncate flex-1">{agent.name}</span>
+                {agent.status === 'running' && (
+                  <motion.span
+                    className="w-1.5 h-1.5 rounded-full bg-orange-400"
+                    animate={{ scale: [1, 1.5, 1] }}
+                    transition={{ repeat: Infinity, duration: 1.2 }}
+                  />
+                )}
+                {agent.status === 'success' && <span className="text-emerald-500 text-xs">✓</span>}
+                {agent.status === 'error' && <span className="text-red-500 text-xs">✕</span>}
+              </motion.li>
+            ))}
+          </ul>
+        </motion.div>
+      ))}
+
+      {/* Side Panel */}
+      <AnimatePresence>
+        {selectedAgent && (
+          <>
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={closePanel}
+              className="absolute inset-0 bg-black/20 dark:bg-black/40 z-40"
+            />
+            <motion.div
+              initial={{ x: '100%' }}
+              animate={{ x: 0 }}
+              exit={{ x: '100%' }}
+              transition={{ type: 'spring', stiffness: 260, damping: 28 }}
+              className="absolute top-0 right-0 h-full w-[380px] bg-white dark:bg-gray-900 shadow-2xl z-50 border-l border-gray-200 dark:border-gray-700 flex flex-col"
+            >
+              <div className="flex items-center justify-between p-5 border-b border-gray-100 dark:border-gray-800">
+                <div>
+                  <p className="text-xs text-gray-400 mb-0.5">{selectedAgent.groupTitle}</p>
+                  <h2 className="text-lg font-semibold text-gray-900 dark:text-white flex items-center gap-2">
+                    <span>{selectedAgent.icon}</span>
+                    {selectedAgent.name}
+                  </h2>
+                </div>
+                <button
+                  onClick={closePanel}
+                  className="w-8 h-8 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 flex items-center justify-center text-gray-500"
+                >
+                  ✕
+                </button>
+              </div>
+
+              <div className="flex-1 p-5 overflow-y-auto">
+                <p className="text-sm text-gray-600 dark:text-gray-300 mb-6">{selectedAgent.description}</p>
+
+                <div className="flex items-center justify-between p-3 rounded-xl bg-gray-50 dark:bg-gray-800 mb-5">
+                  <span className="text-sm text-gray-500">Status</span>
+                  <div className="flex items-center gap-2">
+                    <span className={`w-2 h-2 rounded-full ${statusColors[selectedAgent.status || 'idle']}`} />
+                    <span className="text-sm font-medium capitalize">{selectedAgent.status || 'idle'}</span>
+                  </div>
+                </div>
+
+                {(isRunning || progress > 0) && (
+                  <div className="mb-5">
+                    <div className="flex justify-between text-xs text-gray-500 mb-1.5">
+                      <span>
+                        {isRunning ? 'Calling API...' : lastResult === 'success' ? 'Completed' : 'Failed'}
+                      </span>
+                      <span>{Math.round(progress)}%</span>
+                    </div>
+                    <div className="h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+                      <motion.div
+                        className={`h-full ${lastResult === 'error' ? 'bg-red-500' : 'bg-gradient-to-r from-orange-500 to-orange-400'}`}
+                        initial={{ width: 0 }}
+                        animate={{ width: `${progress}%` }}
+                      />
+                    </div>
+                  </div>
+                )}
+
+                <div className="grid grid-cols-2 gap-3 mb-6">
+                  <button
+                    onClick={runAgent}
+                    disabled={isRunning}
+                    className={`py-2.5 px-4 rounded-xl text-white text-sm font-medium flex items-center justify-center gap-2 transition-all ${
+                      isRunning ? 'bg-orange-400 cursor-not-allowed' : 'bg-orange-500 hover:bg-orange-600'
+                    }`}
+                  >
+                    {isRunning ? (
+                      <>
+                        <motion.span
+                          className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full"
+                          animate={{ rotate: 360 }}
+                          transition={{ repeat: Infinity, duration: 0.7, ease: 'linear' }}
+                        />
+                        Calling API...
+                      </>
+                    ) : (
+                      '▶ Run Agent'
+                    )}
+                  </button>
+                  <button
+                    onClick={resetAgent}
+                    disabled={isRunning}
+                    className="py-2.5 px-4 rounded-xl bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 text-sm font-medium disabled:opacity-50"
+                  >
+                    Reset
+                  </button>
+                </div>
+
+                {runLogs.length > 0 && (
+                  <div>
+                    <h4 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">API Logs</h4>
+                    <div className="bg-gray-50 dark:bg-gray-800/80 rounded-xl p-3 max-h-52 overflow-y-auto font-mono text-xs space-y-1.5">
+                      {runLogs.map((log, i) => (
+                        <motion.div
+                          key={i}
+                          initial={{ opacity: 0, x: -6 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          className={
+                            log.includes('✅')
+                              ? 'text-emerald-600 dark:text-emerald-400'
+                              : log.includes('❌') || log.includes('Error')
+                              ? 'text-red-500'
+                              : 'text-gray-600 dark:text-gray-300'
+                          }
+                        >
+                          {log}
+                        </motion.div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
+    </div>
+  )
+}
+```
+
+---
+
+### 5. Lancer l’application
+
+```bash
+npm run dev
+```
+
+Tu obtiens une application complète avec :
+- Header moderne
+- Dark mode persistant
+- Visualisation orbitale des agents
+- Panneau latéral détaillé
+- Exécution d’agent avec vraie simulation d’API (succès/erreur)
+- Animations fluides
+- Design soigné
+
+Tu veux que j’ajoute ensuite :
+1. Une page de statistiques / historique des runs ?
+2. Un système de filtres par statut ?
+3. La possibilité de créer / éditer des agents ?
+
+Dis-moi ce que tu veux prioriser.

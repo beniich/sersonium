@@ -2,11 +2,16 @@ import type {
   Agent,
   AgentIconKey,
   AgentStatus,
+  ApprovalItem,
   Group,
   OrchestratorStats,
   RunRecord,
+  SensoriumRubrique,
   StatusFilter,
-} from '../types/agent';
+  WorkflowIconKey,
+  WorkflowItem,
+  WorkflowStatus,
+} from '../types/agent.ts';
 
 export function matchesAgentFilter(
   agent: Agent,
@@ -218,3 +223,121 @@ export const STATUS_LABELS: Record<AgentStatus, string> = {
   success: 'Success',
   error: 'Error',
 };
+
+export function filterWorkflows(
+  workflows: WorkflowItem[],
+  options: {
+    status?: WorkflowStatus | 'all';
+    folder?: string | null;
+    subfolder?: string | null;
+    query?: string;
+  }
+): WorkflowItem[] {
+  const status = options.status ?? 'all';
+  const normalizedQuery = (options.query ?? '').trim().toLowerCase();
+
+  return workflows.filter((wf) => {
+    if (status !== 'all' && wf.status !== status) return false;
+    if (options.folder && wf.folder !== options.folder) return false;
+    if (options.subfolder && wf.subfolder !== options.subfolder) return false;
+    if (
+      normalizedQuery.length > 0 &&
+      !wf.name.toLowerCase().includes(normalizedQuery) &&
+      !wf.integrations.toLowerCase().includes(normalizedQuery) &&
+      !wf.folder.toLowerCase().includes(normalizedQuery)
+    ) {
+      return false;
+    }
+    return true;
+  });
+}
+
+export function createWorkflowItem(input: {
+  name: string;
+  integrations: string;
+  folder: WorkflowItem['folder'];
+  subfolder?: string;
+  status?: WorkflowStatus;
+  icon?: WorkflowIconKey;
+  linkedAgentId?: string;
+  description?: string;
+}): WorkflowItem | null {
+  const trimmedName = input.name.trim();
+  if (!trimmedName) return null;
+
+  const status = input.status ?? 'active';
+  return {
+    id: `wf-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
+    name: trimmedName,
+    integrations: input.integrations.trim() || 'Claude Code · Webhook',
+    folder: input.folder,
+    subfolder: input.subfolder?.trim() || undefined,
+    status,
+    statusLabel: status === 'active' ? 'Live' : status === 'paused' ? 'Paused' : 'Draft',
+    isLive: status === 'active',
+    icon: input.icon ?? 'spark',
+    sparkline: status === 'active' ? [6, 8, 7, 9, 8, 0, 0] : [4, 5, 0],
+    linkedAgentId: input.linkedAgentId || 'r2',
+    description:
+      input.description?.trim() ||
+      `Automated Fieldnote workflow orchestrated across ${input.integrations.trim() || 'Agent Orbit'}.`,
+    runsCount: 0,
+  };
+}
+
+export function applyApprovalDecision(
+  approvals: ApprovalItem[],
+  approvalId: string,
+  decision: 'approved' | 'declined',
+  timestamp?: string
+): ApprovalItem[] {
+  const decidedAt = timestamp ?? new Date().toISOString();
+  return approvals.map((item) =>
+    item.id === approvalId ? { ...item, status: decision, decidedAt } : item
+  );
+}
+
+export function filterSensoriumRubriques(
+  rubriques: SensoriumRubrique[],
+  options: {
+    query?: string;
+    rubriqueId?: string | null;
+    pillar?: SensoriumRubrique['pillar'] | null;
+  }
+): SensoriumRubrique[] {
+  const q = (options.query ?? '').trim().toLowerCase();
+
+  return rubriques
+    .filter((r) => {
+      if (options.rubriqueId && r.id !== options.rubriqueId) return false;
+      if (options.pillar && r.pillar !== options.pillar) return false;
+      if (!q) return true;
+      const rubriqueMatch =
+        r.title.toLowerCase().includes(q) ||
+        r.description.toLowerCase().includes(q) ||
+        r.cluster.toLowerCase().includes(q) ||
+        r.pillar.toLowerCase().includes(q);
+      if (rubriqueMatch) return true;
+      return r.services.some(
+        (svc) =>
+          svc.name.toLowerCase().includes(q) || svc.summary.toLowerCase().includes(q)
+      );
+    })
+    .map((r) => {
+      if (!q) return r;
+      const titleMatch =
+        r.title.toLowerCase().includes(q) ||
+        r.cluster.toLowerCase().includes(q) ||
+        r.pillar.toLowerCase().includes(q);
+      if (titleMatch) return r;
+      return {
+        ...r,
+        services: r.services.filter(
+          (svc) =>
+            svc.name.toLowerCase().includes(q) || svc.summary.toLowerCase().includes(q)
+        ),
+      };
+    });
+}
+
+

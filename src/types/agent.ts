@@ -20,7 +20,17 @@ export type AgentIconKey =
   | 'dollar'
   | 'message'
   | 'google'
-  | 'spark';
+  | 'spark'
+  | 'database'
+  | 'activity'
+  | 'terminal'
+  | 'cpu'
+  | 'lock'
+  | 'shield'
+  | 'workflow'
+  | 'bot'
+  | 'network'
+  | 'server';
 
 export type Agent = {
   id: string;
@@ -78,28 +88,107 @@ export type OrchestratorStats = {
   avgDurationMs: number;
 };
 
-export type TimeframeOption = 'today' | '7d' | '30d';
-
 export type WorkflowStatus = 'active' | 'paused' | 'draft';
+
+export type WorkflowIconKey =
+  | 'invoice'
+  | 'user'
+  | 'shield'
+  | 'calendar'
+  | 'wallet'
+  | 'spark'
+  | 'payroll'
+  | 'activity'
+  | 'cpu';
 
 export type WorkflowItem = {
   id: string;
   name: string;
-  icon: string;
   integrations: string;
+  folder: 'Finance' | 'People ops' | 'IT & access';
+  subfolder?: string;
   status: WorkflowStatus;
   statusLabel: string;
   isLive?: boolean;
+  icon: WorkflowIconKey;
   sparkline: number[];
+  linkedAgentId: string;
   agentId?: string;
+  description: string;
+  runsCount: number;
 };
+
+export type ApprovalStatus = 'pending' | 'approved' | 'declined';
 
 export type ApprovalItem = {
   id: string;
   title: string;
   subtitle: string;
   ageLabel: string;
-  status: 'pending' | 'approved' | 'declined';
   locked?: boolean;
+  status: ApprovalStatus;
+  decidedAt?: string;
+  workflowId?: string;
   agentId?: string;
 };
+
+export type TimeframeOption = 'today' | '7d' | '30d';
+
+export type WorkspaceView =
+  | 'overview'
+  | 'orbit'
+  | 'workflows'
+  | 'approvals'
+  | 'history'
+  | 'services'
+  | 'users';
+
+export type SensoriumRubriqueIconKey =
+  | 'globe'
+  | 'layers'
+  | 'compass'
+  | 'cpu'
+  | 'wrench'
+  | 'network'
+  | 'shield'
+  | 'laptop'
+  | 'lock'
+  | 'database'
+  | 'activity'
+  | 'users'
+  | 'server'
+  | 'target'
+  | 'bot'
+  | 'factory'
+  | 'zap'
+  | 'shield-alert'
+  | 'plug'
+  | 'settings';
+
+export type SensoriumServiceItem = {
+  id: string;
+  name: string;
+  endpoint: string;
+  status: 'online' | 'degraded' | 'standby';
+  latencyMs: number;
+  linkedAgentId: string;
+  summary: string;
+};
+
+export type SensoriumRubrique = {
+  id: string;
+  title: string;
+  count: number;
+  icon: SensoriumRubriqueIconKey;
+  pillar:
+    | 'Showcase & Solutions'
+    | 'Global ERP View'
+    | 'Vision Dashboard'
+    | '360° Asset Profile'
+    | '3D Digital Twin'
+    | 'AI Copilot';
+  cluster: string;
+  description: string;
+  services: SensoriumServiceItem[];
+};
+

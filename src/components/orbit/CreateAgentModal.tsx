@@ -18,18 +18,18 @@ interface CreateAgentModalProps {
 }
 
 const ICON_OPTIONS: { key: AgentIconKey; label: string }[] = [
-  { key: 'spark', label: 'Spark' },
-  { key: 'flower', label: 'Claude' },
+  { key: 'spark', label: 'AI Core' },
+  { key: 'database', label: 'Database' },
+  { key: 'shield', label: 'Security' },
+  { key: 'lock', label: 'Zero Trust' },
+  { key: 'workflow', label: 'Workflow' },
+  { key: 'network', label: 'Network' },
+  { key: 'cpu', label: 'Compute' },
+  { key: 'server', label: 'Server' },
+  { key: 'terminal', label: 'CLI' },
+  { key: 'activity', label: 'Telemetry' },
   { key: 'chart', label: 'Analytics' },
-  { key: 'mail', label: 'Email' },
-  { key: 'tiktok', label: 'TikTok' },
-  { key: 'instagram', label: 'Instagram' },
-  { key: 'youtube', label: 'YouTube' },
-  { key: 'x', label: 'X' },
-  { key: 'hubspot', label: 'CRM' },
-  { key: 'stripe', label: 'Stripe' },
-  { key: 'doc', label: 'Docs' },
-  { key: 'mic', label: 'Audio' },
+  { key: 'bot', label: 'Automation' },
 ];
 
 export function CreateAgentModal({
@@ -135,7 +135,7 @@ export function CreateAgentModal({
               <input
                 id="new-agent-name"
                 type="text"
-                placeholder="e.g. LinkedIn Scout"
+                placeholder="e.g. Threat Classifier"
                 value={name}
                 onChange={(e) => {
                   setName(e.target.value);
@@ -150,12 +150,12 @@ export function CreateAgentModal({
                 htmlFor="new-agent-platform"
                 className="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1.5"
               >
-                Channel / Tool
+                Platform / Integration
               </label>
               <input
                 id="new-agent-platform"
                 type="text"
-                placeholder="e.g. LinkedIn"
+                placeholder="e.g. SIEM / Kafka"
                 value={platform}
                 onChange={(e) => setPlatform(e.target.value)}
                 className="w-full px-3 py-2 text-sm rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-950 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-orange-500"
