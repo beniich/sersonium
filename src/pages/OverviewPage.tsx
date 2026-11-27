@@ -134,6 +134,7 @@ export default function OverviewPage({
       <div className="w-full -mt-2">
         <AgentOrbit 
           isDark={isDark} 
+          user={user}
           onNavigateToERP={() => handleTabChange("ov-general")}
         />
       </div>

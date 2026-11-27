@@ -122,7 +122,7 @@ export default function DetailedChartJSDashboard({
 
   // Chart 1: Multi-Axis Telemetry (Req/s & Latency & CPU)
   const multiAxisTelemetryData = useMemo(() => {
-    const trafficPoints = state.trafficData?.map(d => d.requests) || [4200, 3800, 4500, 8900, 14200, 16800, 13400, 9200];
+    const trafficPoints = state.trafficData?.map(d => d.requests) || new Array(8).fill(0);
     const cpuTrend = trafficPoints.map(v => Math.min(95, Math.max(25, Math.round((v / 18000) * 85 + 10))));
     const latencyTrend = trafficPoints.map(v => Math.min(35, Math.max(8, Math.round(12 + (v / 18000) * 8))));
 
@@ -176,11 +176,11 @@ export default function DetailedChartJSDashboard({
     const ramData = nodes.map(n => n.ramUsage || 50);
 
     return {
-      labels: nodeLabels.length ? nodeLabels : ["Paris", "Lyon", "Francfort", "Marseille", "Londres", "Madrid"],
+      labels: nodeLabels.length ? nodeLabels : [],
       datasets: [
         {
           label: "CPU (%)",
-          data: cpuData.length ? cpuData : [42, 58, 71, 39, 48, 62],
+          data: cpuData.length ? cpuData : [],
           backgroundColor: "#f97316",
           borderRadius: 4,
           barPercentage: 0.6,
@@ -188,7 +188,7 @@ export default function DetailedChartJSDashboard({
         },
         {
           label: "RAM (%)",
-          data: ramData.length ? ramData : [64, 72, 85, 52, 60, 68],
+          data: ramData.length ? ramData : [],
           backgroundColor: isDark ? "rgba(255, 255, 255, 0.25)" : "rgba(100, 116, 139, 0.4)",
           borderRadius: 4,
           barPercentage: 0.6,
@@ -308,6 +308,17 @@ export default function DetailedChartJSDashboard({
 
   return (
     <div className="space-y-3 sm:space-y-3.5 transition-all text-slate-900 dark:text-neutral-100">
+
+      {/* ─── T0 Zero-Data Banner: shown when no real assets/nodes yet ─── */}
+      {nodes.length === 0 && (state.trafficData || []).length === 0 && (
+        <div className="flex items-center gap-3 p-3 rounded-xl bg-orange-500/[0.06] border border-orange-500/20 text-xs text-orange-300">
+          <span className="text-lg">📡</span>
+          <div>
+            <p className="font-semibold text-orange-200">Phase T0 — Aucun asset détecté</p>
+            <p className="text-orange-400/80 mt-0.5">Connectez-vous avec votre compte Gmail ou créez votre premier site &amp; asset pour voir vos données réelles ici.</p>
+          </div>
+        </div>
+      )}
       
       {/* Sleek Tab Bar & Control Ribbon (Compact intervals & zero wasted height) */}
       <div className="flex flex-wrap items-center justify-between gap-2 p-1.5 sm:p-2 rounded-xl bg-slate-100/90 dark:bg-[#0e0e12]/95 border border-slate-200/80 dark:border-white/[0.08] backdrop-blur-md">

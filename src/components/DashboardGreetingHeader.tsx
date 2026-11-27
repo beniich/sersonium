@@ -284,7 +284,11 @@ export default function DashboardGreetingHeader({
                 </span>
                 <span className="hidden sm:inline text-neutral-600">•</span>
                 <span className="text-neutral-400 text-[11px] truncate max-w-[200px] sm:max-w-none">
-                  {user?.email || "Lacaza Flagship ERP • Global Supervision"}
+                  {user?.email || (
+                    <span className="text-neutral-500 italic text-[10px]">
+                      — Connexion Gmail requise pour données réelles —
+                    </span>
+                  )}
                 </span>
               </div>
             </div>

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Menu, Sun, Moon, Crown, UserPlus, Globe, Sparkles } from 'lucide-react';
+import { Menu, Sun, Moon, Crown, UserPlus, Globe, Sparkles, LogOut } from 'lucide-react';
 import { useRbac } from '@/hooks/useRbac';
 import { useConnectionHealth } from '@/hooks/useConnectionHealth';
 import { useTheme } from '../App';
@@ -10,6 +10,7 @@ import UserProfileModal from './UserProfileModal';
 import { SensoriumAuthModal } from './SensoriumAuthModal';
 import { GoogleLogoIcon } from './ShowcaseViewer';
 import authService from '../services/auth.service';
+import { logout as firebaseLogout } from '../firebase';
 import TrialService, { TrialStatus } from '../services/trial.service';
 
 export interface MasterHeaderProps {
@@ -33,6 +34,29 @@ export const MasterHeader: React.FC<MasterHeaderProps> = ({
   const [isGoogleLoggingIn, setIsGoogleLoggingIn] = useState(false);
   const [trialStatus, setTrialStatus] = useState<TrialStatus>(() => TrialService.getTrialStatus());
 
+  // ─── Sync Firebase/Gmail identity → RBAC context on login ───────────────────
+  const [firebaseUser, setFirebaseUser] = useState<{ displayName: string | null; email: string | null; photoURL: string | null } | null>(null);
+
+  useEffect(() => {
+    // Pull current auth user from authService on mount and on profile updates
+    const syncFirebaseUser = () => {
+      const session = authService.getSession();
+      const authUser = session?.user || null;
+      if (authUser) {
+        setFirebaseUser({
+          displayName: authUser.displayName || null,
+          email: authUser.email || null,
+          photoURL: authUser.photoUrl || null,
+        });
+      } else {
+        setFirebaseUser(null);
+      }
+    };
+    syncFirebaseUser();
+    window.addEventListener('sensorium:profile_updated', syncFirebaseUser);
+    return () => window.removeEventListener('sensorium:profile_updated', syncFirebaseUser);
+  }, []);
+
   useEffect(() => {
     const updateTrial = () => setTrialStatus(TrialService.getTrialStatus());
     window.addEventListener('sensorium:trial_updated', updateTrial);
@@ -52,7 +76,6 @@ export const MasterHeader: React.FC<MasterHeaderProps> = ({
       window.dispatchEvent(new CustomEvent("sensorium:profile_updated"));
     } catch (e) {
       console.warn("[MasterHeader] Google login error:", e);
-      // Ouvre la modale d'auth en secours
       setAuthDefaultTab('login');
       setIsAuthModalOpen(true);
     } finally {
@@ -60,9 +83,25 @@ export const MasterHeader: React.FC<MasterHeaderProps> = ({
     }
   };
 
-  // Initiales locales pour profil souverain (zero fuite vers serveurs tiers)
-  const initials = currentUser?.name
-    ?.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2) ?? 'EM';
+  const handleLogout = async () => {
+    try {
+      await firebaseLogout();
+      window.dispatchEvent(new CustomEvent("sensorium:profile_updated"));
+    } catch (e) {
+      console.warn("[MasterHeader] Logout error:", e);
+    }
+  };
+
+  // Effective display: Firebase/Gmail data takes priority over RBAC session
+  const effectiveName = firebaseUser?.displayName || currentUser?.name || null;
+  const effectiveEmail = firebaseUser?.email || currentUser?.email || null;
+  const effectivePhoto = firebaseUser?.photoURL || currentUser?.photoUrl || null;
+  const isConnected = !!effectiveName && effectiveName !== 'Admin User';
+
+  // Compute initials from real identity
+  const initials = effectiveName
+    ? effectiveName.split(' ').map((n: string) => n[0]).join('').toUpperCase().slice(0, 2)
+    : (effectiveEmail ? effectiveEmail.slice(0, 2).toUpperCase() : 'S');
 
   return (
     <header className={`h-[46px] w-full bg-[#111317] border-b border-white/[0.08] flex items-center justify-between px-3 sm:px-4.5 sticky top-0 z-50 backdrop-blur-md transition-colors ${className}`}>
@@ -113,7 +152,7 @@ export const MasterHeader: React.FC<MasterHeaderProps> = ({
         >
           <span className="w-1.5 h-1.5 rounded-full bg-[#E5FA52]" />
           <span className="text-[11px] text-slate-300 font-medium leading-none truncate max-w-[120px] sm:max-w-[180px] group-hover:text-white transition-colors">
-            {currentTenant?.name ?? 'SENSORIUM Démo Corp'}
+            {currentTenant?.name ?? (effectiveName ? `${effectiveName} — Sovereign` : 'SENSORIUM — T0')}
           </span>
         </div>
       </div>
@@ -239,35 +278,49 @@ export const MasterHeader: React.FC<MasterHeaderProps> = ({
           {theme === "dark" ? <Sun size={13} className="text-slate-400 hover:text-white" /> : <Moon size={13} className="text-slate-400 hover:text-white" />}
         </button>
 
+        {/* User Identity: real Gmail name + role */}
         <div 
           onClick={() => setIsProfileModalOpen(true)}
           className="text-right hidden sm:block cursor-pointer group pl-1"
           title="Modifier votre profil et nom d'organisation"
         >
           <p className="text-[11px] font-semibold text-white leading-none truncate max-w-[110px] group-hover:text-[#E5FA52] transition-colors">
-            {currentUser?.name ?? 'Admin User'}
+            {effectiveName ?? (isConnected ? currentUser?.name : '— T0 Non connecté')}
           </p>
           <p className="text-[9px] text-[#8E929C] uppercase leading-none mt-0.5">
-            {currentUser?.role ?? 'SuperAdmin'}
+            {effectiveEmail ? effectiveEmail.split('@')[0] : (currentUser?.role ?? 'Souverain')}
           </p>
         </div>
 
         {/* Avatar Souverain Local / Photo de profil Gmail */}
         <div 
           onClick={() => setIsProfileModalOpen(true)}
-          className="w-7 h-7 rounded-full bg-[#1C1E22] border border-white/20 flex items-center justify-center cursor-pointer hover:border-[#E5FA52] transition-all shadow-xs overflow-hidden"
-          title="Modifier mon profil & photo Gmail"
+          className="w-7 h-7 rounded-full bg-[#1C1E22] border border-white/20 flex items-center justify-center cursor-pointer hover:border-[#E5FA52] transition-all shadow-xs overflow-hidden group"
+          title={isConnected ? `Profil connecté : ${effectiveName}` : "Se connecter avec Gmail"}
         >
-          {currentUser?.photoUrl ? (
+          {effectivePhoto ? (
             <img 
-              src={currentUser.photoUrl} 
-              alt={currentUser.name || "Profil"} 
+              src={effectivePhoto} 
+              alt={effectiveName || "Profil"} 
+              referrerPolicy="no-referrer"
               className="w-full h-full object-cover" 
             />
           ) : (
             <span className="text-white text-[10px] font-bold tracking-tight">{initials}</span>
           )}
         </div>
+
+        {/* Logout button when user connected */}
+        {isConnected && (
+          <button
+            onClick={handleLogout}
+            className="p-1.5 rounded-full bg-white/[0.04] hover:bg-red-500/15 border border-white/[0.06] hover:border-red-500/40 text-slate-500 hover:text-red-400 transition-all shadow-xs flex items-center justify-center cursor-pointer"
+            title="Se déconnecter"
+            aria-label="Déconnexion"
+          >
+            <LogOut size={12} />
+          </button>
+        )}
       </div>
 
       {/* Modale de Gestion du Profil Utilisateur & Organisation */}
