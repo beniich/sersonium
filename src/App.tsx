@@ -718,7 +718,7 @@ export default function App() {
         return (
           <Suspense fallback={<div className="p-12 text-center text-slate-400"><Loader2 className="w-8 h-8 animate-spin mx-auto text-orange-500 mb-2" />Chargement de l'Agent Orbit...</div>}>
             <div className="p-4 sm:p-6 max-w-[1400px] mx-auto">
-              <AgentOrbit isDark={isDark} />
+              <AgentOrbit isDark={isDark} onToggleTheme={toggleTheme} user={user} />
             </div>
           </Suspense>
         );
@@ -923,6 +923,7 @@ export default function App() {
                 }>
                   <AgentOrbit 
                     isDark={isDark} 
+                    onToggleTheme={toggleTheme}
                     user={user}
                     onNavigateToERP={() => {
                       try {

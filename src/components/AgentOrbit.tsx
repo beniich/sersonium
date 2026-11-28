@@ -2,7 +2,8 @@
 // SENSORIUM AI — Nouveau Dashboard Fieldnote & Agent Orbit 36
 // Intégration complète fidèle à new26_11 (TopNavBar, Dock, Sidebar, Multi-vues, Zero-Trust ZT 100%, Services 128)
 
-import React, { useState, useEffect, useMemo, useRef } from 'react';
+import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react';
+import { useTheme } from '../App';
 import {
   Plus,
   History,
@@ -114,12 +115,14 @@ const VIEW_LABELS: Record<WorkspaceView, { crumb: string; title: string }> = {
 
 export interface AgentOrbitProps {
   isDark?: boolean;
+  onToggleTheme?: () => void;
   onNavigateToERP?: () => void;
   user?: any;
 }
 
 export default function AgentOrbit({
   isDark: isDarkProp,
+  onToggleTheme,
   onNavigateToERP,
   user,
 }: AgentOrbitProps) {
@@ -129,10 +132,13 @@ export default function AgentOrbit({
     return authService.getSession().user;
   }, [user]);
 
-  const [isDark, setIsDark] = useState<boolean>(() => {
+  // Synchronisation avec le ThemeContext global de SENSORIUM
+  const themeContext = useTheme();
+
+  const [localIsDark, setLocalIsDark] = useState<boolean>(() => {
     if (isDarkProp !== undefined) return isDarkProp;
     try {
-      const saved = localStorage.getItem('theme');
+      const saved = localStorage.getItem('theme') || localStorage.getItem('cafm_theme');
       if (saved === 'dark') return true;
       if (saved === 'light') return false;
       return true;
@@ -141,11 +147,19 @@ export default function AgentOrbit({
     }
   });
 
-  useEffect(() => {
-    if (isDarkProp !== undefined) {
-      setIsDark(isDarkProp);
+  const isDark = isDarkProp !== undefined
+    ? isDarkProp
+    : (themeContext?.isDark !== undefined ? themeContext.isDark : localIsDark);
+
+  const handleToggleTheme = useCallback(() => {
+    if (onToggleTheme) {
+      onToggleTheme();
+    } else if (themeContext?.toggleTheme) {
+      themeContext.toggleTheme();
+    } else {
+      setLocalIsDark((d) => !d);
     }
-  }, [isDarkProp]);
+  }, [onToggleTheme, themeContext]);
 
   const [activeView, setActiveView] = useState<WorkspaceView>('overview');
   const [timeframe, setTimeframe] = useState<TimeframeOption>('today');
@@ -259,17 +273,21 @@ export default function AgentOrbit({
 
   useEffect(() => {
     const root = document.documentElement;
+    const body = document.body;
+    const themeName = isDark ? 'dark' : 'light';
     if (isDark) {
       root.classList.add('dark');
-      try {
-        localStorage.setItem('theme', 'dark');
-      } catch {}
+      body.classList.add('dark');
     } else {
       root.classList.remove('dark');
-      try {
-        localStorage.setItem('theme', 'light');
-      } catch {}
+      body.classList.remove('dark');
     }
+    root.setAttribute('data-theme', themeName);
+    body.setAttribute('data-theme', themeName);
+    try {
+      localStorage.setItem('theme', themeName);
+      localStorage.setItem('cafm_theme', themeName);
+    } catch {}
   }, [isDark]);
 
   useEffect(() => {
@@ -1420,7 +1438,7 @@ export default function AgentOrbit({
 
         <button
           type="button"
-          onClick={() => setIsDark((d) => !d)}
+          onClick={handleToggleTheme}
           aria-label={isDark ? 'Switch to light mode' : 'Switch to dark mode'}
           title={isDark ? 'Switch to light mode' : 'Switch to dark mode'}
           className="p-1.5 rounded-lg text-[#8E929C] hover:text-slate-900 dark:hover:text-white hover:bg-black/5 dark:hover:bg-white/10 transition"
@@ -1576,7 +1594,7 @@ export default function AgentOrbit({
         </div>
         <button
           type="button"
-          onClick={() => setIsDark((d) => !d)}
+          onClick={handleToggleTheme}
           aria-label={isDark ? 'Switch to light mode' : 'Switch to dark mode'}
           title={isDark ? 'Switch to light mode' : 'Switch to dark mode'}
           className="w-8 h-8 rounded-lg flex items-center justify-center text-[#8E929C] hover:text-slate-900 dark:hover:text-white hover:bg-black/5 dark:hover:bg-white/10 transition"
@@ -1692,12 +1710,12 @@ export default function AgentOrbit({
 
               <button
                 type="button"
-                onClick={() => setIsDark((d) => !d)}
+                onClick={handleToggleTheme}
                 aria-label="Toggle theme"
                 title={isDark ? 'Switch to light mode' : 'Switch to dark mode'}
                 className="w-8 h-8 rounded-xl text-white/55 hover:bg-white/10 hover:text-white flex items-center justify-center transition"
               >
-                <Settings className="w-4 h-4" />
+                {isDark ? <Sun className="w-4 h-4 text-amber-300" /> : <Moon className="w-4 h-4" />}
               </button>
             </div>
 
@@ -1942,8 +1960,9 @@ export default function AgentOrbit({
 
                 <button
                   type="button"
-                  onClick={() => setIsDark((d) => !d)}
+                  onClick={handleToggleTheme}
                   aria-label={isDark ? 'Switch to light mode' : 'Switch to dark mode'}
+                  title={isDark ? 'Switch to light mode' : 'Switch to dark mode'}
                   className="w-9 h-9 rounded-full bg-white dark:bg-[#1e2023] border border-white dark:border-white/[0.08] shadow-xs flex items-center justify-center text-[#8E929C] hover:text-black dark:hover:text-white transition"
                 >
                   {isDark ? (

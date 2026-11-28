@@ -514,7 +514,7 @@ export default function DashboardLayout(props: any) {
   };
 
   return (
-    <div className="min-h-screen bg-[#07090E] text-slate-100 font-sans selection:bg-[#E5FA52]/20 relative overflow-x-hidden flex flex-col transition-colors duration-300">
+    <div className="min-h-screen bg-[#E7E9ED] dark:bg-[#07090E] text-slate-900 dark:text-slate-100 font-sans selection:bg-[#E5FA52]/20 relative overflow-x-hidden flex flex-col transition-colors duration-300">
       
       {/* Background Ambient Flagship Glow with Soft Easing */}
       <div className="fixed inset-0 pointer-events-none overflow-hidden z-0">
@@ -749,17 +749,17 @@ export default function DashboardLayout(props: any) {
         {/* END: Extreme Left Primary Icon Dock */}
 
         {/* BEGIN: Secondary Sidebar (Tactile 128 Services Suite) */}
-        <aside className={`flex-shrink-0 bg-[#13161C] rounded-[26px] border border-white/[0.06] shadow-sm flex flex-col justify-between hidden lg:flex transition-all duration-300 ease-in-out overflow-hidden ${isSidebarCollapsed ? "w-0 opacity-0 p-0 border-0 pointer-events-none -ml-2.5" : "w-64 xl:w-72 opacity-100"}`}>
+        <aside className={`flex-shrink-0 bg-[#F2F4F7]/95 dark:bg-[#13161C] rounded-[26px] border border-slate-200/80 dark:border-white/[0.06] shadow-sm flex flex-col justify-between hidden lg:flex transition-all duration-300 ease-in-out overflow-hidden ${isSidebarCollapsed ? "w-0 opacity-0 p-0 border-0 pointer-events-none -ml-2.5" : "w-64 xl:w-72 opacity-100"}`}>
           {/* Workspace Header & Search Input */}
-          <div className="p-3 border-b border-white/[0.06] space-y-2.5">
+          <div className="p-3 border-b border-slate-200/70 dark:border-white/[0.06] space-y-2.5">
             {/* Active Workspace Capsule */}
-            <div className="flex items-center justify-between p-1.5 bg-[#181A1F] rounded-2xl border border-white/[0.06] shadow-2xs">
+            <div className="flex items-center justify-between p-1.5 bg-white dark:bg-[#181A1F] rounded-2xl border border-slate-200/70 dark:border-white/[0.06] shadow-2xs">
               <div className="flex items-center gap-2 min-w-0">
-                <div className="w-7 h-7 rounded-xl bg-white text-[#111317] flex items-center justify-center text-xs font-bold shrink-0">
+                <div className="w-7 h-7 rounded-xl bg-slate-900 text-white dark:bg-white dark:text-[#111317] flex items-center justify-center text-xs font-bold shrink-0">
                   S
                 </div>
                 <div className="leading-tight min-w-0">
-                  <div className="text-xs font-semibold text-white truncate">{currentTenant?.name ?? 'SENSORIUM'}</div>
+                  <div className="text-xs font-semibold text-slate-900 dark:text-white truncate">{currentTenant?.name ?? 'SENSORIUM'}</div>
                   <div className="text-[10px] text-[#8E929C] truncate">Core workspace</div>
                 </div>
               </div>
@@ -775,12 +775,12 @@ export default function DashboardLayout(props: any) {
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   placeholder="Search services..."
-                  className="w-full bg-white/[0.04] text-xs rounded-xl pl-8 pr-7 py-1.5 border border-transparent focus:border-white/20 focus:bg-[#181A1F] placeholder-[#8E929C] text-white outline-none transition-all"
+                  className="w-full bg-slate-100 dark:bg-white/[0.04] text-xs rounded-xl pl-8 pr-7 py-1.5 border border-slate-200/60 dark:border-transparent focus:border-slate-300 dark:focus:border-white/20 focus:bg-white dark:focus:bg-[#181A1F] placeholder-[#8E929C] text-slate-900 dark:text-white outline-none transition-all"
                 />
                 {searchQuery ? (
                   <button
                     onClick={() => setSearchQuery("")}
-                    className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[#8E929C] hover:text-white"
+                    className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[#8E929C] hover:text-slate-900 dark:hover:text-white"
                   >
                     <X className="w-3 h-3" />
                   </button>
@@ -790,7 +790,7 @@ export default function DashboardLayout(props: any) {
               </div>
               <button
                 onClick={toggleSidebarCollapse}
-                className="p-1.5 rounded-xl text-[#8E929C] hover:text-white hover:bg-white/[0.06] transition-colors shrink-0"
+                className="p-1.5 rounded-xl text-[#8E929C] hover:text-slate-900 dark:hover:text-white hover:bg-black/5 dark:hover:bg-white/[0.06] transition-colors shrink-0"
                 title="Réduire la barre latérale"
               >
                 <PanelLeftClose className="w-4 h-4" />
@@ -867,8 +867,8 @@ export default function DashboardLayout(props: any) {
                             onClick={() => handleSelectService(item.page, item.id)}
                             className={`w-full text-left px-2.5 py-1.5 text-xs rounded-xl transition-all flex items-center justify-between group cursor-pointer ${
                               isActive 
-                                ? "bg-[#202327] text-white font-medium border border-white/[0.08] shadow-xs" 
-                                : "text-[#8E929C] hover:text-white hover:bg-white/[0.04]"
+                                ? "bg-white dark:bg-[#202327] text-slate-900 dark:text-white font-medium border border-black/[0.04] dark:border-white/[0.08] shadow-xs" 
+                                : "text-slate-600 dark:text-[#8E929C] hover:text-slate-900 dark:hover:text-white hover:bg-black/[0.03] dark:hover:bg-white/[0.04]"
                             }`}
                           >
                             <span className="truncate text-[12px]">{item.label}</span>
@@ -907,22 +907,22 @@ export default function DashboardLayout(props: any) {
           </div>
 
           {/* Profile Card at bottom */}
-          <div className="p-3 border-t border-white/[0.06] bg-[#101217] flex items-center justify-between">
+          <div className="p-3 border-t border-slate-200/70 dark:border-white/[0.06] bg-slate-50/80 dark:bg-[#101217] flex items-center justify-between">
             <div 
               onClick={() => setIsProfileModalOpen(true)}
               className="flex items-center gap-2 cursor-pointer group min-w-0"
             >
-              <div className="w-7 h-7 rounded-full bg-slate-700 flex items-center justify-center text-[10px] font-bold text-white shrink-0">
+              <div className="w-7 h-7 rounded-full bg-slate-300 dark:bg-slate-700 flex items-center justify-center text-[10px] font-bold text-slate-800 dark:text-white shrink-0">
                 {initials}
               </div>
               <div className="leading-tight min-w-0">
-                <div className="text-xs font-semibold text-white truncate group-hover:text-[#E5FA52] transition-colors">{currentUser?.name ?? 'Admin User'}</div>
+                <div className="text-xs font-semibold text-slate-900 dark:text-white truncate group-hover:text-[#E5FA52] transition-colors">{currentUser?.name ?? 'Admin User'}</div>
                 <div className="text-[10px] text-[#8E929C] truncate">{currentUser?.role ?? 'SuperAdmin'}</div>
               </div>
             </div>
             <button
               onClick={() => setIsProfileModalOpen(true)}
-              className="text-[#8E929C] hover:text-white"
+              className="text-[#8E929C] hover:text-slate-900 dark:hover:text-white"
               title="Options"
             >
               ···
@@ -1041,8 +1041,8 @@ export default function DashboardLayout(props: any) {
           </div>
         )}
 
-        {/* Responsive Main Content Canvas Encapsulated in Tactile Dark Surface */}
-        <main className="flex-1 min-w-0 bg-[#15171B] rounded-[28px] border border-white/[0.06] shadow-soft-card overflow-y-auto transition-colors duration-300 relative flex flex-col p-2.5 sm:p-4">
+        {/* Responsive Main Content Canvas Encapsulated in Tactile Surface */}
+        <main className="flex-1 min-w-0 bg-white dark:bg-[#15171B] rounded-[28px] border border-slate-200/80 dark:border-white/[0.06] shadow-soft-card overflow-y-auto transition-colors duration-300 relative flex flex-col p-2.5 sm:p-4 text-slate-900 dark:text-slate-100">
           {children}
           <DashboardFooter />
         </main>
