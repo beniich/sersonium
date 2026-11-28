@@ -2016,7 +2016,7 @@ export default function AgentOrbit({
             )}
 
             {activeView === 'orbit' && (
-              <div className="pt-0.5 pb-1 space-y-2.5">
+              <div className="pt-0.5 pb-6 space-y-4">
                 <OrbitDiagram
                   groups={groups}
                   selectedAgentId={selectedAgentId}

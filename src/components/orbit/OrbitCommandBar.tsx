@@ -421,98 +421,116 @@ export function OrbitCommandBar({
         <form onSubmit={handleSubmit}>
           <div
             ref={barRef}
-            className={`relative flex items-center gap-2 bg-white/95 dark:bg-[#1e2023]/95 backdrop-blur-md border border-yellow-500/45 dark:border-yellow-400/30 rounded-2xl shadow-[0_0_24px_-6px_rgba(250,204,21,0.38),0_14px_34px_-10px_rgba(15,23,42,0.18)] dark:shadow-[0_0_28px_-6px_rgba(250,204,21,0.32),0_16px_38px_-10px_rgba(0,0,0,0.75)] px-3 py-2.5 focus-within:ring-2 focus-within:ring-yellow-400/60 transition-shadow ${
+            className={`relative flex items-center gap-2 bg-white/95 dark:bg-[#1a1c1f]/95 backdrop-blur-md border border-yellow-400/60 dark:border-yellow-400/50 rounded-2xl shadow-[0_0_25px_rgba(250,204,21,0.35),0_0_50px_rgba(234,179,8,0.18),inset_0_0_15px_rgba(250,204,21,0.08)] px-3 py-2.5 focus-within:ring-2 focus-within:ring-yellow-400 focus-within:shadow-[0_0_35px_rgba(250,204,21,0.6),0_0_70px_rgba(234,179,8,0.3)] transition-all ${
               isBusy ? 'orbit-electric-busy' : ''
             }`}
           >
-            {barSize.width > 0 && barSize.height > 0 && (
-              <svg
-                aria-hidden="true"
-                data-testid="electric-command-contour"
-                width={barSize.width + svgPad * 2}
-                height={barSize.height + svgPad * 2}
-                viewBox={`0 0 ${barSize.width + svgPad * 2} ${barSize.height + svgPad * 2}`}
-                style={{ left: -svgPad, top: -svgPad }}
-                className="pointer-events-none absolute z-20 overflow-visible"
-              >
-                <defs>
-                  <filter id="electric-yellow-glow" x="-20%" y="-40%" width="140%" height="180%">
-                    <feGaussianBlur stdDeviation="2.6" result="blur" />
-                    <feMerge>
-                      <feMergeNode in="blur" />
-                      <feMergeNode in="SourceGraphic" />
-                    </feMerge>
-                  </filter>
-                  <linearGradient id="electric-yellow-stroke" x1="0%" y1="0%" x2="100%" y2="0%">
-                    <stop offset="0%" stopColor="#eab308" />
-                    <stop offset="50%" stopColor="#fde047" />
-                    <stop offset="100%" stopColor="#facc15" />
-                  </linearGradient>
-                </defs>
+            {/* SVG Electric Laser Beams & Continuous Neon Aura */}
+            <svg
+              aria-hidden="true"
+              data-testid="electric-command-contour"
+              width={barSize.width > 0 ? barSize.width + svgPad * 2 : '100%'}
+              height={barSize.height > 0 ? barSize.height + svgPad * 2 : '100%'}
+              viewBox={
+                barSize.width > 0
+                  ? `0 0 ${barSize.width + svgPad * 2} ${barSize.height + svgPad * 2}`
+                  : undefined
+              }
+              style={barSize.width > 0 ? { left: -svgPad, top: -svgPad } : { inset: 0 }}
+              className="pointer-events-none absolute z-20 overflow-visible orbit-electric-pulse"
+            >
+              <defs>
+                <filter id="electric-yellow-glow" x="-25%" y="-50%" width="150%" height="200%">
+                  <feGaussianBlur stdDeviation="3.2" result="blur" />
+                  <feMerge>
+                    <feMergeNode in="blur" />
+                    <feMergeNode in="blur" />
+                    <feMergeNode in="SourceGraphic" />
+                  </feMerge>
+                </filter>
+                <filter id="electric-core-glow" x="-20%" y="-40%" width="140%" height="180%">
+                  <feGaussianBlur stdDeviation="1.5" result="blur" />
+                  <feMerge>
+                    <feMergeNode in="blur" />
+                    <feMergeNode in="SourceGraphic" />
+                  </feMerge>
+                </filter>
+                <linearGradient id="electric-yellow-stroke" x1="0%" y1="0%" x2="100%" y2="0%">
+                  <stop offset="0%" stopColor="#eab308" />
+                  <stop offset="35%" stopColor="#facc15" />
+                  <stop offset="70%" stopColor="#fef08a" />
+                  <stop offset="100%" stopColor="#fde047" />
+                </linearGradient>
+              </defs>
 
-                <rect
-                  x={svgPad}
-                  y={svgPad}
-                  width={barSize.width}
-                  height={barSize.height}
-                  rx={16}
-                  ry={16}
-                  fill="none"
-                  stroke="rgba(250, 204, 21, 0.24)"
-                  strokeWidth="1.25"
-                />
+              {/* 1. Continuous Base Neon Contour (no gaps, always visible and luminous) */}
+              <rect
+                x={svgPad}
+                y={svgPad}
+                width={barSize.width || '100%'}
+                height={barSize.height || '100%'}
+                rx={16}
+                ry={16}
+                fill="none"
+                stroke="rgba(250, 204, 21, 0.45)"
+                strokeWidth="1.75"
+                filter="url(#electric-yellow-glow)"
+              />
 
-                <rect
-                  x={svgPad}
-                  y={svgPad}
-                  width={barSize.width}
-                  height={barSize.height}
-                  rx={16}
-                  ry={16}
-                  pathLength={1000}
-                  fill="none"
-                  stroke="url(#electric-yellow-stroke)"
-                  strokeWidth="2.8"
-                  strokeLinecap="round"
-                  strokeDasharray="190 310"
-                  filter="url(#electric-yellow-glow)"
-                  className="orbit-electric-arc-glow"
-                />
+              {/* 2. Rotating Primary Electric Plasma Arc (flows smoothly around the perimeter) */}
+              <rect
+                x={svgPad}
+                y={svgPad}
+                width={barSize.width || '100%'}
+                height={barSize.height || '100%'}
+                rx={16}
+                ry={16}
+                pathLength={1000}
+                fill="none"
+                stroke="url(#electric-yellow-stroke)"
+                strokeWidth="3.2"
+                strokeLinecap="round"
+                strokeDasharray="360 140"
+                filter="url(#electric-yellow-glow)"
+                className="orbit-electric-arc-glow"
+              />
 
-                <rect
-                  x={svgPad}
-                  y={svgPad}
-                  width={barSize.width}
-                  height={barSize.height}
-                  rx={16}
-                  ry={16}
-                  pathLength={1000}
-                  fill="none"
-                  stroke="#fef9c3"
-                  strokeWidth="1.6"
-                  strokeLinecap="round"
-                  strokeDasharray="78 422"
-                  className="orbit-electric-arc-core"
-                />
+              {/* 3. Ultra-Bright White/Yellow Electric Core (Sparkling laser head) */}
+              <rect
+                x={svgPad}
+                y={svgPad}
+                width={barSize.width || '100%'}
+                height={barSize.height || '100%'}
+                rx={16}
+                ry={16}
+                pathLength={1000}
+                fill="none"
+                stroke="#ffffff"
+                strokeWidth="2.2"
+                strokeLinecap="round"
+                strokeDasharray="90 410"
+                filter="url(#electric-core-glow)"
+                className="orbit-electric-arc-core"
+              />
 
-                <rect
-                  x={svgPad}
-                  y={svgPad}
-                  width={barSize.width}
-                  height={barSize.height}
-                  rx={16}
-                  ry={16}
-                  pathLength={1000}
-                  fill="none"
-                  stroke="#fde047"
-                  strokeWidth="1.8"
-                  strokeLinecap="round"
-                  strokeDasharray="24 476"
-                  filter="url(#electric-yellow-glow)"
-                  className="orbit-electric-arc-spark"
-                />
-              </svg>
-            )}
+              {/* 4. High-Frequency Electric Spark Runner */}
+              <rect
+                x={svgPad}
+                y={svgPad}
+                width={barSize.width || '100%'}
+                height={barSize.height || '100%'}
+                rx={16}
+                ry={16}
+                pathLength={1000}
+                fill="none"
+                stroke="#fef08a"
+                strokeWidth="2.5"
+                strokeLinecap="round"
+                strokeDasharray="45 455"
+                filter="url(#electric-yellow-glow)"
+                className="orbit-electric-arc-spark"
+              />
+            </svg>
 
             <button
               type="button"

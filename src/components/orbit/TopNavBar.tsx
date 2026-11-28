@@ -470,8 +470,19 @@ export function TopNavBar({
         </button>
       </div>
 
-      {/* Right Cluster: Preview, Users, Showcase & Solutions, Billing, Google Connected, Sign up, Pass, Quota */}
-      <div className="flex flex-wrap lg:flex-nowrap items-center gap-1 2xl:gap-1.5 min-w-0 max-w-full">
+      {/* Right Cluster: ERP Switch, Preview, Users, Showcase, Billing, Google, Sign up, Pass, Quota */}
+      <div className="flex items-center gap-1 2xl:gap-1.5 min-w-0 max-w-full overflow-x-auto scrollbar-none py-0.5">
+        {onNavigateToERP && (
+          <button
+            type="button"
+            onClick={onNavigateToERP}
+            title="Basculer vers la supervision ERP Classique SENSORIUM"
+            className="flex items-center gap-1 px-2.5 py-1 rounded-full bg-slate-900 dark:bg-white/95 hover:bg-slate-800 dark:hover:bg-white text-white dark:text-[#111317] text-[11px] font-semibold transition whitespace-nowrap shadow-xs shrink-0 cursor-pointer"
+          >
+            <span>Vue ERP Classique →</span>
+          </button>
+        )}
+
         <button
           type="button"
           onClick={onOpenPreview}
@@ -505,18 +516,18 @@ export function TopNavBar({
           type="button"
           onClick={onOpenVitrine}
           title="Showcase & Solutions"
-          className="flex items-center gap-1 px-2 2xl:px-2.5 py-1 rounded-full bg-white dark:bg-[#1e2023] hover:bg-slate-50 dark:hover:bg-[#282a2d] border border-slate-200 dark:border-white/[0.06] text-slate-700 dark:text-white/80 hover:text-slate-950 dark:hover:text-white text-[11px] transition whitespace-nowrap shrink-0"
+          className="hidden md:flex items-center gap-1 px-2 2xl:px-2.5 py-1 rounded-full bg-white dark:bg-[#1e2023] hover:bg-slate-50 dark:hover:bg-[#282a2d] border border-slate-200 dark:border-white/[0.06] text-slate-700 dark:text-white/80 hover:text-slate-950 dark:hover:text-white text-[11px] transition whitespace-nowrap shrink-0"
         >
           <Globe className="w-3.5 h-3.5 text-slate-500 dark:text-white/60 shrink-0" />
           <span>
-            Showcase<span className="hidden min-[1380px]:inline"> &amp; Solutions</span>
+            Showcase<span className="hidden 2xl:inline"> &amp; Solutions</span>
           </span>
         </button>
 
         <button
           type="button"
           onClick={() => onOpenModal('subscription')}
-          className="hidden sm:flex items-center gap-1 px-2 2xl:px-2.5 py-1 rounded-full bg-white dark:bg-[#1e2023] hover:bg-slate-50 dark:hover:bg-[#282a2d] border border-slate-200 dark:border-white/[0.06] text-slate-700 dark:text-white/80 hover:text-slate-950 dark:hover:text-white text-[11px] transition whitespace-nowrap shrink-0"
+          className="hidden xl:flex items-center gap-1 px-2 2xl:px-2.5 py-1 rounded-full bg-white dark:bg-[#1e2023] hover:bg-slate-50 dark:hover:bg-[#282a2d] border border-slate-200 dark:border-white/[0.06] text-slate-700 dark:text-white/80 hover:text-slate-950 dark:hover:text-white text-[11px] transition whitespace-nowrap shrink-0"
         >
           <Crown className="w-3.5 h-3.5 text-slate-500 dark:text-white/60 shrink-0" />
           <span>Billing</span>
@@ -549,11 +560,11 @@ export function TopNavBar({
           <span>
             {isGoogleConnected ? (
               <>
-                Google<span className="hidden xl:inline"> Connected</span>
+                Google<span className="hidden 2xl:inline"> Connected</span>
               </>
             ) : (
               <>
-                <span className="hidden xl:inline">Connect </span>Google
+                <span className="hidden 2xl:inline">Connect </span>Google
               </>
             )}
           </span>
@@ -563,12 +574,12 @@ export function TopNavBar({
           type="button"
           onClick={() => onOpenModal('signup')}
           data-testid="topbar-auth-button"
-          className="hidden md:flex items-center gap-1.5 px-2 2xl:px-2.5 py-1 rounded-full bg-white dark:bg-[#1e2023] hover:bg-slate-50 dark:hover:bg-[#282a2d] border border-slate-200 dark:border-white/[0.06] text-slate-700 dark:text-white/80 hover:text-slate-950 dark:hover:text-white text-[11px] transition whitespace-nowrap shrink-0"
+          className="hidden lg:flex items-center gap-1.5 px-2 2xl:px-2.5 py-1 rounded-full bg-white dark:bg-[#1e2023] hover:bg-slate-50 dark:hover:bg-[#282a2d] border border-slate-200 dark:border-white/[0.06] text-slate-700 dark:text-white/80 hover:text-slate-950 dark:hover:text-white text-[11px] transition whitespace-nowrap shrink-0"
         >
           {authUser ? (
             <>
               <span className="w-2 h-2 rounded-full bg-emerald-500 dark:bg-[#4edea3] shrink-0" />
-              <span className="font-semibold max-w-[96px] truncate">{authUser.name}</span>
+              <span className="font-semibold max-w-[80px] 2xl:max-w-[110px] truncate">{authUser.name}</span>
             </>
           ) : (
             <>
@@ -582,7 +593,7 @@ export function TopNavBar({
         <button
           type="button"
           onClick={() => onOpenModal('subscription')}
-          className="flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-amber-50 dark:bg-[#1a1812] dark:bg-gradient-to-r dark:from-amber-500/15 dark:via-amber-400/15 dark:to-amber-500/15 border border-amber-400/60 dark:border-amber-400/40 text-amber-800 dark:text-amber-300 shadow-[0_0_12px_rgba(251,191,36,0.12)] cursor-pointer hover:border-amber-500 dark:hover:border-amber-300 transition whitespace-nowrap shrink-0"
+          className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-amber-50 dark:bg-[#1a1812] dark:bg-gradient-to-r dark:from-amber-500/15 dark:via-amber-400/15 dark:to-amber-500/15 border border-amber-400/60 dark:border-amber-400/40 text-amber-800 dark:text-amber-300 shadow-[0_0_12px_rgba(251,191,36,0.12)] cursor-pointer hover:border-amber-500 dark:hover:border-amber-300 transition whitespace-nowrap shrink-0"
         >
           <svg
             className="w-3.5 h-3.5 text-amber-500 dark:text-amber-300 shrink-0"
@@ -624,17 +635,6 @@ export function TopNavBar({
             />
           </span>
         </button>
-
-        {onNavigateToERP && (
-          <button
-            type="button"
-            onClick={onNavigateToERP}
-            title="Basculer vers la supervision ERP Classique SENSORIUM"
-            className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-slate-900 dark:bg-white/90 hover:bg-slate-800 dark:hover:bg-white text-white dark:text-[#111317] text-[11px] font-semibold transition whitespace-nowrap shadow-xs shrink-0 cursor-pointer"
-          >
-            <span>Vue ERP Classique →</span>
-          </button>
-        )}
       </div>
     </div>
   );

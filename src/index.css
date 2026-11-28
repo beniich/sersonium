@@ -541,5 +541,88 @@ button[class*="bg-purple-"] svg.lucide,
   }
 }
 
+/* ─── SENSORIUM / Fieldnote Electric Yellow Contour Animations ─── */
+@keyframes electric-contour-flow {
+  0% {
+    stroke-dashoffset: 0;
+  }
+  100% {
+    stroke-dashoffset: -1000;
+  }
+}
+
+@keyframes electric-contour-head {
+  0% {
+    stroke-dashoffset: -40;
+  }
+  100% {
+    stroke-dashoffset: -1040;
+  }
+}
+
+@keyframes electric-contour-spark {
+  0% {
+    stroke-dashoffset: -180;
+    opacity: 0.6;
+  }
+  50% {
+    opacity: 1;
+  }
+  100% {
+    stroke-dashoffset: -1180;
+    opacity: 0.6;
+  }
+}
+
+@keyframes electric-aura-pulse {
+  0%, 100% {
+    filter: drop-shadow(0 0 10px rgba(250, 204, 21, 0.45)) drop-shadow(0 0 20px rgba(234, 179, 8, 0.25));
+  }
+  50% {
+    filter: drop-shadow(0 0 18px rgba(250, 204, 21, 0.75)) drop-shadow(0 0 35px rgba(234, 179, 8, 0.45));
+  }
+}
+
+.orbit-electric-arc-glow {
+  animation: electric-contour-flow 3.2s linear infinite;
+}
+
+.orbit-electric-arc-core {
+  animation: electric-contour-head 3.2s linear infinite;
+}
+
+.orbit-electric-arc-spark {
+  animation: electric-contour-spark 2.2s linear infinite;
+}
+
+.orbit-electric-pulse {
+  animation: electric-aura-pulse 2s ease-in-out infinite;
+}
+
+.orbit-electric-busy .orbit-electric-arc-glow {
+  animation: electric-contour-flow 1.4s linear infinite;
+}
+
+.orbit-electric-busy .orbit-electric-arc-core {
+  animation: electric-contour-head 1.4s linear infinite;
+}
+
+.orbit-electric-busy .orbit-electric-arc-spark {
+  animation: electric-contour-spark 0.9s linear infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .orbit-electric-arc-glow,
+  .orbit-electric-arc-core,
+  .orbit-electric-arc-spark,
+  .orbit-electric-pulse,
+  .orbit-electric-busy .orbit-electric-arc-glow,
+  .orbit-electric-busy .orbit-electric-arc-core,
+  .orbit-electric-busy .orbit-electric-arc-spark {
+    animation: none;
+  }
+}
+
+
 
 
