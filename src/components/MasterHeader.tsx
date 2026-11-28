@@ -157,31 +157,65 @@ export const MasterHeader: React.FC<MasterHeaderProps> = ({
         </div>
       </div>
 
-      {/* ZONE 2 : INDICATEURS VITAUX (Tactile Capsule Pills) */}
-      <div className="hidden md:flex items-center gap-4 px-3 py-1 bg-slate-100 dark:bg-[#181A1F] rounded-full border border-slate-200/80 dark:border-white/[0.08] shadow-xs">
-        <HealthMetric label="SLA" value={sla || "99.99%"} color="text-emerald-400" />
-        <HealthMetric
-          label="AI"
-          value={aiStatus || "Active"}
-          color={
-            aiCircuitState === 'OPEN' ? 'text-red-400' :
-            aiCircuitState === 'HALF_OPEN' ? 'text-amber-400' :
-            aiCircuitState === 'CLOSED' ? 'text-emerald-400' :
-            'text-indigo-400'
-          }
-          title={
-            aiCircuitState === 'OPEN' ? 'Circuit Breaker OPEN — Mode secours SRE actif' :
-            aiCircuitState === 'HALF_OPEN' ? 'Circuit Breaker HALF-OPEN — Sonde de test en cours' :
-            aiCircuitState === 'CLOSED' ? 'Circuit Breaker CLOSED — Gemini opérationnel' :
-            'Circuit Breaker — Statut en cours de chargement'
-          }
-        />
-        <HealthMetric label="LATENCY" value={latency || "42ms"} color="text-cyan-400" />
-        <HealthMetric 
-          label="SECURITY" 
-          value={zeroTrustStatus === 'ALERT' ? `ZT Alert (${zeroTrustScore}%)` : (zeroTrustStatus === 'NOMINAL' ? `ZT (${zeroTrustScore}%)` : `ZT ${zeroTrustScore}%`)} 
-          color={zeroTrustStatus === 'ALERT' ? 'text-rose-400' : (zeroTrustStatus === 'NOMINAL' ? 'text-amber-400' : 'text-emerald-400')} 
-          title={`Architecture Zero-Trust : ${zeroTrustStatus} (${zeroTrustScore}/100) — Validation contextuelle continue`}
+      {/* ZONE 2 : INDICATEURS VITAUX & TÉLÉMÉTRIE (Tactile Capsule Pills au-dessus de la barre latérale) */}
+      <div className="hidden md:flex items-center gap-2 lg:gap-3">
+        <div className="flex items-center gap-4 px-3 py-1 bg-slate-100 dark:bg-[#181A1F] rounded-full border border-slate-200/80 dark:border-white/[0.08] shadow-xs">
+          <HealthMetric label="SLA" value={sla || "99.99%"} color="text-emerald-400" />
+          <HealthMetric
+            label="AI"
+            value={aiStatus || "Active"}
+            color={
+              aiCircuitState === 'OPEN' ? 'text-red-400' :
+              aiCircuitState === 'HALF_OPEN' ? 'text-amber-400' :
+              aiCircuitState === 'CLOSED' ? 'text-emerald-400' :
+              'text-indigo-400'
+            }
+            title={
+              aiCircuitState === 'OPEN' ? 'Circuit Breaker OPEN — Mode secours SRE actif' :
+              aiCircuitState === 'HALF_OPEN' ? 'Circuit Breaker HALF-OPEN — Sonde de test en cours' :
+              aiCircuitState === 'CLOSED' ? 'Circuit Breaker CLOSED — Gemini opérationnel' :
+              'Circuit Breaker — Statut en cours de chargement'
+            }
+          />
+          <HealthMetric label="LATENCY" value={latency || "42ms"} color="text-cyan-400" />
+          <HealthMetric 
+            label="SECURITY" 
+            value={zeroTrustStatus === 'ALERT' ? `ZT Alert (${zeroTrustScore}%)` : (zeroTrustStatus === 'NOMINAL' ? `ZT (${zeroTrustScore}%)` : `ZT ${zeroTrustScore}%`)} 
+            color={zeroTrustStatus === 'ALERT' ? 'text-rose-400' : (zeroTrustStatus === 'NOMINAL' ? 'text-amber-400' : 'text-emerald-400')} 
+            title={`Architecture Zero-Trust : ${zeroTrustStatus} (${zeroTrustScore}/100) — Validation contextuelle continue`}
+          />
+        </div>
+
+        {/* Pass Découverte Gratuit 10 Jours */}
+        {trialStatus.isTrialActive ? (
+          <div
+            onClick={() => navigate('/pricing')}
+            className="hidden lg:inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-amber-400/10 border border-amber-400/30 text-amber-700 dark:text-amber-300 text-xs font-semibold cursor-pointer shadow-xs hover:border-amber-400 transition-all select-none"
+            title="Pass Découverte 10 Jours Actif — Tous les services Enterprise sont 100% débloqués"
+          >
+            <Sparkles size={11} className="text-amber-500 dark:text-amber-400 animate-pulse shrink-0" />
+            <span className="font-bold">Pass 10 J :</span>
+            <span className="font-mono text-[11px] text-amber-800 dark:text-amber-200">{trialStatus.formattedTime}</span>
+          </div>
+        ) : (
+          <button
+            onClick={() => {
+              TrialService.activate10DayFreeTrial();
+              setTrialStatus(TrialService.getTrialStatus());
+            }}
+            className="hidden lg:inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-900 text-white dark:bg-white dark:text-[#111317] hover:bg-slate-800 dark:hover:bg-slate-200 text-xs font-bold cursor-pointer shadow-xs transition-all"
+            title="Activer un accès gratuit de 10 jours à tous les services"
+          >
+            <Sparkles size={11} className="text-amber-400 shrink-0" />
+            <span>Pass Gratuit 10 J</span>
+          </button>
+        )}
+
+        {/* Compteur interactif de quotas d'abonnement & Tokens IA */}
+        <SubscriptionQuotaCounter 
+          variant="pill" 
+          onOpenPricing={() => navigate('/pricing')} 
+          className="hidden xl:inline-flex"
         />
       </div>
 
@@ -232,38 +266,6 @@ export const MasterHeader: React.FC<MasterHeaderProps> = ({
           <UserPlus size={12} className="text-slate-500 dark:text-slate-300" />
           <span className="hidden sm:inline">Inscription</span>
         </button>
-
-        {/* Pass Découverte Gratuit 10 Jours (Tous Services Débloqués) */}
-        {trialStatus.isTrialActive ? (
-          <div
-            onClick={() => navigate('/pricing')}
-            className="hidden md:inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-amber-400/10 border border-amber-400/30 text-amber-700 dark:text-amber-300 text-xs font-semibold cursor-pointer shadow-xs hover:border-amber-400 transition-all select-none"
-            title="Pass Découverte 10 Jours Actif — Tous les services Enterprise sont 100% débloqués"
-          >
-            <Sparkles size={11} className="text-amber-500 dark:text-amber-400 animate-pulse shrink-0" />
-            <span className="font-bold">Pass 10 J :</span>
-            <span className="font-mono text-[11px] text-amber-800 dark:text-amber-200">{trialStatus.formattedTime}</span>
-          </div>
-        ) : (
-          <button
-            onClick={() => {
-              TrialService.activate10DayFreeTrial();
-              setTrialStatus(TrialService.getTrialStatus());
-            }}
-            className="hidden md:inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-900 text-white dark:bg-white dark:text-[#111317] hover:bg-slate-800 dark:hover:bg-slate-200 text-xs font-bold cursor-pointer shadow-xs transition-all"
-            title="Activer un accès gratuit de 10 jours à tous les services"
-          >
-            <Sparkles size={11} className="text-amber-400 shrink-0" />
-            <span>Pass Gratuit 10 J</span>
-          </button>
-        )}
-
-        {/* Compteur interactif de quotas d'abonnement & Tokens IA */}
-        <SubscriptionQuotaCounter 
-          variant="pill" 
-          onOpenPricing={() => navigate('/pricing')} 
-          className="hidden xl:inline-flex"
-        />
 
         {/* Badge Interactif Mode Live Cloud vs Mode Simulation */}
         <ConnectionBadge className="hidden lg:inline-flex" />

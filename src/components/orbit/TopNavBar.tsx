@@ -413,7 +413,7 @@ export function TopNavBar({
           )}
         </div>
 
-        {/* Live Telemetry Strip */}
+        {/* 1. Live Telemetry Strip */}
         <button
           type="button"
           onClick={() => onNavigateView('services')}
@@ -467,6 +467,53 @@ export function TopNavBar({
               </span>
             </div>
           </div>
+        </button>
+
+        {/* 2. Pass 10d 12h / 10D remaining (Telemetry & Access countdown) */}
+        <button
+          type="button"
+          onClick={() => onOpenModal('subscription')}
+          className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-amber-50 dark:bg-[#1a1812] dark:bg-gradient-to-r dark:from-amber-500/15 dark:via-amber-400/15 dark:to-amber-500/15 border border-amber-400/60 dark:border-amber-400/40 text-amber-800 dark:text-amber-300 shadow-[0_0_12px_rgba(251,191,36,0.12)] cursor-pointer hover:border-amber-500 dark:hover:border-amber-300 transition whitespace-nowrap shrink-0"
+        >
+          <svg
+            className="w-3.5 h-3.5 text-amber-500 dark:text-amber-300 shrink-0"
+            fill="currentColor"
+            viewBox="0 0 24 24"
+            aria-hidden="true"
+          >
+            <path d="M9.5 2l1.9 5.8 5.8 1.9-5.8 1.9L9.5 17.5l-1.9-5.9-5.8-1.9 5.8-1.9L9.5 2zM17 14l1 3 3 1-3 1-1 3-1-3-3-1 3-1 1-3z" />
+          </svg>
+          <span className="leading-none text-left">
+            <span className="block text-[10px] font-bold tracking-tight text-amber-900 dark:text-amber-200 tabular-nums">
+              Pass {activeOrg.passDaysLeft ?? 9}d {activeOrg.passHoursLeft ?? 12}h
+            </span>
+            <span className="block text-[9px] text-amber-700/80 dark:text-amber-300/80 font-medium tracking-wide">
+              10D remaining
+            </span>
+          </span>
+        </button>
+
+        {/* 3. Plan Badge & Quota Progress (Live Telemetry Tokens Quota) */}
+        <button
+          type="button"
+          onClick={() => onOpenModal('subscription')}
+          aria-label={`Plan ${planBadgeLabel}, quota ${formatQuotaCompact(activeOrg.quotaUsed)} of ${formatQuotaCompact(activeOrg.quotaLimit)}`}
+          className="flex items-center gap-1 lg:pl-1.5 lg:border-l border-slate-200 dark:border-white/10 shrink-0 cursor-pointer group"
+        >
+          <span className="px-1.5 py-0.5 rounded bg-slate-200/80 dark:bg-[#282a2d] border border-slate-300/80 dark:border-white/10 text-[10px] font-bold text-slate-700 dark:text-white/70 tracking-wider uppercase">
+            {planBadgeLabel}
+          </span>
+          <span className="flex items-center gap-1 px-2 py-1 rounded-full bg-white dark:bg-[#1e2023] group-hover:bg-slate-50 dark:group-hover:bg-[#282a2d] border border-slate-200 dark:border-white/[0.08] text-[11px] font-semibold text-slate-800 dark:text-white/90 tabular-nums whitespace-nowrap transition">
+            <Zap className="w-3 h-3 text-slate-500 dark:text-white/60 fill-current shrink-0" />
+            <span>
+              {formatQuotaCompact(activeOrg.quotaUsed)} / {formatQuotaCompact(activeOrg.quotaLimit)}
+            </span>
+            <span className="text-[10px] font-normal text-[#8E929C]">({displayPct}%)</span>
+            <span
+              className="w-3.5 h-3.5 rounded-full border-2 border-amber-500/80 border-t-transparent -rotate-45 shrink-0"
+              aria-hidden="true"
+            />
+          </span>
         </button>
       </div>
 
@@ -587,53 +634,6 @@ export function TopNavBar({
               <span>Sign up</span>
             </>
           )}
-        </button>
-
-        {/* Pass 9d 12h / 10D left */}
-        <button
-          type="button"
-          onClick={() => onOpenModal('subscription')}
-          className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-amber-50 dark:bg-[#1a1812] dark:bg-gradient-to-r dark:from-amber-500/15 dark:via-amber-400/15 dark:to-amber-500/15 border border-amber-400/60 dark:border-amber-400/40 text-amber-800 dark:text-amber-300 shadow-[0_0_12px_rgba(251,191,36,0.12)] cursor-pointer hover:border-amber-500 dark:hover:border-amber-300 transition whitespace-nowrap shrink-0"
-        >
-          <svg
-            className="w-3.5 h-3.5 text-amber-500 dark:text-amber-300 shrink-0"
-            fill="currentColor"
-            viewBox="0 0 24 24"
-            aria-hidden="true"
-          >
-            <path d="M9.5 2l1.9 5.8 5.8 1.9-5.8 1.9L9.5 17.5l-1.9-5.9-5.8-1.9 5.8-1.9L9.5 2zM17 14l1 3 3 1-3 1-1 3-1-3-3-1 3-1 1-3z" />
-          </svg>
-          <span className="leading-none text-left">
-            <span className="block text-[10px] font-bold tracking-tight text-amber-900 dark:text-amber-200 tabular-nums">
-              Pass {activeOrg.passDaysLeft ?? 9}d {activeOrg.passHoursLeft ?? 12}h
-            </span>
-            <span className="block text-[9px] text-amber-700/80 dark:text-amber-300/80 font-medium tracking-wide">
-              10D remaining
-            </span>
-          </span>
-        </button>
-
-        {/* Plan Badge & Quota Progress */}
-        <button
-          type="button"
-          onClick={() => onOpenModal('subscription')}
-          aria-label={`Plan ${planBadgeLabel}, quota ${formatQuotaCompact(activeOrg.quotaUsed)} of ${formatQuotaCompact(activeOrg.quotaLimit)}`}
-          className="flex items-center gap-1 lg:pl-1.5 lg:border-l border-slate-200 dark:border-white/10 shrink-0 cursor-pointer group"
-        >
-          <span className="px-1.5 py-0.5 rounded bg-slate-200/80 dark:bg-[#282a2d] border border-slate-300/80 dark:border-white/10 text-[10px] font-bold text-slate-700 dark:text-white/70 tracking-wider uppercase">
-            {planBadgeLabel}
-          </span>
-          <span className="flex items-center gap-1 px-2 py-1 rounded-full bg-white dark:bg-[#1e2023] group-hover:bg-slate-50 dark:group-hover:bg-[#282a2d] border border-slate-200 dark:border-white/[0.08] text-[11px] font-semibold text-slate-800 dark:text-white/90 tabular-nums whitespace-nowrap transition">
-            <Zap className="w-3 h-3 text-slate-500 dark:text-white/60 fill-current shrink-0" />
-            <span>
-              {formatQuotaCompact(activeOrg.quotaUsed)} / {formatQuotaCompact(activeOrg.quotaLimit)}
-            </span>
-            <span className="text-[10px] font-normal text-[#8E929C]">({displayPct}%)</span>
-            <span
-              className="w-3.5 h-3.5 rounded-full border-2 border-amber-500/80 border-t-transparent -rotate-45 shrink-0"
-              aria-hidden="true"
-            />
-          </span>
         </button>
       </div>
     </div>
